@@ -1,7 +1,6 @@
 """
 pgoapi - Pokemon Go API
 Copyright (c) 2016 tjado <https://github.com/tejado>
-Modifications Copyright (c) 2016 j-e-k <https://github.com/j-e-k>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +21,6 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 
 Author: tjado <https://github.com/tejado>
-Modifications by: j-e-k <https://github.com/j-e-k>
 """
 
 from __future__ import absolute_import
@@ -37,7 +35,6 @@ from importlib import import_module
 from pgoapi.protobuf_to_dict import protobuf_to_dict
 from pgoapi.exceptions import NotLoggedInException, ServerBusyOrOfflineException
 from pgoapi.utilities import f2i, h2f, to_camel_case
-import random
 
 from . import protos
 from POGOProtos.Networking.Envelopes_pb2 import RequestEnvelope
