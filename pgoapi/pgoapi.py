@@ -26,15 +26,18 @@ Author: tjado <https://github.com/tejado>
 import logging
 import re
 import requests
-
+import pickle
+import random
 from utilities import f2i, h2f
-
+import json
 from rpc_api import RpcApi
 from auth_ptc import AuthPtc
 from auth_google import AuthGoogle
 from exceptions import AuthException, NotLoggedInException, ServerBusyOrOfflineException
-
+from location import *
 import protos.RpcEnum_pb2 as RpcEnum
+from time import sleep
+import os.path
 
 logger = logging.getLogger(__name__)
 
@@ -43,73 +46,73 @@ class PGoApi:
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
 
     def __init__(self):
-    
+
         self.log = logging.getLogger(__name__)
 
         self._auth_provider = None
         self._api_endpoint = None
-        
-        self._position_lat = 0
+
+        self._position_lat = 0 #int cooords
         self._position_lng = 0
         self._position_alt = 0
+        self._posf = (0,0,0) # this is floats
 
         self._req_method_list = []
-        
+
     def call(self):
         if not self._req_method_list:
             return False
-        
+
         if self._auth_provider is None or not self._auth_provider.is_login():
             self.log.info('Not logged in')
             return False
-        
+
         player_position = self.get_position()
-        
+
         request = RpcApi(self._auth_provider)
-        
+
         if self._api_endpoint:
             api_endpoint = self._api_endpoint
         else:
             api_endpoint = self.API_ENTRY
-        
+
         self.log.info('Execution of RPC')
         response = None
         try:
             response = request.request(api_endpoint, self._req_method_list, player_position)
         except ServerBusyOrOfflineException as e:
             self.log.info('Server seems to be busy or offline - try again!')
-        
+
         # cleanup after call execution
         self.log.info('Cleanup of request!')
         self._req_method_list = []
-        
+
         return response
-    
+
     #def get_player(self):
-    
+
     def list_curr_methods(self):
         for i in self._req_method_list:
             print("{} ({})".format(RpcEnum.RequestMethod.Name(i),i))
-    
+
     def set_logger(self, logger):
         self._ = logger or logging.getLogger(__name__)
 
     def get_position(self):
         return (self._position_lat, self._position_lng, self._position_alt)
-
-    def set_position(self, lat, lng, alt):   
+    def set_position(self, lat, lng, alt):
         self.log.debug('Set Position - Lat: %s Long: %s Alt: %s', lat, lng, alt)
-        
+        self._posf = (lat,lng,alt)
         self._position_lat = f2i(lat)
         self._position_lng = f2i(lng)
         self._position_alt = f2i(alt)
 
     def __getattr__(self, func):
         def function(**kwargs):
-        
+
             if not self._req_method_list:
                 self.log.info('Create new request...')
-        
+
             name = func.upper()
             if kwargs:
                 self._req_method_list.append( { RpcEnum.RequestMethod.Value(name): kwargs } )
@@ -118,60 +121,164 @@ class PGoApi:
             else:
                 self._req_method_list.append( RpcEnum.RequestMethod.Value(name) )
                 self.log.info("Adding '%s' to RPC request", name)
-   
+
             return self
-   
+
         if func.upper() in RpcEnum.RequestMethod.keys():
             return function
         else:
             raise AttributeError
-            
-        
-    def login(self, provider, username, password):
-    
+
+    def heartbeat(self):
+        # making a standard call, like it is also done by the client
+        self.get_player()
+        self.get_hatched_eggs()
+        self.get_inventory()
+        # self.check_awarded_badges()
+        # self.download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e")
+        res = self.call()
+        print('Response dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
+        return res
+    def walk_to(self,loc): #location in floats of course...
+        steps = get_route(self._posf, loc)
+        for step in steps:
+            for next_point in get_increments(self._posf,step):
+                # update every 3 seconds
+                self.set_position(*next_point)
+                self.heartbeat()
+                self.log.info("sleeping before next heartbeat")
+                sleep(1)
+                self.log.info("Any pokemon caught? : %s", self.catch_near_pokemon())
+                sleep(1)
+
+    def spin_near_fort(self):
+        map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
+        forts = sum([cell.get('forts',[]) for cell in map_cells],[]) #supper ghetto lol
+        destinations = filtered_forts(self._posf,forts)
+        if destinations:
+            fort = destinations[0]
+            self.log.info("Walking to fort: %s", fort)
+            self.walk_to((fort['latitude'], fort['longitude']))
+            position = self._posf # FIXME ?
+            res = self.fort_search(fort_id = fort['id'], fort_latitude=fort['latitude'],fort_longitude=fort['longitude'],player_latitude=position[0],player_longitude=position[1]).call()['responses']['FORT_SEARCH']
+            self.log.info("Fort spinned: %s", res)
+            return True
+        else:
+            self.log.error("No fort to walk to!")
+            return False
+
+    def catch_near_pokemon(self):
+        map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
+        pokemons = sum([cell.get('catchable_pokemons',[]) for cell in map_cells],[]) #supper ghetto lol
+        # catch first pokemon:
+        origin = (self._posf[0],self._posf[1])
+        pokemon_distances = [(pokemon, distance_in_meters(origin,(pokemon['latitude'], pokemon['longitude']))) for pokemon in pokemons]
+        self.log.info("Nearby pokemon: : %s", pokemon_distances)
+        if pokemons:
+            target = pokemon_distances[0]
+            self.log.info("Catching pokemon: : %s, distance: %f meters", target[0], target[1])
+            return self.encounter_pokemon(target[0])
+        return False
+
+    def nearby_map_objects(self):
+        position = self.get_position()
+        neighbors = getNeighbors(self._posf)
+        return self.get_map_objects(latitude=position[0], longitude=position[1], since_timestamp_ms=[0]*len(neighbors), cell_id=neighbors).call()
+    def attempt_catch(self,encounter_id,spawnpoint_id):
+        return self.catch_pokemon(
+            normalized_reticle_size= 1.950 - random.uniform(0,0.25),
+            pokeball = 1,
+            spin_modifier= 0.850 - random.uniform(0,0.025),
+            hit_pokemon=True,
+            NormalizedHitPosition=1,
+            encounter_id=encounter_id,
+            spawnpoint_id=spawnpoint_id,
+            ).call()['responses']['CATCH_POKEMON']
+
+
+    def encounter_pokemon(self,pokemon): #take in a MapPokemon from MapCell.catchable_pokemons
+        encounter_id = pokemon['encounter_id']
+        spawnpoint_id = pokemon['spawnpoint_id']
+        # begin encounter_id
+        position = self._posf # FIXME ?
+        resp = self.encounter(encounter_id=encounter_id,spawnpoint_id=spawnpoint_id,player_latitude=position[0],player_longitude=position[1]).call()['responses']['ENCOUNTER']
+        self.log.info("Started Encounter: %s", resp)
+        if resp['status'] == 1:
+            capture_status = -1
+            # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
+            while capture_status != 0 and capture_status != 3:
+                catch_attempt = self.attempt_catch(encounter_id,spawnpoint_id)
+                status = catch_attempt['status']
+                # if status == RpcEnum.CATCH_SUCCESS:
+                if status == 1:
+                    self.log.info("Caught Pokemon: : %s", catch_attempt)
+                    sleep(5)
+                    return catch_attempt
+                else:
+                    self.log.info("Failed Catch: : %s", catch_attempt)
+                sleep(2)
+        return False
+
+
+
+    def login(self, provider, username, password,cached=False):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
             raise AuthException("Username/password not correctly specified")
-        
+
         if provider == 'ptc':
             self._auth_provider = AuthPtc()
         elif provider == 'google':
             self._auth_provider = AuthGoogle()
         else:
             raise AuthException("Invalid authentication provider - only ptc/google available.")
-            
+
         self.log.debug('Auth provider: %s', provider)
-        
+
         if not self._auth_provider.login(username, password):
-            self.log.info('Login process failed') 
+            self.log.info('Login process failed')
             return False
-        
+
         self.log.info('Starting RPC login sequence (app simulation)')
-        
-        # making a standard call, like it is also done by the client
-        self.get_player()
-        self.get_hatched_eggs()
-        self.get_inventory()
-        self.check_awarded_badges()
-        self.download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e")
-        
-        response = self.call()
-        
-        if not response: 
-            self.log.info('Login failed!') 
+        if os.path.isfile("auth_cache") and cached:
+            response = pickle.load(open("auth_cache"))
+        else:
+            response = self.heartbeat()
+            f = open("auth_cache","w")
+            pickle.dump(response, f)
+        if not response:
+            self.log.info('Login failed!')
             return False
-        
+
         if 'api_url' in response:
             self._api_endpoint = ('https://{}/rpc'.format(response['api_url']))
             self.log.debug('Setting API endpoint to: %s', self._api_endpoint)
         else:
             self.log.error('Login failed - unexpected server response!')
             return False
-        
+
         if 'auth_ticket' in response:
             self._auth_provider.set_ticket(response['auth_ticket'].values())
-        
+
         self.log.info('Finished RPC login sequence (app simulation)')
-        self.log.info('Login process completed') 
-        
+        self.log.info('Login process completed')
+
         return True
-        
+    def main_loop(self):
+        while True:
+            try:
+                self.heartbeat() # always heartbeat to start...
+
+                sleep(1)
+                #any pokemon to catch?
+                self.log.info("catch_near_pokemon: %s", self.catch_near_pokemon())
+                while self.catch_near_pokemon():
+                    sleep(6)
+                    pass
+                #Time to move to a new fort!
+                self.spin_near_fort()
+                sleep(2)
+            except Exception as e:
+                self.log.error("Error in main loop: %s", e)
+
+                sleep(10) # timeout...
+                pass

@@ -1,3 +1,4 @@
+syntax = "proto3";
 package RpcSub;
 
 import "RpcEnum.proto";
@@ -8,11 +9,11 @@ message GetPlayerResponse {
 }
 
 message Profile {
-  required int64 creation_time = 1;
+  int64 creation_time = 1;
   optional string username = 2;
   optional RpcEnum.TeamColor team = 5;
-  optional bytes tutorial = 7; 
-  optional AvatarDetails avatar = 8; 
+  optional bytes tutorial = 7;
+  optional AvatarDetails avatar = 8;
   optional int32 poke_storage = 9;
   optional int32 item_storage = 10;
   optional DailyBonus daily_bonus = 11;
@@ -27,7 +28,7 @@ message DailyBonus {
 }
 
 message Currency {
-  required string type = 1;
+  string type = 1;
   optional int32 amount = 2;
 }
 
@@ -194,10 +195,10 @@ message PokemonFamily {
 }
 
 message GetMapObjectsRequest {
-  optional bytes cell_id = 1;
-  optional bytes since_timestamp_ms = 2;
-  optional double latitude = 3;
-  optional double longitude = 4;
+	repeated uint64 cell_id = 1 [packed=true];
+	repeated int64 since_timestamp_ms = 2 [packed=true];
+	double latitude = 3;
+	double longitude = 4;
 }
 
 message GetMapObjectsResponse {
@@ -412,7 +413,7 @@ message DownloadItemTemplatesResponse {
     optional MoveSettings move_settings = 4;
     optional MoveSequenceSettings move_sequence_settings = 5;
     optional TypeEffectiveSettings type_effective = 8;
-    optional BadgeSettings badge_settings = 10; 
+    optional BadgeSettings badge_settings = 10;
     optional CameraSettings camera = 11;
     optional PlayerLevelSettings player_level = 12;
     optional GymLevelSettings gym_level = 13;
@@ -547,7 +548,7 @@ message EncounterResponse {
     PARK = 0;
     DESERT = 1;
   }
-  
+
   enum Status {
     ENCOUNTER_ERROR = 0;
     ENCOUNTER_SUCCESS = 1;
@@ -592,7 +593,7 @@ message CatchPokemonRequest {
   optional fixed64 encounter_id = 1;
   optional int32 pokeball = 2;
   optional double normalized_reticle_size = 3;
-  optional string spawn_point_guid = 4;
+  optional string spawnpoint_id = 4;
   optional bool hit_pokemon = 5;
   optional double spin_modifier = 6;
   optional double NormalizedHitPosition = 7;

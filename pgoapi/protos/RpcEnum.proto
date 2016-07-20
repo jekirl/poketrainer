@@ -1,4 +1,4 @@
-
+syntax = "proto3";
 package RpcEnum;
 
 enum RpcDirection {
@@ -763,4 +763,3 @@ enum PokemonClass {
   LEGENDARY = 1;
   MYTHIC = 2;
 }
-

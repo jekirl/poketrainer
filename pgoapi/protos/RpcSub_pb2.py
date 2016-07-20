@@ -13,15 +13,16 @@ from google.protobuf import descriptor_pb2
 _sym_db = _symbol_database.Default()
 
 
-import RpcEnum_pb2
+import RpcEnum_pb2 as RpcEnum__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='RpcSub.proto',
   package='RpcSub',
-  serialized_pb=_b('\n\x0cRpcSub.proto\x12\x06RpcSub\x1a\rRpcEnum.proto\"G\n\x11GetPlayerResponse\x12\x10\n\x08unknown1\x18\x01 \x01(\x05\x12 \n\x07profile\x18\x02 \x01(\x0b\x32\x0f.RpcSub.Profile\"\xac\x02\n\x07Profile\x12\x15\n\rcreation_time\x18\x01 \x02(\x03\x12\x10\n\x08username\x18\x02 \x01(\t\x12 \n\x04team\x18\x05 \x01(\x0e\x32\x12.RpcEnum.TeamColor\x12\x10\n\x08tutorial\x18\x07 \x01(\x0c\x12%\n\x06\x61vatar\x18\x08 \x01(\x0b\x32\x15.RpcSub.AvatarDetails\x12\x14\n\x0cpoke_storage\x18\t \x01(\x05\x12\x14\n\x0citem_storage\x18\n \x01(\x05\x12\'\n\x0b\x64\x61ily_bonus\x18\x0b \x01(\x0b\x32\x12.RpcSub.DailyBonus\x12\x11\n\tunknown12\x18\x0c \x01(\x0c\x12\x11\n\tunknown13\x18\r \x01(\x0c\x12\"\n\x08\x63urrency\x18\x0e \x03(\x0b\x32\x10.RpcSub.Currency\"Y\n\nDailyBonus\x12\x1e\n\x16NextCollectTimestampMs\x18\x01 \x01(\x03\x12+\n#NextDefenderBonusCollectTimestampMs\x18\x02 \x01(\x03\"(\n\x08\x43urrency\x12\x0c\n\x04type\x18\x01 \x02(\t\x12\x0e\n\x06\x61mount\x18\x02 \x01(\x05\"X\n\rAvatarDetails\x12\x10\n\x08unknown2\x18\x02 \x01(\x05\x12\x10\n\x08unknown3\x18\x03 \x01(\x05\x12\x10\n\x08unknown9\x18\t \x01(\x05\x12\x11\n\tunknown10\x18\n \x01(\x05\"\'\n\x17\x44ownloadSettingsRequest\x12\x0c\n\x04hash\x18\x01 \x01(\t\"X\n\x14GetInventoryResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12/\n\x0finventory_delta\x18\x02 \x01(\x0b\x32\x16.RpcSub.InventoryDelta\"y\n\x0eInventoryDelta\x12\x1d\n\x15original_timestamp_ms\x18\x01 \x01(\x03\x12\x18\n\x10new_timestamp_ms\x18\x02 \x01(\x03\x12.\n\x0finventory_items\x18\x03 \x03(\x0b\x32\x15.RpcSub.InventoryItem\"\x80\x01\n\rInventoryItem\x12\x1d\n\x15modified_timestamp_ms\x18\x01 \x01(\x03\x12\x18\n\x10\x64\x65leted_item_key\x18\x02 \x01(\x03\x12\x36\n\x13inventory_item_data\x18\x03 \x01(\x0b\x32\x19.RpcSub.InventoryItemData\"\xcd\x03\n\x11InventoryItemData\x12$\n\x07pokemon\x18\x01 \x01(\x0b\x32\x13.RpcSub.PokemonData\x12\x1a\n\x04item\x18\x02 \x01(\x0b\x32\x0c.RpcSub.Item\x12+\n\rpokedex_entry\x18\x03 \x01(\x0b\x32\x14.RpcSub.PokedexEntry\x12)\n\x0cplayer_stats\x18\x04 \x01(\x0b\x32\x13.RpcSub.PlayerStats\x12/\n\x0fplayer_currency\x18\x05 \x01(\x0b\x32\x16.RpcSub.PlayerCurrency\x12+\n\rplayer_camera\x18\x06 \x01(\x0b\x32\x14.RpcSub.PlayerCamera\x12\x35\n\x12inventory_upgrades\x18\x07 \x01(\x0b\x32\x19.RpcSub.InventoryUpgrades\x12+\n\rapplied_items\x18\x08 \x01(\x0b\x32\x14.RpcSub.AppliedItems\x12-\n\x0e\x65gg_incubators\x18\t \x01(\x0b\x32\x15.RpcSub.EggIncubators\x12-\n\x0epokemon_family\x18\n \x01(\x0b\x32\x15.RpcSub.PokemonFamily\"\xd8\x05\n\x07Pokemon\x12\n\n\x02id\x18\x01 \x01(\x05\x12(\n\x0cpokemon_type\x18\x02 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\n\n\x02\x63p\x18\x03 \x01(\x05\x12\x0f\n\x07stamina\x18\x04 \x01(\x05\x12\x13\n\x0bstamina_max\x18\x05 \x01(\x05\x12$\n\x06move_1\x18\x06 \x01(\x0e\x32\x14.RpcEnum.PokemonMove\x12$\n\x06move_2\x18\x07 \x01(\x0e\x32\x14.RpcEnum.PokemonMove\x12\x18\n\x10\x64\x65ployed_fort_id\x18\x08 \x01(\x05\x12\x12\n\nowner_name\x18\t \x01(\t\x12\x0e\n\x06is_egg\x18\n \x01(\x08\x12\x1c\n\x14\x65gg_km_walked_target\x18\x0b \x01(\x05\x12\x1b\n\x13\x65gg_km_walked_start\x18\x0c \x01(\x05\x12\x0e\n\x06origin\x18\x0e \x01(\x05\x12\x10\n\x08height_m\x18\x0f \x01(\x02\x12\x11\n\tweight_kg\x18\x10 \x01(\x02\x12\x19\n\x11individual_attack\x18\x11 \x01(\x05\x12\x1a\n\x12individual_defense\x18\x12 \x01(\x05\x12\x1a\n\x12individual_stamina\x18\x13 \x01(\x05\x12\x15\n\rcp_multiplier\x18\x14 \x01(\x05\x12\x10\n\x08pokeball\x18\x15 \x01(\x05\x12\x18\n\x10\x63\x61ptured_cell_id\x18\x16 \x01(\x04\x12\x18\n\x10\x62\x61ttles_attacked\x18\x17 \x01(\x05\x12\x18\n\x10\x62\x61ttles_defended\x18\x18 \x01(\x05\x12\x18\n\x10\x65gg_incubator_id\x18\x19 \x01(\x05\x12\x18\n\x10\x63reation_time_ms\x18\x1a \x01(\x04\x12\x14\n\x0cnum_upgrades\x18\x1b \x01(\x05\x12 \n\x18\x61\x64\x64itional_cp_multiplier\x18\x1c \x01(\x05\x12\x10\n\x08\x66\x61vorite\x18\x1d \x01(\x05\x12\x10\n\x08nickname\x18\x1e \x01(\t\x12\x11\n\tfrom_fort\x18\x1f \x01(\x05\"F\n\x04Item\x12\x1f\n\x04item\x18\x01 \x01(\x0e\x32\x11.RpcEnum.ItemType\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\x12\x0e\n\x06unseen\x18\x03 \x01(\x08\"\x99\x01\n\x0cPokedexEntry\x12\x1c\n\x14pokedex_entry_number\x18\x01 \x01(\x05\x12\x19\n\x11times_encountered\x18\x02 \x01(\x05\x12\x16\n\x0etimes_captured\x18\x03 \x01(\x05\x12\x1e\n\x16\x65volution_stone_pieces\x18\x04 \x01(\x05\x12\x18\n\x10\x65volution_stones\x18\x05 \x01(\x05\"\xed\x04\n\x0bPlayerStats\x12\r\n\x05level\x18\x01 \x01(\x05\x12\x12\n\nexperience\x18\x02 \x01(\x03\x12\x15\n\rprev_level_xp\x18\x03 \x01(\x03\x12\x15\n\rnext_level_xp\x18\x04 \x01(\x03\x12\x11\n\tkm_walked\x18\x05 \x01(\x02\x12\x1c\n\x14pokemons_encountered\x18\x06 \x01(\x05\x12\x1e\n\x16unique_pokedex_entries\x18\x07 \x01(\x05\x12\x19\n\x11pokemons_captured\x18\x08 \x01(\x05\x12\x12\n\nevolutions\x18\t \x01(\x05\x12\x18\n\x10poke_stop_visits\x18\n \x01(\x05\x12\x18\n\x10pokeballs_thrown\x18\x0b \x01(\x05\x12\x14\n\x0c\x65ggs_hatched\x18\x0c \x01(\x05\x12\x1b\n\x13\x62ig_magikarp_caught\x18\r \x01(\x05\x12\x19\n\x11\x62\x61ttle_attack_won\x18\x0e \x01(\x05\x12\x1b\n\x13\x62\x61ttle_attack_total\x18\x0f \x01(\x05\x12\x1b\n\x13\x62\x61ttle_defended_won\x18\x10 \x01(\x05\x12\x1b\n\x13\x62\x61ttle_training_won\x18\x11 \x01(\x05\x12\x1d\n\x15\x62\x61ttle_training_total\x18\x12 \x01(\x05\x12\x1d\n\x15prestige_raised_total\x18\x13 \x01(\x05\x12\x1e\n\x16prestige_dropped_total\x18\x14 \x01(\x05\x12\x18\n\x10pokemon_deployed\x18\x15 \x01(\x05\x12\x1e\n\x16pokemon_caught_by_type\x18\x16 \x01(\x0c\x12\x1c\n\x14small_rattata_caught\x18\x17 \x01(\x05\"\x1e\n\x0ePlayerCurrency\x12\x0c\n\x04gems\x18\x01 \x01(\x05\")\n\x0cPlayerCamera\x12\x19\n\x11is_default_camera\x18\x01 \x01(\x08\"I\n\x11InventoryUpgrades\x12\x34\n\x12inventory_upgrades\x18\x01 \x03(\x0b\x32\x18.RpcSub.InventoryUpgrade\"\x84\x01\n\x10InventoryUpgrade\x12\x1f\n\x04item\x18\x01 \x01(\x0e\x32\x11.RpcEnum.ItemType\x12\x33\n\x0cupgrade_type\x18\x02 \x01(\x0e\x32\x1d.RpcEnum.InventoryUpgradeType\x12\x1a\n\x12\x61\x64\x64itional_storage\x18\x03 \x01(\x05\"1\n\x0c\x41ppliedItems\x12!\n\x04item\x18\x04 \x01(\x0b\x32\x13.RpcSub.AppliedItem\"\x87\x01\n\x0b\x41ppliedItem\x12\"\n\titem_type\x18\x01 \x01(\x0e\x32\x0f.RpcEnum.ItemId\x12-\n\x12item_type_category\x18\x02 \x01(\x0e\x32\x11.RpcEnum.ItemType\x12\x11\n\texpire_ms\x18\x03 \x01(\x03\x12\x12\n\napplied_ms\x18\x04 \x01(\x03\"<\n\rEggIncubators\x12+\n\regg_incubator\x18\x01 \x01(\x0b\x32\x14.RpcSub.EggIncubator\"\xd7\x01\n\x0c\x45ggIncubator\x12\x0f\n\x07item_id\x18\x01 \x01(\t\x12$\n\titem_type\x18\x02 \x01(\x0e\x32\x11.RpcEnum.ItemType\x12\x31\n\x0eincubator_type\x18\x03 \x01(\x0e\x32\x19.RpcEnum.EggIncubatorType\x12\x16\n\x0euses_remaining\x18\x04 \x01(\x05\x12\x12\n\npokemon_id\x18\x05 \x01(\x03\x12\x17\n\x0fstart_km_walked\x18\x06 \x01(\x01\x12\x18\n\x10target_km_walked\x18\x07 \x01(\x01\"K\n\rPokemonFamily\x12+\n\tfamily_id\x18\x01 \x01(\x0e\x32\x18.RpcEnum.PokemonFamilyId\x12\r\n\x05\x63\x61ndy\x18\x02 \x01(\x05\"h\n\x14GetMapObjectsRequest\x12\x0f\n\x07\x63\x65ll_id\x18\x01 \x01(\x0c\x12\x1a\n\x12since_timestamp_ms\x18\x02 \x01(\x0c\x12\x10\n\x08latitude\x18\x03 \x01(\x01\x12\x11\n\tlongitude\x18\x04 \x01(\x01\"f\n\x15GetMapObjectsResponse\x12\"\n\tmap_cells\x18\x01 \x03(\x0b\x32\x0f.RpcSub.MapCell\x12)\n\x06status\x18\x02 \x01(\x0e\x32\x19.RpcEnum.MapObjectsStatus\"\xa7\x03\n\x07MapCell\x12\x12\n\ns2_cell_id\x18\x01 \x01(\x04\x12\x1c\n\x14\x63urrent_timestamp_ms\x18\x02 \x01(\x03\x12\x1f\n\x05\x66orts\x18\x03 \x03(\x0b\x32\x10.RpcSub.FortData\x12(\n\x0cspawn_points\x18\x04 \x03(\x0b\x32\x12.RpcSub.SpawnPoint\x12\x17\n\x0f\x64\x65leted_objects\x18\x06 \x03(\t\x12\x19\n\x11is_truncated_list\x18\x07 \x01(\x08\x12+\n\x0e\x66ort_summaries\x18\x08 \x03(\x0b\x32\x13.RpcSub.FortSummary\x12\x32\n\x16\x64\x65\x63imated_spawn_points\x18\t \x03(\x0b\x32\x12.RpcSub.SpawnPoint\x12*\n\rwild_pokemons\x18\x05 \x03(\x0b\x32\x13.RpcSub.WildPokemon\x12.\n\x12\x63\x61tchable_pokemons\x18\n \x03(\x0b\x32\x12.RpcSub.MapPokemon\x12.\n\x0fnearby_pokemons\x18\x0b \x03(\x0b\x32\x15.RpcSub.NearbyPokemon\"\xf8\x03\n\x08\x46ortData\x12\n\n\x02id\x18\x01 \x01(\t\x12\"\n\x1alast_modified_timestamp_ms\x18\x02 \x01(\x03\x12\x10\n\x08latitude\x18\x03 \x01(\x01\x12\x11\n\tlongitude\x18\x04 \x01(\x01\x12\x0f\n\x07\x65nabled\x18\x08 \x01(\x08\x12\x1f\n\x04type\x18\t \x01(\x0e\x32\x11.RpcEnum.FortType\x12)\n\rowned_by_team\x18\x05 \x01(\x0e\x32\x12.RpcEnum.TeamColor\x12,\n\x10guard_pokemon_id\x18\x06 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\x18\n\x10guard_pokemon_cp\x18\x07 \x01(\x05\x12\x12\n\ngym_points\x18\n \x01(\x03\x12\x14\n\x0cis_in_battle\x18\x0b \x01(\x08\x12&\n\x1e\x63ooldown_complete_timestamp_ms\x18\x0e \x01(\x03\x12%\n\x07sponsor\x18\x0f \x01(\x0e\x32\x14.RpcEnum.FortSponsor\x12\x32\n\x0erendering_type\x18\x10 \x01(\x0e\x32\x1a.RpcEnum.FortRenderingType\x12\x1c\n\x14\x61\x63tive_fort_modifier\x18\x0c \x01(\x0c\x12\'\n\tlure_info\x18\r \x01(\x0b\x32\x14.RpcSub.FortLureInfo\"\x83\x01\n\x0c\x46ortLureInfo\x12\x0f\n\x07\x66ort_id\x18\x01 \x01(\t\x12\x10\n\x08unknown2\x18\x02 \x01(\x01\x12-\n\x11\x61\x63tive_pokemon_id\x18\x03 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12!\n\x19lure_expires_timestamp_ms\x18\x04 \x01(\x03\"1\n\nSpawnPoint\x12\x10\n\x08latitude\x18\x02 \x01(\x01\x12\x11\n\tlongitude\x18\x03 \x01(\x01\"o\n\x0b\x46ortSummary\x12\x17\n\x0f\x66ort_summary_id\x18\x01 \x01(\x05\x12\"\n\x1alast_modified_timestamp_ms\x18\x02 \x01(\x05\x12\x10\n\x08latitude\x18\x03 \x01(\x05\x12\x11\n\tlongitude\x18\x04 \x01(\x05\"\xcb\x01\n\x0bWildPokemon\x12\x14\n\x0c\x65ncounter_id\x18\x01 \x01(\x06\x12\"\n\x1alast_modified_timestamp_ms\x18\x02 \x01(\x03\x12\x10\n\x08latitude\x18\x03 \x01(\x01\x12\x11\n\tlongitude\x18\x04 \x01(\x01\x12\x15\n\rspawnpoint_id\x18\x05 \x01(\t\x12)\n\x0cpokemon_data\x18\x07 \x01(\x0b\x32\x13.RpcSub.PokemonData\x12\x1b\n\x13time_till_hidden_ms\x18\x0b \x01(\x05\"\xda\x05\n\x0bPokemonData\x12\n\n\x02id\x18\x01 \x01(\x06\x12&\n\npokemon_id\x18\x02 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\n\n\x02\x63p\x18\x03 \x01(\x05\x12\x0f\n\x07stamina\x18\x04 \x01(\x05\x12\x13\n\x0bstamina_max\x18\x05 \x01(\x05\x12$\n\x06move_1\x18\x06 \x01(\x0e\x32\x14.RpcEnum.PokemonMove\x12$\n\x06move_2\x18\x07 \x01(\x0e\x32\x14.RpcEnum.PokemonMove\x12\x18\n\x10\x64\x65ployed_fort_id\x18\x08 \x01(\x05\x12\x12\n\nowner_name\x18\t \x01(\t\x12\x0e\n\x06is_egg\x18\n \x01(\x08\x12\x1c\n\x14\x65gg_km_walked_target\x18\x0b \x01(\x05\x12\x1b\n\x13\x65gg_km_walked_start\x18\x0c \x01(\x05\x12\x0e\n\x06origin\x18\x0e \x01(\x05\x12\x10\n\x08height_m\x18\x0f \x01(\x02\x12\x11\n\tweight_kg\x18\x10 \x01(\x02\x12\x19\n\x11individual_attack\x18\x11 \x01(\x05\x12\x1a\n\x12individual_defense\x18\x12 \x01(\x05\x12\x1a\n\x12individual_stamina\x18\x13 \x01(\x05\x12\x15\n\rcp_multiplier\x18\x14 \x01(\x05\x12\x10\n\x08pokeball\x18\x15 \x01(\x05\x12\x18\n\x10\x63\x61ptured_cell_id\x18\x16 \x01(\x04\x12\x18\n\x10\x62\x61ttles_attacked\x18\x17 \x01(\x05\x12\x18\n\x10\x62\x61ttles_defended\x18\x18 \x01(\x05\x12\x18\n\x10\x65gg_incubator_id\x18\x19 \x01(\x05\x12\x18\n\x10\x63reation_time_ms\x18\x1a \x01(\x04\x12\x14\n\x0cnum_upgrades\x18\x1b \x01(\x05\x12 \n\x18\x61\x64\x64itional_cp_multiplier\x18\x1c \x01(\x05\x12\x10\n\x08\x66\x61vorite\x18\x1d \x01(\x05\x12\x10\n\x08nickname\x18\x1e \x01(\t\x12\x11\n\tfrom_fort\x18\x1f \x01(\x05\"\xa7\x01\n\nMapPokemon\x12\x15\n\rspawnpoint_id\x18\x01 \x01(\t\x12\x14\n\x0c\x65ncounter_id\x18\x02 \x01(\x06\x12&\n\npokemon_id\x18\x03 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\x1f\n\x17\x65xpiration_timestamp_ms\x18\x04 \x01(\x03\x12\x10\n\x08latitude\x18\x05 \x01(\x01\x12\x11\n\tlongitude\x18\x06 \x01(\x01\"i\n\rNearbyPokemon\x12&\n\npokemon_id\x18\x01 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\x1a\n\x12\x64istance_in_meters\x18\x02 \x01(\x02\x12\x14\n\x0c\x65ncounter_id\x18\x03 \x01(\x06\"a\n\x18\x44ownloadSettingsResponse\x12\r\n\x05\x65rror\x18\x01 \x01(\t\x12\x0c\n\x04hash\x18\x02 \x01(\t\x12(\n\x08settings\x18\x03 \x01(\x0b\x32\x16.RpcSub.GlobalSettings\"\xee\x01\n\x0eGlobalSettings\x12+\n\rfort_settings\x18\x02 \x01(\x0b\x32\x14.RpcSub.FortSettings\x12)\n\x0cmap_settings\x18\x03 \x01(\x0b\x32\x13.RpcSub.MapSettings\x12-\n\x0elevel_settings\x18\x04 \x01(\x0b\x32\x15.RpcSub.LevelSettings\x12\x35\n\x12inventory_settings\x18\x05 \x01(\x0b\x32\x19.RpcSub.InventorySettings\x12\x1e\n\x16minimum_client_version\x18\x06 \x01(\t\"\xe4\x01\n\x0c\x46ortSettings\x12 \n\x18interaction_range_meters\x18\x01 \x01(\x01\x12\"\n\x1amax_total_deployed_pokemon\x18\x02 \x01(\x05\x12#\n\x1bmax_player_deployed_pokemon\x18\x03 \x01(\x05\x12!\n\x19\x64\x65ploy_stamina_multiplier\x18\x04 \x01(\x01\x12 \n\x18\x64\x65ploy_attack_multiplier\x18\x05 \x01(\x01\x12$\n\x1c\x66\x61r_interaction_range_meters\x18\x06 \x01(\x01\"\x8f\x02\n\x0bMapSettings\x12\x1d\n\x15pokemon_visible_range\x18\x01 \x01(\x01\x12\x1d\n\x15poke_nav_range_meters\x18\x02 \x01(\x01\x12\x1e\n\x16\x65ncounter_range_meters\x18\x03 \x01(\x01\x12+\n#get_map_objects_min_refresh_seconds\x18\x04 \x01(\x02\x12+\n#get_map_objects_max_refresh_seconds\x18\x05 \x01(\x02\x12+\n#get_map_objects_min_distance_meters\x18\x06 \x01(\x02\x12\x1b\n\x13google_maps_api_key\x18\x07 \x01(\t\"Q\n\rLevelSettings\x12\x1b\n\x13trainer_cp_modifier\x18\x02 \x01(\x01\x12#\n\x1btrainer_difficulty_modifier\x18\x03 \x01(\x01\"\x80\x01\n\x11InventorySettings\x12\x13\n\x0bmax_pokemon\x18\x01 \x01(\x05\x12\x15\n\rmax_bag_items\x18\x02 \x01(\x05\x12\x14\n\x0c\x62\x61se_pokemon\x18\x03 \x01(\x05\x12\x16\n\x0e\x62\x61se_bag_items\x18\x04 \x01(\x05\x12\x11\n\tbase_eggs\x18\x05 \x01(\x05\":\n\x13PlayerUpdateRequest\x12\x10\n\x08latitude\x18\x01 \x01(\x01\x12\x11\n\tlongitude\x18\x02 \x01(\x01\"y\n\x14PlayerUpdateResponse\x12*\n\rwild_pokemons\x18\x01 \x03(\x0b\x32\x13.RpcSub.WildPokemon\x12\x1f\n\x05\x66orts\x18\x02 \x03(\x0b\x32\x10.RpcSub.FortData\x12\x14\n\x0c\x66orts_nearby\x18\x03 \x01(\x05\"\x1e\n\x1c\x44ownloadItemTemplatesRequest\"\xab\x07\n\x1d\x44ownloadItemTemplatesResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12J\n\x0eitem_templates\x18\x02 \x03(\x0b\x32\x32.RpcSub.DownloadItemTemplatesResponse.ItemTemplate\x12\x14\n\x0ctimestamp_ms\x18\x03 \x01(\x04\x1a\x96\x06\n\x0cItemTemplate\x12\x13\n\x0btemplate_id\x18\x01 \x01(\t\x12\x31\n\x10pokemon_settings\x18\x02 \x01(\x0b\x32\x17.RpcSub.PokemonSettings\x12+\n\ritem_settings\x18\x03 \x01(\x0b\x32\x14.RpcSub.ItemSettings\x12+\n\rmove_settings\x18\x04 \x01(\x0b\x32\x14.RpcSub.MoveSettings\x12<\n\x16move_sequence_settings\x18\x05 \x01(\x0b\x32\x1c.RpcSub.MoveSequenceSettings\x12\x35\n\x0etype_effective\x18\x08 \x01(\x0b\x32\x1d.RpcSub.TypeEffectiveSettings\x12-\n\x0e\x62\x61\x64ge_settings\x18\n \x01(\x0b\x32\x15.RpcSub.BadgeSettings\x12&\n\x06\x63\x61mera\x18\x0b \x01(\x0b\x32\x16.RpcSub.CameraSettings\x12\x31\n\x0cplayer_level\x18\x0c \x01(\x0b\x32\x1b.RpcSub.PlayerLevelSettings\x12+\n\tgym_level\x18\r \x01(\x0b\x32\x18.RpcSub.GymLevelSettings\x12\x32\n\x0f\x62\x61ttle_settings\x18\x0e \x01(\x0b\x32\x19.RpcSub.GymBattleSettings\x12\x35\n\x12\x65ncounter_settings\x18\x0f \x01(\x0b\x32\x19.RpcSub.EncounterSettings\x12\x30\n\x10iap_item_display\x18\x10 \x01(\x0b\x32\x16.RpcSub.IapItemDisplay\x12)\n\x0ciap_settings\x18\x11 \x01(\x0b\x32\x13.RpcSub.IapSettings\x12\x38\n\x10pokemon_upgrades\x18\x12 \x01(\x0b\x32\x1e.RpcSub.PokemonUpgradeSettings\x12\x36\n\x0f\x65quipped_badges\x18\x13 \x01(\x0b\x32\x1d.RpcSub.EquippedBadgeSettings\"i\n\x15UseItemCaptureRequest\x12 \n\x07item_id\x18\x01 \x01(\x0e\x32\x0f.RpcEnum.ItemId\x12\x14\n\x0c\x65ncounter_id\x18\x02 \x01(\x06\x12\x18\n\x10spawn_point_guid\x18\x03 \x01(\t\"\xb1\x01\n\x16UseItemCaptureResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x19\n\x11item_capture_mult\x18\x02 \x01(\x01\x12\x16\n\x0eitem_flee_mult\x18\x03 \x01(\x01\x12\x15\n\rstop_movement\x18\x04 \x01(\x08\x12\x13\n\x0bstop_attack\x18\x05 \x01(\x08\x12\x12\n\ntarget_max\x18\x06 \x01(\x08\x12\x13\n\x0btarget_slow\x18\x07 \x01(\x08\"+\n\x15ReleasePokemonRequest\x12\x12\n\npokemon_id\x18\x01 \x01(\x06\"\xc4\x01\n\x16ReleasePokemonResponse\x12\x35\n\x06result\x18\x01 \x01(\x0e\x32%.RpcSub.ReleasePokemonResponse.Result\x12\x15\n\rcandy_awarded\x18\x02 \x01(\x05\"\\\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10POKEMON_DEPLOYED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x12\x18\n\x14\x45RROR_POKEMON_IS_EGG\x10\x04\"\x17\n\x15GetHatchedEggsRequest\"\x8e\x01\n\x16GetHatchedEggsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x16\n\npokemon_id\x18\x02 \x03(\x04\x42\x02\x10\x01\x12\x1a\n\x12\x65xperience_awarded\x18\x03 \x03(\x05\x12\x15\n\rcandy_awarded\x18\x04 \x03(\x05\x12\x18\n\x10stardust_awarded\x18\x05 \x03(\x05\"\x86\x01\n\x11\x46ortSearchRequest\x12\x0f\n\x07\x66ort_id\x18\x01 \x01(\t\x12\x17\n\x0fplayer_latitude\x18\x02 \x01(\x01\x12\x18\n\x10player_longitude\x18\x03 \x01(\x01\x12\x15\n\rfort_latitude\x18\x04 \x01(\x01\x12\x16\n\x0e\x66ort_longitude\x18\x05 \x01(\x01\"\xdc\x03\n\x12\x46ortSearchResponse\x12\x31\n\x06result\x18\x01 \x01(\x0e\x32!.RpcSub.FortSearchResponse.Result\x12;\n\ritems_awarded\x18\x02 \x03(\x0b\x32$.RpcSub.FortSearchResponse.ItemAward\x12\x14\n\x0cgems_awarded\x18\x03 \x01(\x05\x12-\n\x10pokemon_data_egg\x18\x04 \x01(\x0b\x32\x13.RpcSub.PokemonData\x12\x1a\n\x12\x65xperience_awarded\x18\x05 \x01(\x05\x12&\n\x1e\x63ooldown_complete_timestamp_ms\x18\x06 \x01(\x03\x12\"\n\x1a\x63hain_hack_sequence_number\x18\x07 \x01(\x05\x1a\x41\n\tItemAward\x12 \n\x07item_id\x18\x01 \x01(\x0e\x32\x0f.RpcEnum.ItemId\x12\x12\n\nitem_count\x18\x02 \x01(\x05\"f\n\x06Result\x12\x11\n\rNO_RESULT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x10\n\x0cOUT_OF_RANGE\x10\x02\x12\x16\n\x12IN_COOLDOWN_PERIOD\x10\x03\x12\x12\n\x0eINVENTORY_FULL\x10\x04\"J\n\x12\x46ortDetailsRequest\x12\x0f\n\x07\x66ort_id\x18\x01 \x01(\t\x12\x10\n\x08latitude\x18\x02 \x01(\x01\x12\x11\n\tlongitude\x18\x03 \x01(\x01\"\xd1\x02\n\x13\x46ortDetailsResponse\x12\x0f\n\x07\x66ort_id\x18\x01 \x01(\t\x12&\n\nteam_color\x18\x02 \x01(\x0e\x32\x12.RpcEnum.TeamColor\x12)\n\x0cpokemon_data\x18\x03 \x01(\x0b\x32\x13.RpcSub.PokemonData\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x12\n\nimage_urls\x18\x05 \x03(\t\x12\n\n\x02\x66p\x18\x06 \x01(\x05\x12\x0f\n\x07stamina\x18\x07 \x01(\x05\x12\x13\n\x0bmax_stamina\x18\x08 \x01(\x05\x12\x1f\n\x04type\x18\t \x01(\x0e\x32\x11.RpcEnum.FortType\x12\x10\n\x08latitude\x18\n \x01(\x01\x12\x11\n\tlongitude\x18\x0b \x01(\x01\x12\x13\n\x0b\x64\x65scription\x18\x0c \x01(\t\x12\'\n\tmodifiers\x18\r \x03(\x0b\x32\x14.RpcSub.FortModifier\"s\n\x0c\x46ortModifier\x12 \n\x07item_id\x18\x01 \x01(\x0e\x32\x0f.RpcEnum.ItemId\x12\x1f\n\x17\x65xpiration_timestamp_ms\x18\x02 \x01(\x03\x12 \n\x18\x64\x65ployer_player_codename\x18\x03 \x01(\t\"r\n\x10\x45ncounterRequest\x12\x14\n\x0c\x65ncounter_id\x18\x01 \x01(\x06\x12\x15\n\rspawnpoint_id\x18\x02 \x01(\t\x12\x17\n\x0fplayer_latitude\x18\x03 \x01(\x01\x12\x18\n\x10player_longitude\x18\x04 \x01(\x01\"\xe1\x03\n\x11\x45ncounterResponse\x12)\n\x0cwild_pokemon\x18\x01 \x01(\x0b\x32\x13.RpcSub.WildPokemon\x12\x38\n\nbackground\x18\x02 \x01(\x0e\x32$.RpcSub.EncounterResponse.Background\x12\x30\n\x06status\x18\x03 \x01(\x0e\x32 .RpcSub.EncounterResponse.Status\x12\x37\n\x13\x63\x61pture_probability\x18\x04 \x01(\x0b\x32\x1a.RpcSub.CaptureProbability\"\"\n\nBackground\x12\x08\n\x04PARK\x10\x00\x12\n\n\x06\x44\x45SERT\x10\x01\"\xd7\x01\n\x06Status\x12\x13\n\x0f\x45NCOUNTER_ERROR\x10\x00\x12\x15\n\x11\x45NCOUNTER_SUCCESS\x10\x01\x12\x17\n\x13\x45NCOUNTER_NOT_FOUND\x10\x02\x12\x14\n\x10\x45NCOUNTER_CLOSED\x10\x03\x12\x1a\n\x16\x45NCOUNTER_POKEMON_FLED\x10\x04\x12\x1a\n\x16\x45NCOUNTER_NOT_IN_RANGE\x10\x05\x12\x1e\n\x1a\x45NCOUNTER_ALREADY_HAPPENED\x10\x06\x12\x1a\n\x16POKEMON_INVENTORY_FULL\x10\x07\"{\n\x12\x43\x61ptureProbability\x12&\n\rpokeball_type\x18\x01 \x03(\x0e\x32\x0f.RpcEnum.ItemId\x12\x1b\n\x13\x63\x61pture_probability\x18\x02 \x03(\x02\x12 \n\x18reticle_difficulty_scale\x18\x0c \x01(\x01\"p\n\x14\x44iskEncounterRequest\x12\x14\n\x0c\x65ncounter_id\x18\x01 \x01(\x06\x12\x0f\n\x07\x66ort_id\x18\x02 \x01(\t\x12\x17\n\x0fplayer_latitude\x18\x03 \x01(\x01\x12\x18\n\x10player_longitude\x18\x04 \x01(\x01\"\xb7\x02\n\x15\x44iskEncounterResponse\x12\x34\n\x06result\x18\x01 \x01(\x0e\x32$.RpcSub.DiskEncounterResponse.Result\x12)\n\x0cpokemon_data\x18\x02 \x01(\x0b\x32\x13.RpcSub.PokemonData\x12\x37\n\x13\x63\x61pture_probability\x18\x03 \x01(\x0b\x32\x1a.RpcSub.CaptureProbability\"\x83\x01\n\x06Result\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x11\n\rNOT_AVAILABLE\x10\x02\x12\x10\n\x0cNOT_IN_RANGE\x10\x03\x12\x1e\n\x1a\x45NCOUNTER_ALREADY_FINISHED\x10\x04\x12\x1a\n\x16POKEMON_INVENTORY_FULL\x10\x05\"\xc3\x01\n\x13\x43\x61tchPokemonRequest\x12\x14\n\x0c\x65ncounter_id\x18\x01 \x01(\x06\x12\x10\n\x08pokeball\x18\x02 \x01(\x05\x12\x1f\n\x17normalized_reticle_size\x18\x03 \x01(\x01\x12\x18\n\x10spawn_point_guid\x18\x04 \x01(\t\x12\x13\n\x0bhit_pokemon\x18\x05 \x01(\x08\x12\x15\n\rspin_modifier\x18\x06 \x01(\x01\x12\x1d\n\x15NormalizedHitPosition\x18\x07 \x01(\x01\"\x90\x02\n\x14\x43\x61tchPokemonResponse\x12\x38\n\x06status\x18\x01 \x01(\x0e\x32(.RpcSub.CatchPokemonResponse.CatchStatus\x12\x14\n\x0cmiss_percent\x18\x02 \x01(\x01\x12\x1b\n\x13\x63\x61ptured_pokemon_id\x18\x03 \x01(\x04\x12$\n\x06scores\x18\x04 \x01(\x0b\x32\x14.RpcSub.CaptureScore\"e\n\x0b\x43\x61tchStatus\x12\x0f\n\x0b\x43\x41TCH_ERROR\x10\x00\x12\x11\n\rCATCH_SUCCESS\x10\x01\x12\x10\n\x0c\x43\x41TCH_ESCAPE\x10\x02\x12\x0e\n\nCATCH_FLEE\x10\x03\x12\x10\n\x0c\x43\x41TCH_MISSED\x10\x04\"i\n\x0c\x43\x61ptureScore\x12,\n\ractivity_type\x18\x01 \x03(\x0e\x32\x15.RpcEnum.ActivityType\x12\n\n\x02xp\x18\x02 \x03(\x05\x12\r\n\x05\x63\x61ndy\x18\x03 \x03(\x05\x12\x10\n\x08stardust\x18\x04 \x03(\x05\"\x1b\n\x19\x43heckAwardedBadgesRequest\"w\n\x1a\x43heckAwardedBadgesResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12*\n\x0e\x61warded_badges\x18\x02 \x03(\x0e\x32\x12.RpcEnum.BadgeType\x12\x1c\n\x14\x61warded_badge_levels\x18\x03 \x03(\x05\"y\n\x15\x45quippedBadgeSettings\x12\x1f\n\x17\x65quip_badge_cooldown_ms\x18\x01 \x01(\x03\x12\x1f\n\x17\x63\x61tch_probability_bonus\x18\x02 \x03(\x02\x12\x1e\n\x16\x66lee_probability_bonus\x18\x03 \x03(\x02\"\x84\x01\n\x16PokemonUpgradeSettings\x12\x1a\n\x12upgrades_per_level\x18\x01 \x01(\x05\x12#\n\x1b\x61llowed_levels_above_player\x18\x02 \x01(\x05\x12\x12\n\ncandy_cost\x18\x03 \x03(\x05\x12\x15\n\rstardust_cost\x18\x04 \x03(\x05\"\x8c\x02\n\x0bIapSettings\x12\x19\n\x11\x64\x61ily_bonus_coins\x18\x01 \x01(\x05\x12(\n daily_defender_bonus_per_pokemon\x18\x02 \x03(\x05\x12*\n\"daily_defender_bonus_max_defenders\x18\x03 \x01(\x05\x12%\n\x1d\x64\x61ily_defender_bonus_currency\x18\x04 \x03(\t\x12\"\n\x1amin_time_between_claims_ms\x18\x05 \x01(\x03\x12\x1b\n\x13\x64\x61ily_bonus_enabled\x18\x06 \x01(\x08\x12$\n\x1c\x64\x61ily_defender_bonus_enabled\x18\x07 \x01(\x08\"\x94\x01\n\x0eIapItemDisplay\x12\x0b\n\x03sku\x18\x01 \x01(\t\x12.\n\x08\x63\x61tegory\x18\x02 \x01(\x0e\x32\x1c.RpcEnum.HoloIapItemCategory\x12\x12\n\nsort_order\x18\x03 \x01(\x05\x12!\n\x08item_ids\x18\x04 \x03(\x0e\x32\x0f.RpcEnum.ItemId\x12\x0e\n\x06\x63ounts\x18\x05 \x03(\x05\"\xae\x01\n\x11\x45ncounterSettings\x12\x1c\n\x14spin_bonus_threshold\x18\x01 \x01(\x02\x12!\n\x19\x65xcellent_throw_threshold\x18\x02 \x01(\x02\x12\x1d\n\x15great_throw_threshold\x18\x03 \x01(\x02\x12\x1c\n\x14nice_throw_threshold\x18\x04 \x01(\x02\x12\x1b\n\x13milestone_threshold\x18\x05 \x01(\x05\"\xc6\x03\n\x11GymBattleSettings\x12\x16\n\x0e\x65nergy_per_sec\x18\x01 \x01(\x02\x12\x19\n\x11\x64odge_energy_cost\x18\x02 \x01(\x02\x12\x18\n\x10retarget_seconds\x18\x03 \x01(\x02\x12\x1d\n\x15\x65nemy_attack_interval\x18\x04 \x01(\x02\x12\x1e\n\x16\x61ttack_server_interval\x18\x05 \x01(\x02\x12\x1e\n\x16round_duration_seconds\x18\x06 \x01(\x02\x12#\n\x1b\x62onus_time_per_ally_seconds\x18\x07 \x01(\x02\x12$\n\x1cmaximum_attackers_per_battle\x18\x08 \x01(\x05\x12)\n!same_type_attack_bonus_multiplier\x18\t \x01(\x02\x12\x16\n\x0emaximum_energy\x18\n \x01(\x05\x12$\n\x1c\x65nergy_delta_per_health_lost\x18\x0b \x01(\x02\x12\x19\n\x11\x64odge_duration_ms\x18\x0c \x01(\x05\x12\x1c\n\x14minimum_player_level\x18\r \x01(\x05\x12\x18\n\x10swap_duration_ms\x18\x0e \x01(\x05\"w\n\x10GymLevelSettings\x12\x1b\n\x13required_experience\x18\x01 \x03(\x05\x12\x14\n\x0cleader_slots\x18\x02 \x03(\x05\x12\x15\n\rtrainer_slots\x18\x03 \x03(\x05\x12\x19\n\x11search_roll_bonus\x18\x04 \x03(\x05\"\x9d\x01\n\x13PlayerLevelSettings\x12\x10\n\x08rank_num\x18\x01 \x03(\x05\x12\x1b\n\x13required_experience\x18\x02 \x03(\x05\x12\x15\n\rcp_multiplier\x18\x03 \x03(\x02\x12\x1c\n\x14max_egg_player_level\x18\x04 \x01(\x05\x12\"\n\x1amax_encounter_player_level\x18\x05 \x01(\x05\"\xc5\x03\n\x0e\x43\x61meraSettings\x12\x13\n\x0bnext_camera\x18\x01 \x01(\t\x12\x33\n\rinterpolation\x18\x02 \x03(\x0e\x32\x1c.RpcEnum.CameraInterpolation\x12*\n\x0btarget_type\x18\x03 \x03(\x0e\x32\x15.RpcEnum.CameraTarget\x12\x15\n\rease_in_speed\x18\x04 \x03(\x02\x12\x16\n\x0e\x65\x61st_out_speed\x18\x05 \x03(\x02\x12\x18\n\x10\x64uration_seconds\x18\x06 \x03(\x02\x12\x14\n\x0cwait_seconds\x18\x07 \x03(\x02\x12\x1a\n\x12transition_seconds\x18\x08 \x03(\x02\x12\x14\n\x0c\x61ngle_degree\x18\t \x03(\x02\x12\x1b\n\x13\x61ngle_offset_degree\x18\n \x03(\x02\x12\x14\n\x0cpitch_degree\x18\x0b \x03(\x02\x12\x1b\n\x13pitch_offset_degree\x18\x0c \x03(\x02\x12\x13\n\x0broll_degree\x18\r \x03(\x02\x12\x17\n\x0f\x64istance_meters\x18\x0e \x03(\x02\x12\x16\n\x0eheight_percent\x18\x0f \x03(\x02\x12\x16\n\x0evert_ctr_ratio\x18\x10 \x03(\x02\"\\\n\rBadgeSettings\x12&\n\nbadge_type\x18\x01 \x01(\x0e\x32\x12.RpcEnum.BadgeType\x12\x12\n\nbadge_rank\x18\x02 \x01(\x05\x12\x0f\n\x07targets\x18\x03 \x03(\x05\"Y\n\x15TypeEffectiveSettings\x12\x15\n\rattack_scalar\x18\x01 \x03(\x02\x12)\n\x0b\x61ttack_type\x18\x02 \x01(\x0e\x32\x14.RpcEnum.PokemonType\"(\n\x14MoveSequenceSettings\x12\x10\n\x08sequence\x18\x01 \x03(\t\"\xa7\x03\n\x0cMoveSettings\x12\x31\n\x0bmovement_id\x18\x01 \x01(\x0e\x32\x1c.RpcEnum.PokemonMovementType\x12\x14\n\x0c\x61nimation_id\x18\x02 \x01(\x05\x12*\n\x0cpokemon_type\x18\x03 \x01(\x0e\x32\x14.RpcEnum.PokemonType\x12\r\n\x05power\x18\x04 \x01(\x02\x12\x17\n\x0f\x61\x63\x63uracy_chance\x18\x05 \x01(\x02\x12\x17\n\x0f\x63ritical_chance\x18\x06 \x01(\x02\x12\x13\n\x0bheal_scalar\x18\x07 \x01(\x02\x12\x1b\n\x13stamina_loss_scalar\x18\x08 \x01(\x02\x12\x19\n\x11trainer_level_min\x18\t \x01(\x05\x12\x19\n\x11trainer_level_max\x18\n \x01(\x05\x12\x10\n\x08vfx_name\x18\x0b \x01(\t\x12\x13\n\x0b\x64uration_ms\x18\x0c \x01(\x05\x12\x1e\n\x16\x64\x61mage_window_start_ms\x18\r \x01(\x05\x12\x1c\n\x14\x64\x61mage_window_end_ms\x18\x0e \x01(\x05\x12\x14\n\x0c\x65nergy_delta\x18\x0f \x01(\x05\"\xed\x05\n\x0fPokemonSettings\x12&\n\npokemon_id\x18\x01 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\x13\n\x0bmodel_scale\x18\x03 \x01(\x02\x12\"\n\x04type\x18\x04 \x01(\x0e\x32\x14.RpcEnum.PokemonType\x12$\n\x06type_2\x18\x05 \x01(\x0e\x32\x14.RpcEnum.PokemonType\x12(\n\x06\x63\x61mera\x18\x06 \x01(\x0b\x32\x18.RpcSub.CameraAttributes\x12.\n\tencounter\x18\x07 \x01(\x0b\x32\x1b.RpcSub.EncounterAttributes\x12&\n\x05stats\x18\x08 \x01(\x0b\x32\x17.RpcSub.StatsAttributes\x12)\n\x0bquick_moves\x18\t \x03(\x0e\x32\x14.RpcEnum.PokemonMove\x12-\n\x0f\x63inematic_moves\x18\n \x03(\x0e\x32\x14.RpcEnum.PokemonMove\x12\x16\n\x0e\x61nimation_time\x18\x0b \x03(\x02\x12)\n\revolution_ids\x18\x0c \x03(\x0e\x32\x12.RpcEnum.PokemonId\x12\x16\n\x0e\x65volution_pips\x18\r \x01(\x05\x12$\n\x05\x63lass\x18\x0e \x01(\x0e\x32\x15.RpcEnum.PokemonClass\x12\x18\n\x10pokedex_height_m\x18\x0f \x01(\x02\x12\x19\n\x11pokedex_weight_kg\x18\x10 \x01(\x02\x12-\n\x11parent_pokemon_id\x18\x11 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\x16\n\x0eheight_std_dev\x18\x12 \x01(\x02\x12\x16\n\x0eweight_std_dev\x18\x13 \x01(\x02\x12\x1c\n\x14km_distance_to_hatch\x18\x14 \x01(\x02\x12+\n\tfamily_id\x18\x15 \x01(\x0e\x32\x18.RpcEnum.PokemonFamilyId\x12\x17\n\x0f\x63\x61ndy_to_evolve\x18\x16 \x01(\x05\"\x97\x01\n\x10\x43\x61meraAttributes\x12\x15\n\rdisk_radius_m\x18\x01 \x01(\x02\x12\x19\n\x11\x63ylinder_radius_m\x18\x02 \x01(\x02\x12\x19\n\x11\x63ylinder_height_m\x18\x03 \x01(\x02\x12\x19\n\x11\x63ylinder_ground_m\x18\x04 \x01(\x02\x12\x1b\n\x13shoulder_mode_scale\x18\x05 \x01(\x02\"\x9d\x02\n\x13\x45ncounterAttributes\x12\x19\n\x11\x62\x61se_capture_rate\x18\x01 \x01(\x02\x12\x16\n\x0e\x62\x61se_flee_rate\x18\x02 \x01(\x02\x12\x1a\n\x12\x63ollision_radius_m\x18\x03 \x01(\x02\x12\x1a\n\x12\x63ollision_height_m\x18\x04 \x01(\x02\x12\x1f\n\x17\x63ollision_head_radius_m\x18\x05 \x01(\x02\x12\x33\n\rmovement_type\x18\x06 \x01(\x0e\x32\x1c.RpcEnum.PokemonMovementType\x12\x18\n\x10movement_timer_s\x18\x07 \x01(\x02\x12\x13\n\x0bjump_time_s\x18\x08 \x01(\x02\x12\x16\n\x0e\x61ttack_timer_s\x18\t \x01(\x02\"n\n\x0fStatsAttributes\x12\x14\n\x0c\x62\x61se_stamina\x18\x01 \x01(\x05\x12\x13\n\x0b\x62\x61se_attack\x18\x02 \x01(\x05\x12\x14\n\x0c\x62\x61se_defense\x18\x03 \x01(\x05\x12\x1a\n\x12\x64odge_energy_delta\x18\x08 \x01(\x05\"\x8e\x05\n\x0cItemSettings\x12 \n\x07item_id\x18\x01 \x01(\x0e\x32\x0f.RpcEnum.ItemId\x12$\n\titem_type\x18\x02 \x01(\x0e\x32\x11.RpcEnum.ItemType\x12\'\n\x08\x63\x61tegory\x18\x03 \x01(\x0e\x32\x15.RpcEnum.ItemCategory\x12\x11\n\tdrop_freq\x18\x04 \x01(\x02\x12\x1a\n\x12\x64rop_trainer_level\x18\x05 \x01(\x05\x12,\n\x08pokeball\x18\x06 \x01(\x0b\x32\x1a.RpcSub.PokeballAttributes\x12(\n\x06potion\x18\x07 \x01(\x0b\x32\x18.RpcSub.PotionAttributes\x12(\n\x06revive\x18\x08 \x01(\x0b\x32\x18.RpcSub.ReviveAttributes\x12(\n\x06\x62\x61ttle\x18\t \x01(\x0b\x32\x18.RpcSub.BattleAttributes\x12$\n\x04\x66ood\x18\n \x01(\x0b\x32\x16.RpcSub.FoodAttributes\x12=\n\x11inventory_upgrade\x18\x0b \x01(\x0b\x32\".RpcSub.InventoryUpgradeAttributes\x12\x33\n\x08xp_boost\x18\x0c \x01(\x0b\x32!.RpcSub.ExperienceBoostAttributes\x12*\n\x07incense\x18\r \x01(\x0b\x32\x19.RpcSub.IncenseAttributes\x12\x35\n\regg_incubator\x18\x0e \x01(\x0b\x32\x1e.RpcSub.EggIncubatorAttributes\x12\x35\n\rfort_modifier\x18\x0f \x01(\x0b\x32\x1e.RpcSub.FortModifierAttributes\"\'\n\x10\x42\x61ttleAttributes\x12\x13\n\x0bsta_percent\x18\x01 \x01(\x02\"v\n\x16\x45ggIncubatorAttributes\x12\x31\n\x0eincubator_type\x18\x01 \x01(\x0e\x32\x19.RpcEnum.EggIncubatorType\x12\x0c\n\x04uses\x18\x02 \x01(\x05\x12\x1b\n\x13\x64istance_multiplier\x18\x03 \x01(\x02\"M\n\x19\x45xperienceBoostAttributes\x12\x15\n\rxp_multiplier\x18\x01 \x01(\x02\x12\x19\n\x11\x62oost_duration_ms\x18\x02 \x01(\x05\"o\n\x0e\x46oodAttributes\x12(\n\x0bitem_effect\x18\x01 \x03(\x0e\x32\x13.RpcEnum.ItemEffect\x12\x1b\n\x13item_effect_percent\x18\x02 \x03(\x02\x12\x16\n\x0egrowth_percent\x18\x03 \x01(\x02\"b\n\x16\x46ortModifierAttributes\x12!\n\x19modifier_lifetime_seconds\x18\x01 \x01(\x05\x12%\n\x1dtroy_disk_num_pokemon_spawned\x18\x02 \x01(\x05\"\xc9\x02\n\x11IncenseAttributes\x12 \n\x18incense_lifetime_seconds\x18\x01 \x01(\x05\x12*\n\x0cpokemon_type\x18\x02 \x03(\x0e\x32\x14.RpcEnum.PokemonType\x12(\n pokemon_incense_type_probability\x18\x03 \x01(\x02\x12\x30\n(standing_time_between_encounters_seconds\x18\x04 \x01(\x05\x12-\n%moving_time_between_encounter_seconds\x18\x05 \x01(\x05\x12\x35\n-distance_required_for_shorter_interval_meters\x18\x06 \x01(\x05\x12$\n\x1cpokemon_attracted_length_sec\x18\x07 \x01(\x05\"m\n\x1aInventoryUpgradeAttributes\x12\x1a\n\x12\x61\x64\x64itional_storage\x18\x01 \x01(\x05\x12\x33\n\x0cupgrade_type\x18\x02 \x01(\x0e\x32\x1d.RpcEnum.InventoryUpgradeType\"\x8c\x01\n\x12PokeballAttributes\x12(\n\x0bitem_effect\x18\x01 \x01(\x0e\x32\x13.RpcEnum.ItemEffect\x12\x15\n\rcapture_multi\x18\x02 \x01(\x02\x12\x1c\n\x14\x63\x61pture_multi_effect\x18\x03 \x01(\x02\x12\x17\n\x0fitem_effect_mod\x18\x04 \x01(\x02\";\n\x10PotionAttributes\x12\x13\n\x0bsta_percent\x18\x01 \x01(\x02\x12\x12\n\nsta_amount\x18\x02 \x01(\x05\"\'\n\x10ReviveAttributes\x12\x13\n\x0bsta_percent\x18\x01 \x01(\x02')
+  syntax='proto3',
+  serialized_pb=_b('\n\x0cRpcSub.proto\x12\x06RpcSub\x1a\rRpcEnum.proto\"G\n\x11GetPlayerResponse\x12\x10\n\x08unknown1\x18\x01 \x01(\x05\x12 \n\x07profile\x18\x02 \x01(\x0b\x32\x0f.RpcSub.Profile\"\xac\x02\n\x07Profile\x12\x15\n\rcreation_time\x18\x01 \x01(\x03\x12\x10\n\x08username\x18\x02 \x01(\t\x12 \n\x04team\x18\x05 \x01(\x0e\x32\x12.RpcEnum.TeamColor\x12\x10\n\x08tutorial\x18\x07 \x01(\x0c\x12%\n\x06\x61vatar\x18\x08 \x01(\x0b\x32\x15.RpcSub.AvatarDetails\x12\x14\n\x0cpoke_storage\x18\t \x01(\x05\x12\x14\n\x0citem_storage\x18\n \x01(\x05\x12\'\n\x0b\x64\x61ily_bonus\x18\x0b \x01(\x0b\x32\x12.RpcSub.DailyBonus\x12\x11\n\tunknown12\x18\x0c \x01(\x0c\x12\x11\n\tunknown13\x18\r \x01(\x0c\x12\"\n\x08\x63urrency\x18\x0e \x03(\x0b\x32\x10.RpcSub.Currency\"Y\n\nDailyBonus\x12\x1e\n\x16NextCollectTimestampMs\x18\x01 \x01(\x03\x12+\n#NextDefenderBonusCollectTimestampMs\x18\x02 \x01(\x03\"(\n\x08\x43urrency\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x0e\n\x06\x61mount\x18\x02 \x01(\x05\"X\n\rAvatarDetails\x12\x10\n\x08unknown2\x18\x02 \x01(\x05\x12\x10\n\x08unknown3\x18\x03 \x01(\x05\x12\x10\n\x08unknown9\x18\t \x01(\x05\x12\x11\n\tunknown10\x18\n \x01(\x05\"\'\n\x17\x44ownloadSettingsRequest\x12\x0c\n\x04hash\x18\x01 \x01(\t\"X\n\x14GetInventoryResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12/\n\x0finventory_delta\x18\x02 \x01(\x0b\x32\x16.RpcSub.InventoryDelta\"y\n\x0eInventoryDelta\x12\x1d\n\x15original_timestamp_ms\x18\x01 \x01(\x03\x12\x18\n\x10new_timestamp_ms\x18\x02 \x01(\x03\x12.\n\x0finventory_items\x18\x03 \x03(\x0b\x32\x15.RpcSub.InventoryItem\"\x80\x01\n\rInventoryItem\x12\x1d\n\x15modified_timestamp_ms\x18\x01 \x01(\x03\x12\x18\n\x10\x64\x65leted_item_key\x18\x02 \x01(\x03\x12\x36\n\x13inventory_item_data\x18\x03 \x01(\x0b\x32\x19.RpcSub.InventoryItemData\"\xcd\x03\n\x11InventoryItemData\x12$\n\x07pokemon\x18\x01 \x01(\x0b\x32\x13.RpcSub.PokemonData\x12\x1a\n\x04item\x18\x02 \x01(\x0b\x32\x0c.RpcSub.Item\x12+\n\rpokedex_entry\x18\x03 \x01(\x0b\x32\x14.RpcSub.PokedexEntry\x12)\n\x0cplayer_stats\x18\x04 \x01(\x0b\x32\x13.RpcSub.PlayerStats\x12/\n\x0fplayer_currency\x18\x05 \x01(\x0b\x32\x16.RpcSub.PlayerCurrency\x12+\n\rplayer_camera\x18\x06 \x01(\x0b\x32\x14.RpcSub.PlayerCamera\x12\x35\n\x12inventory_upgrades\x18\x07 \x01(\x0b\x32\x19.RpcSub.InventoryUpgrades\x12+\n\rapplied_items\x18\x08 \x01(\x0b\x32\x14.RpcSub.AppliedItems\x12-\n\x0e\x65gg_incubators\x18\t \x01(\x0b\x32\x15.RpcSub.EggIncubators\x12-\n\x0epokemon_family\x18\n \x01(\x0b\x32\x15.RpcSub.PokemonFamily\"\xd8\x05\n\x07Pokemon\x12\n\n\x02id\x18\x01 \x01(\x05\x12(\n\x0cpokemon_type\x18\x02 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\n\n\x02\x63p\x18\x03 \x01(\x05\x12\x0f\n\x07stamina\x18\x04 \x01(\x05\x12\x13\n\x0bstamina_max\x18\x05 \x01(\x05\x12$\n\x06move_1\x18\x06 \x01(\x0e\x32\x14.RpcEnum.PokemonMove\x12$\n\x06move_2\x18\x07 \x01(\x0e\x32\x14.RpcEnum.PokemonMove\x12\x18\n\x10\x64\x65ployed_fort_id\x18\x08 \x01(\x05\x12\x12\n\nowner_name\x18\t \x01(\t\x12\x0e\n\x06is_egg\x18\n \x01(\x08\x12\x1c\n\x14\x65gg_km_walked_target\x18\x0b \x01(\x05\x12\x1b\n\x13\x65gg_km_walked_start\x18\x0c \x01(\x05\x12\x0e\n\x06origin\x18\x0e \x01(\x05\x12\x10\n\x08height_m\x18\x0f \x01(\x02\x12\x11\n\tweight_kg\x18\x10 \x01(\x02\x12\x19\n\x11individual_attack\x18\x11 \x01(\x05\x12\x1a\n\x12individual_defense\x18\x12 \x01(\x05\x12\x1a\n\x12individual_stamina\x18\x13 \x01(\x05\x12\x15\n\rcp_multiplier\x18\x14 \x01(\x05\x12\x10\n\x08pokeball\x18\x15 \x01(\x05\x12\x18\n\x10\x63\x61ptured_cell_id\x18\x16 \x01(\x04\x12\x18\n\x10\x62\x61ttles_attacked\x18\x17 \x01(\x05\x12\x18\n\x10\x62\x61ttles_defended\x18\x18 \x01(\x05\x12\x18\n\x10\x65gg_incubator_id\x18\x19 \x01(\x05\x12\x18\n\x10\x63reation_time_ms\x18\x1a \x01(\x04\x12\x14\n\x0cnum_upgrades\x18\x1b \x01(\x05\x12 \n\x18\x61\x64\x64itional_cp_multiplier\x18\x1c \x01(\x05\x12\x10\n\x08\x66\x61vorite\x18\x1d \x01(\x05\x12\x10\n\x08nickname\x18\x1e \x01(\t\x12\x11\n\tfrom_fort\x18\x1f \x01(\x05\"F\n\x04Item\x12\x1f\n\x04item\x18\x01 \x01(\x0e\x32\x11.RpcEnum.ItemType\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\x12\x0e\n\x06unseen\x18\x03 \x01(\x08\"\x99\x01\n\x0cPokedexEntry\x12\x1c\n\x14pokedex_entry_number\x18\x01 \x01(\x05\x12\x19\n\x11times_encountered\x18\x02 \x01(\x05\x12\x16\n\x0etimes_captured\x18\x03 \x01(\x05\x12\x1e\n\x16\x65volution_stone_pieces\x18\x04 \x01(\x05\x12\x18\n\x10\x65volution_stones\x18\x05 \x01(\x05\"\xed\x04\n\x0bPlayerStats\x12\r\n\x05level\x18\x01 \x01(\x05\x12\x12\n\nexperience\x18\x02 \x01(\x03\x12\x15\n\rprev_level_xp\x18\x03 \x01(\x03\x12\x15\n\rnext_level_xp\x18\x04 \x01(\x03\x12\x11\n\tkm_walked\x18\x05 \x01(\x02\x12\x1c\n\x14pokemons_encountered\x18\x06 \x01(\x05\x12\x1e\n\x16unique_pokedex_entries\x18\x07 \x01(\x05\x12\x19\n\x11pokemons_captured\x18\x08 \x01(\x05\x12\x12\n\nevolutions\x18\t \x01(\x05\x12\x18\n\x10poke_stop_visits\x18\n \x01(\x05\x12\x18\n\x10pokeballs_thrown\x18\x0b \x01(\x05\x12\x14\n\x0c\x65ggs_hatched\x18\x0c \x01(\x05\x12\x1b\n\x13\x62ig_magikarp_caught\x18\r \x01(\x05\x12\x19\n\x11\x62\x61ttle_attack_won\x18\x0e \x01(\x05\x12\x1b\n\x13\x62\x61ttle_attack_total\x18\x0f \x01(\x05\x12\x1b\n\x13\x62\x61ttle_defended_won\x18\x10 \x01(\x05\x12\x1b\n\x13\x62\x61ttle_training_won\x18\x11 \x01(\x05\x12\x1d\n\x15\x62\x61ttle_training_total\x18\x12 \x01(\x05\x12\x1d\n\x15prestige_raised_total\x18\x13 \x01(\x05\x12\x1e\n\x16prestige_dropped_total\x18\x14 \x01(\x05\x12\x18\n\x10pokemon_deployed\x18\x15 \x01(\x05\x12\x1e\n\x16pokemon_caught_by_type\x18\x16 \x01(\x0c\x12\x1c\n\x14small_rattata_caught\x18\x17 \x01(\x05\"\x1e\n\x0ePlayerCurrency\x12\x0c\n\x04gems\x18\x01 \x01(\x05\")\n\x0cPlayerCamera\x12\x19\n\x11is_default_camera\x18\x01 \x01(\x08\"I\n\x11InventoryUpgrades\x12\x34\n\x12inventory_upgrades\x18\x01 \x03(\x0b\x32\x18.RpcSub.InventoryUpgrade\"\x84\x01\n\x10InventoryUpgrade\x12\x1f\n\x04item\x18\x01 \x01(\x0e\x32\x11.RpcEnum.ItemType\x12\x33\n\x0cupgrade_type\x18\x02 \x01(\x0e\x32\x1d.RpcEnum.InventoryUpgradeType\x12\x1a\n\x12\x61\x64\x64itional_storage\x18\x03 \x01(\x05\"1\n\x0c\x41ppliedItems\x12!\n\x04item\x18\x04 \x01(\x0b\x32\x13.RpcSub.AppliedItem\"\x87\x01\n\x0b\x41ppliedItem\x12\"\n\titem_type\x18\x01 \x01(\x0e\x32\x0f.RpcEnum.ItemId\x12-\n\x12item_type_category\x18\x02 \x01(\x0e\x32\x11.RpcEnum.ItemType\x12\x11\n\texpire_ms\x18\x03 \x01(\x03\x12\x12\n\napplied_ms\x18\x04 \x01(\x03\"<\n\rEggIncubators\x12+\n\regg_incubator\x18\x01 \x01(\x0b\x32\x14.RpcSub.EggIncubator\"\xd7\x01\n\x0c\x45ggIncubator\x12\x0f\n\x07item_id\x18\x01 \x01(\t\x12$\n\titem_type\x18\x02 \x01(\x0e\x32\x11.RpcEnum.ItemType\x12\x31\n\x0eincubator_type\x18\x03 \x01(\x0e\x32\x19.RpcEnum.EggIncubatorType\x12\x16\n\x0euses_remaining\x18\x04 \x01(\x05\x12\x12\n\npokemon_id\x18\x05 \x01(\x03\x12\x17\n\x0fstart_km_walked\x18\x06 \x01(\x01\x12\x18\n\x10target_km_walked\x18\x07 \x01(\x01\"K\n\rPokemonFamily\x12+\n\tfamily_id\x18\x01 \x01(\x0e\x32\x18.RpcEnum.PokemonFamilyId\x12\r\n\x05\x63\x61ndy\x18\x02 \x01(\x05\"p\n\x14GetMapObjectsRequest\x12\x13\n\x07\x63\x65ll_id\x18\x01 \x03(\x04\x42\x02\x10\x01\x12\x1e\n\x12since_timestamp_ms\x18\x02 \x03(\x03\x42\x02\x10\x01\x12\x10\n\x08latitude\x18\x03 \x01(\x01\x12\x11\n\tlongitude\x18\x04 \x01(\x01\"f\n\x15GetMapObjectsResponse\x12\"\n\tmap_cells\x18\x01 \x03(\x0b\x32\x0f.RpcSub.MapCell\x12)\n\x06status\x18\x02 \x01(\x0e\x32\x19.RpcEnum.MapObjectsStatus\"\xa7\x03\n\x07MapCell\x12\x12\n\ns2_cell_id\x18\x01 \x01(\x04\x12\x1c\n\x14\x63urrent_timestamp_ms\x18\x02 \x01(\x03\x12\x1f\n\x05\x66orts\x18\x03 \x03(\x0b\x32\x10.RpcSub.FortData\x12(\n\x0cspawn_points\x18\x04 \x03(\x0b\x32\x12.RpcSub.SpawnPoint\x12\x17\n\x0f\x64\x65leted_objects\x18\x06 \x03(\t\x12\x19\n\x11is_truncated_list\x18\x07 \x01(\x08\x12+\n\x0e\x66ort_summaries\x18\x08 \x03(\x0b\x32\x13.RpcSub.FortSummary\x12\x32\n\x16\x64\x65\x63imated_spawn_points\x18\t \x03(\x0b\x32\x12.RpcSub.SpawnPoint\x12*\n\rwild_pokemons\x18\x05 \x03(\x0b\x32\x13.RpcSub.WildPokemon\x12.\n\x12\x63\x61tchable_pokemons\x18\n \x03(\x0b\x32\x12.RpcSub.MapPokemon\x12.\n\x0fnearby_pokemons\x18\x0b \x03(\x0b\x32\x15.RpcSub.NearbyPokemon\"\xf8\x03\n\x08\x46ortData\x12\n\n\x02id\x18\x01 \x01(\t\x12\"\n\x1alast_modified_timestamp_ms\x18\x02 \x01(\x03\x12\x10\n\x08latitude\x18\x03 \x01(\x01\x12\x11\n\tlongitude\x18\x04 \x01(\x01\x12\x0f\n\x07\x65nabled\x18\x08 \x01(\x08\x12\x1f\n\x04type\x18\t \x01(\x0e\x32\x11.RpcEnum.FortType\x12)\n\rowned_by_team\x18\x05 \x01(\x0e\x32\x12.RpcEnum.TeamColor\x12,\n\x10guard_pokemon_id\x18\x06 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\x18\n\x10guard_pokemon_cp\x18\x07 \x01(\x05\x12\x12\n\ngym_points\x18\n \x01(\x03\x12\x14\n\x0cis_in_battle\x18\x0b \x01(\x08\x12&\n\x1e\x63ooldown_complete_timestamp_ms\x18\x0e \x01(\x03\x12%\n\x07sponsor\x18\x0f \x01(\x0e\x32\x14.RpcEnum.FortSponsor\x12\x32\n\x0erendering_type\x18\x10 \x01(\x0e\x32\x1a.RpcEnum.FortRenderingType\x12\x1c\n\x14\x61\x63tive_fort_modifier\x18\x0c \x01(\x0c\x12\'\n\tlure_info\x18\r \x01(\x0b\x32\x14.RpcSub.FortLureInfo\"\x83\x01\n\x0c\x46ortLureInfo\x12\x0f\n\x07\x66ort_id\x18\x01 \x01(\t\x12\x10\n\x08unknown2\x18\x02 \x01(\x01\x12-\n\x11\x61\x63tive_pokemon_id\x18\x03 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12!\n\x19lure_expires_timestamp_ms\x18\x04 \x01(\x03\"1\n\nSpawnPoint\x12\x10\n\x08latitude\x18\x02 \x01(\x01\x12\x11\n\tlongitude\x18\x03 \x01(\x01\"o\n\x0b\x46ortSummary\x12\x17\n\x0f\x66ort_summary_id\x18\x01 \x01(\x05\x12\"\n\x1alast_modified_timestamp_ms\x18\x02 \x01(\x05\x12\x10\n\x08latitude\x18\x03 \x01(\x05\x12\x11\n\tlongitude\x18\x04 \x01(\x05\"\xcb\x01\n\x0bWildPokemon\x12\x14\n\x0c\x65ncounter_id\x18\x01 \x01(\x06\x12\"\n\x1alast_modified_timestamp_ms\x18\x02 \x01(\x03\x12\x10\n\x08latitude\x18\x03 \x01(\x01\x12\x11\n\tlongitude\x18\x04 \x01(\x01\x12\x15\n\rspawnpoint_id\x18\x05 \x01(\t\x12)\n\x0cpokemon_data\x18\x07 \x01(\x0b\x32\x13.RpcSub.PokemonData\x12\x1b\n\x13time_till_hidden_ms\x18\x0b \x01(\x05\"\xda\x05\n\x0bPokemonData\x12\n\n\x02id\x18\x01 \x01(\x06\x12&\n\npokemon_id\x18\x02 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\n\n\x02\x63p\x18\x03 \x01(\x05\x12\x0f\n\x07stamina\x18\x04 \x01(\x05\x12\x13\n\x0bstamina_max\x18\x05 \x01(\x05\x12$\n\x06move_1\x18\x06 \x01(\x0e\x32\x14.RpcEnum.PokemonMove\x12$\n\x06move_2\x18\x07 \x01(\x0e\x32\x14.RpcEnum.PokemonMove\x12\x18\n\x10\x64\x65ployed_fort_id\x18\x08 \x01(\x05\x12\x12\n\nowner_name\x18\t \x01(\t\x12\x0e\n\x06is_egg\x18\n \x01(\x08\x12\x1c\n\x14\x65gg_km_walked_target\x18\x0b \x01(\x05\x12\x1b\n\x13\x65gg_km_walked_start\x18\x0c \x01(\x05\x12\x0e\n\x06origin\x18\x0e \x01(\x05\x12\x10\n\x08height_m\x18\x0f \x01(\x02\x12\x11\n\tweight_kg\x18\x10 \x01(\x02\x12\x19\n\x11individual_attack\x18\x11 \x01(\x05\x12\x1a\n\x12individual_defense\x18\x12 \x01(\x05\x12\x1a\n\x12individual_stamina\x18\x13 \x01(\x05\x12\x15\n\rcp_multiplier\x18\x14 \x01(\x05\x12\x10\n\x08pokeball\x18\x15 \x01(\x05\x12\x18\n\x10\x63\x61ptured_cell_id\x18\x16 \x01(\x04\x12\x18\n\x10\x62\x61ttles_attacked\x18\x17 \x01(\x05\x12\x18\n\x10\x62\x61ttles_defended\x18\x18 \x01(\x05\x12\x18\n\x10\x65gg_incubator_id\x18\x19 \x01(\x05\x12\x18\n\x10\x63reation_time_ms\x18\x1a \x01(\x04\x12\x14\n\x0cnum_upgrades\x18\x1b \x01(\x05\x12 \n\x18\x61\x64\x64itional_cp_multiplier\x18\x1c \x01(\x05\x12\x10\n\x08\x66\x61vorite\x18\x1d \x01(\x05\x12\x10\n\x08nickname\x18\x1e \x01(\t\x12\x11\n\tfrom_fort\x18\x1f \x01(\x05\"\xa7\x01\n\nMapPokemon\x12\x15\n\rspawnpoint_id\x18\x01 \x01(\t\x12\x14\n\x0c\x65ncounter_id\x18\x02 \x01(\x06\x12&\n\npokemon_id\x18\x03 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\x1f\n\x17\x65xpiration_timestamp_ms\x18\x04 \x01(\x03\x12\x10\n\x08latitude\x18\x05 \x01(\x01\x12\x11\n\tlongitude\x18\x06 \x01(\x01\"i\n\rNearbyPokemon\x12&\n\npokemon_id\x18\x01 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\x1a\n\x12\x64istance_in_meters\x18\x02 \x01(\x02\x12\x14\n\x0c\x65ncounter_id\x18\x03 \x01(\x06\"a\n\x18\x44ownloadSettingsResponse\x12\r\n\x05\x65rror\x18\x01 \x01(\t\x12\x0c\n\x04hash\x18\x02 \x01(\t\x12(\n\x08settings\x18\x03 \x01(\x0b\x32\x16.RpcSub.GlobalSettings\"\xee\x01\n\x0eGlobalSettings\x12+\n\rfort_settings\x18\x02 \x01(\x0b\x32\x14.RpcSub.FortSettings\x12)\n\x0cmap_settings\x18\x03 \x01(\x0b\x32\x13.RpcSub.MapSettings\x12-\n\x0elevel_settings\x18\x04 \x01(\x0b\x32\x15.RpcSub.LevelSettings\x12\x35\n\x12inventory_settings\x18\x05 \x01(\x0b\x32\x19.RpcSub.InventorySettings\x12\x1e\n\x16minimum_client_version\x18\x06 \x01(\t\"\xe4\x01\n\x0c\x46ortSettings\x12 \n\x18interaction_range_meters\x18\x01 \x01(\x01\x12\"\n\x1amax_total_deployed_pokemon\x18\x02 \x01(\x05\x12#\n\x1bmax_player_deployed_pokemon\x18\x03 \x01(\x05\x12!\n\x19\x64\x65ploy_stamina_multiplier\x18\x04 \x01(\x01\x12 \n\x18\x64\x65ploy_attack_multiplier\x18\x05 \x01(\x01\x12$\n\x1c\x66\x61r_interaction_range_meters\x18\x06 \x01(\x01\"\x8f\x02\n\x0bMapSettings\x12\x1d\n\x15pokemon_visible_range\x18\x01 \x01(\x01\x12\x1d\n\x15poke_nav_range_meters\x18\x02 \x01(\x01\x12\x1e\n\x16\x65ncounter_range_meters\x18\x03 \x01(\x01\x12+\n#get_map_objects_min_refresh_seconds\x18\x04 \x01(\x02\x12+\n#get_map_objects_max_refresh_seconds\x18\x05 \x01(\x02\x12+\n#get_map_objects_min_distance_meters\x18\x06 \x01(\x02\x12\x1b\n\x13google_maps_api_key\x18\x07 \x01(\t\"Q\n\rLevelSettings\x12\x1b\n\x13trainer_cp_modifier\x18\x02 \x01(\x01\x12#\n\x1btrainer_difficulty_modifier\x18\x03 \x01(\x01\"\x80\x01\n\x11InventorySettings\x12\x13\n\x0bmax_pokemon\x18\x01 \x01(\x05\x12\x15\n\rmax_bag_items\x18\x02 \x01(\x05\x12\x14\n\x0c\x62\x61se_pokemon\x18\x03 \x01(\x05\x12\x16\n\x0e\x62\x61se_bag_items\x18\x04 \x01(\x05\x12\x11\n\tbase_eggs\x18\x05 \x01(\x05\":\n\x13PlayerUpdateRequest\x12\x10\n\x08latitude\x18\x01 \x01(\x01\x12\x11\n\tlongitude\x18\x02 \x01(\x01\"y\n\x14PlayerUpdateResponse\x12*\n\rwild_pokemons\x18\x01 \x03(\x0b\x32\x13.RpcSub.WildPokemon\x12\x1f\n\x05\x66orts\x18\x02 \x03(\x0b\x32\x10.RpcSub.FortData\x12\x14\n\x0c\x66orts_nearby\x18\x03 \x01(\x05\"\x1e\n\x1c\x44ownloadItemTemplatesRequest\"\xab\x07\n\x1d\x44ownloadItemTemplatesResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12J\n\x0eitem_templates\x18\x02 \x03(\x0b\x32\x32.RpcSub.DownloadItemTemplatesResponse.ItemTemplate\x12\x14\n\x0ctimestamp_ms\x18\x03 \x01(\x04\x1a\x96\x06\n\x0cItemTemplate\x12\x13\n\x0btemplate_id\x18\x01 \x01(\t\x12\x31\n\x10pokemon_settings\x18\x02 \x01(\x0b\x32\x17.RpcSub.PokemonSettings\x12+\n\ritem_settings\x18\x03 \x01(\x0b\x32\x14.RpcSub.ItemSettings\x12+\n\rmove_settings\x18\x04 \x01(\x0b\x32\x14.RpcSub.MoveSettings\x12<\n\x16move_sequence_settings\x18\x05 \x01(\x0b\x32\x1c.RpcSub.MoveSequenceSettings\x12\x35\n\x0etype_effective\x18\x08 \x01(\x0b\x32\x1d.RpcSub.TypeEffectiveSettings\x12-\n\x0e\x62\x61\x64ge_settings\x18\n \x01(\x0b\x32\x15.RpcSub.BadgeSettings\x12&\n\x06\x63\x61mera\x18\x0b \x01(\x0b\x32\x16.RpcSub.CameraSettings\x12\x31\n\x0cplayer_level\x18\x0c \x01(\x0b\x32\x1b.RpcSub.PlayerLevelSettings\x12+\n\tgym_level\x18\r \x01(\x0b\x32\x18.RpcSub.GymLevelSettings\x12\x32\n\x0f\x62\x61ttle_settings\x18\x0e \x01(\x0b\x32\x19.RpcSub.GymBattleSettings\x12\x35\n\x12\x65ncounter_settings\x18\x0f \x01(\x0b\x32\x19.RpcSub.EncounterSettings\x12\x30\n\x10iap_item_display\x18\x10 \x01(\x0b\x32\x16.RpcSub.IapItemDisplay\x12)\n\x0ciap_settings\x18\x11 \x01(\x0b\x32\x13.RpcSub.IapSettings\x12\x38\n\x10pokemon_upgrades\x18\x12 \x01(\x0b\x32\x1e.RpcSub.PokemonUpgradeSettings\x12\x36\n\x0f\x65quipped_badges\x18\x13 \x01(\x0b\x32\x1d.RpcSub.EquippedBadgeSettings\"i\n\x15UseItemCaptureRequest\x12 \n\x07item_id\x18\x01 \x01(\x0e\x32\x0f.RpcEnum.ItemId\x12\x14\n\x0c\x65ncounter_id\x18\x02 \x01(\x06\x12\x18\n\x10spawn_point_guid\x18\x03 \x01(\t\"\xb1\x01\n\x16UseItemCaptureResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x19\n\x11item_capture_mult\x18\x02 \x01(\x01\x12\x16\n\x0eitem_flee_mult\x18\x03 \x01(\x01\x12\x15\n\rstop_movement\x18\x04 \x01(\x08\x12\x13\n\x0bstop_attack\x18\x05 \x01(\x08\x12\x12\n\ntarget_max\x18\x06 \x01(\x08\x12\x13\n\x0btarget_slow\x18\x07 \x01(\x08\"+\n\x15ReleasePokemonRequest\x12\x12\n\npokemon_id\x18\x01 \x01(\x06\"\xc4\x01\n\x16ReleasePokemonResponse\x12\x35\n\x06result\x18\x01 \x01(\x0e\x32%.RpcSub.ReleasePokemonResponse.Result\x12\x15\n\rcandy_awarded\x18\x02 \x01(\x05\"\\\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10POKEMON_DEPLOYED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x12\x18\n\x14\x45RROR_POKEMON_IS_EGG\x10\x04\"\x17\n\x15GetHatchedEggsRequest\"\x8e\x01\n\x16GetHatchedEggsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x16\n\npokemon_id\x18\x02 \x03(\x04\x42\x02\x10\x01\x12\x1a\n\x12\x65xperience_awarded\x18\x03 \x03(\x05\x12\x15\n\rcandy_awarded\x18\x04 \x03(\x05\x12\x18\n\x10stardust_awarded\x18\x05 \x03(\x05\"\x86\x01\n\x11\x46ortSearchRequest\x12\x0f\n\x07\x66ort_id\x18\x01 \x01(\t\x12\x17\n\x0fplayer_latitude\x18\x02 \x01(\x01\x12\x18\n\x10player_longitude\x18\x03 \x01(\x01\x12\x15\n\rfort_latitude\x18\x04 \x01(\x01\x12\x16\n\x0e\x66ort_longitude\x18\x05 \x01(\x01\"\xdc\x03\n\x12\x46ortSearchResponse\x12\x31\n\x06result\x18\x01 \x01(\x0e\x32!.RpcSub.FortSearchResponse.Result\x12;\n\ritems_awarded\x18\x02 \x03(\x0b\x32$.RpcSub.FortSearchResponse.ItemAward\x12\x14\n\x0cgems_awarded\x18\x03 \x01(\x05\x12-\n\x10pokemon_data_egg\x18\x04 \x01(\x0b\x32\x13.RpcSub.PokemonData\x12\x1a\n\x12\x65xperience_awarded\x18\x05 \x01(\x05\x12&\n\x1e\x63ooldown_complete_timestamp_ms\x18\x06 \x01(\x03\x12\"\n\x1a\x63hain_hack_sequence_number\x18\x07 \x01(\x05\x1a\x41\n\tItemAward\x12 \n\x07item_id\x18\x01 \x01(\x0e\x32\x0f.RpcEnum.ItemId\x12\x12\n\nitem_count\x18\x02 \x01(\x05\"f\n\x06Result\x12\x11\n\rNO_RESULT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x10\n\x0cOUT_OF_RANGE\x10\x02\x12\x16\n\x12IN_COOLDOWN_PERIOD\x10\x03\x12\x12\n\x0eINVENTORY_FULL\x10\x04\"J\n\x12\x46ortDetailsRequest\x12\x0f\n\x07\x66ort_id\x18\x01 \x01(\t\x12\x10\n\x08latitude\x18\x02 \x01(\x01\x12\x11\n\tlongitude\x18\x03 \x01(\x01\"\xd1\x02\n\x13\x46ortDetailsResponse\x12\x0f\n\x07\x66ort_id\x18\x01 \x01(\t\x12&\n\nteam_color\x18\x02 \x01(\x0e\x32\x12.RpcEnum.TeamColor\x12)\n\x0cpokemon_data\x18\x03 \x01(\x0b\x32\x13.RpcSub.PokemonData\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x12\n\nimage_urls\x18\x05 \x03(\t\x12\n\n\x02\x66p\x18\x06 \x01(\x05\x12\x0f\n\x07stamina\x18\x07 \x01(\x05\x12\x13\n\x0bmax_stamina\x18\x08 \x01(\x05\x12\x1f\n\x04type\x18\t \x01(\x0e\x32\x11.RpcEnum.FortType\x12\x10\n\x08latitude\x18\n \x01(\x01\x12\x11\n\tlongitude\x18\x0b \x01(\x01\x12\x13\n\x0b\x64\x65scription\x18\x0c \x01(\t\x12\'\n\tmodifiers\x18\r \x03(\x0b\x32\x14.RpcSub.FortModifier\"s\n\x0c\x46ortModifier\x12 \n\x07item_id\x18\x01 \x01(\x0e\x32\x0f.RpcEnum.ItemId\x12\x1f\n\x17\x65xpiration_timestamp_ms\x18\x02 \x01(\x03\x12 \n\x18\x64\x65ployer_player_codename\x18\x03 \x01(\t\"r\n\x10\x45ncounterRequest\x12\x14\n\x0c\x65ncounter_id\x18\x01 \x01(\x06\x12\x15\n\rspawnpoint_id\x18\x02 \x01(\t\x12\x17\n\x0fplayer_latitude\x18\x03 \x01(\x01\x12\x18\n\x10player_longitude\x18\x04 \x01(\x01\"\xe1\x03\n\x11\x45ncounterResponse\x12)\n\x0cwild_pokemon\x18\x01 \x01(\x0b\x32\x13.RpcSub.WildPokemon\x12\x38\n\nbackground\x18\x02 \x01(\x0e\x32$.RpcSub.EncounterResponse.Background\x12\x30\n\x06status\x18\x03 \x01(\x0e\x32 .RpcSub.EncounterResponse.Status\x12\x37\n\x13\x63\x61pture_probability\x18\x04 \x01(\x0b\x32\x1a.RpcSub.CaptureProbability\"\"\n\nBackground\x12\x08\n\x04PARK\x10\x00\x12\n\n\x06\x44\x45SERT\x10\x01\"\xd7\x01\n\x06Status\x12\x13\n\x0f\x45NCOUNTER_ERROR\x10\x00\x12\x15\n\x11\x45NCOUNTER_SUCCESS\x10\x01\x12\x17\n\x13\x45NCOUNTER_NOT_FOUND\x10\x02\x12\x14\n\x10\x45NCOUNTER_CLOSED\x10\x03\x12\x1a\n\x16\x45NCOUNTER_POKEMON_FLED\x10\x04\x12\x1a\n\x16\x45NCOUNTER_NOT_IN_RANGE\x10\x05\x12\x1e\n\x1a\x45NCOUNTER_ALREADY_HAPPENED\x10\x06\x12\x1a\n\x16POKEMON_INVENTORY_FULL\x10\x07\"{\n\x12\x43\x61ptureProbability\x12&\n\rpokeball_type\x18\x01 \x03(\x0e\x32\x0f.RpcEnum.ItemId\x12\x1b\n\x13\x63\x61pture_probability\x18\x02 \x03(\x02\x12 \n\x18reticle_difficulty_scale\x18\x0c \x01(\x01\"p\n\x14\x44iskEncounterRequest\x12\x14\n\x0c\x65ncounter_id\x18\x01 \x01(\x06\x12\x0f\n\x07\x66ort_id\x18\x02 \x01(\t\x12\x17\n\x0fplayer_latitude\x18\x03 \x01(\x01\x12\x18\n\x10player_longitude\x18\x04 \x01(\x01\"\xb7\x02\n\x15\x44iskEncounterResponse\x12\x34\n\x06result\x18\x01 \x01(\x0e\x32$.RpcSub.DiskEncounterResponse.Result\x12)\n\x0cpokemon_data\x18\x02 \x01(\x0b\x32\x13.RpcSub.PokemonData\x12\x37\n\x13\x63\x61pture_probability\x18\x03 \x01(\x0b\x32\x1a.RpcSub.CaptureProbability\"\x83\x01\n\x06Result\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x11\n\rNOT_AVAILABLE\x10\x02\x12\x10\n\x0cNOT_IN_RANGE\x10\x03\x12\x1e\n\x1a\x45NCOUNTER_ALREADY_FINISHED\x10\x04\x12\x1a\n\x16POKEMON_INVENTORY_FULL\x10\x05\"\xc0\x01\n\x13\x43\x61tchPokemonRequest\x12\x14\n\x0c\x65ncounter_id\x18\x01 \x01(\x06\x12\x10\n\x08pokeball\x18\x02 \x01(\x05\x12\x1f\n\x17normalized_reticle_size\x18\x03 \x01(\x01\x12\x15\n\rspawnpoint_id\x18\x04 \x01(\t\x12\x13\n\x0bhit_pokemon\x18\x05 \x01(\x08\x12\x15\n\rspin_modifier\x18\x06 \x01(\x01\x12\x1d\n\x15NormalizedHitPosition\x18\x07 \x01(\x01\"\x90\x02\n\x14\x43\x61tchPokemonResponse\x12\x38\n\x06status\x18\x01 \x01(\x0e\x32(.RpcSub.CatchPokemonResponse.CatchStatus\x12\x14\n\x0cmiss_percent\x18\x02 \x01(\x01\x12\x1b\n\x13\x63\x61ptured_pokemon_id\x18\x03 \x01(\x04\x12$\n\x06scores\x18\x04 \x01(\x0b\x32\x14.RpcSub.CaptureScore\"e\n\x0b\x43\x61tchStatus\x12\x0f\n\x0b\x43\x41TCH_ERROR\x10\x00\x12\x11\n\rCATCH_SUCCESS\x10\x01\x12\x10\n\x0c\x43\x41TCH_ESCAPE\x10\x02\x12\x0e\n\nCATCH_FLEE\x10\x03\x12\x10\n\x0c\x43\x41TCH_MISSED\x10\x04\"i\n\x0c\x43\x61ptureScore\x12,\n\ractivity_type\x18\x01 \x03(\x0e\x32\x15.RpcEnum.ActivityType\x12\n\n\x02xp\x18\x02 \x03(\x05\x12\r\n\x05\x63\x61ndy\x18\x03 \x03(\x05\x12\x10\n\x08stardust\x18\x04 \x03(\x05\"\x1b\n\x19\x43heckAwardedBadgesRequest\"w\n\x1a\x43heckAwardedBadgesResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12*\n\x0e\x61warded_badges\x18\x02 \x03(\x0e\x32\x12.RpcEnum.BadgeType\x12\x1c\n\x14\x61warded_badge_levels\x18\x03 \x03(\x05\"y\n\x15\x45quippedBadgeSettings\x12\x1f\n\x17\x65quip_badge_cooldown_ms\x18\x01 \x01(\x03\x12\x1f\n\x17\x63\x61tch_probability_bonus\x18\x02 \x03(\x02\x12\x1e\n\x16\x66lee_probability_bonus\x18\x03 \x03(\x02\"\x84\x01\n\x16PokemonUpgradeSettings\x12\x1a\n\x12upgrades_per_level\x18\x01 \x01(\x05\x12#\n\x1b\x61llowed_levels_above_player\x18\x02 \x01(\x05\x12\x12\n\ncandy_cost\x18\x03 \x03(\x05\x12\x15\n\rstardust_cost\x18\x04 \x03(\x05\"\x8c\x02\n\x0bIapSettings\x12\x19\n\x11\x64\x61ily_bonus_coins\x18\x01 \x01(\x05\x12(\n daily_defender_bonus_per_pokemon\x18\x02 \x03(\x05\x12*\n\"daily_defender_bonus_max_defenders\x18\x03 \x01(\x05\x12%\n\x1d\x64\x61ily_defender_bonus_currency\x18\x04 \x03(\t\x12\"\n\x1amin_time_between_claims_ms\x18\x05 \x01(\x03\x12\x1b\n\x13\x64\x61ily_bonus_enabled\x18\x06 \x01(\x08\x12$\n\x1c\x64\x61ily_defender_bonus_enabled\x18\x07 \x01(\x08\"\x94\x01\n\x0eIapItemDisplay\x12\x0b\n\x03sku\x18\x01 \x01(\t\x12.\n\x08\x63\x61tegory\x18\x02 \x01(\x0e\x32\x1c.RpcEnum.HoloIapItemCategory\x12\x12\n\nsort_order\x18\x03 \x01(\x05\x12!\n\x08item_ids\x18\x04 \x03(\x0e\x32\x0f.RpcEnum.ItemId\x12\x0e\n\x06\x63ounts\x18\x05 \x03(\x05\"\xae\x01\n\x11\x45ncounterSettings\x12\x1c\n\x14spin_bonus_threshold\x18\x01 \x01(\x02\x12!\n\x19\x65xcellent_throw_threshold\x18\x02 \x01(\x02\x12\x1d\n\x15great_throw_threshold\x18\x03 \x01(\x02\x12\x1c\n\x14nice_throw_threshold\x18\x04 \x01(\x02\x12\x1b\n\x13milestone_threshold\x18\x05 \x01(\x05\"\xc6\x03\n\x11GymBattleSettings\x12\x16\n\x0e\x65nergy_per_sec\x18\x01 \x01(\x02\x12\x19\n\x11\x64odge_energy_cost\x18\x02 \x01(\x02\x12\x18\n\x10retarget_seconds\x18\x03 \x01(\x02\x12\x1d\n\x15\x65nemy_attack_interval\x18\x04 \x01(\x02\x12\x1e\n\x16\x61ttack_server_interval\x18\x05 \x01(\x02\x12\x1e\n\x16round_duration_seconds\x18\x06 \x01(\x02\x12#\n\x1b\x62onus_time_per_ally_seconds\x18\x07 \x01(\x02\x12$\n\x1cmaximum_attackers_per_battle\x18\x08 \x01(\x05\x12)\n!same_type_attack_bonus_multiplier\x18\t \x01(\x02\x12\x16\n\x0emaximum_energy\x18\n \x01(\x05\x12$\n\x1c\x65nergy_delta_per_health_lost\x18\x0b \x01(\x02\x12\x19\n\x11\x64odge_duration_ms\x18\x0c \x01(\x05\x12\x1c\n\x14minimum_player_level\x18\r \x01(\x05\x12\x18\n\x10swap_duration_ms\x18\x0e \x01(\x05\"w\n\x10GymLevelSettings\x12\x1b\n\x13required_experience\x18\x01 \x03(\x05\x12\x14\n\x0cleader_slots\x18\x02 \x03(\x05\x12\x15\n\rtrainer_slots\x18\x03 \x03(\x05\x12\x19\n\x11search_roll_bonus\x18\x04 \x03(\x05\"\x9d\x01\n\x13PlayerLevelSettings\x12\x10\n\x08rank_num\x18\x01 \x03(\x05\x12\x1b\n\x13required_experience\x18\x02 \x03(\x05\x12\x15\n\rcp_multiplier\x18\x03 \x03(\x02\x12\x1c\n\x14max_egg_player_level\x18\x04 \x01(\x05\x12\"\n\x1amax_encounter_player_level\x18\x05 \x01(\x05\"\xc5\x03\n\x0e\x43\x61meraSettings\x12\x13\n\x0bnext_camera\x18\x01 \x01(\t\x12\x33\n\rinterpolation\x18\x02 \x03(\x0e\x32\x1c.RpcEnum.CameraInterpolation\x12*\n\x0btarget_type\x18\x03 \x03(\x0e\x32\x15.RpcEnum.CameraTarget\x12\x15\n\rease_in_speed\x18\x04 \x03(\x02\x12\x16\n\x0e\x65\x61st_out_speed\x18\x05 \x03(\x02\x12\x18\n\x10\x64uration_seconds\x18\x06 \x03(\x02\x12\x14\n\x0cwait_seconds\x18\x07 \x03(\x02\x12\x1a\n\x12transition_seconds\x18\x08 \x03(\x02\x12\x14\n\x0c\x61ngle_degree\x18\t \x03(\x02\x12\x1b\n\x13\x61ngle_offset_degree\x18\n \x03(\x02\x12\x14\n\x0cpitch_degree\x18\x0b \x03(\x02\x12\x1b\n\x13pitch_offset_degree\x18\x0c \x03(\x02\x12\x13\n\x0broll_degree\x18\r \x03(\x02\x12\x17\n\x0f\x64istance_meters\x18\x0e \x03(\x02\x12\x16\n\x0eheight_percent\x18\x0f \x03(\x02\x12\x16\n\x0evert_ctr_ratio\x18\x10 \x03(\x02\"\\\n\rBadgeSettings\x12&\n\nbadge_type\x18\x01 \x01(\x0e\x32\x12.RpcEnum.BadgeType\x12\x12\n\nbadge_rank\x18\x02 \x01(\x05\x12\x0f\n\x07targets\x18\x03 \x03(\x05\"Y\n\x15TypeEffectiveSettings\x12\x15\n\rattack_scalar\x18\x01 \x03(\x02\x12)\n\x0b\x61ttack_type\x18\x02 \x01(\x0e\x32\x14.RpcEnum.PokemonType\"(\n\x14MoveSequenceSettings\x12\x10\n\x08sequence\x18\x01 \x03(\t\"\xa7\x03\n\x0cMoveSettings\x12\x31\n\x0bmovement_id\x18\x01 \x01(\x0e\x32\x1c.RpcEnum.PokemonMovementType\x12\x14\n\x0c\x61nimation_id\x18\x02 \x01(\x05\x12*\n\x0cpokemon_type\x18\x03 \x01(\x0e\x32\x14.RpcEnum.PokemonType\x12\r\n\x05power\x18\x04 \x01(\x02\x12\x17\n\x0f\x61\x63\x63uracy_chance\x18\x05 \x01(\x02\x12\x17\n\x0f\x63ritical_chance\x18\x06 \x01(\x02\x12\x13\n\x0bheal_scalar\x18\x07 \x01(\x02\x12\x1b\n\x13stamina_loss_scalar\x18\x08 \x01(\x02\x12\x19\n\x11trainer_level_min\x18\t \x01(\x05\x12\x19\n\x11trainer_level_max\x18\n \x01(\x05\x12\x10\n\x08vfx_name\x18\x0b \x01(\t\x12\x13\n\x0b\x64uration_ms\x18\x0c \x01(\x05\x12\x1e\n\x16\x64\x61mage_window_start_ms\x18\r \x01(\x05\x12\x1c\n\x14\x64\x61mage_window_end_ms\x18\x0e \x01(\x05\x12\x14\n\x0c\x65nergy_delta\x18\x0f \x01(\x05\"\xed\x05\n\x0fPokemonSettings\x12&\n\npokemon_id\x18\x01 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\x13\n\x0bmodel_scale\x18\x03 \x01(\x02\x12\"\n\x04type\x18\x04 \x01(\x0e\x32\x14.RpcEnum.PokemonType\x12$\n\x06type_2\x18\x05 \x01(\x0e\x32\x14.RpcEnum.PokemonType\x12(\n\x06\x63\x61mera\x18\x06 \x01(\x0b\x32\x18.RpcSub.CameraAttributes\x12.\n\tencounter\x18\x07 \x01(\x0b\x32\x1b.RpcSub.EncounterAttributes\x12&\n\x05stats\x18\x08 \x01(\x0b\x32\x17.RpcSub.StatsAttributes\x12)\n\x0bquick_moves\x18\t \x03(\x0e\x32\x14.RpcEnum.PokemonMove\x12-\n\x0f\x63inematic_moves\x18\n \x03(\x0e\x32\x14.RpcEnum.PokemonMove\x12\x16\n\x0e\x61nimation_time\x18\x0b \x03(\x02\x12)\n\revolution_ids\x18\x0c \x03(\x0e\x32\x12.RpcEnum.PokemonId\x12\x16\n\x0e\x65volution_pips\x18\r \x01(\x05\x12$\n\x05\x63lass\x18\x0e \x01(\x0e\x32\x15.RpcEnum.PokemonClass\x12\x18\n\x10pokedex_height_m\x18\x0f \x01(\x02\x12\x19\n\x11pokedex_weight_kg\x18\x10 \x01(\x02\x12-\n\x11parent_pokemon_id\x18\x11 \x01(\x0e\x32\x12.RpcEnum.PokemonId\x12\x16\n\x0eheight_std_dev\x18\x12 \x01(\x02\x12\x16\n\x0eweight_std_dev\x18\x13 \x01(\x02\x12\x1c\n\x14km_distance_to_hatch\x18\x14 \x01(\x02\x12+\n\tfamily_id\x18\x15 \x01(\x0e\x32\x18.RpcEnum.PokemonFamilyId\x12\x17\n\x0f\x63\x61ndy_to_evolve\x18\x16 \x01(\x05\"\x97\x01\n\x10\x43\x61meraAttributes\x12\x15\n\rdisk_radius_m\x18\x01 \x01(\x02\x12\x19\n\x11\x63ylinder_radius_m\x18\x02 \x01(\x02\x12\x19\n\x11\x63ylinder_height_m\x18\x03 \x01(\x02\x12\x19\n\x11\x63ylinder_ground_m\x18\x04 \x01(\x02\x12\x1b\n\x13shoulder_mode_scale\x18\x05 \x01(\x02\"\x9d\x02\n\x13\x45ncounterAttributes\x12\x19\n\x11\x62\x61se_capture_rate\x18\x01 \x01(\x02\x12\x16\n\x0e\x62\x61se_flee_rate\x18\x02 \x01(\x02\x12\x1a\n\x12\x63ollision_radius_m\x18\x03 \x01(\x02\x12\x1a\n\x12\x63ollision_height_m\x18\x04 \x01(\x02\x12\x1f\n\x17\x63ollision_head_radius_m\x18\x05 \x01(\x02\x12\x33\n\rmovement_type\x18\x06 \x01(\x0e\x32\x1c.RpcEnum.PokemonMovementType\x12\x18\n\x10movement_timer_s\x18\x07 \x01(\x02\x12\x13\n\x0bjump_time_s\x18\x08 \x01(\x02\x12\x16\n\x0e\x61ttack_timer_s\x18\t \x01(\x02\"n\n\x0fStatsAttributes\x12\x14\n\x0c\x62\x61se_stamina\x18\x01 \x01(\x05\x12\x13\n\x0b\x62\x61se_attack\x18\x02 \x01(\x05\x12\x14\n\x0c\x62\x61se_defense\x18\x03 \x01(\x05\x12\x1a\n\x12\x64odge_energy_delta\x18\x08 \x01(\x05\"\x8e\x05\n\x0cItemSettings\x12 \n\x07item_id\x18\x01 \x01(\x0e\x32\x0f.RpcEnum.ItemId\x12$\n\titem_type\x18\x02 \x01(\x0e\x32\x11.RpcEnum.ItemType\x12\'\n\x08\x63\x61tegory\x18\x03 \x01(\x0e\x32\x15.RpcEnum.ItemCategory\x12\x11\n\tdrop_freq\x18\x04 \x01(\x02\x12\x1a\n\x12\x64rop_trainer_level\x18\x05 \x01(\x05\x12,\n\x08pokeball\x18\x06 \x01(\x0b\x32\x1a.RpcSub.PokeballAttributes\x12(\n\x06potion\x18\x07 \x01(\x0b\x32\x18.RpcSub.PotionAttributes\x12(\n\x06revive\x18\x08 \x01(\x0b\x32\x18.RpcSub.ReviveAttributes\x12(\n\x06\x62\x61ttle\x18\t \x01(\x0b\x32\x18.RpcSub.BattleAttributes\x12$\n\x04\x66ood\x18\n \x01(\x0b\x32\x16.RpcSub.FoodAttributes\x12=\n\x11inventory_upgrade\x18\x0b \x01(\x0b\x32\".RpcSub.InventoryUpgradeAttributes\x12\x33\n\x08xp_boost\x18\x0c \x01(\x0b\x32!.RpcSub.ExperienceBoostAttributes\x12*\n\x07incense\x18\r \x01(\x0b\x32\x19.RpcSub.IncenseAttributes\x12\x35\n\regg_incubator\x18\x0e \x01(\x0b\x32\x1e.RpcSub.EggIncubatorAttributes\x12\x35\n\rfort_modifier\x18\x0f \x01(\x0b\x32\x1e.RpcSub.FortModifierAttributes\"\'\n\x10\x42\x61ttleAttributes\x12\x13\n\x0bsta_percent\x18\x01 \x01(\x02\"v\n\x16\x45ggIncubatorAttributes\x12\x31\n\x0eincubator_type\x18\x01 \x01(\x0e\x32\x19.RpcEnum.EggIncubatorType\x12\x0c\n\x04uses\x18\x02 \x01(\x05\x12\x1b\n\x13\x64istance_multiplier\x18\x03 \x01(\x02\"M\n\x19\x45xperienceBoostAttributes\x12\x15\n\rxp_multiplier\x18\x01 \x01(\x02\x12\x19\n\x11\x62oost_duration_ms\x18\x02 \x01(\x05\"o\n\x0e\x46oodAttributes\x12(\n\x0bitem_effect\x18\x01 \x03(\x0e\x32\x13.RpcEnum.ItemEffect\x12\x1b\n\x13item_effect_percent\x18\x02 \x03(\x02\x12\x16\n\x0egrowth_percent\x18\x03 \x01(\x02\"b\n\x16\x46ortModifierAttributes\x12!\n\x19modifier_lifetime_seconds\x18\x01 \x01(\x05\x12%\n\x1dtroy_disk_num_pokemon_spawned\x18\x02 \x01(\x05\"\xc9\x02\n\x11IncenseAttributes\x12 \n\x18incense_lifetime_seconds\x18\x01 \x01(\x05\x12*\n\x0cpokemon_type\x18\x02 \x03(\x0e\x32\x14.RpcEnum.PokemonType\x12(\n pokemon_incense_type_probability\x18\x03 \x01(\x02\x12\x30\n(standing_time_between_encounters_seconds\x18\x04 \x01(\x05\x12-\n%moving_time_between_encounter_seconds\x18\x05 \x01(\x05\x12\x35\n-distance_required_for_shorter_interval_meters\x18\x06 \x01(\x05\x12$\n\x1cpokemon_attracted_length_sec\x18\x07 \x01(\x05\"m\n\x1aInventoryUpgradeAttributes\x12\x1a\n\x12\x61\x64\x64itional_storage\x18\x01 \x01(\x05\x12\x33\n\x0cupgrade_type\x18\x02 \x01(\x0e\x32\x1d.RpcEnum.InventoryUpgradeType\"\x8c\x01\n\x12PokeballAttributes\x12(\n\x0bitem_effect\x18\x01 \x01(\x0e\x32\x13.RpcEnum.ItemEffect\x12\x15\n\rcapture_multi\x18\x02 \x01(\x02\x12\x1c\n\x14\x63\x61pture_multi_effect\x18\x03 \x01(\x02\x12\x17\n\x0fitem_effect_mod\x18\x04 \x01(\x02\";\n\x10PotionAttributes\x12\x13\n\x0bsta_percent\x18\x01 \x01(\x02\x12\x12\n\nsta_amount\x18\x02 \x01(\x05\"\'\n\x10ReviveAttributes\x12\x13\n\x0bsta_percent\x18\x01 \x01(\x02\x62\x06proto3')
   ,
-  dependencies=[RpcEnum_pb2.DESCRIPTOR,])
+  dependencies=[RpcEnum__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
@@ -55,8 +56,8 @@ _RELEASEPOKEMONRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9211,
-  serialized_end=9303,
+  serialized_start=9219,
+  serialized_end=9311,
 )
 _sym_db.RegisterEnumDescriptor(_RELEASEPOKEMONRESPONSE_RESULT)
 
@@ -89,8 +90,8 @@ _FORTSEARCHRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9987,
-  serialized_end=10089,
+  serialized_start=9995,
+  serialized_end=10097,
 )
 _sym_db.RegisterEnumDescriptor(_FORTSEARCHRESPONSE_RESULT)
 
@@ -111,8 +112,8 @@ _ENCOUNTERRESPONSE_BACKGROUND = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=10970,
-  serialized_end=11004,
+  serialized_start=10978,
+  serialized_end=11012,
 )
 _sym_db.RegisterEnumDescriptor(_ENCOUNTERRESPONSE_BACKGROUND)
 
@@ -157,8 +158,8 @@ _ENCOUNTERRESPONSE_STATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=11007,
-  serialized_end=11222,
+  serialized_start=11015,
+  serialized_end=11230,
 )
 _sym_db.RegisterEnumDescriptor(_ENCOUNTERRESPONSE_STATUS)
 
@@ -195,8 +196,8 @@ _DISKENCOUNTERRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=11644,
-  serialized_end=11775,
+  serialized_start=11652,
+  serialized_end=11783,
 )
 _sym_db.RegisterEnumDescriptor(_DISKENCOUNTERRESPONSE_RESULT)
 
@@ -229,8 +230,8 @@ _CATCHPOKEMONRESPONSE_CATCHSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=12147,
-  serialized_end=12248,
+  serialized_start=12152,
+  serialized_end=12253,
 )
 _sym_db.RegisterEnumDescriptor(_CATCHPOKEMONRESPONSE_CATCHSTATUS)
 
@@ -264,6 +265,7 @@ _GETPLAYERRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -281,7 +283,7 @@ _PROFILE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='creation_time', full_name='RpcSub.Profile.creation_time', index=0,
-      number=1, type=3, cpp_type=2, label=2,
+      number=1, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -364,6 +366,7 @@ _PROFILE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -401,6 +404,7 @@ _DAILYBONUS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -418,7 +422,7 @@ _CURRENCY = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='type', full_name='RpcSub.Currency.type', index=0,
-      number=1, type=9, cpp_type=9, label=2,
+      number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -438,6 +442,7 @@ _CURRENCY = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -489,6 +494,7 @@ _AVATARDETAILS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -519,6 +525,7 @@ _DOWNLOADSETTINGSREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -556,6 +563,7 @@ _GETINVENTORYRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -600,6 +608,7 @@ _INVENTORYDELTA = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -644,6 +653,7 @@ _INVENTORYITEM = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -737,6 +747,7 @@ _INVENTORYITEMDATA = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -970,6 +981,7 @@ _POKEMON = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1014,6 +1026,7 @@ _ITEM = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1072,6 +1085,7 @@ _POKEDEXENTRY = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1256,6 +1270,7 @@ _PLAYERSTATS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1286,6 +1301,7 @@ _PLAYERCURRENCY = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1316,6 +1332,7 @@ _PLAYERCAMERA = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1346,6 +1363,7 @@ _INVENTORYUPGRADES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1390,6 +1408,7 @@ _INVENTORYUPGRADE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1420,6 +1439,7 @@ _APPLIEDITEMS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1471,6 +1491,7 @@ _APPLIEDITEM = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1501,6 +1522,7 @@ _EGGINCUBATORS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1573,6 +1595,7 @@ _EGGINCUBATOR = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1610,6 +1633,7 @@ _POKEMONFAMILY = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -1627,18 +1651,18 @@ _GETMAPOBJECTSREQUEST = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='cell_id', full_name='RpcSub.GetMapObjectsRequest.cell_id', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
+      number=1, type=4, cpp_type=4, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=_descriptor._ParseOptions(descriptor_pb2.FieldOptions(), _b('\020\001'))),
     _descriptor.FieldDescriptor(
       name='since_timestamp_ms', full_name='RpcSub.GetMapObjectsRequest.since_timestamp_ms', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b(""),
+      number=2, type=3, cpp_type=2, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      options=_descriptor._ParseOptions(descriptor_pb2.FieldOptions(), _b('\020\001'))),
     _descriptor.FieldDescriptor(
       name='latitude', full_name='RpcSub.GetMapObjectsRequest.latitude', index=2,
       number=3, type=1, cpp_type=5, label=1,
@@ -1661,11 +1685,12 @@ _GETMAPOBJECTSREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
   serialized_start=3901,
-  serialized_end=4005,
+  serialized_end=4013,
 )
 
 
@@ -1698,11 +1723,12 @@ _GETMAPOBJECTSRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4007,
-  serialized_end=4109,
+  serialized_start=4015,
+  serialized_end=4117,
 )
 
 
@@ -1798,11 +1824,12 @@ _MAPCELL = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4112,
-  serialized_end=4535,
+  serialized_start=4120,
+  serialized_end=4543,
 )
 
 
@@ -1933,11 +1960,12 @@ _FORTDATA = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4538,
-  serialized_end=5042,
+  serialized_start=4546,
+  serialized_end=5050,
 )
 
 
@@ -1984,11 +2012,12 @@ _FORTLUREINFO = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5045,
-  serialized_end=5176,
+  serialized_start=5053,
+  serialized_end=5184,
 )
 
 
@@ -2021,11 +2050,12 @@ _SPAWNPOINT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5178,
-  serialized_end=5227,
+  serialized_start=5186,
+  serialized_end=5235,
 )
 
 
@@ -2072,11 +2102,12 @@ _FORTSUMMARY = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5229,
-  serialized_end=5340,
+  serialized_start=5237,
+  serialized_end=5348,
 )
 
 
@@ -2144,11 +2175,12 @@ _WILDPOKEMON = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5343,
-  serialized_end=5546,
+  serialized_start=5351,
+  serialized_end=5554,
 )
 
 
@@ -2377,11 +2409,12 @@ _POKEMONDATA = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5549,
-  serialized_end=6279,
+  serialized_start=5557,
+  serialized_end=6287,
 )
 
 
@@ -2442,11 +2475,12 @@ _MAPPOKEMON = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6282,
-  serialized_end=6449,
+  serialized_start=6290,
+  serialized_end=6457,
 )
 
 
@@ -2486,11 +2520,12 @@ _NEARBYPOKEMON = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6451,
-  serialized_end=6556,
+  serialized_start=6459,
+  serialized_end=6564,
 )
 
 
@@ -2530,11 +2565,12 @@ _DOWNLOADSETTINGSRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6558,
-  serialized_end=6655,
+  serialized_start=6566,
+  serialized_end=6663,
 )
 
 
@@ -2588,11 +2624,12 @@ _GLOBALSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6658,
-  serialized_end=6896,
+  serialized_start=6666,
+  serialized_end=6904,
 )
 
 
@@ -2653,11 +2690,12 @@ _FORTSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6899,
-  serialized_end=7127,
+  serialized_start=6907,
+  serialized_end=7135,
 )
 
 
@@ -2725,11 +2763,12 @@ _MAPSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7130,
-  serialized_end=7401,
+  serialized_start=7138,
+  serialized_end=7409,
 )
 
 
@@ -2762,11 +2801,12 @@ _LEVELSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7403,
-  serialized_end=7484,
+  serialized_start=7411,
+  serialized_end=7492,
 )
 
 
@@ -2820,11 +2860,12 @@ _INVENTORYSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7487,
-  serialized_end=7615,
+  serialized_start=7495,
+  serialized_end=7623,
 )
 
 
@@ -2857,11 +2898,12 @@ _PLAYERUPDATEREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7617,
-  serialized_end=7675,
+  serialized_start=7625,
+  serialized_end=7683,
 )
 
 
@@ -2901,11 +2943,12 @@ _PLAYERUPDATERESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7677,
-  serialized_end=7798,
+  serialized_start=7685,
+  serialized_end=7806,
 )
 
 
@@ -2924,11 +2967,12 @@ _DOWNLOADITEMTEMPLATESREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7800,
-  serialized_end=7830,
+  serialized_start=7808,
+  serialized_end=7838,
 )
 
 
@@ -3059,11 +3103,12 @@ _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7982,
-  serialized_end=8772,
+  serialized_start=7990,
+  serialized_end=8780,
 )
 
 _DOWNLOADITEMTEMPLATESRESPONSE = _descriptor.Descriptor(
@@ -3102,11 +3147,12 @@ _DOWNLOADITEMTEMPLATESRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=7833,
-  serialized_end=8772,
+  serialized_start=7841,
+  serialized_end=8780,
 )
 
 
@@ -3146,11 +3192,12 @@ _USEITEMCAPTUREREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8774,
-  serialized_end=8879,
+  serialized_start=8782,
+  serialized_end=8887,
 )
 
 
@@ -3218,11 +3265,12 @@ _USEITEMCAPTURERESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8882,
-  serialized_end=9059,
+  serialized_start=8890,
+  serialized_end=9067,
 )
 
 
@@ -3248,11 +3296,12 @@ _RELEASEPOKEMONREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9061,
-  serialized_end=9104,
+  serialized_start=9069,
+  serialized_end=9112,
 )
 
 
@@ -3286,11 +3335,12 @@ _RELEASEPOKEMONRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9107,
-  serialized_end=9303,
+  serialized_start=9115,
+  serialized_end=9311,
 )
 
 
@@ -3309,11 +3359,12 @@ _GETHATCHEDEGGSREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9305,
-  serialized_end=9328,
+  serialized_start=9313,
+  serialized_end=9336,
 )
 
 
@@ -3367,11 +3418,12 @@ _GETHATCHEDEGGSRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9331,
-  serialized_end=9473,
+  serialized_start=9339,
+  serialized_end=9481,
 )
 
 
@@ -3425,11 +3477,12 @@ _FORTSEARCHREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9476,
-  serialized_end=9610,
+  serialized_start=9484,
+  serialized_end=9618,
 )
 
 
@@ -3462,11 +3515,12 @@ _FORTSEARCHRESPONSE_ITEMAWARD = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9920,
-  serialized_end=9985,
+  serialized_start=9928,
+  serialized_end=9993,
 )
 
 _FORTSEARCHRESPONSE = _descriptor.Descriptor(
@@ -3534,11 +3588,12 @@ _FORTSEARCHRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9613,
-  serialized_end=10089,
+  serialized_start=9621,
+  serialized_end=10097,
 )
 
 
@@ -3578,11 +3633,12 @@ _FORTDETAILSREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10091,
-  serialized_end=10165,
+  serialized_start=10099,
+  serialized_end=10173,
 )
 
 
@@ -3692,11 +3748,12 @@ _FORTDETAILSRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10168,
-  serialized_end=10505,
+  serialized_start=10176,
+  serialized_end=10513,
 )
 
 
@@ -3736,11 +3793,12 @@ _FORTMODIFIER = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10507,
-  serialized_end=10622,
+  serialized_start=10515,
+  serialized_end=10630,
 )
 
 
@@ -3787,11 +3845,12 @@ _ENCOUNTERREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10624,
-  serialized_end=10738,
+  serialized_start=10632,
+  serialized_end=10746,
 )
 
 
@@ -3840,11 +3899,12 @@ _ENCOUNTERRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10741,
-  serialized_end=11222,
+  serialized_start=10749,
+  serialized_end=11230,
 )
 
 
@@ -3884,11 +3944,12 @@ _CAPTUREPROBABILITY = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11224,
-  serialized_end=11347,
+  serialized_start=11232,
+  serialized_end=11355,
 )
 
 
@@ -3935,11 +3996,12 @@ _DISKENCOUNTERREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11349,
-  serialized_end=11461,
+  serialized_start=11357,
+  serialized_end=11469,
 )
 
 
@@ -3980,11 +4042,12 @@ _DISKENCOUNTERRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11464,
-  serialized_end=11775,
+  serialized_start=11472,
+  serialized_end=11783,
 )
 
 
@@ -4017,7 +4080,7 @@ _CATCHPOKEMONREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='spawn_point_guid', full_name='RpcSub.CatchPokemonRequest.spawn_point_guid', index=3,
+      name='spawnpoint_id', full_name='RpcSub.CatchPokemonRequest.spawnpoint_id', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -4052,11 +4115,12 @@ _CATCHPOKEMONREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11778,
-  serialized_end=11973,
+  serialized_start=11786,
+  serialized_end=11978,
 )
 
 
@@ -4104,11 +4168,12 @@ _CATCHPOKEMONRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11976,
-  serialized_end=12248,
+  serialized_start=11981,
+  serialized_end=12253,
 )
 
 
@@ -4155,11 +4220,12 @@ _CAPTURESCORE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12250,
-  serialized_end=12355,
+  serialized_start=12255,
+  serialized_end=12360,
 )
 
 
@@ -4178,11 +4244,12 @@ _CHECKAWARDEDBADGESREQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12357,
-  serialized_end=12384,
+  serialized_start=12362,
+  serialized_end=12389,
 )
 
 
@@ -4222,11 +4289,12 @@ _CHECKAWARDEDBADGESRESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12386,
-  serialized_end=12505,
+  serialized_start=12391,
+  serialized_end=12510,
 )
 
 
@@ -4266,11 +4334,12 @@ _EQUIPPEDBADGESETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12507,
-  serialized_end=12628,
+  serialized_start=12512,
+  serialized_end=12633,
 )
 
 
@@ -4317,11 +4386,12 @@ _POKEMONUPGRADESETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12631,
-  serialized_end=12763,
+  serialized_start=12636,
+  serialized_end=12768,
 )
 
 
@@ -4389,11 +4459,12 @@ _IAPSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12766,
-  serialized_end=13034,
+  serialized_start=12771,
+  serialized_end=13039,
 )
 
 
@@ -4447,11 +4518,12 @@ _IAPITEMDISPLAY = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13037,
-  serialized_end=13185,
+  serialized_start=13042,
+  serialized_end=13190,
 )
 
 
@@ -4505,11 +4577,12 @@ _ENCOUNTERSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13188,
-  serialized_end=13362,
+  serialized_start=13193,
+  serialized_end=13367,
 )
 
 
@@ -4626,11 +4699,12 @@ _GYMBATTLESETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13365,
-  serialized_end=13819,
+  serialized_start=13370,
+  serialized_end=13824,
 )
 
 
@@ -4677,11 +4751,12 @@ _GYMLEVELSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13821,
-  serialized_end=13940,
+  serialized_start=13826,
+  serialized_end=13945,
 )
 
 
@@ -4735,11 +4810,12 @@ _PLAYERLEVELSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13943,
-  serialized_end=14100,
+  serialized_start=13948,
+  serialized_end=14105,
 )
 
 
@@ -4870,11 +4946,12 @@ _CAMERASETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14103,
-  serialized_end=14556,
+  serialized_start=14108,
+  serialized_end=14561,
 )
 
 
@@ -4914,11 +4991,12 @@ _BADGESETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14558,
-  serialized_end=14650,
+  serialized_start=14563,
+  serialized_end=14655,
 )
 
 
@@ -4951,11 +5029,12 @@ _TYPEEFFECTIVESETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14652,
-  serialized_end=14741,
+  serialized_start=14657,
+  serialized_end=14746,
 )
 
 
@@ -4981,11 +5060,12 @@ _MOVESEQUENCESETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14743,
-  serialized_end=14783,
+  serialized_start=14748,
+  serialized_end=14788,
 )
 
 
@@ -5109,11 +5189,12 @@ _MOVESETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14786,
-  serialized_end=15209,
+  serialized_start=14791,
+  serialized_end=15214,
 )
 
 
@@ -5279,11 +5360,12 @@ _POKEMONSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15212,
-  serialized_end=15961,
+  serialized_start=15217,
+  serialized_end=15966,
 )
 
 
@@ -5337,11 +5419,12 @@ _CAMERAATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=15964,
-  serialized_end=16115,
+  serialized_start=15969,
+  serialized_end=16120,
 )
 
 
@@ -5423,11 +5506,12 @@ _ENCOUNTERATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16118,
-  serialized_end=16403,
+  serialized_start=16123,
+  serialized_end=16408,
 )
 
 
@@ -5474,11 +5558,12 @@ _STATSATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16405,
-  serialized_end=16515,
+  serialized_start=16410,
+  serialized_end=16520,
 )
 
 
@@ -5602,11 +5687,12 @@ _ITEMSETTINGS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=16518,
-  serialized_end=17172,
+  serialized_start=16523,
+  serialized_end=17177,
 )
 
 
@@ -5632,11 +5718,12 @@ _BATTLEATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17174,
-  serialized_end=17213,
+  serialized_start=17179,
+  serialized_end=17218,
 )
 
 
@@ -5676,11 +5763,12 @@ _EGGINCUBATORATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17215,
-  serialized_end=17333,
+  serialized_start=17220,
+  serialized_end=17338,
 )
 
 
@@ -5713,11 +5801,12 @@ _EXPERIENCEBOOSTATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17335,
-  serialized_end=17412,
+  serialized_start=17340,
+  serialized_end=17417,
 )
 
 
@@ -5757,11 +5846,12 @@ _FOODATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17414,
-  serialized_end=17525,
+  serialized_start=17419,
+  serialized_end=17530,
 )
 
 
@@ -5794,11 +5884,12 @@ _FORTMODIFIERATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17527,
-  serialized_end=17625,
+  serialized_start=17532,
+  serialized_end=17630,
 )
 
 
@@ -5866,11 +5957,12 @@ _INCENSEATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17628,
-  serialized_end=17957,
+  serialized_start=17633,
+  serialized_end=17962,
 )
 
 
@@ -5903,11 +5995,12 @@ _INVENTORYUPGRADEATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=17959,
-  serialized_end=18068,
+  serialized_start=17964,
+  serialized_end=18073,
 )
 
 
@@ -5954,11 +6047,12 @@ _POKEBALLATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18071,
-  serialized_end=18211,
+  serialized_start=18076,
+  serialized_end=18216,
 )
 
 
@@ -5991,11 +6085,12 @@ _POTIONATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18213,
-  serialized_end=18272,
+  serialized_start=18218,
+  serialized_end=18277,
 )
 
 
@@ -6021,15 +6116,16 @@ _REVIVEATTRIBUTES = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18274,
-  serialized_end=18313,
+  serialized_start=18279,
+  serialized_end=18318,
 )
 
 _GETPLAYERRESPONSE.fields_by_name['profile'].message_type = _PROFILE
-_PROFILE.fields_by_name['team'].enum_type = RpcEnum_pb2._TEAMCOLOR
+_PROFILE.fields_by_name['team'].enum_type = RpcEnum__pb2._TEAMCOLOR
 _PROFILE.fields_by_name['avatar'].message_type = _AVATARDETAILS
 _PROFILE.fields_by_name['daily_bonus'].message_type = _DAILYBONUS
 _PROFILE.fields_by_name['currency'].message_type = _CURRENCY
@@ -6046,22 +6142,22 @@ _INVENTORYITEMDATA.fields_by_name['inventory_upgrades'].message_type = _INVENTOR
 _INVENTORYITEMDATA.fields_by_name['applied_items'].message_type = _APPLIEDITEMS
 _INVENTORYITEMDATA.fields_by_name['egg_incubators'].message_type = _EGGINCUBATORS
 _INVENTORYITEMDATA.fields_by_name['pokemon_family'].message_type = _POKEMONFAMILY
-_POKEMON.fields_by_name['pokemon_type'].enum_type = RpcEnum_pb2._POKEMONID
-_POKEMON.fields_by_name['move_1'].enum_type = RpcEnum_pb2._POKEMONMOVE
-_POKEMON.fields_by_name['move_2'].enum_type = RpcEnum_pb2._POKEMONMOVE
-_ITEM.fields_by_name['item'].enum_type = RpcEnum_pb2._ITEMTYPE
+_POKEMON.fields_by_name['pokemon_type'].enum_type = RpcEnum__pb2._POKEMONID
+_POKEMON.fields_by_name['move_1'].enum_type = RpcEnum__pb2._POKEMONMOVE
+_POKEMON.fields_by_name['move_2'].enum_type = RpcEnum__pb2._POKEMONMOVE
+_ITEM.fields_by_name['item'].enum_type = RpcEnum__pb2._ITEMTYPE
 _INVENTORYUPGRADES.fields_by_name['inventory_upgrades'].message_type = _INVENTORYUPGRADE
-_INVENTORYUPGRADE.fields_by_name['item'].enum_type = RpcEnum_pb2._ITEMTYPE
-_INVENTORYUPGRADE.fields_by_name['upgrade_type'].enum_type = RpcEnum_pb2._INVENTORYUPGRADETYPE
+_INVENTORYUPGRADE.fields_by_name['item'].enum_type = RpcEnum__pb2._ITEMTYPE
+_INVENTORYUPGRADE.fields_by_name['upgrade_type'].enum_type = RpcEnum__pb2._INVENTORYUPGRADETYPE
 _APPLIEDITEMS.fields_by_name['item'].message_type = _APPLIEDITEM
-_APPLIEDITEM.fields_by_name['item_type'].enum_type = RpcEnum_pb2._ITEMID
-_APPLIEDITEM.fields_by_name['item_type_category'].enum_type = RpcEnum_pb2._ITEMTYPE
+_APPLIEDITEM.fields_by_name['item_type'].enum_type = RpcEnum__pb2._ITEMID
+_APPLIEDITEM.fields_by_name['item_type_category'].enum_type = RpcEnum__pb2._ITEMTYPE
 _EGGINCUBATORS.fields_by_name['egg_incubator'].message_type = _EGGINCUBATOR
-_EGGINCUBATOR.fields_by_name['item_type'].enum_type = RpcEnum_pb2._ITEMTYPE
-_EGGINCUBATOR.fields_by_name['incubator_type'].enum_type = RpcEnum_pb2._EGGINCUBATORTYPE
-_POKEMONFAMILY.fields_by_name['family_id'].enum_type = RpcEnum_pb2._POKEMONFAMILYID
+_EGGINCUBATOR.fields_by_name['item_type'].enum_type = RpcEnum__pb2._ITEMTYPE
+_EGGINCUBATOR.fields_by_name['incubator_type'].enum_type = RpcEnum__pb2._EGGINCUBATORTYPE
+_POKEMONFAMILY.fields_by_name['family_id'].enum_type = RpcEnum__pb2._POKEMONFAMILYID
 _GETMAPOBJECTSRESPONSE.fields_by_name['map_cells'].message_type = _MAPCELL
-_GETMAPOBJECTSRESPONSE.fields_by_name['status'].enum_type = RpcEnum_pb2._MAPOBJECTSSTATUS
+_GETMAPOBJECTSRESPONSE.fields_by_name['status'].enum_type = RpcEnum__pb2._MAPOBJECTSSTATUS
 _MAPCELL.fields_by_name['forts'].message_type = _FORTDATA
 _MAPCELL.fields_by_name['spawn_points'].message_type = _SPAWNPOINT
 _MAPCELL.fields_by_name['fort_summaries'].message_type = _FORTSUMMARY
@@ -6069,19 +6165,19 @@ _MAPCELL.fields_by_name['decimated_spawn_points'].message_type = _SPAWNPOINT
 _MAPCELL.fields_by_name['wild_pokemons'].message_type = _WILDPOKEMON
 _MAPCELL.fields_by_name['catchable_pokemons'].message_type = _MAPPOKEMON
 _MAPCELL.fields_by_name['nearby_pokemons'].message_type = _NEARBYPOKEMON
-_FORTDATA.fields_by_name['type'].enum_type = RpcEnum_pb2._FORTTYPE
-_FORTDATA.fields_by_name['owned_by_team'].enum_type = RpcEnum_pb2._TEAMCOLOR
-_FORTDATA.fields_by_name['guard_pokemon_id'].enum_type = RpcEnum_pb2._POKEMONID
-_FORTDATA.fields_by_name['sponsor'].enum_type = RpcEnum_pb2._FORTSPONSOR
-_FORTDATA.fields_by_name['rendering_type'].enum_type = RpcEnum_pb2._FORTRENDERINGTYPE
+_FORTDATA.fields_by_name['type'].enum_type = RpcEnum__pb2._FORTTYPE
+_FORTDATA.fields_by_name['owned_by_team'].enum_type = RpcEnum__pb2._TEAMCOLOR
+_FORTDATA.fields_by_name['guard_pokemon_id'].enum_type = RpcEnum__pb2._POKEMONID
+_FORTDATA.fields_by_name['sponsor'].enum_type = RpcEnum__pb2._FORTSPONSOR
+_FORTDATA.fields_by_name['rendering_type'].enum_type = RpcEnum__pb2._FORTRENDERINGTYPE
 _FORTDATA.fields_by_name['lure_info'].message_type = _FORTLUREINFO
-_FORTLUREINFO.fields_by_name['active_pokemon_id'].enum_type = RpcEnum_pb2._POKEMONID
+_FORTLUREINFO.fields_by_name['active_pokemon_id'].enum_type = RpcEnum__pb2._POKEMONID
 _WILDPOKEMON.fields_by_name['pokemon_data'].message_type = _POKEMONDATA
-_POKEMONDATA.fields_by_name['pokemon_id'].enum_type = RpcEnum_pb2._POKEMONID
-_POKEMONDATA.fields_by_name['move_1'].enum_type = RpcEnum_pb2._POKEMONMOVE
-_POKEMONDATA.fields_by_name['move_2'].enum_type = RpcEnum_pb2._POKEMONMOVE
-_MAPPOKEMON.fields_by_name['pokemon_id'].enum_type = RpcEnum_pb2._POKEMONID
-_NEARBYPOKEMON.fields_by_name['pokemon_id'].enum_type = RpcEnum_pb2._POKEMONID
+_POKEMONDATA.fields_by_name['pokemon_id'].enum_type = RpcEnum__pb2._POKEMONID
+_POKEMONDATA.fields_by_name['move_1'].enum_type = RpcEnum__pb2._POKEMONMOVE
+_POKEMONDATA.fields_by_name['move_2'].enum_type = RpcEnum__pb2._POKEMONMOVE
+_MAPPOKEMON.fields_by_name['pokemon_id'].enum_type = RpcEnum__pb2._POKEMONID
+_NEARBYPOKEMON.fields_by_name['pokemon_id'].enum_type = RpcEnum__pb2._POKEMONID
 _DOWNLOADSETTINGSRESPONSE.fields_by_name['settings'].message_type = _GLOBALSETTINGS
 _GLOBALSETTINGS.fields_by_name['fort_settings'].message_type = _FORTSETTINGS
 _GLOBALSETTINGS.fields_by_name['map_settings'].message_type = _MAPSETTINGS
@@ -6106,27 +6202,27 @@ _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['pokemon_upgrades'].m
 _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.fields_by_name['equipped_badges'].message_type = _EQUIPPEDBADGESETTINGS
 _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE.containing_type = _DOWNLOADITEMTEMPLATESRESPONSE
 _DOWNLOADITEMTEMPLATESRESPONSE.fields_by_name['item_templates'].message_type = _DOWNLOADITEMTEMPLATESRESPONSE_ITEMTEMPLATE
-_USEITEMCAPTUREREQUEST.fields_by_name['item_id'].enum_type = RpcEnum_pb2._ITEMID
+_USEITEMCAPTUREREQUEST.fields_by_name['item_id'].enum_type = RpcEnum__pb2._ITEMID
 _RELEASEPOKEMONRESPONSE.fields_by_name['result'].enum_type = _RELEASEPOKEMONRESPONSE_RESULT
 _RELEASEPOKEMONRESPONSE_RESULT.containing_type = _RELEASEPOKEMONRESPONSE
-_FORTSEARCHRESPONSE_ITEMAWARD.fields_by_name['item_id'].enum_type = RpcEnum_pb2._ITEMID
+_FORTSEARCHRESPONSE_ITEMAWARD.fields_by_name['item_id'].enum_type = RpcEnum__pb2._ITEMID
 _FORTSEARCHRESPONSE_ITEMAWARD.containing_type = _FORTSEARCHRESPONSE
 _FORTSEARCHRESPONSE.fields_by_name['result'].enum_type = _FORTSEARCHRESPONSE_RESULT
 _FORTSEARCHRESPONSE.fields_by_name['items_awarded'].message_type = _FORTSEARCHRESPONSE_ITEMAWARD
 _FORTSEARCHRESPONSE.fields_by_name['pokemon_data_egg'].message_type = _POKEMONDATA
 _FORTSEARCHRESPONSE_RESULT.containing_type = _FORTSEARCHRESPONSE
-_FORTDETAILSRESPONSE.fields_by_name['team_color'].enum_type = RpcEnum_pb2._TEAMCOLOR
+_FORTDETAILSRESPONSE.fields_by_name['team_color'].enum_type = RpcEnum__pb2._TEAMCOLOR
 _FORTDETAILSRESPONSE.fields_by_name['pokemon_data'].message_type = _POKEMONDATA
-_FORTDETAILSRESPONSE.fields_by_name['type'].enum_type = RpcEnum_pb2._FORTTYPE
+_FORTDETAILSRESPONSE.fields_by_name['type'].enum_type = RpcEnum__pb2._FORTTYPE
 _FORTDETAILSRESPONSE.fields_by_name['modifiers'].message_type = _FORTMODIFIER
-_FORTMODIFIER.fields_by_name['item_id'].enum_type = RpcEnum_pb2._ITEMID
+_FORTMODIFIER.fields_by_name['item_id'].enum_type = RpcEnum__pb2._ITEMID
 _ENCOUNTERRESPONSE.fields_by_name['wild_pokemon'].message_type = _WILDPOKEMON
 _ENCOUNTERRESPONSE.fields_by_name['background'].enum_type = _ENCOUNTERRESPONSE_BACKGROUND
 _ENCOUNTERRESPONSE.fields_by_name['status'].enum_type = _ENCOUNTERRESPONSE_STATUS
 _ENCOUNTERRESPONSE.fields_by_name['capture_probability'].message_type = _CAPTUREPROBABILITY
 _ENCOUNTERRESPONSE_BACKGROUND.containing_type = _ENCOUNTERRESPONSE
 _ENCOUNTERRESPONSE_STATUS.containing_type = _ENCOUNTERRESPONSE
-_CAPTUREPROBABILITY.fields_by_name['pokeball_type'].enum_type = RpcEnum_pb2._ITEMID
+_CAPTUREPROBABILITY.fields_by_name['pokeball_type'].enum_type = RpcEnum__pb2._ITEMID
 _DISKENCOUNTERRESPONSE.fields_by_name['result'].enum_type = _DISKENCOUNTERRESPONSE_RESULT
 _DISKENCOUNTERRESPONSE.fields_by_name['pokemon_data'].message_type = _POKEMONDATA
 _DISKENCOUNTERRESPONSE.fields_by_name['capture_probability'].message_type = _CAPTUREPROBABILITY
@@ -6134,32 +6230,32 @@ _DISKENCOUNTERRESPONSE_RESULT.containing_type = _DISKENCOUNTERRESPONSE
 _CATCHPOKEMONRESPONSE.fields_by_name['status'].enum_type = _CATCHPOKEMONRESPONSE_CATCHSTATUS
 _CATCHPOKEMONRESPONSE.fields_by_name['scores'].message_type = _CAPTURESCORE
 _CATCHPOKEMONRESPONSE_CATCHSTATUS.containing_type = _CATCHPOKEMONRESPONSE
-_CAPTURESCORE.fields_by_name['activity_type'].enum_type = RpcEnum_pb2._ACTIVITYTYPE
-_CHECKAWARDEDBADGESRESPONSE.fields_by_name['awarded_badges'].enum_type = RpcEnum_pb2._BADGETYPE
-_IAPITEMDISPLAY.fields_by_name['category'].enum_type = RpcEnum_pb2._HOLOIAPITEMCATEGORY
-_IAPITEMDISPLAY.fields_by_name['item_ids'].enum_type = RpcEnum_pb2._ITEMID
-_CAMERASETTINGS.fields_by_name['interpolation'].enum_type = RpcEnum_pb2._CAMERAINTERPOLATION
-_CAMERASETTINGS.fields_by_name['target_type'].enum_type = RpcEnum_pb2._CAMERATARGET
-_BADGESETTINGS.fields_by_name['badge_type'].enum_type = RpcEnum_pb2._BADGETYPE
-_TYPEEFFECTIVESETTINGS.fields_by_name['attack_type'].enum_type = RpcEnum_pb2._POKEMONTYPE
-_MOVESETTINGS.fields_by_name['movement_id'].enum_type = RpcEnum_pb2._POKEMONMOVEMENTTYPE
-_MOVESETTINGS.fields_by_name['pokemon_type'].enum_type = RpcEnum_pb2._POKEMONTYPE
-_POKEMONSETTINGS.fields_by_name['pokemon_id'].enum_type = RpcEnum_pb2._POKEMONID
-_POKEMONSETTINGS.fields_by_name['type'].enum_type = RpcEnum_pb2._POKEMONTYPE
-_POKEMONSETTINGS.fields_by_name['type_2'].enum_type = RpcEnum_pb2._POKEMONTYPE
+_CAPTURESCORE.fields_by_name['activity_type'].enum_type = RpcEnum__pb2._ACTIVITYTYPE
+_CHECKAWARDEDBADGESRESPONSE.fields_by_name['awarded_badges'].enum_type = RpcEnum__pb2._BADGETYPE
+_IAPITEMDISPLAY.fields_by_name['category'].enum_type = RpcEnum__pb2._HOLOIAPITEMCATEGORY
+_IAPITEMDISPLAY.fields_by_name['item_ids'].enum_type = RpcEnum__pb2._ITEMID
+_CAMERASETTINGS.fields_by_name['interpolation'].enum_type = RpcEnum__pb2._CAMERAINTERPOLATION
+_CAMERASETTINGS.fields_by_name['target_type'].enum_type = RpcEnum__pb2._CAMERATARGET
+_BADGESETTINGS.fields_by_name['badge_type'].enum_type = RpcEnum__pb2._BADGETYPE
+_TYPEEFFECTIVESETTINGS.fields_by_name['attack_type'].enum_type = RpcEnum__pb2._POKEMONTYPE
+_MOVESETTINGS.fields_by_name['movement_id'].enum_type = RpcEnum__pb2._POKEMONMOVEMENTTYPE
+_MOVESETTINGS.fields_by_name['pokemon_type'].enum_type = RpcEnum__pb2._POKEMONTYPE
+_POKEMONSETTINGS.fields_by_name['pokemon_id'].enum_type = RpcEnum__pb2._POKEMONID
+_POKEMONSETTINGS.fields_by_name['type'].enum_type = RpcEnum__pb2._POKEMONTYPE
+_POKEMONSETTINGS.fields_by_name['type_2'].enum_type = RpcEnum__pb2._POKEMONTYPE
 _POKEMONSETTINGS.fields_by_name['camera'].message_type = _CAMERAATTRIBUTES
 _POKEMONSETTINGS.fields_by_name['encounter'].message_type = _ENCOUNTERATTRIBUTES
 _POKEMONSETTINGS.fields_by_name['stats'].message_type = _STATSATTRIBUTES
-_POKEMONSETTINGS.fields_by_name['quick_moves'].enum_type = RpcEnum_pb2._POKEMONMOVE
-_POKEMONSETTINGS.fields_by_name['cinematic_moves'].enum_type = RpcEnum_pb2._POKEMONMOVE
-_POKEMONSETTINGS.fields_by_name['evolution_ids'].enum_type = RpcEnum_pb2._POKEMONID
-_POKEMONSETTINGS.fields_by_name['class'].enum_type = RpcEnum_pb2._POKEMONCLASS
-_POKEMONSETTINGS.fields_by_name['parent_pokemon_id'].enum_type = RpcEnum_pb2._POKEMONID
-_POKEMONSETTINGS.fields_by_name['family_id'].enum_type = RpcEnum_pb2._POKEMONFAMILYID
-_ENCOUNTERATTRIBUTES.fields_by_name['movement_type'].enum_type = RpcEnum_pb2._POKEMONMOVEMENTTYPE
-_ITEMSETTINGS.fields_by_name['item_id'].enum_type = RpcEnum_pb2._ITEMID
-_ITEMSETTINGS.fields_by_name['item_type'].enum_type = RpcEnum_pb2._ITEMTYPE
-_ITEMSETTINGS.fields_by_name['category'].enum_type = RpcEnum_pb2._ITEMCATEGORY
+_POKEMONSETTINGS.fields_by_name['quick_moves'].enum_type = RpcEnum__pb2._POKEMONMOVE
+_POKEMONSETTINGS.fields_by_name['cinematic_moves'].enum_type = RpcEnum__pb2._POKEMONMOVE
+_POKEMONSETTINGS.fields_by_name['evolution_ids'].enum_type = RpcEnum__pb2._POKEMONID
+_POKEMONSETTINGS.fields_by_name['class'].enum_type = RpcEnum__pb2._POKEMONCLASS
+_POKEMONSETTINGS.fields_by_name['parent_pokemon_id'].enum_type = RpcEnum__pb2._POKEMONID
+_POKEMONSETTINGS.fields_by_name['family_id'].enum_type = RpcEnum__pb2._POKEMONFAMILYID
+_ENCOUNTERATTRIBUTES.fields_by_name['movement_type'].enum_type = RpcEnum__pb2._POKEMONMOVEMENTTYPE
+_ITEMSETTINGS.fields_by_name['item_id'].enum_type = RpcEnum__pb2._ITEMID
+_ITEMSETTINGS.fields_by_name['item_type'].enum_type = RpcEnum__pb2._ITEMTYPE
+_ITEMSETTINGS.fields_by_name['category'].enum_type = RpcEnum__pb2._ITEMCATEGORY
 _ITEMSETTINGS.fields_by_name['pokeball'].message_type = _POKEBALLATTRIBUTES
 _ITEMSETTINGS.fields_by_name['potion'].message_type = _POTIONATTRIBUTES
 _ITEMSETTINGS.fields_by_name['revive'].message_type = _REVIVEATTRIBUTES
@@ -6170,11 +6266,11 @@ _ITEMSETTINGS.fields_by_name['xp_boost'].message_type = _EXPERIENCEBOOSTATTRIBUT
 _ITEMSETTINGS.fields_by_name['incense'].message_type = _INCENSEATTRIBUTES
 _ITEMSETTINGS.fields_by_name['egg_incubator'].message_type = _EGGINCUBATORATTRIBUTES
 _ITEMSETTINGS.fields_by_name['fort_modifier'].message_type = _FORTMODIFIERATTRIBUTES
-_EGGINCUBATORATTRIBUTES.fields_by_name['incubator_type'].enum_type = RpcEnum_pb2._EGGINCUBATORTYPE
-_FOODATTRIBUTES.fields_by_name['item_effect'].enum_type = RpcEnum_pb2._ITEMEFFECT
-_INCENSEATTRIBUTES.fields_by_name['pokemon_type'].enum_type = RpcEnum_pb2._POKEMONTYPE
-_INVENTORYUPGRADEATTRIBUTES.fields_by_name['upgrade_type'].enum_type = RpcEnum_pb2._INVENTORYUPGRADETYPE
-_POKEBALLATTRIBUTES.fields_by_name['item_effect'].enum_type = RpcEnum_pb2._ITEMEFFECT
+_EGGINCUBATORATTRIBUTES.fields_by_name['incubator_type'].enum_type = RpcEnum__pb2._EGGINCUBATORTYPE
+_FOODATTRIBUTES.fields_by_name['item_effect'].enum_type = RpcEnum__pb2._ITEMEFFECT
+_INCENSEATTRIBUTES.fields_by_name['pokemon_type'].enum_type = RpcEnum__pb2._POKEMONTYPE
+_INVENTORYUPGRADEATTRIBUTES.fields_by_name['upgrade_type'].enum_type = RpcEnum__pb2._INVENTORYUPGRADETYPE
+_POKEBALLATTRIBUTES.fields_by_name['item_effect'].enum_type = RpcEnum__pb2._ITEMEFFECT
 DESCRIPTOR.message_types_by_name['GetPlayerResponse'] = _GETPLAYERRESPONSE
 DESCRIPTOR.message_types_by_name['Profile'] = _PROFILE
 DESCRIPTOR.message_types_by_name['DailyBonus'] = _DAILYBONUS
@@ -6937,6 +7033,10 @@ ReviveAttributes = _reflection.GeneratedProtocolMessageType('ReviveAttributes', 
 _sym_db.RegisterMessage(ReviveAttributes)
 
 
+_GETMAPOBJECTSREQUEST.fields_by_name['cell_id'].has_options = True
+_GETMAPOBJECTSREQUEST.fields_by_name['cell_id']._options = _descriptor._ParseOptions(descriptor_pb2.FieldOptions(), _b('\020\001'))
+_GETMAPOBJECTSREQUEST.fields_by_name['since_timestamp_ms'].has_options = True
+_GETMAPOBJECTSREQUEST.fields_by_name['since_timestamp_ms']._options = _descriptor._ParseOptions(descriptor_pb2.FieldOptions(), _b('\020\001'))
 _GETHATCHEDEGGSRESPONSE.fields_by_name['pokemon_id'].has_options = True
 _GETHATCHEDEGGSRESPONSE.fields_by_name['pokemon_id']._options = _descriptor._ParseOptions(descriptor_pb2.FieldOptions(), _b('\020\001'))
 # @@protoc_insertion_point(module_scope)

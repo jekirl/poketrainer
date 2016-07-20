@@ -13,15 +13,16 @@ from google.protobuf import descriptor_pb2
 _sym_db = _symbol_database.Default()
 
 
-import RpcEnum_pb2
+import RpcEnum_pb2 as RpcEnum__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='RpcEnvelope.proto',
   package='',
-  serialized_pb=_b('\n\x11RpcEnvelope.proto\x1a\rRpcEnum.proto\"\xd8\x04\n\x07Request\x12(\n\tdirection\x18\x01 \x02(\x0e\x32\x15.RpcEnum.RpcDirection\x12\x0e\n\x06rpc_id\x18\x03 \x01(\x03\x12#\n\x08requests\x18\x04 \x03(\x0b\x32\x11.Request.Requests\x12#\n\x08unknown6\x18\x06 \x01(\x0b\x32\x11.Request.Unknown6\x12\x10\n\x08latitude\x18\x07 \x01(\x06\x12\x11\n\tlongitude\x18\x08 \x01(\x06\x12\x10\n\x08\x61ltitude\x18\t \x01(\x06\x12\x1f\n\x04\x61uth\x18\n \x01(\x0b\x32\x11.Request.AuthInfo\x12 \n\x0b\x61uth_ticket\x18\x0b \x01(\x0b\x32\x0b.AuthTicket\x12\x11\n\tunknown12\x18\x0c \x01(\x03\x1a\x44\n\x08Requests\x12$\n\x04type\x18\x01 \x02(\x0e\x32\x16.RpcEnum.RequestMethod\x12\x12\n\nparameters\x18\x02 \x01(\x0c\x1an\n\x08\x41uthInfo\x12\x10\n\x08provider\x18\x01 \x02(\t\x12$\n\x05token\x18\x02 \x02(\x0b\x32\x15.Request.AuthInfo.JWT\x1a*\n\x03JWT\x12\x10\n\x08\x63ontents\x18\x01 \x02(\t\x12\x11\n\tunknown13\x18\x02 \x02(\x05\x1a\x1c\n\x08Unknown3\x12\x10\n\x08unknown4\x18\x01 \x02(\t\x1ah\n\x08Unknown6\x12\x10\n\x08unknown1\x18\x01 \x02(\x05\x12,\n\x08unknown2\x18\x02 \x02(\x0b\x32\x1a.Request.Unknown6.Unknown2\x1a\x1c\n\x08Unknown2\x12\x10\n\x08unknown1\x18\x01 \x02(\x0c\"\xe2\x02\n\x08Response\x12(\n\tdirection\x18\x01 \x02(\x0e\x32\x15.RpcEnum.RpcDirection\x12\x10\n\x08unknown2\x18\x02 \x01(\x03\x12\x0f\n\x07\x61pi_url\x18\x03 \x01(\t\x12$\n\x08unknown6\x18\x06 \x02(\x0b\x32\x12.Response.Unknown6\x12 \n\x0b\x61uth_ticket\x18\x07 \x01(\x0b\x32\x0b.AuthTicket\x12\x11\n\tresponses\x18\x64 \x03(\x0c\x1ai\n\x08Unknown6\x12\x10\n\x08unknown1\x18\x01 \x02(\x05\x12-\n\x08unknown2\x18\x02 \x02(\x0b\x32\x1b.Response.Unknown6.Unknown2\x1a\x1c\n\x08Unknown2\x12\x10\n\x08unknown1\x18\x01 \x02(\x0c\x1a\x43\n\x08Unknown7\x12\x11\n\tunknown71\x18\x01 \x01(\x0c\x12\x11\n\tunknown72\x18\x02 \x01(\x03\x12\x11\n\tunknown73\x18\x03 \x01(\x0c\"E\n\nAuthTicket\x12\r\n\x05start\x18\x01 \x01(\x0c\x12\x1b\n\x13\x65xpire_timestamp_ms\x18\x02 \x01(\x04\x12\x0b\n\x03\x65nd\x18\x03 \x01(\x0c')
+  syntax='proto3',
+  serialized_pb=_b('\n\x11RpcEnvelope.proto\x1a\rRpcEnum.proto\"\xd8\x04\n\x07Request\x12(\n\tdirection\x18\x01 \x01(\x0e\x32\x15.RpcEnum.RpcDirection\x12\x0e\n\x06rpc_id\x18\x03 \x01(\x03\x12#\n\x08requests\x18\x04 \x03(\x0b\x32\x11.Request.Requests\x12#\n\x08unknown6\x18\x06 \x01(\x0b\x32\x11.Request.Unknown6\x12\x10\n\x08latitude\x18\x07 \x01(\x06\x12\x11\n\tlongitude\x18\x08 \x01(\x06\x12\x10\n\x08\x61ltitude\x18\t \x01(\x06\x12\x1f\n\x04\x61uth\x18\n \x01(\x0b\x32\x11.Request.AuthInfo\x12 \n\x0b\x61uth_ticket\x18\x0b \x01(\x0b\x32\x0b.AuthTicket\x12\x11\n\tunknown12\x18\x0c \x01(\x03\x1a\x44\n\x08Requests\x12$\n\x04type\x18\x01 \x01(\x0e\x32\x16.RpcEnum.RequestMethod\x12\x12\n\nparameters\x18\x02 \x01(\x0c\x1an\n\x08\x41uthInfo\x12\x10\n\x08provider\x18\x01 \x01(\t\x12$\n\x05token\x18\x02 \x01(\x0b\x32\x15.Request.AuthInfo.JWT\x1a*\n\x03JWT\x12\x10\n\x08\x63ontents\x18\x01 \x01(\t\x12\x11\n\tunknown13\x18\x02 \x01(\x05\x1a\x1c\n\x08Unknown3\x12\x10\n\x08unknown4\x18\x01 \x01(\t\x1ah\n\x08Unknown6\x12\x10\n\x08unknown1\x18\x01 \x01(\x05\x12,\n\x08unknown2\x18\x02 \x01(\x0b\x32\x1a.Request.Unknown6.Unknown2\x1a\x1c\n\x08Unknown2\x12\x10\n\x08unknown1\x18\x01 \x01(\x0c\"\xe2\x02\n\x08Response\x12(\n\tdirection\x18\x01 \x01(\x0e\x32\x15.RpcEnum.RpcDirection\x12\x10\n\x08unknown2\x18\x02 \x01(\x03\x12\x0f\n\x07\x61pi_url\x18\x03 \x01(\t\x12$\n\x08unknown6\x18\x06 \x01(\x0b\x32\x12.Response.Unknown6\x12 \n\x0b\x61uth_ticket\x18\x07 \x01(\x0b\x32\x0b.AuthTicket\x12\x11\n\tresponses\x18\x64 \x03(\x0c\x1ai\n\x08Unknown6\x12\x10\n\x08unknown1\x18\x01 \x01(\x05\x12-\n\x08unknown2\x18\x02 \x01(\x0b\x32\x1b.Response.Unknown6.Unknown2\x1a\x1c\n\x08Unknown2\x12\x10\n\x08unknown1\x18\x01 \x01(\x0c\x1a\x43\n\x08Unknown7\x12\x11\n\tunknown71\x18\x01 \x01(\x0c\x12\x11\n\tunknown72\x18\x02 \x01(\x03\x12\x11\n\tunknown73\x18\x03 \x01(\x0c\"E\n\nAuthTicket\x12\r\n\x05start\x18\x01 \x01(\x0c\x12\x1b\n\x13\x65xpire_timestamp_ms\x18\x02 \x01(\x04\x12\x0b\n\x03\x65nd\x18\x03 \x01(\x0c\x62\x06proto3')
   ,
-  dependencies=[RpcEnum_pb2.DESCRIPTOR,])
+  dependencies=[RpcEnum__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 
@@ -36,7 +37,7 @@ _REQUEST_REQUESTS = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='type', full_name='Request.Requests.type', index=0,
-      number=1, type=14, cpp_type=8, label=2,
+      number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -56,6 +57,7 @@ _REQUEST_REQUESTS = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -72,14 +74,14 @@ _REQUEST_AUTHINFO_JWT = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='contents', full_name='Request.AuthInfo.JWT.contents', index=0,
-      number=1, type=9, cpp_type=9, label=2,
+      number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='unknown13', full_name='Request.AuthInfo.JWT.unknown13', index=1,
-      number=2, type=5, cpp_type=1, label=2,
+      number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -92,6 +94,7 @@ _REQUEST_AUTHINFO_JWT = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -108,14 +111,14 @@ _REQUEST_AUTHINFO = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='provider', full_name='Request.AuthInfo.provider', index=0,
-      number=1, type=9, cpp_type=9, label=2,
+      number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='token', full_name='Request.AuthInfo.token', index=1,
-      number=2, type=11, cpp_type=10, label=2,
+      number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -128,6 +131,7 @@ _REQUEST_AUTHINFO = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -144,7 +148,7 @@ _REQUEST_UNKNOWN3 = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='unknown4', full_name='Request.Unknown3.unknown4', index=0,
-      number=1, type=9, cpp_type=9, label=2,
+      number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -157,6 +161,7 @@ _REQUEST_UNKNOWN3 = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -173,7 +178,7 @@ _REQUEST_UNKNOWN6_UNKNOWN2 = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='unknown1', full_name='Request.Unknown6.Unknown2.unknown1', index=0,
-      number=1, type=12, cpp_type=9, label=2,
+      number=1, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -186,6 +191,7 @@ _REQUEST_UNKNOWN6_UNKNOWN2 = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -202,14 +208,14 @@ _REQUEST_UNKNOWN6 = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='unknown1', full_name='Request.Unknown6.unknown1', index=0,
-      number=1, type=5, cpp_type=1, label=2,
+      number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='unknown2', full_name='Request.Unknown6.unknown2', index=1,
-      number=2, type=11, cpp_type=10, label=2,
+      number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -222,6 +228,7 @@ _REQUEST_UNKNOWN6 = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -238,7 +245,7 @@ _REQUEST = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='direction', full_name='Request.direction', index=0,
-      number=1, type=14, cpp_type=8, label=2,
+      number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -314,6 +321,7 @@ _REQUEST = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -331,7 +339,7 @@ _RESPONSE_UNKNOWN6_UNKNOWN2 = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='unknown1', full_name='Response.Unknown6.Unknown2.unknown1', index=0,
-      number=1, type=12, cpp_type=9, label=2,
+      number=1, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -344,6 +352,7 @@ _RESPONSE_UNKNOWN6_UNKNOWN2 = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -360,14 +369,14 @@ _RESPONSE_UNKNOWN6 = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='unknown1', full_name='Response.Unknown6.unknown1', index=0,
-      number=1, type=5, cpp_type=1, label=2,
+      number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='unknown2', full_name='Response.Unknown6.unknown2', index=1,
-      number=2, type=11, cpp_type=10, label=2,
+      number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -380,6 +389,7 @@ _RESPONSE_UNKNOWN6 = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -423,6 +433,7 @@ _RESPONSE_UNKNOWN7 = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -439,7 +450,7 @@ _RESPONSE = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='direction', full_name='Response.direction', index=0,
-      number=1, type=14, cpp_type=8, label=2,
+      number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -460,7 +471,7 @@ _RESPONSE = _descriptor.Descriptor(
       options=None),
     _descriptor.FieldDescriptor(
       name='unknown6', full_name='Response.unknown6', index=3,
-      number=6, type=11, cpp_type=10, label=2,
+      number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -487,6 +498,7 @@ _RESPONSE = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -531,6 +543,7 @@ _AUTHTICKET = _descriptor.Descriptor(
   ],
   options=None,
   is_extendable=False,
+  syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
@@ -538,7 +551,7 @@ _AUTHTICKET = _descriptor.Descriptor(
   serialized_end=1065,
 )
 
-_REQUEST_REQUESTS.fields_by_name['type'].enum_type = RpcEnum_pb2._REQUESTMETHOD
+_REQUEST_REQUESTS.fields_by_name['type'].enum_type = RpcEnum__pb2._REQUESTMETHOD
 _REQUEST_REQUESTS.containing_type = _REQUEST
 _REQUEST_AUTHINFO_JWT.containing_type = _REQUEST_AUTHINFO
 _REQUEST_AUTHINFO.fields_by_name['token'].message_type = _REQUEST_AUTHINFO_JWT
@@ -547,7 +560,7 @@ _REQUEST_UNKNOWN3.containing_type = _REQUEST
 _REQUEST_UNKNOWN6_UNKNOWN2.containing_type = _REQUEST_UNKNOWN6
 _REQUEST_UNKNOWN6.fields_by_name['unknown2'].message_type = _REQUEST_UNKNOWN6_UNKNOWN2
 _REQUEST_UNKNOWN6.containing_type = _REQUEST
-_REQUEST.fields_by_name['direction'].enum_type = RpcEnum_pb2._RPCDIRECTION
+_REQUEST.fields_by_name['direction'].enum_type = RpcEnum__pb2._RPCDIRECTION
 _REQUEST.fields_by_name['requests'].message_type = _REQUEST_REQUESTS
 _REQUEST.fields_by_name['unknown6'].message_type = _REQUEST_UNKNOWN6
 _REQUEST.fields_by_name['auth'].message_type = _REQUEST_AUTHINFO
@@ -556,7 +569,7 @@ _RESPONSE_UNKNOWN6_UNKNOWN2.containing_type = _RESPONSE_UNKNOWN6
 _RESPONSE_UNKNOWN6.fields_by_name['unknown2'].message_type = _RESPONSE_UNKNOWN6_UNKNOWN2
 _RESPONSE_UNKNOWN6.containing_type = _RESPONSE
 _RESPONSE_UNKNOWN7.containing_type = _RESPONSE
-_RESPONSE.fields_by_name['direction'].enum_type = RpcEnum_pb2._RPCDIRECTION
+_RESPONSE.fields_by_name['direction'].enum_type = RpcEnum__pb2._RPCDIRECTION
 _RESPONSE.fields_by_name['unknown6'].message_type = _RESPONSE_UNKNOWN6
 _RESPONSE.fields_by_name['auth_ticket'].message_type = _AUTHTICKET
 DESCRIPTOR.message_types_by_name['Request'] = _REQUEST

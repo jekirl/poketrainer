@@ -1,8 +1,8 @@
-
+syntax = "proto3";
 import "RpcEnum.proto";
 
 message Request {
-  required RpcEnum.RpcDirection direction = 1;
+  RpcEnum.RpcDirection direction = 1;
   optional int64 rpc_id = 3;
   repeated Requests requests = 4;
   optional Unknown6 unknown6 = 6;
@@ -14,48 +14,48 @@ message Request {
   optional int64 unknown12 = 12;
 
   message Requests {
-    required RpcEnum.RequestMethod type = 1;
+    RpcEnum.RequestMethod type = 1;
     optional bytes parameters = 2;
   }
 
   message AuthInfo {
-    required string provider = 1;
-    required JWT token = 2;
+    string provider = 1;
+    JWT token = 2;
 
     message JWT {
-      required string contents = 1;
-      required int32 unknown13  = 2;
+      string contents = 1;
+      int32 unknown13  = 2;
     }
   }
 
   message Unknown3 {
-    required string unknown4 = 1;
+    string unknown4 = 1;
   }
 
   message Unknown6 {
-    required int32 unknown1 = 1;
-    required Unknown2 unknown2 = 2;
+    int32 unknown1 = 1;
+    Unknown2 unknown2 = 2;
 
     message Unknown2 {
-      required bytes unknown1 = 1;
+      bytes unknown1 = 1;
     }
   }
 }
 
 message Response {
-  required RpcEnum.RpcDirection direction = 1;
+  RpcEnum.RpcDirection direction = 1;
   optional int64 unknown2 = 2;
   optional string api_url = 3;
-  required Unknown6 unknown6 = 6;
+  Unknown6 unknown6 = 6;
   optional AuthTicket auth_ticket = 7;
   repeated bytes responses = 100;
 
   message Unknown6 {
-    required int32 unknown1 = 1;
-    required Unknown2 unknown2 = 2;
+    int32 unknown1 = 1;
+    Unknown2 unknown2 = 2;
 
     message Unknown2 {
-      required bytes unknown1 = 1;
+      bytes unknown1 = 1;
     }
   }
 
