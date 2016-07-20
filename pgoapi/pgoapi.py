@@ -143,17 +143,18 @@ class PGoApi:
     def walk_to(self,loc): #location in floats of course...
         steps = get_route(self._posf, loc)
         for step in steps:
-            for next_point in get_increments(self._posf,step):
+            for i,next_point in enumerate(get_increments(self._posf,step)):
                 # update every 3 seconds
                 self.set_position(*next_point)
                 self.heartbeat()
                 self.log.info("sleeping before next heartbeat")
                 sleep(1)
-                self.log.info("Any pokemon caught? : %s", self.catch_near_pokemon())
-                sleep(1)
+                while self.catch_near_pokemon():
+                    sleep(0.25)
 
     def spin_near_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
+        self.catch_near_pokemon(map_cells)
         forts = sum([cell.get('forts',[]) for cell in map_cells],[]) #supper ghetto lol
         destinations = filtered_forts(self._posf,forts)
         if destinations:
@@ -168,13 +169,23 @@ class PGoApi:
             self.log.error("No fort to walk to!")
             return False
 
-    def catch_near_pokemon(self):
-        map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
+    def catch_near_pokemon(self,cells=None):
+        if cells:
+            map_cells = cells
+        else:
+            map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         pokemons = sum([cell.get('catchable_pokemons',[]) for cell in map_cells],[]) #supper ghetto lol
+        wild_pokemons = sum([cell.get('wild_pokemons',[]) for cell in map_cells],[]) #supper ghetto lol
+        # nearby_pokemons = sum([cell.get('nearby_pokemons',[]) for cell in map_cells],[]) #supper ghetto lol
+
         # catch first pokemon:
         origin = (self._posf[0],self._posf[1])
+
         pokemon_distances = [(pokemon, distance_in_meters(origin,(pokemon['latitude'], pokemon['longitude']))) for pokemon in pokemons]
+        # wild_pokemons_distances = [(pokemon, distance_in_meters(origin,(pokemon['latitude'], pokemon['longitude']))) for pokemon in wild_pokemons]
+
         self.log.info("Nearby pokemon: : %s", pokemon_distances)
+        # self.log.info("wild_pokemons_distances: : %s", wild_pokemons_distances)
         if pokemons:
             target = pokemon_distances[0]
             self.log.info("Catching pokemon: : %s, distance: %f meters", target[0], target[1])
@@ -187,9 +198,9 @@ class PGoApi:
         return self.get_map_objects(latitude=position[0], longitude=position[1], since_timestamp_ms=[0]*len(neighbors), cell_id=neighbors).call()
     def attempt_catch(self,encounter_id,spawn_point_id):
         return self.catch_pokemon(
-            normalized_reticle_size= 1.950 - random.uniform(0,0.25),
+            normalized_reticle_size= 1.950,
             pokeball = 1,
-            spin_modifier= 0.850 - random.uniform(0,0.025),
+            spin_modifier= 0.850,
             hit_pokemon=True,
             NormalizedHitPosition=1,
             encounter_id=encounter_id,
@@ -214,7 +225,7 @@ class PGoApi:
                 # if status == RpcEnum.CATCH_SUCCESS:
                 if status == 1:
                     self.log.info("Caught Pokemon: : %s", catch_attempt)
-                    sleep(5)
+                    sleep(2)
                     return catch_attempt
                 else:
                     self.log.info("Failed Catch: : %s", catch_attempt)
@@ -254,9 +265,12 @@ class PGoApi:
             self.log.info('Login failed!')
         if os.path.isfile("auth_cache") and cached:
             response = pickle.load(open("auth_cache"))
+        fname = "auth_cache_%s" % username
+        if os.path.isfile(fname) and cached:
+            response = pickle.load(open(fname))
         else:
             response = self.heartbeat()
-            f = open("auth_cache","w")
+            f = open(fname,"w")
             pickle.dump(response, f)
         if not response:
             self.log.info('Login failed!')
@@ -278,19 +292,16 @@ class PGoApi:
         return True
 
     def main_loop(self):
+        self.heartbeat() # always heartbeat to start...
         while True:
             try:
-                self.heartbeat() # always heartbeat to start...
-
-                sleep(1)
+                sleep(2)
                 #any pokemon to catch?
-                self.log.info("catch_near_pokemon: %s", self.catch_near_pokemon())
+                #Time to move to a new fort!
+                self.spin_near_fort()
                 while self.catch_near_pokemon():
                     sleep(6)
                     pass
-                #Time to move to a new fort!
-                self.spin_near_fort()
-                sleep(2)
             except Exception as e:
                 self.log.error("Error in main loop: %s", e)
 
