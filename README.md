@@ -33,7 +33,7 @@ Optionally create an alias:
  * Walking to pokestops and spinning them
  * Capturing any pokemon it sees on the way
  * Releasing pokemon that you have duplicates of if under CP_CUTOFF (FIXME this is not the best idea....)
-  * Change CP_CUTOFF in `pgoapi.py` to configure this, by default it is 9999 (to never release)
+  * Change CP_CUTOFF in `pgoapi.py` to configure this, by default it is 0 (to never release)
 
 
 ## Credits
