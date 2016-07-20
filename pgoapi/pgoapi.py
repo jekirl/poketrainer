@@ -208,7 +208,8 @@ class PGoApi:
             if "pokemon" in  inventory_item['inventory_item_data']:
                 # is a pokemon:
                 pokemon = inventory_item['inventory_item_data']['pokemon']
-                caught_pokemon["pokemon_id"].append(pokemon)
+                if 'cp' in pokemon:
+                    caught_pokemon[pokemon["pokemon_id"]].append(pokemon)
         for pokemons in caught_pokemon.values():
             if len(pokemons) > 1:
                 #release crappy ones:
@@ -306,9 +307,7 @@ class PGoApi:
         return True
 
     def main_loop(self):
-        self.heartbeat() # always heartbeat to start...
         while True:
-
             try:
                 self.heartbeat()
                 sleep(1)
