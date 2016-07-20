@@ -45,7 +45,7 @@ import POGOProtos.Enums_pb2 as RpcEnum
 from time import sleep
 from collections import defaultdict
 import os.path
-CP_CUTOFF = 75 # release anything under this if we don't have it already
+CP_CUTOFF = 0 # release anything under this if we don't have it already
 logger = logging.getLogger(__name__)
 
 class PGoApi:
