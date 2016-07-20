@@ -51,8 +51,7 @@ class RpcApi:
         self._auth_provider = auth_provider
 
     def get_rpc_id(self):
-        # return int(random.random() * 10 ** 12) #8145806132888207460
-        return 8145806132888207460
+        return int(random.random() * 10 ** 12) #8145806132888207460
 
     def decode_raw(self, raw):
         process = subprocess.Popen(['protoc', '--decode_raw'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
