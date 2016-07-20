@@ -1,5 +1,6 @@
 pgoapi - Pokemon Go API
 Copyright (c) 2016 tjado <https://github.com/tejado>
+Modifications Copyright (c) 2016 j-e-k <https://github.com/j-e-k>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,3 +21,4 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 
 Author: tjado <https://github.com/tejado>
+Modifications by: j-e-k <https://github.com/j-e-k>
