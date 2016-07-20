@@ -247,5 +247,4 @@ class RpcApi:
 
             response_proto_dict['responses'][entry_name] = subresponse_return
             i += 1
-
         return response_proto_dict
