@@ -39,14 +39,14 @@ import protos.RpcEnum_pb2 as RpcEnum
 from time import sleep
 from collections import defaultdict
 import os.path
-CP_CUTOFF = 0 # release anything under this if we don't have it already
+
 logger = logging.getLogger(__name__)
 
 class PGoApi:
 
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
 
-    def __init__(self):
+    def __init__(self,CP_CUTOFF=0):
 
         self.log = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ class PGoApi:
         self._position_lng = 0
         self._position_alt = 0
         self._posf = (0,0,0) # this is floats
-
+        self.CP_CUTOFF = CP_CUTOFF # release anything under this if we don't have it already
         self._req_method_list = []
 
     def call(self):
@@ -209,10 +209,13 @@ class PGoApi:
                 if 'cp' in pokemon:
                     caught_pokemon[pokemon["pokemon_id"]].append(pokemon)
         for pokemons in caught_pokemon.values():
+            #Only if we have more than 1
             if len(pokemons) > 1:
-                #release crappy ones:
-                for pokemon in pokemons:
-                    if 'cp' in pokemon and pokemon['cp'] < CP_CUTOFF:
+                pokemons = sorted(pokemons, lambda x,y: cmp(x['cp'],y['cp']),reverse=True)
+                # keep the first pokemon....
+                for pokemon in pokemons[1:]:
+                    if 'cp' in pokemon and pokemon['cp'] < self.CP_CUTOFF:
+                        self.log.info("Releasing pokemon: %s", pokemon)
                         self.release_pokemon(pokemon_id = pokemon["id"])
 
         return self.call()
