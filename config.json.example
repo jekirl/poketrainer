@@ -1,0 +1,13 @@
+{"accounts" :
+    [{
+        "auth_service": "google",
+        "username": "test@gmail.com",
+        "password": "password",
+        "location": "University of Southern California, Los Angeles, CA"
+    },
+    {  "auth_service": "ptc",
+        "username": "someusername",
+        "password": "password",
+        "location": "University of Southern California, Los Angeles, CA"
+    }
+    ]}

@@ -37,8 +37,9 @@ from exceptions import AuthException, NotLoggedInException, ServerBusyOrOfflineE
 from location import *
 import protos.RpcEnum_pb2 as RpcEnum
 from time import sleep
+from collections import defaultdict
 import os.path
-
+CP_CUTOFF = 75 # release anything under this if we don't have it already
 logger = logging.getLogger(__name__)
 
 class PGoApi:
@@ -134,16 +135,17 @@ class PGoApi:
         self.get_player()
         self.get_hatched_eggs()
         self.get_inventory()
-        # self.check_awarded_badges()
+        self.check_awarded_badges()
         # self.download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e")
         res = self.call()
         print('Response dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
+        if 'GET_INVENTORY' in res['responses']:
+            print(self.cleanup_inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']))
         return res
     def walk_to(self,loc): #location in floats of course...
         steps = get_route(self._posf, loc)
         for step in steps:
             for i,next_point in enumerate(get_increments(self._posf,step)):
-                # update every 3 seconds
                 self.set_position(*next_point)
                 self.heartbeat()
                 self.log.info("sleeping before next heartbeat")
@@ -153,7 +155,6 @@ class PGoApi:
 
     def spin_near_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
-        self.catch_near_pokemon(map_cells)
         forts = sum([cell.get('forts',[]) for cell in map_cells],[]) #supper ghetto lol
         destinations = filtered_forts(self._posf,forts)
         if destinations:
@@ -168,23 +169,14 @@ class PGoApi:
             self.log.error("No fort to walk to!")
             return False
 
-    def catch_near_pokemon(self,cells=None):
-        if cells:
-            map_cells = cells
-        else:
-            map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
+    def catch_near_pokemon(self):
+        map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         pokemons = sum([cell.get('catchable_pokemons',[]) for cell in map_cells],[]) #supper ghetto lol
-        wild_pokemons = sum([cell.get('wild_pokemons',[]) for cell in map_cells],[]) #supper ghetto lol
-        # nearby_pokemons = sum([cell.get('nearby_pokemons',[]) for cell in map_cells],[]) #supper ghetto lol
 
         # catch first pokemon:
         origin = (self._posf[0],self._posf[1])
-
         pokemon_distances = [(pokemon, distance_in_meters(origin,(pokemon['latitude'], pokemon['longitude']))) for pokemon in pokemons]
-        # wild_pokemons_distances = [(pokemon, distance_in_meters(origin,(pokemon['latitude'], pokemon['longitude']))) for pokemon in wild_pokemons]
-
         self.log.info("Nearby pokemon: : %s", pokemon_distances)
-        # self.log.info("wild_pokemons_distances: : %s", wild_pokemons_distances)
         if pokemons:
             target = pokemon_distances[0]
             self.log.info("Catching pokemon: : %s, distance: %f meters", target[0], target[1])
@@ -206,6 +198,26 @@ class PGoApi:
             spawnpoint_id=spawnpoint_id,
             ).call()['responses']['CATCH_POKEMON']
 
+    def cleanup_inventory(self, inventroy_items=None):
+        if not inventroy_items:
+            inventroy_items = self.get_inventory().call()['GET_INVENTORY']['inventory_delta']['inventory_items']
+        caught_pokemon = defaultdict(list)
+        for inventory_item in inventroy_items:
+            if "pokemon" in  inventory_item['inventory_item_data']:
+                # is a pokemon:
+                pokemon = inventory_item['inventory_item_data']['pokemon']
+                caught_pokemon["pokemon_id"].append(pokemon)
+        for pokemons in caught_pokemon.values():
+            if len(pokemons) > 1:
+                #release crappy ones:
+                for pokemon in pokemons:
+                    if 'cp' in pokemon and pokemon['cp'] < CP_CUTOFF:
+                        self.release_pokemon(pokemon_id = pokemon["id"])
+
+        return self.call()
+
+
+
 
     def encounter_pokemon(self,pokemon): #take in a MapPokemon from MapCell.catchable_pokemons
         encounter_id = pokemon['encounter_id']
@@ -225,8 +237,9 @@ class PGoApi:
                     self.log.info("Caught Pokemon: : %s", catch_attempt)
                     sleep(2)
                     return catch_attempt
-                else:
+                elif status != 2:
                     self.log.info("Failed Catch: : %s", catch_attempt)
+                    return False
                 sleep(2)
         return False
 
@@ -278,16 +291,20 @@ class PGoApi:
     def main_loop(self):
         self.heartbeat() # always heartbeat to start...
         while True:
-            try:
-                sleep(2)
-                #any pokemon to catch?
-                #Time to move to a new fort!
-                self.spin_near_fort()
-                while self.catch_near_pokemon():
-                    sleep(6)
-                    pass
-            except Exception as e:
-                self.log.error("Error in main loop: %s", e)
-
-                sleep(10) # timeout...
+            self.heartbeat()
+            sleep(1)
+            self.spin_near_fort()
+            while self.catch_near_pokemon():
+                sleep(4)
                 pass
+
+            # try:
+            #     sleep(1)
+            #     self.spin_near_fort()
+            #     while self.catch_near_pokemon():
+            #         sleep(4)
+            #         pass
+            # except Exception as e:
+            #     self.log.error("Error in main loop: %s", e)
+            #     sleep(60)
+            #     pass
