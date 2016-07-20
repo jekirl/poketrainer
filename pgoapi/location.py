@@ -9,7 +9,7 @@ import pyproj
 g = pyproj.Geod(ellps='WGS84')
 
 geolocator = GoogleV3()
-directions_service = Directions()
+directions_service = Directions(api_key="AIzaSyDQArFbEb9yoJJ9A6gr0u4ajhZEflD_JRw")
 def getLocation(search):
     loc = geolocator.geocode(search)
     return (loc.latitude, loc.longitude, loc.altitude)
@@ -19,20 +19,23 @@ def getLocation(search):
 def get_route(start,end):
     origin = (start[0], start[1])
     destination = (end[0], end[1])
-    d = directions_service.directions(origin, destination, mode="walking",units="metric")
-    steps = d[0]['legs'][0]['steps']
-    return [(step['end_location']["lat"],step['end_location']["lng"]) for step in steps]
+    # d = directions_service.directions(origin, destination, mode="walking",units="metric")
+    # steps = d[0]['legs'][0]['steps']
+    # return [(step['end_location']["lat"],step['end_location']["lng"]) for step in steps]
+    return [destination]
 
 
 # step_size corresponds to how many meters between each step we want, we update our location every 4 seconds, so each step should be about 8 meters
-def get_increments(start,end,step_size=3):
+def get_increments(start,end,step_size=25):
+# def get_increments(start,end,step_size=3):
     g = pyproj.Geod(ellps='WGS84')
     (startlat, startlong, _) = start
     (endlat, endlong) = end
     (az12, az21, dist) = g.inv(startlong, startlat, endlong, endlat)
     # calculate line string along path with segments <= 1 km
     lonlats = g.npts(startlong, startlat, endlong, endlat,
-                     1 + int(dist / step_size))
+                     2)
+                    #  1 + int(dist / step_size))
     # npts doesn't include start/end points, so append
     lonlats.append((endlong, endlat))
     return [(l[1],l[0],0) for l in lonlats] # reorder to be lat,long instead of long,lat

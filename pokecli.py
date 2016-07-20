@@ -81,9 +81,10 @@ def init_config():
             load.update(json.load(data))
 
     # Read passed in Arguments
-    required = lambda x: not x in load
+    required = lambda x: not x in load['accounts'][0].keys()
     parser.add_argument("-a", "--auth_service", help="Auth Service ('ptc' or 'google')",
         required=required("auth_service"))
+    parser.add_argument("-i", "--config_index", help="config_index", required=required("config_index"))
     parser.add_argument("-u", "--username", help="Username", required=required("username"))
     parser.add_argument("-p", "--password", help="Password", required=required("password"))
     parser.add_argument("-l", "--location", help="Location", required=required("location"))
@@ -92,7 +93,7 @@ def init_config():
     parser.add_argument("-t", "--test", help="Only parse the specified location", action='store_true')
     parser.set_defaults(DEBUG=False, TEST=False,CACHED=False)
     config = parser.parse_args()
-
+    load = load['accounts'][int(config.__dict__['config_index'])]
     # Passed in arguments shoud trump
     for key in config.__dict__:
         if key in load and config.__dict__[key] == None:
