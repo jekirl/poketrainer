@@ -172,8 +172,11 @@ class RpcApi:
             return False
 
         self.log.debug('Protobuf structure of rpc response:\n\r%s', response_proto)
-        self.log.debug('Decode raw over protoc (protoc has to be in your PATH):\n\r%s', self.decode_raw(response_raw.content))
-
+        try:
+            self.log.debug('Decode raw over protoc (protoc has to be in your PATH):\n\r%s', self.decode_raw(response_raw.content))
+        except:
+            print("You don't have protoc installed")
+            pass
         response_proto_dict = protobuf_to_dict(response_proto)
         response_proto_dict = self._parse_sub_responses(response_proto, subrequests, response_proto_dict)
 
