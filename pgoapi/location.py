@@ -9,6 +9,7 @@ from time import time
 g = pyproj.Geod(ellps='WGS84')
 geolocator = GoogleV3()
 directions_service = Directions()
+# directions_service = Directions(api_key="KEY HERE")
 def getLocation(search):
     loc = geolocator.geocode(search)
     return (loc.latitude, loc.longitude, loc.altitude)
