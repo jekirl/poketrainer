@@ -151,9 +151,9 @@ class PGoApi:
                 self.set_position(*next_point)
                 self.heartbeat()
                 self.log.info("sleeping before next heartbeat")
-                sleep(1)
+                sleep(2)
                 while self.catch_near_pokemon():
-                    sleep(0.25)
+                    sleep(1)
 
     def spin_near_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
