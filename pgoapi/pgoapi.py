@@ -213,7 +213,7 @@ class PGoApi:
             if "pokemon" in  inventory_item['inventory_item_data']:
                 # is a pokemon:
                 pokemon = inventory_item['inventory_item_data']['pokemon']
-                if 'cp' in pokemon:
+                if 'cp' in pokemon and "favorite" not in pokemon:
                     caught_pokemon[pokemon["pokemon_id"]].append(pokemon)
             elif "item" in  inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
