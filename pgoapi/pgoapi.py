@@ -188,15 +188,18 @@ class PGoApi:
         neighbors = getNeighbors(self._posf)
         return self.get_map_objects(latitude=position[0], longitude=position[1], since_timestamp_ms=[0]*len(neighbors), cell_id=neighbors).call()
     def attempt_catch(self,encounter_id,spawnpoint_id):
-        return self.catch_pokemon(
-            normalized_reticle_size= 1.950,
-            pokeball = 1,
-            spin_modifier= 0.850,
-            hit_pokemon=True,
-            NormalizedHitPosition=1,
-            encounter_id=encounter_id,
-            spawnpoint_id=spawnpoint_id,
-            ).call()['responses']['CATCH_POKEMON']
+        for i in range(1,4):
+            r = self.catch_pokemon(
+                normalized_reticle_size= 1.950,
+                pokeball = i,
+                spin_modifier= 0.850,
+                hit_pokemon=True,
+                NormalizedHitPosition=1,
+                encounter_id=encounter_id,
+                spawnpoint_id=spawnpoint_id,
+                ).call()['responses']['CATCH_POKEMON']
+            if "status" in r:
+                return r
 
     def cleanup_inventory(self, inventroy_items=None):
         if not inventroy_items:
