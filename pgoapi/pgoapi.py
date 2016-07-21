@@ -235,13 +235,13 @@ class PGoApi:
             # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
             while capture_status != 0 and capture_status != 3:
                 catch_attempt = self.attempt_catch(encounter_id,spawnpoint_id)
-                status = catch_attempt['status']
+                capture_status = catch_attempt['status']
                 # if status == RpcEnum.CATCH_SUCCESS:
-                if status == 1:
+                if capture_status == 1:
                     self.log.info("Caught Pokemon: : %s", catch_attempt)
                     sleep(2)
                     return catch_attempt
-                elif status != 2:
+                elif capture_status != 2:
                     self.log.info("Failed Catch: : %s", catch_attempt)
                     return False
                 sleep(2)
