@@ -65,6 +65,7 @@ class PGoApi:
         self._posf = (0,0,0) # this is floats
         self.CP_CUTOFF = CP_CUTOFF # release anything under this if we don't have it already
         self._req_method_list = []
+        self._heartbeat_number = 0
 
     def call(self):
         if not self._req_method_list:
@@ -133,16 +134,19 @@ class PGoApi:
         else:
             raise AttributeError
     def heartbeat(self):
-        # making a standard call, like it is also done by the client
+        self._heartbeat_number += 1
+        # making a standard call to update position, etc
         self.get_player()
-        self.get_hatched_eggs()
-        self.get_inventory()
-        self.check_awarded_badges()
+        if self._heartbeat_number % 10 == 0:
+            self.check_awarded_badges()
+            self.get_inventory()
         # self.download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e")
         res = self.call()
-        print('Response dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
+        print('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
         if 'GET_INVENTORY' in res['responses']:
             print(self.cleanup_inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']))
+
+
         return res
     def walk_to(self,loc): #location in floats of course...
         steps = get_route(self._posf, loc)
