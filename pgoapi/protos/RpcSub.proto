@@ -442,9 +442,26 @@ message UseItemCaptureResponse {
   optional bool target_slow = 7;
 }
 
+message RecycleInventoryItemRequest {
+    optional RpcEnum.ItemId item_id = 1;
+  	optional int32 count = 2;
+}
+
+message RecycleInventoryItemResponse {
+    optional Result result = 1;
+    optional int32 new_count = 2;
+    enum Result {
+  		UNSET = 0;
+  		SUCCESS = 1;
+  		ERROR_NOT_ENOUGH_COPIES = 2;
+  		ERROR_CANNOT_RECYCLE_INCUBATORS = 3;
+    }
+
+}
 message ReleasePokemonRequest {
   optional fixed64 pokemon_id = 1;
 }
+
 
 message ReleasePokemonResponse {
   optional Result result = 1;
