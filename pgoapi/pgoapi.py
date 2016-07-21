@@ -47,7 +47,7 @@ from collections import defaultdict
 import os.path
 
 logger = logging.getLogger(__name__)
-
+BAD_ITEM_IDS = [101,102,701,702,703] #Potion, Super Potion, RazzBerry, BlukBerry Add 201 to get rid of revive
 class PGoApi:
 
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
@@ -205,7 +205,7 @@ class PGoApi:
 
     def cleanup_inventory(self, inventroy_items=None):
         if not inventroy_items:
-            inventroy_items = self.get_inventory().call()['GET_INVENTORY']['inventory_delta']['inventory_items']
+            inventroy_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']
         caught_pokemon = defaultdict(list)
         for inventory_item in inventroy_items:
             if "pokemon" in  inventory_item['inventory_item_data']:
@@ -213,6 +213,11 @@ class PGoApi:
                 pokemon = inventory_item['inventory_item_data']['pokemon']
                 if 'cp' in pokemon:
                     caught_pokemon[pokemon["pokemon_id"]].append(pokemon)
+            elif "item" in  inventory_item['inventory_item_data']:
+                item = inventory_item['inventory_item_data']['item']
+                if item['item_id'] in BAD_ITEM_IDS and "count" in item:
+                    self.recycle_inventory_item(item_id=item['item_id'],count=item['count'])
+
         for pokemons in caught_pokemon.values():
             #Only if we have more than 1
             if len(pokemons) > 1:
@@ -312,6 +317,7 @@ class PGoApi:
         return True
 
     def main_loop(self):
+        self.heartbeat()
         while True:
             try:
                 self.heartbeat()
