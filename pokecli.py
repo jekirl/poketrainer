@@ -131,14 +131,14 @@ def main():
         return
 
     # instantiate pgoapi
-    api = PGoApi()
+    api = PGoApi(CP_CUTOFF=0)
+    # api = PGoApi(CP_CUTOFF=500) # CP_CUTOFF EXAMPLE
 
     # provide player position on the earth
     api.set_position(*position)
 
     if not api.login(config.auth_service, config.username, config.password, config.cached):
         return
-
     # chain subrequests (methods) into one RPC call
 
     # get player profile call
