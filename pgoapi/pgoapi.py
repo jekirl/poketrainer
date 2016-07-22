@@ -143,6 +143,9 @@ class PGoApi:
             self.get_inventory()
         # self.download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e")
         res = self.call()
+        if res.get("direction",-1) == 102:
+            self.log.error("There were a problem responses for api call: %s. Restarting!!!", res)
+            raise
         print('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
         if 'GET_INVENTORY' in res['responses']:
             print(self.cleanup_inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']))
