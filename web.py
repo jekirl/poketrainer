@@ -45,7 +45,7 @@ def inventory(username):
                 player = item['player_stats']
             if "pokemon_family" in item:
                 filled_family = str(item['pokemon_family']['family_id']).zfill(4)
-                candy[filled_family] += item['pokemon_family']['candy']
+                candy[filled_family] += item['pokemon_family'].get("candy",0)
         pokemons = sorted(pokemons, lambda x,y: cmp(x["iv"],y["iv"]),reverse=True)
         # add candy back into pokemon json
         for pokemon in pokemons:
