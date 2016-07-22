@@ -125,7 +125,7 @@ def main():
         try:
             api.main_loop()
         except Exception as e:
-            self.log.error('Error in main loop, restarting %s', e)
+            log.error('Error in main loop, restarting %s', e)
             # restart after sleep
             sleep(30)
             api = PGoApi(config.__dict__)
