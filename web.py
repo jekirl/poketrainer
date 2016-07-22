@@ -29,6 +29,7 @@ def inventory(username):
         data = f.read()
         data = json.loads(data.encode())
         currency = data['GET_PLAYER']['player_data']['currencies'][1]['amount']
+        latlng = "%f,%f" % (data["lat"],data["lng"])
         items = data['GET_INVENTORY']['inventory_delta']['inventory_items']
         pokemons = []
         candy = defaultdict(int)
@@ -50,7 +51,7 @@ def inventory(username):
         # add candy back into pokemon json
         for pokemon in pokemons:
             pokemon['candy'] = candy[pokemon['family_id']]
-        return render_template('pokemon.html', pokemons=pokemons, player=player,currency="{:,d}".format(currency), candy=candy)
+        return render_template('pokemon.html', pokemons=pokemons, player=player,currency="{:,d}".format(currency), candy=candy,latlng=latlng)
 
 if __name__ == "__main__":
     app.run(debug=True)

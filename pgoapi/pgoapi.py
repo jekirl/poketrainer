@@ -143,10 +143,12 @@ class PGoApi:
         res = self.call()
         if res.get("direction",-1) == 102:
             self.log.error("There were a problem responses for api call: %s. Restarting!!!", res)
-            raise
+            raise AuthException("Token probably expired?")
         print('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
         if 'GET_INVENTORY' in res['responses']:
             with open("data_dumps/%s.json" % self.config['username'], "w") as f:
+                res['responses']['lat'] = self._posf[0]
+                res['responses']['lng'] = self._posf[1]
                 f.write(json.dumps(res['responses'], indent=2))
             print(self.cleanup_inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']))
 
