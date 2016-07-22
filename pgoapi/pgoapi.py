@@ -45,7 +45,7 @@ import POGOProtos.Enums_pb2 as RpcEnum
 from time import sleep
 from collections import defaultdict
 import os.path
-
+from pgoapi.poke_utils import *
 logger = logging.getLogger(__name__)
 BAD_ITEM_IDS = [101,102,701,702,703] #Potion, Super Potion, RazzBerry, BlukBerry Add 201 to get rid of revive
 class PGoApi:
@@ -53,7 +53,6 @@ class PGoApi:
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
 
     def __init__(self,config):
-
         self.log = logging.getLogger(__name__)
 
         self._auth_provider = None
@@ -147,7 +146,6 @@ class PGoApi:
             raise
         print('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
         if 'GET_INVENTORY' in res['responses']:
-            print "HIHIHIHIHIHIHI"
             with open("data_dumps/%s.json" % self.config['username'], "w") as f:
                 f.write(json.dumps(res['responses'], indent=2))
             print(self.cleanup_inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']))
@@ -224,9 +222,9 @@ class PGoApi:
             inventroy_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']
         caught_pokemon = defaultdict(list)
         for inventory_item in inventroy_items:
-            if "pokemon" in  inventory_item['inventory_item_data']:
+            if "pokemon_data" in  inventory_item['inventory_item_data']:
                 # is a pokemon:
-                pokemon = inventory_item['inventory_item_data']['pokemon']
+                pokemon = inventory_item['inventory_item_data']['pokemon_data']
                 if 'cp' in pokemon and "favorite" not in pokemon:
                     caught_pokemon[pokemon["pokemon_id"]].append(pokemon)
             elif "item" in  inventory_item['inventory_item_data']:

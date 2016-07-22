@@ -78,10 +78,7 @@ def init_config():
     config = parser.parse_args()
     load = load['accounts'][int(config.__dict__['config_index'])]
     # Passed in arguments shoud trump
-    for key in config.__dict__:
-        if key in load and config.__dict__[key] == None:
-            config.__dict__[key] = load[key]
-
+    config.__dict__.update(load)
     if config.auth_service not in ['ptc', 'google']:
       log.error("Invalid Auth service specified! ('ptc' or 'google')")
       return None
