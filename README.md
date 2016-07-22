@@ -10,6 +10,7 @@ Usage:
     * The `ACCOUNT_INDEX` is the index of the account you want to use from `config.json` indexing from 0
  * You probably also need an API key for the directions service in `location.py`, check that out
 
+<<<<<<< HEAD
 ## Requirements
  * Run `pip install -r requirements.txt`
  * Python 2
@@ -30,6 +31,7 @@ Optionally create an alias:
     alias pokecli='docker run pokecli'
 
 ### What's working:
+What's working:
  * Walking to pokestops and spinning them
  * Capturing any pokemon it sees on the way
  * Releasing pokemon that you have duplicates of if under CP_CUTOFF (FIXME this is not the best idea....)
