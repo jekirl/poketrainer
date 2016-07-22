@@ -90,3 +90,5 @@ ENV/
 
 # Personal load details
 config.json
+
+.DS_Store

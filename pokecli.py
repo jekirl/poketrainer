@@ -114,30 +114,13 @@ def main():
         return
 
     # instantiate pgoapi
-    api = PGoApi()
+    api = PGoApi(config.__dict__)
 
     # provide player position on the earth
     api.set_position(*position)
 
     if not api.login(config.auth_service, config.username, config.password, config.cached):
         return
-
-    # get player profile call
-    # ----------------------
-    api.get_player()
-
-    # get inventory call
-    # ----------------------
-    api.get_inventory()
-
-
-    # execute the RPC call
-    response_dict = api.call()
-    print('Response dictionary: \n\r{}'.format(json.dumps(response_dict, indent=2)))
-    # r = api.get_player().call()
-    # print(r)
-    # alternative:
-    # api.get_player().get_inventory().get_map_objects().download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e").call()
     while True:
         api.main_loop()
     import ipdb; ipdb.set_trace()

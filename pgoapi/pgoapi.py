@@ -52,18 +52,19 @@ class PGoApi:
 
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
 
-    def __init__(self,CP_CUTOFF=0):
+    def __init__(self,config):
 
         self.log = logging.getLogger(__name__)
 
         self._auth_provider = None
         self._api_endpoint = None
-
+        self.config = config
         self._position_lat = 0 #int cooords
         self._position_lng = 0
         self._position_alt = 0
         self._posf = (0,0,0) # this is floats
-        self.CP_CUTOFF = CP_CUTOFF # release anything under this if we don't have it already
+        self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0) # release anything under this if we don't have it already
+        self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0) # release anything under this if we don't have it already
         self._req_method_list = []
         self._heartbeat_number = 0
 
@@ -149,9 +150,9 @@ class PGoApi:
 
         return res
     def walk_to(self,loc): #location in floats of course...
-        steps = get_route(self._posf, loc)
+        steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""))
         for step in steps:
-            for i,next_point in enumerate(get_increments(self._posf,step)):
+            for i,next_point in enumerate(get_increments(self._posf,step,self.config.get("STEP_SIZE", 200))):
                 self.set_position(*next_point)
                 self.heartbeat()
                 self.log.info("sleeping before next heartbeat")
@@ -228,7 +229,7 @@ class PGoApi:
                 pokemons = sorted(pokemons, lambda x,y: cmp(x['cp'],y['cp']),reverse=True)
                 # keep the first pokemon....
                 for pokemon in pokemons[1:]:
-                    if 'cp' in pokemon and pokemon['cp'] < self.CP_CUTOFF:
+                    if 'cp' in pokemon and pokemonIVPercentage(pokemon) < self.MIN_KEEP_IV and pokemon['cp'] < self.KEEP_CP_OVER:
                         self.log.info("Releasing pokemon: %s", pokemon)
                         self.release_pokemon(pokemon_id = pokemon["id"])
 

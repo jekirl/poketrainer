@@ -1,0 +1,19 @@
+<div>
+<h2>Level: {{player['level']}}</h2>
+<h2>Stardust: {{currency}}</h2>
+</div>
+<table>
+ {% for pokemon in pokemons %}
+ <tr>
+   <td><img src={{ url_for('static', filename = "pokemon/%03d.png" % pokemon['pokemon_id']) }}></td>
+   <td>{{pokemon["name"]}}</td>
+   <td>CP: {{pokemon["cp"]}}</td>
+   <td>Pokemon IV: {{pokemon["iv"]|round(1, 'floor')}}%</td>
+   <td>Candy: {{pokemon["candy"]}}</td>
+   <td>Stamina: {{pokemon["stamina"]}}</td>
+   <td>Individual Attack: {{pokemon["individual_attack"]}}</td>
+   <td>Individual Stamina: {{pokemon["individual_stamina"]}}</td>
+   <td>Individual Defense: {{pokemon["individual_defense"]}}</td>
+ </tr>
+ {% endfor %}
+</table>
