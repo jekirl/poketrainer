@@ -39,6 +39,7 @@ from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException
 from pgoapi.location import *
 from pgoapi.protos.POGOProtos import Inventory_pb2 as Inventory
+from pgoapi.protos.POGOProtos import Enums_pb2 as PgoEnum
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.rpc_api import RpcApi
 from .utilities import f2i
@@ -151,7 +152,7 @@ class PGoApi:
             self.get_inventory()
         # self.download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e")
         res = self.call()
-        print('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
+        self.log.info('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
         if 'GET_INVENTORY' in res['responses']:
             print(self.cleanup_inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']))
 
