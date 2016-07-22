@@ -41,7 +41,17 @@ from collections import defaultdict
 import os.path
 
 logger = logging.getLogger(__name__)
-BAD_ITEM_IDS = [101,102,701,702,703] #Potion, Super Potion, RazzBerry, BlukBerry Add 201 to get rid of revive
+# Minimum number of these items in the inventory when recycling inventory, everything else will be kept.
+MIN_BAD_ITEM_COUNTS = {RpcEnum.ITEM_POTION: 20,
+                       RpcEnum.ITEM_SUPER_POTION: 50,
+                       RpcEnum.ITEM_RAZZ_BERRY: 20,
+                       RpcEnum.ITEM_BLUK_BERRY: 50,
+                       RpcEnum.ITEM_NANAB_BERRY: 60,
+                       RpcEnum.ITEM_REVIVE: 20}
+
+MIN_SIMILAR_POKEMON = 1
+
+
 class PGoApi:
 
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
@@ -217,23 +227,22 @@ class PGoApi:
                     caught_pokemon[pokemon["pokemon_id"]].append(pokemon)
             elif "item" in  inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
-                if item['item'] in BAD_ITEM_IDS and "count" in item:
-                    self.recycle_inventory_item(item_id=item['item'],count=item['count'])
+                if item['item'] in MIN_BAD_ITEM_COUNTS and "count" in item and item['count'] > MIN_BAD_ITEM_COUNTS[item['item']]:
+                    recycle_count = item['count'] - MIN_BAD_ITEM_COUNTS[item['item']]
+                    self.log.info("Recycling Item_ID {0}, item count {1}".format(item['item'], recycle_count))
+                    self.recycle_inventory_item(item_id=item['item'], count=recycle_count)
 
         for pokemons in caught_pokemon.values():
-            #Only if we have more than 1
-            if len(pokemons) > 1:
+            #Only if we have more than MIN_SIMILAR_POKEMON
+            if len(pokemons) > MIN_SIMILAR_POKEMON:
                 pokemons = sorted(pokemons, lambda x,y: cmp(x['cp'],y['cp']),reverse=True)
-                # keep the first pokemon....
-                for pokemon in pokemons[1:]:
+                # keep the first MIN_SIMILAR_POKEMON pokemon....
+                for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
                     if 'cp' in pokemon and pokemon['cp'] < self.CP_CUTOFF:
                         self.log.info("Releasing pokemon: %s", pokemon)
                         self.release_pokemon(pokemon_id = pokemon["id"])
 
         return self.call()
-
-
-
 
     def encounter_pokemon(self,pokemon): #take in a MapPokemon from MapCell.catchable_pokemons
         encounter_id = pokemon['encounter_id']
