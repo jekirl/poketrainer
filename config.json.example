@@ -3,11 +3,18 @@
         "auth_service": "google",
         "username": "test@gmail.com",
         "password": "password",
-        "location": "University of Southern California, Los Angeles, CA"
+        "location": "University of Southern California, Los Angeles, CA",
+        "USE_GOOGLE": true,
+        "GMAPS_API_KEY": "some api key here",
+        "MIN_KEEP_IV" : 50,
+        "KEEP_CP_OVER": 500,
+        "STEP_SIZE": 100
     },
     {  "auth_service": "ptc",
         "username": "someusername",
         "password": "password",
-        "location": "University of Southern California, Los Angeles, CA"
+        "location": "University of Southern California, Los Angeles, CA",
+        "USE_GOOGLE": false,
+        "MIN_KEEP_IV" : 70
     }
     ]}

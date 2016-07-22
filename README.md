@@ -8,13 +8,16 @@ Usage:
  * Run the client with `python pokecli.py -i ACCOUNT_INDEX --[cached]`
     * Use `--cached` after you have already logged in once, doing so will cache your login and prevent soft bans
     * The `ACCOUNT_INDEX` is the index of the account you want to use from `config.json` indexing from 0
- * You probably also need an API key for the directions service in `location.py`, check that out
-
-What's working:
- * Walking to pokestops and spinning them
- * Capturing any pokemon it sees on the way
- * Releasing pokemon that you have duplicates of if under CP_CUTOFF (FIXME this is not the best idea....)
-  * Change CP_CUTOFF in `pgoapi.py` to configure this, by default it is 0 (to never release)
+    * USE_GOOGLE will enable google walking directions for navigation
+     * You will probably need to provide an api key in `GMAPS_API_KEY` to avoid rate limits
+    * `STEP_SIZE` corresponds to how many meters you want to move at most between server calls, set this around 4-6 for walking or 100-200 for really, really fast driving
+    * `MIN_KEEP_IV` is the minimum pokemon IV that you want to keep, note that the highest CP pokemon you have will always be kept regardless of its IV
+     * Setting this to 0 will never transfer anything
+    * `KEEP_CP_OVER` Never transfer any pokemon above this CP
+     * Setting this to 0 will never transfer anything
+ * Run python web.py to get a webservice to show you player information, this can be seen at:
+  * http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
+  * Only 1 needs to run regardless of how many bots you are running
 
 
 ## Requirements
@@ -26,6 +29,23 @@ What's working:
  * geopy (only for pokecli demo)
  * s2sphere (only for pokecli demo)
 
+### pokecli with Docker (optional)
+Build and run container:
+
+    docker build -t pokecli .
+    docker run pokecli
+
+Optionally create an alias:
+
+    alias pokecli='docker run pokecli'
+
+### What's working:
+What's working:
+ * Walking to pokestops and spinning them
+ * Capturing any pokemon it sees on the way
+ * Releasing pokemon that you have duplicates of if under CP_CUTOFF (FIXME this is not the best idea....)
+  * Change CP_CUTOFF in `pgoapi.py` to configure this, by default it is 0 (to never release)
+
 
 ## Credits
 * [tejado](https://github.com/tejado) for the base of this and everything else really
@@ -34,3 +54,4 @@ What's working:
 * [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos  
 * [AHAAAAAAA](https://github.com/AHAAAAAAA/PokemonGo-Map) for parts of the s2sphere stuff
 * And to anyone on the pokemongodev slack channel <3
+>>>>>>> super sketch but yolo

@@ -8,18 +8,17 @@ import pyproj
 from time import time
 g = pyproj.Geod(ellps='WGS84')
 geolocator = GoogleV3()
-directions_service = Directions()
-# directions_service = Directions(api_key="KEY HERE")
 def getLocation(search):
     loc = geolocator.geocode(search)
     return (loc.latitude, loc.longitude, loc.altitude)
 
 
 #http://python-gmaps.readthedocs.io/en/latest/gmaps.html#module-gmaps.directions
-def get_route(start,end, use_google = False):
+def get_route(start,end, use_google = False, GMAPS_API_KEY = ""):
     origin = (start[0], start[1])
     destination = (end[0], end[1])
     if use_google:
+        directions_service = Directions(api_key=GMAPS_API_KEY)
         d = directions_service.directions(origin, destination, mode="walking",units="metric")
         steps = d[0]['legs'][0]['steps']
         return [(step['end_location']["lat"],step['end_location']["lng"]) for step in steps]

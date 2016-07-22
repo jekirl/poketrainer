@@ -1,6 +1,7 @@
 """
 pgoapi - Pokemon Go API
 Copyright (c) 2016 tjado <https://github.com/tejado>
+Modifications Copyright (c) 2016 j-e-k <https://github.com/j-e-k>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,21 +22,26 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 
 Author: tjado <https://github.com/tejado>
+Modifications by: j-e-k <https://github.com/j-e-k>
 """
+
+from __future__ import absolute_import
 
 import logging
 import re
 import requests
+from .utilities import f2i, h2f
+from pgoapi.rpc_api import RpcApi
+from pgoapi.auth_ptc import AuthPtc
+from pgoapi.auth_google import AuthGoogle
+from pgoapi.exceptions import AuthException, NotLoggedInException, ServerBusyOrOfflineException
+from . import protos
+from POGOProtos.Networking.Requests_pb2 import RequestType
 import pickle
 import random
-from utilities import f2i, h2f
 import json
-from rpc_api import RpcApi
-from auth_ptc import AuthPtc
-from auth_google import AuthGoogle
-from exceptions import AuthException, NotLoggedInException, ServerBusyOrOfflineException
-from location import *
-import protos.RpcEnum_pb2 as RpcEnum
+from pgoapi.location import *
+import POGOProtos.Enums_pb2 as RpcEnum
 from time import sleep
 from collections import defaultdict
 import os.path
@@ -56,18 +62,19 @@ class PGoApi:
 
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
 
-    def __init__(self,CP_CUTOFF=0):
+    def __init__(self,config):
 
         self.log = logging.getLogger(__name__)
 
         self._auth_provider = None
         self._api_endpoint = None
-
+        self.config = config
         self._position_lat = 0 #int cooords
         self._position_lng = 0
         self._position_alt = 0
         self._posf = (0,0,0) # this is floats
-        self.CP_CUTOFF = CP_CUTOFF # release anything under this if we don't have it already
+        self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0) # release anything under this if we don't have it already
+        self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0) # release anything under this if we don't have it already
         self._req_method_list = []
         self._heartbeat_number = 0
 
@@ -101,12 +108,9 @@ class PGoApi:
 
         return response
 
-    #def get_player(self):
-
     def list_curr_methods(self):
         for i in self._req_method_list:
-            print("{} ({})".format(RpcEnum.RequestMethod.Name(i),i))
-
+            print("{} ({})".format(RequestType.Name(i),i))
     def set_logger(self, logger):
         self._ = logger or logging.getLogger(__name__)
 
@@ -127,20 +131,19 @@ class PGoApi:
 
             name = func.upper()
             if kwargs:
-                self._req_method_list.append( { RpcEnum.RequestMethod.Value(name): kwargs } )
+                self._req_method_list.append( { RequestType.Value(name): kwargs } )
                 self.log.info("Adding '%s' to RPC request including arguments", name)
                 self.log.debug("Arguments of '%s': \n\r%s", name, kwargs)
             else:
-                self._req_method_list.append( RpcEnum.RequestMethod.Value(name) )
+                self._req_method_list.append( RequestType.Value(name) )
                 self.log.info("Adding '%s' to RPC request", name)
 
             return self
 
-        if func.upper() in RpcEnum.RequestMethod.keys():
+        if func.upper() in RequestType.keys():
             return function
         else:
             raise AttributeError
-
     def heartbeat(self):
         self._heartbeat_number += 1
         # making a standard call to update position, etc
@@ -157,9 +160,9 @@ class PGoApi:
 
         return res
     def walk_to(self,loc): #location in floats of course...
-        steps = get_route(self._posf, loc)
+        steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""))
         for step in steps:
-            for i,next_point in enumerate(get_increments(self._posf,step)):
+            for i,next_point in enumerate(get_increments(self._posf,step,self.config.get("STEP_SIZE", 200))):
                 self.set_position(*next_point)
                 self.heartbeat()
                 self.log.info("sleeping before next heartbeat")
@@ -201,7 +204,7 @@ class PGoApi:
         position = self.get_position()
         neighbors = getNeighbors(self._posf)
         return self.get_map_objects(latitude=position[0], longitude=position[1], since_timestamp_ms=[0]*len(neighbors), cell_id=neighbors).call()
-    def attempt_catch(self,encounter_id,spawnpoint_id):
+    def attempt_catch(self,encounter_id,spawn_point_guid):
         for i in range(1,4):
             r = self.catch_pokemon(
                 normalized_reticle_size= 1.950,
@@ -210,7 +213,7 @@ class PGoApi:
                 hit_pokemon=True,
                 NormalizedHitPosition=1,
                 encounter_id=encounter_id,
-                spawnpoint_id=spawnpoint_id,
+                spawn_point_guid=spawn_point_guid,
                 ).call()['responses']['CATCH_POKEMON']
             if "status" in r:
                 return r
@@ -238,7 +241,7 @@ class PGoApi:
                 pokemons = sorted(pokemons, lambda x,y: cmp(x['cp'],y['cp']),reverse=True)
                 # keep the first MIN_SIMILAR_POKEMON pokemon....
                 for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
-                    if 'cp' in pokemon and pokemon['cp'] < self.CP_CUTOFF:
+                    if 'cp' in pokemon and pokemonIVPercentage(pokemon) < self.MIN_KEEP_IV and pokemon['cp'] < self.CP_CUTOFF:
                         self.log.info("Releasing pokemon: %s", pokemon)
                         self.release_pokemon(pokemon_id = pokemon["id"])
 
@@ -246,16 +249,16 @@ class PGoApi:
 
     def encounter_pokemon(self,pokemon): #take in a MapPokemon from MapCell.catchable_pokemons
         encounter_id = pokemon['encounter_id']
-        spawnpoint_id = pokemon['spawnpoint_id']
+        spawn_point_id = pokemon['spawnpoint_id']
         # begin encounter_id
         position = self._posf # FIXME ?
-        resp = self.encounter(encounter_id=encounter_id,spawnpoint_id=spawnpoint_id,player_latitude=position[0],player_longitude=position[1]).call()['responses']['ENCOUNTER']
+        resp = self.encounter(encounter_id=encounter_id,spawnpoint_id=spawn_point_id,player_latitude=position[0],player_longitude=position[1]).call()['responses']['ENCOUNTER']
         self.log.info("Started Encounter: %s", resp)
         if resp['status'] == 1:
             capture_status = -1
             # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
             while capture_status != 0 and capture_status != 3:
-                catch_attempt = self.attempt_catch(encounter_id,spawnpoint_id)
+                catch_attempt = self.attempt_catch(encounter_id,spawn_point_id)
                 capture_status = catch_attempt['status']
                 # if status == RpcEnum.CATCH_SUCCESS:
                 if capture_status == 1:
@@ -288,6 +291,19 @@ class PGoApi:
             return False
 
         self.log.info('Starting RPC login sequence (app simulation)')
+        # making a standard call, like it is also done by the client
+        self.get_player()
+        self.get_hatched_eggs()
+        self.get_inventory()
+        self.check_awarded_badges()
+        self.download_settings(hash="05daf51635c82611d1aac95c0b051d3ec088a930")
+
+        response = self.call()
+
+        if not response:
+            self.log.info('Login failed!')
+        if os.path.isfile("auth_cache") and cached:
+            response = pickle.load(open("auth_cache"))
         fname = "auth_cache_%s" % username
         if os.path.isfile(fname) and cached:
             response = pickle.load(open(fname))
@@ -313,7 +329,9 @@ class PGoApi:
         self.log.info('Login process completed')
 
         return True
+
     def main_loop(self):
+        self.heartbeat()
         while True:
             try:
                 self.heartbeat()

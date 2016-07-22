@@ -2,6 +2,7 @@
 """
 pgoapi - Pokemon Go API
 Copyright (c) 2016 tjado <https://github.com/tejado>
+Modifications Copyright (c) 2016 j-e-k <https://github.com/j-e-k>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +23,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 
 Author: tjado <https://github.com/tejado>
+Modifications by: j-e-k <https://github.com/j-e-k>
 """
 
 import os
@@ -50,25 +52,6 @@ def get_pos_by_name(location_name):
     log.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
 
     return (loc.latitude, loc.longitude, loc.altitude)
-
-def get_cellid(lat, long):
-    origin = CellId.from_lat_lng(LatLng.from_degrees(lat, long)).parent(15)
-    walk = [origin.id()]
-
-    # 10 before and 10 after
-    next = origin.next()
-    prev = origin.prev()
-    for i in range(10):
-        walk.append(prev.id())
-        walk.append(next.id())
-        next = next.next()
-        prev = prev.prev()
-    return ''.join(map(encode, sorted(walk)))
-
-def encode(cellid):
-    output = []
-    encoder._VarintEncoder()(output.append, cellid)
-    return ''.join(output)
 
 def init_config():
     parser = argparse.ArgumentParser()
@@ -131,61 +114,15 @@ def main():
         return
 
     # instantiate pgoapi
-    api = PGoApi(CP_CUTOFF=0)
-    # api = PGoApi(CP_CUTOFF=500) # CP_CUTOFF EXAMPLE
+    api = PGoApi(config.__dict__)
 
     # provide player position on the earth
     api.set_position(*position)
 
     if not api.login(config.auth_service, config.username, config.password, config.cached):
         return
-    # chain subrequests (methods) into one RPC call
-
-    # get player profile call
-    # ----------------------
-    api.get_player()
-
-    # get inventory call
-    # ----------------------
-    api.get_inventory()
-
-    # get map objects call
-    # ----------------------
-    #timestamp = "\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000"
-    #cellid = get_cellid(position[0], position[1])
-    #api.get_map_objects(latitude=f2i(position[0]), longitude=f2i(position[1]), since_timestamp_ms=timestamp, cell_id=cellid)
-
-    # spin a fort
-    # ----------------------
-    #fortid = '<your fortid>'
-    #lng = <your longitude>
-    #lat = <your latitude>
-    #api.fort_search(fort_id=fortid, fort_latitude=lat, fort_longitude=lng, player_latitude=f2i(position[0]), player_longitude=f2i(position[1]))
-
-    # release/transfer a pokemon and get candy for it
-    # ----------------------
-    #api.release_pokemon(pokemon_id = <your pokemonid>)
-
-    # get download settings call
-    # ----------------------
-    #api.download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e")
-
-    # execute the RPC call
-    response_dict = api.call()
-    print('Response dictionary: \n\r{}'.format(json.dumps(response_dict, indent=2)))
-    # r = api.get_player().call()
-    # print(r)
-    # alternative:
-    # api.get_player().get_inventory().get_map_objects().download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e").call()
     while True:
         api.main_loop()
-        # print("Any pokemon caught? : ", api.catch_near_pokemon())
-        # print(api.spin_near_fort())
-        # try:
-        #     print(api.spin_near_fort())
-        # except Exception as e:
-        #     print("Something went wrong: ", e)
-        #     sleep(30)
     import ipdb; ipdb.set_trace()
 
 if __name__ == '__main__':
