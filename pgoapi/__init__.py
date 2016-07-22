@@ -1,9 +1,8 @@
-
 from __future__ import absolute_import
 
-from pgoapi.exceptions import PleaseInstallProtobufVersion3
-
 import pkg_resources
+
+from pgoapi.exceptions import PleaseInstallProtobufVersion3
 
 protobuf_exist = False
 protobuf_version = 0
@@ -22,6 +21,7 @@ from pgoapi.auth import Auth
 
 try:
     import requests.packages.urllib3
+
     requests.packages.urllib3.disable_warnings()
 except:
     pass

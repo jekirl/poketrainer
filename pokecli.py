@@ -58,7 +58,7 @@ def init_config():
     config_file = "config.json"
 
     # If config file exists, load variables from json
-    load   = {}
+    load = {}
     if os.path.isfile(config_file):
         with open(config_file) as data:
             load.update(json.load(data))

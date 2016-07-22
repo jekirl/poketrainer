@@ -27,54 +27,49 @@ Modifications by: j-e-k <https://github.com/j-e-k>
 
 from __future__ import absolute_import
 
-import logging
-import re
-import requests
-from .utilities import f2i, h2f
-from pgoapi.rpc_api import RpcApi
-from pgoapi.auth_ptc import AuthPtc
-from pgoapi.auth_google import AuthGoogle
-from pgoapi.exceptions import AuthException, NotLoggedInException, ServerBusyOrOfflineException
-from . import protos
-from POGOProtos.Networking.Requests_pb2 import RequestType
-import pickle
-import random
 import json
-from pgoapi.location import *
-import POGOProtos.Enums_pb2 as RpcEnum
-from time import sleep
-from collections import defaultdict
+import logging
 import os.path
+import pickle
+from collections import defaultdict
+from time import sleep
 
-logger = logging.getLogger(__name__)
+from pgoapi.auth_google import AuthGoogle
+from pgoapi.auth_ptc import AuthPtc
+from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException
+from pgoapi.location import *
+from pgoapi.protos.POGOProtos import Inventory_pb2 as Inventory
+from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
+from pgoapi.rpc_api import RpcApi
+from .utilities import f2i
+
 # Minimum number of these items in the inventory when recycling inventory, everything else will be kept.
-MIN_BAD_ITEM_COUNTS = {RpcEnum.ITEM_POTION: 20,
-                       RpcEnum.ITEM_SUPER_POTION: 50,
-                       RpcEnum.ITEM_RAZZ_BERRY: 20,
-                       RpcEnum.ITEM_BLUK_BERRY: 50,
-                       RpcEnum.ITEM_NANAB_BERRY: 60,
-                       RpcEnum.ITEM_REVIVE: 20}
+MIN_BAD_ITEM_COUNTS = {Inventory.ITEM_POTION: 20,
+                       Inventory.ITEM_SUPER_POTION: 20,
+                       Inventory.ITEM_RAZZ_BERRY: 20,
+                       Inventory.ITEM_BLUK_BERRY: 50,
+                       Inventory.ITEM_NANAB_BERRY: 60,
+                       Inventory.ITEM_REVIVE: 20}
 
 MIN_SIMILAR_POKEMON = 1
 
 
 class PGoApi:
-
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
 
-    def __init__(self,config):
+    def __init__(self, config):
 
         self.log = logging.getLogger(__name__)
 
         self._auth_provider = None
         self._api_endpoint = None
         self.config = config
-        self._position_lat = 0 #int cooords
+        self._position_lat = 0  # int cooords
         self._position_lng = 0
         self._position_alt = 0
-        self._posf = (0,0,0) # this is floats
-        self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0) # release anything under this if we don't have it already
-        self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0) # release anything under this if we don't have it already
+        self._posf = (0, 0, 0)  # this is floats
+        self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0)  # release anything under this if we don't have it already
+        self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0)  # release anything under this if we don't have it already
         self._req_method_list = []
         self._heartbeat_number = 0
 
@@ -110,15 +105,17 @@ class PGoApi:
 
     def list_curr_methods(self):
         for i in self._req_method_list:
-            print("{} ({})".format(RequestType.Name(i),i))
+            print("{} ({})".format(RequestType.Name(i), i))
+
     def set_logger(self, logger):
-        self._ = logger or logging.getLogger(__name__)
+        self.log = logger or logging.getLogger(__name__)
 
     def get_position(self):
-        return (self._position_lat, self._position_lng, self._position_alt)
+        return self._position_lat, self._position_lng, self._position_alt
+
     def set_position(self, lat, lng, alt):
         self.log.debug('Set Position - Lat: %s Long: %s Alt: %s', lat, lng, alt)
-        self._posf = (lat,lng,alt)
+        self._posf = (lat, lng, alt)
         self._position_lat = f2i(lat)
         self._position_lng = f2i(lng)
         self._position_alt = f2i(alt)
@@ -131,11 +128,11 @@ class PGoApi:
 
             name = func.upper()
             if kwargs:
-                self._req_method_list.append( { RequestType.Value(name): kwargs } )
+                self._req_method_list.append({RequestType.Value(name): kwargs})
                 self.log.info("Adding '%s' to RPC request including arguments", name)
                 self.log.debug("Arguments of '%s': \n\r%s", name, kwargs)
             else:
-                self._req_method_list.append( RequestType.Value(name) )
+                self._req_method_list.append(RequestType.Value(name))
                 self.log.info("Adding '%s' to RPC request", name)
 
             return self
@@ -144,6 +141,7 @@ class PGoApi:
             return function
         else:
             raise AttributeError
+
     def heartbeat(self):
         self._heartbeat_number += 1
         # making a standard call to update position, etc
@@ -157,12 +155,12 @@ class PGoApi:
         if 'GET_INVENTORY' in res['responses']:
             print(self.cleanup_inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']))
 
-
         return res
-    def walk_to(self,loc): #location in floats of course...
+
+    def walk_to(self, loc):  # location in floats of course...
         steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""))
         for step in steps:
-            for i,next_point in enumerate(get_increments(self._posf,step,self.config.get("STEP_SIZE", 200))):
+            for i, next_point in enumerate(get_increments(self._posf, step, self.config.get("STEP_SIZE", 200))):
                 self.set_position(*next_point)
                 self.heartbeat()
                 self.log.info("sleeping before next heartbeat")
@@ -172,14 +170,16 @@ class PGoApi:
 
     def spin_near_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
-        forts = sum([cell.get('forts',[]) for cell in map_cells],[]) #supper ghetto lol
-        destinations = filtered_forts(self._posf,forts)
+        forts = sum([cell.get('forts', []) for cell in map_cells], [])  # supper ghetto lol
+        destinations = filtered_forts(self._posf, forts)
         if destinations:
             fort = destinations[0]
             self.log.info("Walking to fort: %s", fort)
             self.walk_to((fort['latitude'], fort['longitude']))
-            position = self._posf # FIXME ?
-            res = self.fort_search(fort_id = fort['id'], fort_latitude=fort['latitude'],fort_longitude=fort['longitude'],player_latitude=position[0],player_longitude=position[1]).call()['responses']['FORT_SEARCH']
+            position = self._posf  # FIXME ?
+            res = self.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'], fort_longitude=fort['longitude'],
+                                   player_latitude=position[0], player_longitude=position[1]).call()['responses'][
+                'FORT_SEARCH']
             self.log.info("Fort spinned: %s", res)
             return True
         else:
@@ -188,11 +188,12 @@ class PGoApi:
 
     def catch_near_pokemon(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
-        pokemons = sum([cell.get('catchable_pokemons',[]) for cell in map_cells],[]) #supper ghetto lol
+        pokemons = sum([cell.get('catchable_pokemons', []) for cell in map_cells], [])  # supper ghetto lol
 
         # catch first pokemon:
-        origin = (self._posf[0],self._posf[1])
-        pokemon_distances = [(pokemon, distance_in_meters(origin,(pokemon['latitude'], pokemon['longitude']))) for pokemon in pokemons]
+        origin = (self._posf[0], self._posf[1])
+        pokemon_distances = [(pokemon, distance_in_meters(origin, (pokemon['latitude'], pokemon['longitude']))) for
+                             pokemon in pokemons]
         self.log.info("Nearby pokemon: : %s", pokemon_distances)
         if pokemons:
             target = pokemon_distances[0]
@@ -203,62 +204,68 @@ class PGoApi:
     def nearby_map_objects(self):
         position = self.get_position()
         neighbors = getNeighbors(self._posf)
-        return self.get_map_objects(latitude=position[0], longitude=position[1], since_timestamp_ms=[0]*len(neighbors), cell_id=neighbors).call()
-    def attempt_catch(self,encounter_id,spawn_point_guid):
-        for i in range(1,4):
+        return self.get_map_objects(latitude=position[0], longitude=position[1],
+                                    since_timestamp_ms=[0] * len(neighbors), cell_id=neighbors).call()
+
+    def attempt_catch(self, encounter_id, spawn_point_guid):
+        for i in range(1, 4):
             r = self.catch_pokemon(
-                normalized_reticle_size= 1.950,
-                pokeball = i,
-                spin_modifier= 0.850,
+                normalized_reticle_size=1.950,
+                pokeball=i,
+                spin_modifier=0.850,
                 hit_pokemon=True,
                 NormalizedHitPosition=1,
                 encounter_id=encounter_id,
                 spawn_point_guid=spawn_point_guid,
-                ).call()['responses']['CATCH_POKEMON']
+            ).call()['responses']['CATCH_POKEMON']
             if "status" in r:
                 return r
 
     def cleanup_inventory(self, inventroy_items=None):
         if not inventroy_items:
-            inventroy_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']
+            inventroy_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
+                'inventory_items']
         caught_pokemon = defaultdict(list)
         for inventory_item in inventroy_items:
-            if "pokemon" in  inventory_item['inventory_item_data']:
+            if "pokemon" in inventory_item['inventory_item_data']:
                 # is a pokemon:
                 pokemon = inventory_item['inventory_item_data']['pokemon']
                 if 'cp' in pokemon and "favorite" not in pokemon:
                     caught_pokemon[pokemon["pokemon_id"]].append(pokemon)
-            elif "item" in  inventory_item['inventory_item_data']:
+            elif "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
-                if item['item'] in MIN_BAD_ITEM_COUNTS and "count" in item and item['count'] > MIN_BAD_ITEM_COUNTS[item['item']]:
+                if item['item'] in MIN_BAD_ITEM_COUNTS and "count" in item and item['count'] > MIN_BAD_ITEM_COUNTS[
+                    item['item']]:
                     recycle_count = item['count'] - MIN_BAD_ITEM_COUNTS[item['item']]
                     self.log.info("Recycling Item_ID {0}, item count {1}".format(item['item'], recycle_count))
                     self.recycle_inventory_item(item_id=item['item'], count=recycle_count)
 
         for pokemons in caught_pokemon.values():
-            #Only if we have more than MIN_SIMILAR_POKEMON
+            # Only if we have more than MIN_SIMILAR_POKEMON
             if len(pokemons) > MIN_SIMILAR_POKEMON:
-                pokemons = sorted(pokemons, lambda x,y: cmp(x['cp'],y['cp']),reverse=True)
+                pokemons = sorted(pokemons, lambda x, y: cmp(x['cp'], y['cp']), reverse=True)
                 # keep the first MIN_SIMILAR_POKEMON pokemon....
                 for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
-                    if 'cp' in pokemon and pokemonIVPercentage(pokemon) < self.MIN_KEEP_IV and pokemon['cp'] < self.CP_CUTOFF:
+                    if 'cp' in pokemon and pokemonIVPercentage(pokemon) < self.MIN_KEEP_IV and pokemon[
+                        'cp'] < self.CP_CUTOFF:
                         self.log.info("Releasing pokemon: %s", pokemon)
-                        self.release_pokemon(pokemon_id = pokemon["id"])
+                        self.release_pokemon(pokemon_id=pokemon["id"])
 
         return self.call()
 
-    def encounter_pokemon(self,pokemon): #take in a MapPokemon from MapCell.catchable_pokemons
+    def encounter_pokemon(self, pokemon):  # take in a MapPokemon from MapCell.catchable_pokemons
         encounter_id = pokemon['encounter_id']
         spawn_point_id = pokemon['spawnpoint_id']
         # begin encounter_id
-        position = self._posf # FIXME ?
-        resp = self.encounter(encounter_id=encounter_id,spawnpoint_id=spawn_point_id,player_latitude=position[0],player_longitude=position[1]).call()['responses']['ENCOUNTER']
+        position = self._posf  # FIXME ?
+        resp = self.encounter(encounter_id=encounter_id, spawnpoint_id=spawn_point_id, player_latitude=position[0],
+                              player_longitude=position[1]).call()['responses']['ENCOUNTER']
         self.log.info("Started Encounter: %s", resp)
         if resp['status'] == 1:
             capture_status = -1
             # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
             while capture_status != 0 and capture_status != 3:
-                catch_attempt = self.attempt_catch(encounter_id,spawn_point_id)
+                catch_attempt = self.attempt_catch(encounter_id, spawn_point_id)
                 capture_status = catch_attempt['status']
                 # if status == RpcEnum.CATCH_SUCCESS:
                 if capture_status == 1:
@@ -271,9 +278,7 @@ class PGoApi:
                 sleep(2)
         return False
 
-
-
-    def login(self, provider, username, password,cached=False):
+    def login(self, provider, username, password, cached=False):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
             raise AuthException("Username/password not correctly specified")
 
@@ -309,7 +314,7 @@ class PGoApi:
             response = pickle.load(open(fname))
         else:
             response = self.heartbeat()
-            f = open(fname,"w")
+            f = open(fname, "w")
             pickle.dump(response, f)
         if not response:
             self.log.info('Login failed!')
