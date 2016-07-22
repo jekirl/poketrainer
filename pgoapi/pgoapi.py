@@ -176,11 +176,15 @@ class PGoApi:
             fort = destinations[0]
             self.log.info("Walking to fort: %s", fort)
             self.walk_to((fort['latitude'], fort['longitude']))
-            position = self._posf  # FIXME ?
-            res = self.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'], fort_longitude=fort['longitude'],
-                                   player_latitude=position[0], player_longitude=position[1]).call()['responses'][
-                'FORT_SEARCH']
+            position = self._posf # FIXME ?
+            res = self.fort_search(fort_id = fort['id'], fort_latitude=fort['latitude'],fort_longitude=fort['longitude'],player_latitude=position[0],player_longitude=position[1]).call()['responses']['FORT_SEARCH']
             self.log.info("Fort spinned: %s", res)
+            if 'lure_info' in fort:
+                encounter_id = fort['lure_info']['encounter_id']
+                fort_id = fort['lure_info']['fort_id']
+                position = self._posf
+                resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0], player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
+                self.disk_encounter_pokemon(fort['lure_info'])
             return True
         else:
             self.log.error("No fort to walk to!")
@@ -214,7 +218,7 @@ class PGoApi:
                 pokeball=i,
                 spin_modifier=0.850,
                 hit_pokemon=True,
-                NormalizedHitPosition=1,
+                normalized_hit_position=1,
                 encounter_id=encounter_id,
                 spawn_point_guid=spawn_point_guid,
             ).call()['responses']['CATCH_POKEMON']
@@ -253,15 +257,39 @@ class PGoApi:
 
         return self.call()
 
-    def encounter_pokemon(self, pokemon):  # take in a MapPokemon from MapCell.catchable_pokemons
+
+    def disk_encounter_pokemon(self, lureinfo):
+         encounter_id = lureinfo['encounter_id']
+         fort_id = lureinfo['fort_id']
+         position = self._posf
+         resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0], player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
+         self.log.info("Started Disk Encounter, Pokemon ID: %s", resp['pokemon_data']['pokemon_id'])
+         if resp['result'] == 1:
+             capture_status = -1
+             # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
+             while capture_status != 0 and capture_status != 3:
+                 catch_attempt = self.attempt_catch(encounter_id,fort_id)
+                 capture_status = catch_attempt['status']
+                 # if status == RpcEnum.CATCH_SUCCESS:
+                 if capture_status == 1:
+                     self.log.info("Caught Pokemon: : %s", catch_attempt)
+                     sleep(2)
+                     return catch_attempt
+                 elif capture_status != 2:
+                     self.log.info("Failed Catch: : %s", catch_attempt)
+                     return False
+                 sleep(2)
+         return False
+
+
+    def encounter_pokemon(self,pokemon): #take in a MapPokemon from MapCell.catchable_pokemons
         encounter_id = pokemon['encounter_id']
-        spawn_point_id = pokemon['spawnpoint_id']
+        spawn_point_id = pokemon['spawn_point_id']
         # begin encounter_id
-        position = self._posf  # FIXME ?
-        resp = self.encounter(encounter_id=encounter_id, spawnpoint_id=spawn_point_id, player_latitude=position[0],
-                              player_longitude=position[1]).call()['responses']['ENCOUNTER']
-        self.log.info("Started Encounter: %s", resp)
-        if resp['status'] == 1:
+        position = self._posf # FIXME ?
+        encounter = self.encounter(encounter_id=encounter_id,spawn_point_id=spawn_point_id,player_latitude=position[0],player_longitude=position[1]).call()['responses']['ENCOUNTER']
+        self.log.info("Started Encounter: %s", encounter)
+        if encounter['status'] == 1:
             capture_status = -1
             # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
             while capture_status != 0 and capture_status != 3:
@@ -338,14 +366,9 @@ class PGoApi:
     def main_loop(self):
         self.heartbeat()
         while True:
-            try:
-                self.heartbeat()
-                sleep(1)
-                self.spin_near_fort()
-                while self.catch_near_pokemon():
-                    sleep(4)
-                    pass
-            except Exception as e:
-                self.log.error("Error in main loop: %s", e)
-                sleep(60)
+            self.heartbeat()
+            sleep(1)
+            self.spin_near_fort()
+            while self.catch_near_pokemon():
+                sleep(4)
                 pass

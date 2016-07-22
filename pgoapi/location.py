@@ -50,7 +50,7 @@ def distance_in_meters(p1, p2):
 
 def filtered_forts(origin, forts):
     forts = [(fort, distance_in_meters(origin, (fort['latitude'], fort['longitude']))) for fort in forts if
-             fort.get('type', None) == CHECKPOINT and fort.get('enabled', None) and fort.get(
+             fort.get('type', None) == CHECKPOINT and ("enabled" in fort or lure_info in fort) and fort.get(
                  'cooldown_complete_timestamp_ms', -1) < time() * 1000]
     sorted_forts = sorted(forts, lambda x, y: cmp(x[1], y[1]))
     return [x[0] for x in sorted_forts]

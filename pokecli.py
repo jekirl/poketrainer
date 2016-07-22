@@ -122,7 +122,20 @@ def main():
     if not api.login(config.auth_service, config.username, config.password, config.cached):
         return
     while True:
-        api.main_loop()
+        try:
+            api.main_loop()
+        except Exception as e:
+            self.log.error('Error in main loop, restarting %s', e)
+            # restart after sleep
+            sleep(30)
+            api = PGoApi(config.__dict__)
+
+            # provide player position on the earth
+            api.set_position(*position)
+
+            if not api.login(config.auth_service, config.username, config.password, False):
+                return
+
     import ipdb; ipdb.set_trace()
 
 if __name__ == '__main__':
