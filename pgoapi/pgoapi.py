@@ -352,14 +352,9 @@ class PGoApi:
     def main_loop(self):
         self.heartbeat()
         while True:
-            try:
-                self.heartbeat()
-                sleep(1)
-                self.spin_near_fort()
-                while self.catch_near_pokemon():
-                    sleep(4)
-                    pass
-            except Exception as e:
-                self.log.error("Error in main loop: %s", e)
-                sleep(60)
+            self.heartbeat()
+            sleep(1)
+            self.spin_near_fort()
+            while self.catch_near_pokemon():
+                sleep(4)
                 pass
