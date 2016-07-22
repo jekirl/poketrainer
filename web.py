@@ -28,14 +28,14 @@ def inventory(username):
     with open("data_dumps/%s.json"%username) as f:
         data = f.read()
         data = json.loads(data.encode())
-        currency = data['GET_PLAYER']['profile']['currency'][1]['amount']
+        currency = data['GET_PLAYER']['player_data']['currencies'][1]['amount']
         items = data['GET_INVENTORY']['inventory_delta']['inventory_items']
         pokemons = []
         candy = defaultdict(int)
         player = {}
         for item in items:
             item = item['inventory_item_data']
-            pokemon = item.get("pokemon",{})
+            pokemon = item.get("pokemon_data",{})
             if "pokemon_id" in pokemon:
                 pokemon['name'] = pokemon_names[str(pokemon['pokemon_id'])]
                 pokemon.update(pokemon_details[str(pokemon['pokemon_id'])])

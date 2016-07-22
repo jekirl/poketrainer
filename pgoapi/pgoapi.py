@@ -66,7 +66,7 @@ class PGoApi:
         self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0) # release anything under this if we don't have it already
         self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0) # release anything under this if we don't have it already
         self._req_method_list = []
-        self._heartbeat_number = 0
+        self._heartbeat_number = 5
 
     def call(self):
         if not self._req_method_list:
@@ -135,7 +135,6 @@ class PGoApi:
         else:
             raise AttributeError
     def heartbeat(self):
-        self._heartbeat_number += 1
         # making a standard call to update position, etc
         self.get_player()
         if self._heartbeat_number % 10 == 0:
@@ -148,9 +147,12 @@ class PGoApi:
             raise
         print('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
         if 'GET_INVENTORY' in res['responses']:
+            print "HIHIHIHIHIHIHI"
+            with open("data_dumps/%s.json" % self.config['username'], "w") as f:
+                f.write(json.dumps(res['responses'], indent=2))
             print(self.cleanup_inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']))
 
-
+        self._heartbeat_number += 1
         return res
     def walk_to(self,loc): #location in floats of course...
         steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""))
@@ -246,27 +248,29 @@ class PGoApi:
 
 
     def disk_encounter_pokemon(self, lureinfo):
-         encounter_id = lureinfo['encounter_id']
-         fort_id = lureinfo['fort_id']
-         position = self._posf
-         resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0], player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
-         self.log.info("Started Disk Encounter, Pokemon ID: %s", resp['pokemon_data']['pokemon_id'])
-         if resp['result'] == 1:
-             capture_status = -1
-             # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
-             while capture_status != 0 and capture_status != 3:
-                 catch_attempt = self.attempt_catch(encounter_id,fort_id)
-                 capture_status = catch_attempt['status']
-                 # if status == RpcEnum.CATCH_SUCCESS:
-                 if capture_status == 1:
-                     self.log.info("Caught Pokemon: : %s", catch_attempt)
+        try:
+             encounter_id = lureinfo['encounter_id']
+             fort_id = lureinfo['fort_id']
+             position = self._posf
+             resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0], player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
+             if resp['result'] == 1:
+                 capture_status = -1
+                 # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
+                 while capture_status != 0 and capture_status != 3:
+                     catch_attempt = self.attempt_catch(encounter_id,fort_id)
+                     capture_status = catch_attempt['status']
+                     # if status == RpcEnum.CATCH_SUCCESS:
+                     if capture_status == 1:
+                         self.log.info("Caught Pokemon: : %s", catch_attempt)
+                         sleep(2)
+                         return catch_attempt
+                     elif capture_status != 2:
+                         self.log.info("Failed Catch: : %s", catch_attempt)
+                         return False
                      sleep(2)
-                     return catch_attempt
-                 elif capture_status != 2:
-                     self.log.info("Failed Catch: : %s", catch_attempt)
-                     return False
-                 sleep(2)
-         return False
+        except Exception as e:
+            self.log.error("Error in disk encounter %s", e)
+            return False
 
 
     def encounter_pokemon(self,pokemon): #take in a MapPokemon from MapCell.catchable_pokemons
