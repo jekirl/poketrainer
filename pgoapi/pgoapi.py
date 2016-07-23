@@ -60,7 +60,7 @@ MIN_SIMILAR_POKEMON = 1
 
 # Add more here as you wish. http://www.serebii.net/pokemongo/evolution.shtml
 POKEMON_EVOLUTION = {Enums_pb2.PIDGEY: 12}
-POKEMON_EVOLTION_FAMILY = {Enums_pb2.PIDGEY: Enums_pb2.FAMILY_PIDGEY}
+POKEMON_EVOLUTION_FAMILY = {Enums_pb2.PIDGEY: Enums_pb2.FAMILY_PIDGEY}
 
 class PGoApi:
 
@@ -291,7 +291,7 @@ class PGoApi:
     @staticmethod
     def can_we_evolve_this(inventory_item, pokemon_id):
         return "pokemon_family" in inventory_item['inventory_item_data'] and \
-               inventory_item['inventory_item_data']['pokemon_family']['family_id'] == POKEMON_EVOLTION_FAMILY[
+               inventory_item['inventory_item_data']['pokemon_family']['family_id'] == POKEMON_EVOLUTION_FAMILY[
                    pokemon_id] and inventory_item['inventory_item_data']['pokemon_family']['candy'] > POKEMON_EVOLUTION[
             pokemon_id]
 
