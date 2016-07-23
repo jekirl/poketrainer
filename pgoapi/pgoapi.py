@@ -50,7 +50,7 @@ from collections import defaultdict
 import os.path
 
 logger = logging.getLogger(__name__)
-BAD_ITEM_IDS = [101,102,701,702,703] #Potion, Super Potion, RazzBerry, BlukBerry Add 201 to get rid of revive
+BAD_ITEM_IDS = [101,102,103,701,702,703,704,201] #Potion, Super Potion, RazzBerry, BlukBerry Add 201 to get rid of revive
 class PGoApi:
 
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
@@ -235,11 +235,11 @@ class PGoApi:
             if "status" in r:
                 return r
 
-    def cleanup_inventory(self, inventroy_items=None):
-        if not inventroy_items:
-            inventroy_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']
+    def cleanup_inventory(self, inventory_items=None):
+        if not inventory_items:
+            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']
         caught_pokemon = defaultdict(list)
-        for inventory_item in inventroy_items:
+        for inventory_item in inventory_items:
             if "pokemon_data" in  inventory_item['inventory_item_data']:
                 # is a pokemon:
                 pokemon = inventory_item['inventory_item_data']['pokemon_data']
@@ -257,6 +257,13 @@ class PGoApi:
                 # keep the first pokemon....
                 for pokemon in pokemons[1:]:
                     if 'cp' in pokemon and pokemonIVPercentage(pokemon) < self.MIN_KEEP_IV and pokemon['cp'] < self.KEEP_CP_OVER:
+                        # FIXME autoevolve code is jank
+                        if pokemon['pokemon_id'] == 16:
+                            for inventory_item in inventory_items:
+                                if "pokemon_family" in inventory_item['inventory_item_data'] and inventory_item['inventory_item_data']['pokemon_family']['family_id'] == 16 and inventory_item['inventory_item_data']['pokemon_family']['candy'] > 11:
+                                  #checks that the item is a candy, that the candy is of the pidgy type, and that there are at least 12 candies
+                                  self.log.info("Evolving pokemon: %s", pokemon)
+                                  self.evolve(pokemon_id = pokemon['id'])
                         self.log.debug("Releasing pokemon: %s", pokemon)
                         self.log.info("Releasing pokemon: %s IV: %s", self.pokemon_names[str(pokemon['pokemon_id'])], pokemonIVPercentage(pokemon))
                         self.release_pokemon(pokemon_id = pokemon["id"])
