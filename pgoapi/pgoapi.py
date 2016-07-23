@@ -295,7 +295,7 @@ class PGoApi:
                    pokemon_id] and inventory_item['inventory_item_data']['pokemon_family']['candy'] > POKEMON_EVOLUTION[
             pokemon_id]
 
-    def disk_encounter_pokemon(self, lureinfo):
+    def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:
             encounter_id = lureinfo['encounter_id']
             fort_id = lureinfo['fort_id']
@@ -312,23 +312,29 @@ class PGoApi:
                     if capture_status == 1:
                         self.log.debug("(LURE) Caught Pokemon: : %s", catch_attempt)
                         self.log.info("(LURE) Caught Pokemon:  %s",
-                                      self.pokemon_names[str(resp['pokemon_data']['pokemon_id'])])
+                                      self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
                         sleep(2)
                         return True
                     elif capture_status != 2:
                         self.log.debug("(LURE) Failed Catch: : %s", catch_attempt)
                         self.log.info("(LURE) Failed to catch Pokemon:  %s",
-                                      self.pokemon_names[str(resp['pokemon_data']['pokemon_id'])])
+                                      self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
                         return False
                     sleep(2)
+            elif resp['result'] == 5:
+                self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
+                              self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
+                self.cleanup_inventory()
+                if not retry:
+                    self.disk_encounter_pokemon(lureinfo, retry=True)
             else:
-                self.log.info("Disk Encounter failed with Status: %s", DISK_ENCOUNTER[resp['result']])
-
+                self.log.info("Could not start Disk (lure) encounter for pokemon: %s",
+                              self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
         except Exception as e:
             self.log.error("Error in disk encounter %s", e)
             return False
 
-    def encounter_pokemon(self, pokemon): #take in a MapPokemon from MapCell.catchable_pokemons
+    def encounter_pokemon(self, pokemon, retry=False): #take in a MapPokemon from MapCell.catchable_pokemons
         encounter_id = pokemon['encounter_id']
         spawn_point_id = pokemon['spawn_point_id']
         # begin encounter_id
@@ -337,7 +343,7 @@ class PGoApi:
                                    spawn_point_id=spawn_point_id,
                                    player_latitude=position[0],
                                    player_longitude=position[1]).call()['responses']['ENCOUNTER']
-        self.log.debug("Started Encounter: %s", encounter)
+        self.log.debug("Attempting to Start Encounter: %s", encounter)
         if encounter['status'] == 1:
             capture_status = -1
             # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
@@ -347,14 +353,23 @@ class PGoApi:
                 # if status == RpcEnum.CATCH_SUCCESS:
                 if capture_status == 1:
                     self.log.debug("Caught Pokemon: : %s", catch_attempt)
-                    self.log.info("Caught Pokemon:  %s", self.pokemon_names[str(pokemon['pokemon_id'])])
+                    self.log.info("Caught Pokemon:  %s", self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
                     sleep(2)
                     return True
                 elif capture_status != 2:
                     self.log.debug("Failed Catch: : %s", catch_attempt)
-                    self.log.info("Failed to Catch Pokemon:  %s", self.pokemon_names[str(pokemon['pokemon_id'])])
+                    self.log.info("Failed to Catch Pokemon:  %s", self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
                     return False
                 sleep(2)
+        elif encounter['status'] == 7:
+            self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
+                          self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
+            self.cleanup_inventory()
+            if not retry:
+                self.encounter_pokemon(pokemon, retry=True)
+        else:
+            self.log.info("Could not start encounter for pokemon: %s",
+                          self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
         return False
 
 
