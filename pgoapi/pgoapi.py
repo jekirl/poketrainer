@@ -277,7 +277,7 @@ class PGoApi:
                             for inventory_item in inventory_items:
                                 if "pokemon_family" in inventory_item['inventory_item_data'] and inventory_item['inventory_item_data']['pokemon_family']['family_id'] == 16 and inventory_item['inventory_item_data']['pokemon_family']['candy'] > 11:
                                   #checks that the item is a candy, that the candy is of the pidgy type, and that there are at least 12 candies
-                                  self.log.info("Evolving pokemon: %s", pokemon)
+                                  self.log.info("Evolving pokemon: %s", self.pokemon_names[str(pokemon['pokemon_id'])])
                                   self.evolve_pokemon(pokemon_id = pokemon['id'])
                         self.log.debug("Releasing pokemon: %s", pokemon)
                         self.log.info("Releasing pokemon: %s IV: %s", self.pokemon_names[str(pokemon['pokemon_id'])], pokemonIVPercentage(pokemon))
