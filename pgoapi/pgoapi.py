@@ -326,7 +326,7 @@ class PGoApi:
                               self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
                 self.cleanup_inventory()
                 if not retry:
-                    self.disk_encounter_pokemon(lureinfo, retry=True)
+                    return self.disk_encounter_pokemon(lureinfo, retry=True)
             else:
                 self.log.info("Could not start Disk (lure) encounter for pokemon: %s",
                               self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
@@ -366,7 +366,7 @@ class PGoApi:
                           self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
             self.cleanup_inventory()
             if not retry:
-                self.encounter_pokemon(pokemon, retry=True)
+                return self.encounter_pokemon(pokemon, retry=True)
         else:
             self.log.info("Could not start encounter for pokemon: %s",
                           self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
