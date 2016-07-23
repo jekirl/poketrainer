@@ -89,7 +89,7 @@ def init_config():
 def main():
     # log settings
     # log format
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
     # log level for http request class
     logging.getLogger("requests").setLevel(logging.WARNING)
     # log level for main pgoapi class
@@ -102,16 +102,17 @@ def main():
         return
 
     if config.debug:
-        logging.getLogger("requests").setLevel(logging.DEBUG)
-        logging.getLogger("pgoapi").setLevel(logging.DEBUG)
-        logging.getLogger("rpc_api").setLevel(logging.DEBUG)
+        logging.getLogger("requests").setLevel(logging.INFO)
+        logging.getLogger("pgoapi").setLevel(logging.INFO)
+        logging.getLogger("rpc_api").setLevel(logging.INFO)
 
     position = get_pos_by_name(config.location)
     if config.test:
         return
 
     # instantiate pgoapi
-    api = PGoApi(config.__dict__)
+    pokemon_names = json.load(open("pokemon.en.json"))
+    api = PGoApi(config.__dict__, pokemon_names)
 
     # provide player position on the earth
     api.set_position(*position)
@@ -125,7 +126,7 @@ def main():
             logging.getLogger("pgoapi").error('Error in main loop, restarting %s', e)
             # restart after sleep
             sleep(30)
-            api = PGoApi(config.__dict__)
+            api = PGoApi(config.__dict__, pokemon_names)
 
             # provide player position on the earth
             api.set_position(*position)
