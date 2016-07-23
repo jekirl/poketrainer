@@ -25,34 +25,34 @@ Author: tjado <https://github.com/tejado>
 
 from __future__ import absolute_import
 
-import re
 import json
-import logging
+import re
+
 import requests
 
 from pgoapi.auth import Auth
 
-class AuthPtc(Auth):
 
+class AuthPtc(Auth):
     PTC_LOGIN_URL = 'https://sso.pokemon.com/sso/login?service=https%3A%2F%2Fsso.pokemon.com%2Fsso%2Foauth2.0%2FcallbackAuthorize'
     PTC_LOGIN_OAUTH = 'https://sso.pokemon.com/sso/oauth2.0/accessToken'
     PTC_LOGIN_CLIENT_SECRET = 'w8ScCUXJQc6kXKw8FiOhd8Fixzht18Dq3PEVkUCP5ZPxtgyWsbTvWHFLm2wNY0JR'
 
     def __init__(self):
         Auth.__init__(self)
-        
+
         self._auth_provider = 'ptc'
-        
+
         self._session = requests.session()
         self._session.verify = True
 
     def login(self, username, password):
 
         self.log.info('Login for: %s', username)
-        
+
         head = {'User-Agent': 'niantic'}
         r = self._session.get(self.PTC_LOGIN_URL, headers=head)
-        
+
         jdata = json.loads(r.content.decode('utf-8'))
         data = {
             'lt': jdata['lt'],
@@ -80,7 +80,7 @@ class AuthPtc(Auth):
             'grant_type': 'refresh_token',
             'code': ticket,
         }
-        
+
         r2 = self._session.post(self.PTC_LOGIN_OAUTH, data=data1)
         access_token = re.sub('&expires.*', '', r2.content.decode('utf-8'))
         access_token = re.sub('.*access_token=', '', access_token)
@@ -92,8 +92,7 @@ class AuthPtc(Auth):
         else:
             self.log.info('Seems not to be a PTC Session Token... login failed :(')
             return False
-        
+
         self._login = True
-        
+
         return True
-        

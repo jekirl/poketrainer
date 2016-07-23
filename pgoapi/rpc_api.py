@@ -25,24 +25,21 @@ Author: tjado <https://github.com/tejado>
 
 from __future__ import absolute_import
 
-import re
 import logging
-import requests
 import subprocess
-
 from importlib import import_module
 
-from pgoapi.protobuf_to_dict import protobuf_to_dict
-from pgoapi.exceptions import NotLoggedInException, ServerBusyOrOfflineException
-from pgoapi.utilities import f2i, h2f, to_camel_case
+import requests
+from pgoapi.protos.POGOProtos.Networking.Envelopes_pb2 import RequestEnvelope
+from pgoapi.protos.POGOProtos.Networking.Envelopes_pb2 import ResponseEnvelope
+from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 
-from . import protos
-from POGOProtos.Networking.Envelopes_pb2 import RequestEnvelope
-from POGOProtos.Networking.Envelopes_pb2 import ResponseEnvelope
-from POGOProtos.Networking.Requests_pb2 import RequestType
+from pgoapi.exceptions import NotLoggedInException, ServerBusyOrOfflineException
+from pgoapi.protobuf_to_dict import protobuf_to_dict
+from pgoapi.utilities import to_camel_case
+
 
 class RpcApi:
-
     def __init__(self, auth_provider):
 
         self.log = logging.getLogger(__name__)
@@ -59,7 +56,8 @@ class RpcApi:
     def decode_raw(self, raw):
         output = error = None
         try:
-            process = subprocess.Popen(['protoc', '--decode_raw'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(['protoc', '--decode_raw'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                       stderr=subprocess.PIPE)
             output, error = process.communicate(raw)
         except:
             output = "Couldn't find protoc in your environment OR other issue..."
@@ -94,7 +92,7 @@ class RpcApi:
 
         return response_dict
 
-    def _build_main_request(self, subrequests, player_position = None):
+    def _build_main_request(self, subrequests, player_position=None):
         self.log.debug('Generating main RPC request...')
 
         request = RequestEnvelope()
@@ -104,8 +102,8 @@ class RpcApi:
         if player_position is not None:
             request.latitude, request.longitude, request.altitude = player_position
 
-        # ticket = self._auth_provider.get_ticket()
-        # if ticket:
+            # ticket = self._auth_provider.get_ticket()
+            # if ticket:
             # request.auth_ticket.expire_timestamp_ms, request.auth_ticket.start, request.auth_ticket.end = ticket
         # else:
         request.auth_info.provider = self._auth_provider.get_name()
@@ -117,7 +115,7 @@ class RpcApi:
 
         request = self._build_sub_requests(request, subrequests)
 
-        self.log.debug('Generated protobuf request: \n\r%s', request )
+        self.log.debug('Generated protobuf request: \n\r%s', request)
 
         return request
 
@@ -147,7 +145,8 @@ class RpcApi:
                                 r = getattr(subrequest_extension, key)
                                 r.append(i)
                             except Exception as e:
-                                self.log.warning('Argument %s with value %s unknown inside %s (Exception: %s)', key, i, proto_name, str(e))
+                                self.log.warning('Argument %s with value %s unknown inside %s (Exception: %s)', key, i,
+                                                 proto_name, str(e))
                     else:
                         try:
                             setattr(subrequest_extension, key, value)
@@ -157,7 +156,8 @@ class RpcApi:
                                 r = getattr(subrequest_extension, key)
                                 r.append(value)
                             except Exception as e:
-                                self.log.warning('Argument %s with value %s unknown inside %s (Exception: %s)', key, value, proto_name, str(e))
+                                self.log.warning('Argument %s with value %s unknown inside %s (Exception: %s)', key,
+                                                 value, proto_name, str(e))
 
                 subrequest = mainrequest.requests.add()
                 subrequest.request_type = entry_id
@@ -170,7 +170,6 @@ class RpcApi:
                 raise Exception('Unknown value in request list')
 
         return mainrequest
-
 
     def _parse_main_response(self, response_raw, subrequests):
         self.log.debug('Parsing main RPC response...')
@@ -193,7 +192,8 @@ class RpcApi:
 
         self.log.debug('Protobuf structure of rpc response:\n\r%s', response_proto)
         try:
-            self.log.debug('Decode raw over protoc (protoc has to be in your PATH):\n\r%s', self.decode_raw(response_raw.content).decode('utf-8'))
+            self.log.debug('Decode raw over protoc (protoc has to be in your PATH):\n\r%s',
+                           self.decode_raw(response_raw.content).decode('utf-8'))
         except:
             self.log.debug('Error during protoc parsing - ignored.')
 
@@ -209,7 +209,7 @@ class RpcApi:
         if 'returns' in response_proto_dict:
             del response_proto_dict['returns']
 
-        list_len = len(subrequests_list) -1
+        list_len = len(subrequests_list) - 1
         i = 0
         for subresponse in response_proto.returns:
             if i > list_len:
@@ -219,7 +219,7 @@ class RpcApi:
             if isinstance(request_entry, int):
                 entry_id = request_entry
             else:
-                entry_id =  list(request_entry.items())[0][0]
+                entry_id = list(request_entry.items())[0][0]
 
             entry_name = RequestType.Name(entry_id)
             proto_name = to_camel_case(entry_name.lower()) + 'Response'
