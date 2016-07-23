@@ -50,7 +50,7 @@ from collections import defaultdict
 import os.path
 
 logger = logging.getLogger(__name__)
-BAD_ITEM_IDS = [101,102,103,701,702,703,704,201] #Potion, Super Potion, RazzBerry, BlukBerry Add 201 to get rid of revive
+BAD_ITEM_IDS = [101,102,701,702,703] #Potion, Super Potion, RazzBerry, BlukBerry Add 201 to get rid of revive
 class PGoApi:
 
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
