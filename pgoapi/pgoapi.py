@@ -69,7 +69,7 @@ class PGoApi:
         self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0) # release anything under this if we don't have it already
         self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0) # release anything under this if we don't have it already
         self._req_method_list = []
-        self._heartbeat_number = 0
+        self._heartbeat_number = 5
         self.pokemon_names = pokemon_names
 
     def call(self):
@@ -139,7 +139,6 @@ class PGoApi:
         else:
             raise AttributeError
     def heartbeat(self):
-        self._heartbeat_number += 1
         # making a standard call to update position, etc
         self.get_player()
         if self._heartbeat_number % 10 == 0:
@@ -147,15 +146,26 @@ class PGoApi:
             self.get_inventory()
         # self.download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e")
         res = self.call()
+        if res.get("direction",-1) == 102:
+            self.log.error("There were a problem responses for api call: %s. Restarting!!!", res)
+            raise AuthException("Token probably expired?")
         self.log.debug('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
+
         if 'GET_PLAYER' in res['responses']:
             player_data = res['responses'].get('GET_PLAYER', {}).get('player_data', {})
             currencies = player_data.get('currencies', [])
             currency_data = ",".join(map(lambda x: "{0}: {1}".format(x.get('name', 'NA'), x.get('amount', 'NA')), currencies))
             self.log.info("Username: %s, Currencies: %s", player_data.get('username', 'NA'), currency_data)
+
         if 'GET_INVENTORY' in res['responses']:
+            with open("data_dumps/%s.json" % self.config['username'], "w") as f:
+                res['responses']['lat'] = self._posf[0]
+                res['responses']['lng'] = self._posf[1]
+                f.write(json.dumps(res['responses'], indent=2))
             self.log.info(get_inventory_data(res, self.pokemon_names))
             self.log.debug(self.cleanup_inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']))
+
+        self._heartbeat_number += 1
         return res
     def walk_to(self,loc): #location in floats of course...
         steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""))
@@ -230,9 +240,9 @@ class PGoApi:
             inventroy_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']
         caught_pokemon = defaultdict(list)
         for inventory_item in inventroy_items:
-            if "pokemon" in  inventory_item['inventory_item_data']:
+            if "pokemon_data" in  inventory_item['inventory_item_data']:
                 # is a pokemon:
-                pokemon = inventory_item['inventory_item_data']['pokemon']
+                pokemon = inventory_item['inventory_item_data']['pokemon_data']
                 if 'cp' in pokemon and "favorite" not in pokemon:
                     caught_pokemon[pokemon["pokemon_id"]].append(pokemon)
             elif "item" in  inventory_item['inventory_item_data']:
@@ -248,36 +258,38 @@ class PGoApi:
                 for pokemon in pokemons[1:]:
                     if 'cp' in pokemon and pokemonIVPercentage(pokemon) < self.MIN_KEEP_IV and pokemon['cp'] < self.KEEP_CP_OVER:
                         self.log.debug("Releasing pokemon: %s", pokemon)
-                        self.log.info("Releasing pokemon: %s IV: %s", self.pokemon_names[str(pokemon['id'])], pokemonIVPercentage(pokemon))
+                        self.log.info("Releasing pokemon: %s IV: %s", self.pokemon_names[str(pokemon['pokemon_id'])], pokemonIVPercentage(pokemon))
                         self.release_pokemon(pokemon_id = pokemon["id"])
 
         return self.call()
 
 
     def disk_encounter_pokemon(self, lureinfo):
-         encounter_id = lureinfo['encounter_id']
-         fort_id = lureinfo['fort_id']
-         position = self._posf
-         resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0], player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
-         self.log.info("Started Disk Encounter, Pokemon ID: %s", resp['pokemon_data']['pokemon_id'])
-         if resp['result'] == 1:
-             capture_status = -1
-             # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
-             while capture_status != 0 and capture_status != 3:
-                 catch_attempt = self.attempt_catch(encounter_id,fort_id)
-                 capture_status = catch_attempt['status']
-                 # if status == RpcEnum.CATCH_SUCCESS:
-                 if capture_status == 1:
-                     self.log.debug("Caught Pokemon: : %s", catch_attempt)
-                     self.log.info("Caught Pokemon:  %s", self.pokemon_names[str(resp['pokemon_data']['pokemon_id'])])
+        try:
+             encounter_id = lureinfo['encounter_id']
+             fort_id = lureinfo['fort_id']
+             position = self._posf
+             resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0], player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
+             if resp['result'] == 1:
+                 capture_status = -1
+                 # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
+                 while capture_status != 0 and capture_status != 3:
+                     catch_attempt = self.attempt_catch(encounter_id,fort_id)
+                     capture_status = catch_attempt['status']
+                     # if status == RpcEnum.CATCH_SUCCESS:
+                     if capture_status == 1:
+                         self.log.debug("Caught Pokemon: : %s", catch_attempt)
+                         self.log.info("Caught Pokemon:  %s", self.pokemon_names[str(resp['pokemon_data']['pokemon_id'])])
+                         sleep(2)
+                         return catch_attempt
+                     elif capture_status != 2:
+                         self.log.debug("Failed Catch: : %s", catch_attempt)
+                         self.log.info("Failed to catch Pokemon:  %s", self.pokemon_names[str(resp['pokemon_data']['pokemon_id'])])
+                         return False
                      sleep(2)
-                     return catch_attempt
-                 elif capture_status != 2:
-                     self.log.debug("Failed Catch: : %s", catch_attempt)
-                     self.log.info("Failed to catch Pokemon:  %s", self.pokemon_names[str(resp['pokemon_data']['pokemon_id'])])
-                     return False
-                 sleep(2)
-         return False
+        except Exception as e:
+            self.log.error("Error in disk encounter %s", e)
+            return False
 
 
     def encounter_pokemon(self,pokemon): #take in a MapPokemon from MapCell.catchable_pokemons
