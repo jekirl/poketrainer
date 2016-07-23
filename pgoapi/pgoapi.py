@@ -261,7 +261,7 @@ class PGoApi:
             elif "item" in  inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
                 if item['item_id'] in MIN_BAD_ITEM_COUNTS and "count" in item and item['count'] > MIN_BAD_ITEM_COUNTS[item['item_id']]:
-                    recycle_count = item['count'] - MIN_BAD_ITEM_COUNTS[item['item']]
+                    recycle_count = item['count'] - MIN_BAD_ITEM_COUNTS[item['item_id']]
                     self.log.info("Recycling Item_ID {0}, item count {1}".format(item['item_id'], recycle_count))
                     self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count)
 

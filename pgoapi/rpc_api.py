@@ -30,9 +30,9 @@ import subprocess
 from importlib import import_module
 
 import requests
-from POGOProtos.Networking.Envelopes_pb2 import RequestEnvelope
-from POGOProtos.Networking.Envelopes_pb2 import ResponseEnvelope
-from POGOProtos.Networking.Requests_pb2 import RequestType
+from pgoapi.protos.POGOProtos.Networking.Envelopes_pb2 import RequestEnvelope
+from pgoapi.protos.POGOProtos.Networking.Envelopes_pb2 import ResponseEnvelope
+from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 
 from pgoapi.exceptions import NotLoggedInException, ServerBusyOrOfflineException
 from pgoapi.protobuf_to_dict import protobuf_to_dict
