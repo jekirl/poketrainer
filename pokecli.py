@@ -126,13 +126,7 @@ def main():
             logging.getLogger("pgoapi").error('Error in main loop, restarting %s', e)
             # restart after sleep
             sleep(30)
-            api = PGoApi(config.__dict__, pokemon_names)
-
-            # provide player position on the earth
-            api.set_position(*position)
-
-            if not api.login(config.auth_service, config.username, config.password, False):
-                return
+            main()
 
     import ipdb; ipdb.set_trace()
 
