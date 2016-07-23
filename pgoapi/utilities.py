@@ -24,8 +24,6 @@ Author: tjado <https://github.com/tejado>
 """
 
 import struct
-import re
-
 def f2i(float):
   return struct.unpack('<Q', struct.pack('<d', float))[0]
 
@@ -42,6 +40,3 @@ def to_camel_case(value):
 
   c = camelcase()
   return "".join(next(c)(x) if x else '_' for x in value.split("_"))
-
-
-            
