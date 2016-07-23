@@ -185,7 +185,7 @@ class PGoApi:
             for i, next_point in enumerate(get_increments(self._posf,step,self.config.get("STEP_SIZE", 200))):
                 self.set_position(*next_point)
                 self.heartbeat()
-                self.log.debug("Walking along :)")
+                self.log.info("On my way to the next fort! :)")
                 sleep(1)
                 while self.catch_near_pokemon():
                     sleep(1)
@@ -206,6 +206,7 @@ class PGoApi:
                                    player_latitude=position[0],
                                    player_longitude=position[1]).call()['responses']['FORT_SEARCH']
             self.log.debug("Fort spinned: %s", res)
+            self.log.info("Fort Spinned: http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
             if 'lure_info' in fort:
                 self.disk_encounter_pokemon(fort['lure_info'])
         return True
@@ -300,7 +301,7 @@ class PGoApi:
             fort_id = lureinfo['fort_id']
             position = self._posf
             self.log.debug("At Fort with lure %s".encode('ascii', 'ignore'), lureinfo)
-            self.log.info("At Fort with Active Pokemon %s", lureinfo.get('active_pokemon_id', 'No Name'))
+            self.log.info("At Fort with Lure AND Active Pokemon %s", self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
             resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0],
                                        player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
             if resp['result'] == 1:
@@ -320,6 +321,9 @@ class PGoApi:
                                       self.pokemon_names[str(resp['pokemon_data']['pokemon_id'])])
                         return False
                     sleep(2)
+            else:
+                self.log.info("Disk Encounter failed with Status: %s", DISK_ENCOUNTER[resp['result']])
+
         except Exception as e:
             self.log.error("Error in disk encounter %s", e)
             return False
@@ -413,14 +417,20 @@ class PGoApi:
         return True
 
     def main_loop(self):
+        catch_attempt = 0
         self.heartbeat()
         while True:
             self.heartbeat()
             sleep(1)
             self.spin_near_fort()
-            while self.catch_near_pokemon():
+            # if catching fails 10 times, maybe you are sofbanned.
+            while self.catch_near_pokemon() and catch_attempt < 10:
                 sleep(4)
+                catch_attempt += 1
                 pass
+            if catch_attempt > 8:
+                self.log.warn("Your account may be softbaned. Failed to catch pokemon %s times", catch_attempt)
+            catch_attempt = 0
 
     @staticmethod
     def flatmap(f, items):
