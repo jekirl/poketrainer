@@ -34,6 +34,7 @@ import random
 from collections import defaultdict
 from itertools import chain, imap
 from time import sleep
+import logging
 
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
@@ -44,6 +45,7 @@ from pgoapi.protos.POGOProtos import Enums_pb2
 from pgoapi.protos.POGOProtos import Inventory_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.rpc_api import RpcApi
+from expiringdict import ExpiringDict
 from .utilities import f2i
 
 logger = logging.getLogger(__name__)
@@ -82,6 +84,9 @@ class PGoApi:
         self._req_method_list = []
         self._heartbeat_number = 5
         self.pokemon_names = pokemon_names
+        self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
+        self.experimental = config.get("EXPERIMENTAL", False)
+        self.pokemon_caught = 0
 
     def call(self):
         if not self._req_method_list:
@@ -166,7 +171,8 @@ class PGoApi:
             player_data = res['responses'].get('GET_PLAYER', {}).get('player_data', {})
             currencies = player_data.get('currencies', [])
             currency_data = ",".join(map(lambda x: "{0}: {1}".format(x.get('name', 'NA'), x.get('amount', 'NA')), currencies))
-            self.log.info("Username: %s, Currencies: %s", player_data.get('username', 'NA'), currency_data)
+            self.log.info("Username: %s, Currencies: %s, Pokemon Caught in this run: %s",
+                          player_data.get('username', 'NA'), currency_data, self.pokemon_caught)
 
         if 'GET_INVENTORY' in res['responses']:
             with open("data_dumps/%s.json" % self.config['username'], "w") as f:
@@ -193,7 +199,7 @@ class PGoApi:
     def spin_near_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._posf,forts)
+        destinations = filtered_forts(self._posf, forts, self.visited_forts, self.experimental)
         if not destinations:
             self.log.error("No fort to walk to!")
             return False
@@ -205,8 +211,14 @@ class PGoApi:
                                    fort_longitude=fort['longitude'],
                                    player_latitude=position[0],
                                    player_longitude=position[1]).call()['responses']['FORT_SEARCH']
-            self.log.debug("Fort spinned: %s", res)
-            self.log.info("Fort Spinned: http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
+            if res['result'] == 1:
+                self.log.debug("Fort spinned: %s", res)
+                self.log.info("Fort Spinned: http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
+                self.visited_forts[fort['id']] = fort
+            elif res['result'] == 4:
+                self.log.debug("For spinned but Your inventory is full : %s", res)
+                self.log.info("For spinned but Your inventory is full.")
+                self.visited_forts[fort['id']] = fort
             if 'lure_info' in fort:
                 self.disk_encounter_pokemon(fort['lure_info'])
         return True
@@ -313,6 +325,7 @@ class PGoApi:
                         self.log.debug("(LURE) Caught Pokemon: : %s", catch_attempt)
                         self.log.info("(LURE) Caught Pokemon:  %s",
                                       self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
+                        self.pokemon_caught += 1
                         sleep(2)
                         return True
                     elif capture_status != 2:
@@ -349,11 +362,12 @@ class PGoApi:
             # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
             while capture_status != 0 and capture_status != 3:
                 catch_attempt = self.attempt_catch(encounter_id,spawn_point_id)
-                capture_status = catch_attempt['status']
+                capture_status = catch_attempt.get('status', -1)
                 # if status == RpcEnum.CATCH_SUCCESS:
                 if capture_status == 1:
                     self.log.debug("Caught Pokemon: : %s", catch_attempt)
                     self.log.info("Caught Pokemon:  %s", self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
+                    self.pokemon_caught += 1
                     sleep(2)
                     return True
                 elif capture_status != 2:

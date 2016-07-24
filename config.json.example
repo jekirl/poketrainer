@@ -8,7 +8,9 @@
         "GMAPS_API_KEY": "some api key here",
         "MIN_KEEP_IV" : 50,
         "KEEP_CP_OVER": 500,
-        "STEP_SIZE": 100
+        "STEP_SIZE": 100,
+        "EXPERIMENTAL": true,
+        "SKIP_VISITED_FORT_DURATION": 600
     },
     {  "auth_service": "ptc",
         "username": "someusername",

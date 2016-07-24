@@ -15,6 +15,10 @@ Usage:
      * Setting this to 0 will never transfer anything
     * `KEEP_CP_OVER` Never transfer any pokemon above this CP
      * Setting this to 0 will never transfer anything
+    * `EXERIMENTAL` will set the flag to use exeperimental features
+    * `SKIP_VISITED_FORT_DURATION` Avoid a fort for a given number of seconds
+     * Setting this to 500 means avoid a fort for 500 seconds before returning, (Should be higher than 300 to have any effect). This will let the bot explore a bigger area.
+        
  * Run python web.py to get a webservice to show you player information, this can be seen at:
   * http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
   * Only 1 needs to run regardless of how many bots you are running
@@ -45,7 +49,7 @@ What's working:
  * Capturing any pokemon it sees on the way
  * Releasing pokemon that you have duplicates of if under CP_CUTOFF (FIXME this is not the best idea....)
   * Change CP_CUTOFF in `pgoapi.py` to configure this, by default it is 0 (to never release)
-
+ * And other stufff, readme needs to be updated...
 
 ## Credits
 * [tejado](https://github.com/tejado) for the base of this and everything else really
