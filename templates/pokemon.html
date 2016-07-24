@@ -1,6 +1,9 @@
 <div>
 <h2>Level: {{player['level']}}</h2>
+<h2>EXP: {{player['level']}}</h2>
 <h2>Stardust: {{currency}}</h2>
+<h2>Pokemon Count: {{pokemons|length}}</h2>
+<h2>EXP: {{player["experience"]}} / {{player["next_level_xp"]}}
 </div>
 <iframe src="http://maps.google.com/maps?q={{latlng}}&z=15&output=embed" width="900" height="900" frameborder="0" style="border:0"></iframe>
 <table>
@@ -15,6 +18,8 @@
    <td>Individual Attack: {{pokemon["individual_attack"]}}</td>
    <td>Individual Stamina: {{pokemon["individual_stamina"]}}</td>
    <td>Individual Defense: {{pokemon["individual_defense"]}}</td>
+   <td>Move 1: {{pokemon["move_1"]}}</td>
+   <td>Move 2: {{pokemon["move_2"]}}</td>
  </tr>
  {% endfor %}
 </table>
