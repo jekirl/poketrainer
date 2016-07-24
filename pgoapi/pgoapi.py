@@ -164,7 +164,7 @@ class PGoApi:
         res = self.call()
         if 'GET_INVENTORY' in res['responses']:
             self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
-        self.log.info("Plaer Items: %s", self.inventory)
+        self.log.info("Player Items: %s", self.inventory)
 
     def heartbeat(self):
         # making a standard call to update position, etc
