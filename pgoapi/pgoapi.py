@@ -91,6 +91,7 @@ class PGoApi:
         self.experimental = config.get("EXPERIMENTAL", False)
         self.pokemon_caught = 0
         self.inventory = Player_Inventory([])
+        self.spin_all_forts = config.get("SPIN_ALL_FORTS", False)
 
     def call(self):
         if not self._req_method_list:
@@ -199,19 +200,71 @@ class PGoApi:
         self._heartbeat_number += 1
         return res
 
-    def walk_to(self, loc): #location in floats of course...
-        steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""))
+    def walk_to(self, loc, waypoints=[]): #location in floats of course...
+        steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""),
+                          self.experimental and self.spin_all_forts, waypoints)
         catch_attempt = 0
         for step in steps:
             for i, next_point in enumerate(get_increments(self._posf,step,self.config.get("STEP_SIZE", 200))):
                 self.set_position(*next_point)
                 self.heartbeat()
+                if self.experimental and self.spin_all_forts:
+                    self.spin_nearest_fort()
                 self.log.info("On my way to the next fort! :)")
                 sleep(1)
                 while self.catch_near_pokemon() and catch_attempt < 5:
                     sleep(1)
                     catch_attempt += 1
                 catch_attempt = 0
+
+    def spin_nearest_fort(self):
+        map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
+        forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
+        destinations = filtered_forts(self._posf, forts, self.visited_forts, False)
+        if destinations:
+            nearest_fort = destinations[0][0]
+            nearest_fort_dis = destinations[0][1]
+            if nearest_fort_dis <= 50:
+                self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(), fort_distance=nearest_fort_dis)
+                if 'lure_info' in nearest_fort:
+                    self.disk_encounter_pokemon(nearest_fort['lure_info'])
+
+    def fort_search_pgoapi(self, fort, player_postion, fort_distance):
+        res = self.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'],
+                               fort_longitude=fort['longitude'],
+                               player_latitude=player_postion[0],
+                               player_longitude=player_postion[1]).call()['responses']['FORT_SEARCH']
+        if res['result'] == 1:
+            self.log.debug("Fort spinned: %s", res)
+            self.log.info("Fort Spinned: http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
+            self.visited_forts[fort['id']] = fort
+        elif res['result'] == 4:
+            self.log.debug("For spinned but Your inventory is full : %s", res)
+            self.log.info("For spinned but Your inventory is full.")
+            self.visited_forts[fort['id']] = fort
+        elif res['result'] == 2:
+            self.log.debug("Could not spin fort -  fort not in range %s", res)
+            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Not in Range %s", fort['latitude'], fort['longitude'], fort_distance)
+        else:
+            self.log.debug("Could not spin fort %s", res)
+            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Error id: %s", fort['latitude'], fort['longitude'], res['result'])
+            return False
+        return True
+
+    def spin_all_forts_visible(self):
+        map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
+        forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
+        destinations = filtered_forts(self._posf, forts, self.visited_forts, self.experimental, True)
+        if not destinations:
+            self.log.error("No fort to walk to!")
+            return False
+        if len(destinations) >= 20:
+            destinations = destinations[:20]
+        furthest_fort = destinations[0][0]
+        self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", furthest_fort['latitude'], furthest_fort['longitude'])
+        self.walk_to((furthest_fort['latitude'], furthest_fort['longitude']),
+                     map(lambda x: "via:%f,%f" % (x[0]['latitude'], x[0]['longitude']), destinations[1:]))
+        return True
 
     def spin_near_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
@@ -220,22 +273,11 @@ class PGoApi:
         if not destinations:
             self.log.error("No fort to walk to!")
             return False
-        for fort in destinations:
+        for fort_data in destinations:
+            fort = fort_data[0]
             self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
             self.walk_to((fort['latitude'], fort['longitude']))
-            position = self.get_position()
-            res = self.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'],
-                                   fort_longitude=fort['longitude'],
-                                   player_latitude=position[0],
-                                   player_longitude=position[1]).call()['responses']['FORT_SEARCH']
-            if res['result'] == 1:
-                self.log.debug("Fort spinned: %s", res)
-                self.log.info("Fort Spinned: http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
-                self.visited_forts[fort['id']] = fort
-            elif res['result'] == 4:
-                self.log.debug("For spinned but Your inventory is full : %s", res)
-                self.log.info("For spinned but Your inventory is full.")
-                self.visited_forts[fort['id']] = fort
+            self.fort_search_pgoapi(fort, self.get_position(), fort_data[1])
             if 'lure_info' in fort:
                 self.disk_encounter_pokemon(fort['lure_info'])
         return True
@@ -490,7 +532,10 @@ class PGoApi:
         while True:
             self.heartbeat()
             sleep(1)
-            self.spin_near_fort()
+            if self.experimental and self.spin_all_forts:
+                self.spin_all_forts_visible()
+            else:
+                self.spin_near_fort()
             # if catching fails 10 times, maybe you are sofbanned.
             while self.catch_near_pokemon() and catch_attempt < 10:
                 sleep(4)

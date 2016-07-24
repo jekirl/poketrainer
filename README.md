@@ -16,8 +16,9 @@ Usage:
     * `KEEP_CP_OVER` Never transfer any pokemon above this CP
      * Setting this to 0 will never transfer anything
     * `EXERIMENTAL` will set the flag to use exeperimental features
-    * `SKIP_VISITED_FORT_DURATION` Avoid a fort for a given number of seconds
+    * `SKIP_VISITED_FORT_DURATION` [Experimental] Avoid a fort for a given number of seconds
      * Setting this to 500 means avoid a fort for 500 seconds before returning, (Should be higher than 300 to have any effect). This will let the bot explore a bigger area.
+    * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever. 
         
  * Run python web.py to get a webservice to show you player information, this can be seen at:
   * http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
