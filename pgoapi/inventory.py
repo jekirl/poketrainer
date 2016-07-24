@@ -38,7 +38,7 @@ class Inventory:
                 self.ultra_balls = item_count
 
     def can_attempt_catch(self):
-        return self.poke_balls + self.great_balls + self.ultra_balls + self.master_balls > 1
+        return self.poke_balls + self.great_balls + self.ultra_balls + self.master_balls > 0
 
     def take_pokeball(self):
         self.poke_balls -= 1
