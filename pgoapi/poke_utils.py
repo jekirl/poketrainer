@@ -16,3 +16,10 @@ def get_inventory_data(res, poke_names):
         poke_names[str(x['pokemon_data']['pokemon_id'])].encode('ascii', 'ignore'),
         x['pokemon_data']['cp'],
         pokemonIVPercentage(x['pokemon_data'])), inventory_items_pokemon_list)))
+
+
+DISK_ENCOUNTER = {0: "UNKNOWN",
+                  1: "SUCCESS",
+                  2: "NOT_AVAILABLE",
+                  3: "NOT_IN_RANGE",
+                  4: "ENCOUNTER_ALREADY_FINISHED"}

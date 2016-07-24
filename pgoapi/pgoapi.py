@@ -27,29 +27,24 @@ Modifications by: j-e-k <https://github.com/j-e-k>
 
 from __future__ import absolute_import
 
-import logging
-import re
-from itertools import chain, imap
-
-import requests
-from .utilities import f2i, h2f
-from pgoapi.rpc_api import RpcApi
-from pgoapi.auth_ptc import AuthPtc
-from pgoapi.auth_google import AuthGoogle
-from pgoapi.exceptions import AuthException, NotLoggedInException, ServerBusyOrOfflineException
-from . import protos
-from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
-from pgoapi.protos.POGOProtos import Inventory_pb2 as Inventory
-
+import json
+import os.path
 import pickle
 import random
-import json
-from pgoapi.location import *
-import pgoapi.protos.POGOProtos.Enums_pb2 as RpcEnum
-from pgoapi.poke_utils import *
-from time import sleep
 from collections import defaultdict
-import os.path
+from itertools import chain, imap
+from time import sleep
+
+from pgoapi.auth_google import AuthGoogle
+from pgoapi.auth_ptc import AuthPtc
+from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException
+from pgoapi.location import *
+from pgoapi.poke_utils import *
+from pgoapi.protos.POGOProtos import Enums_pb2
+from pgoapi.protos.POGOProtos import Inventory_pb2 as Inventory
+from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
+from pgoapi.rpc_api import RpcApi
+from .utilities import f2i
 
 logger = logging.getLogger(__name__)
 BAD_ITEM_IDS = [101,102,701,702,703] #Potion, Super Potion, RazzBerry, BlukBerry Add 201 to get rid of revive
@@ -63,6 +58,9 @@ MIN_BAD_ITEM_COUNTS = {Inventory.ITEM_POTION: 10,
                        Inventory.ITEM_REVIVE: 10}
 MIN_SIMILAR_POKEMON = 1
 
+# Add more here as you wish. http://www.serebii.net/pokemongo/evolution.shtml
+POKEMON_EVOLUTION = {Enums_pb2.PIDGEY: 12}
+POKEMON_EVOLUTION_FAMILY = {Enums_pb2.PIDGEY: Enums_pb2.FAMILY_PIDGEY}
 
 class PGoApi:
 
@@ -180,40 +178,38 @@ class PGoApi:
 
         self._heartbeat_number += 1
         return res
-    def walk_to(self,loc): #location in floats of course...
+
+    def walk_to(self, loc): #location in floats of course...
         steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""))
         for step in steps:
-            for i,next_point in enumerate(get_increments(self._posf,step,self.config.get("STEP_SIZE", 200))):
+            for i, next_point in enumerate(get_increments(self._posf,step,self.config.get("STEP_SIZE", 200))):
                 self.set_position(*next_point)
                 self.heartbeat()
-                self.log.info("sleeping before next heartbeat")
-                sleep(2)
+                self.log.info("On my way to the next fort! :)")
+                sleep(1)
                 while self.catch_near_pokemon():
                     sleep(1)
-
-
 
     def spin_near_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._posf,forts)
-        if destinations:
-            fort = destinations[0]
-            self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
-            self.walk_to((fort['latitude'], fort['longitude']))
-            position = self._posf # FIXME ?
-            res = self.fort_search(fort_id = fort['id'], fort_latitude=fort['latitude'],fort_longitude=fort['longitude'],player_latitude=position[0],player_longitude=position[1]).call()['responses']['FORT_SEARCH']
-            self.log.debug("Fort spinned: %s", res)
-            if 'lure_info' in fort:
-                encounter_id = fort['lure_info']['encounter_id']
-                fort_id = fort['lure_info']['fort_id']
-                position = self._posf
-                resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0], player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
-                self.disk_encounter_pokemon(fort['lure_info'])
-            return True
-        else:
+        if not destinations:
             self.log.error("No fort to walk to!")
             return False
+        for fort in destinations:
+            self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
+            self.walk_to((fort['latitude'], fort['longitude']))
+            position = self.get_position()
+            res = self.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'],
+                                   fort_longitude=fort['longitude'],
+                                   player_latitude=position[0],
+                                   player_longitude=position[1]).call()['responses']['FORT_SEARCH']
+            self.log.debug("Fort spinned: %s", res)
+            self.log.info("Fort Spinned: http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
+            if 'lure_info' in fort:
+                self.disk_encounter_pokemon(fort['lure_info'])
+        return True
 
     def catch_near_pokemon(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
@@ -222,19 +218,26 @@ class PGoApi:
         # catch first pokemon:
         origin = (self._posf[0], self._posf[1])
         pokemon_distances = [(pokemon, distance_in_meters(origin,(pokemon['latitude'], pokemon['longitude']))) for pokemon in pokemons]
-        self.log.debug("Nearby pokemon: : %s", pokemon_distances)
+        if pokemons:
+            self.log.debug("Nearby pokemon: : %s", pokemon_distances)
+            self.log.info("Nearby Pokemon: %s", ", ".join(map(lambda x: self.pokemon_names[str(x['pokemon_id'])], pokemons)))
+        else:
+            self.log.info("No nearby pokemon")
+        catches_successful = False
         for pokemon_distance in pokemon_distances:
             target = pokemon_distance
             self.log.debug("Catching pokemon: : %s, distance: %f meters", target[0], target[1])
             self.log.info("Catching Pokemon: %s", self.pokemon_names[str(target[0]['pokemon_id'])])
-            return self.encounter_pokemon(target[0])
-        return False
+            catches_successful &= self.encounter_pokemon(target[0])
+            sleep(random.randrange(4, 8))
+        return catches_successful
 
     def nearby_map_objects(self):
         position = self.get_position()
         neighbors = getNeighbors(self._posf)
         return self.get_map_objects(latitude=position[0], longitude=position[1], since_timestamp_ms=[0]*len(neighbors), cell_id=neighbors).call()
-    def attempt_catch(self,encounter_id,spawn_point_guid):
+
+    def attempt_catch(self, encounter_id, spawn_point_guid):
         for i in range(1,4):
             r = self.catch_pokemon(
                 normalized_reticle_size= 1.950,
@@ -273,54 +276,74 @@ class PGoApi:
                 for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
                     if 'cp' in pokemon and pokemonIVPercentage(pokemon) < self.MIN_KEEP_IV and pokemon['cp'] < self.KEEP_CP_OVER:
                         # FIXME autoevolve code is jank
-                        if pokemon['pokemon_id'] == 16:
+                        if pokemon['pokemon_id'] in POKEMON_EVOLUTION:
                             for inventory_item in inventory_items:
-                                if "pokemon_family" in inventory_item['inventory_item_data'] and inventory_item['inventory_item_data']['pokemon_family']['family_id'] == 16 and inventory_item['inventory_item_data']['pokemon_family']['candy'] > 11:
-                                  #checks that the item is a candy, that the candy is of the pidgy type, and that there are at least 12 candies
-                                  self.log.info("Evolving pokemon: %s", self.pokemon_names[str(pokemon['pokemon_id'])])
-                                  self.evolve_pokemon(pokemon_id = pokemon['id'])
+                                if PGoApi.can_we_evolve_this(inventory_item, pokemon['pokemon_id']):
+                                    self.log.info("Evolving pokemon: %s",
+                                                  self.pokemon_names[str(pokemon['pokemon_id'])])
+                                    self.evolve_pokemon(pokemon_id=pokemon['id'])
                         self.log.debug("Releasing pokemon: %s", pokemon)
                         self.log.info("Releasing pokemon: %s IV: %s", self.pokemon_names[str(pokemon['pokemon_id'])], pokemonIVPercentage(pokemon))
-                        self.release_pokemon(pokemon_id = pokemon["id"])
+                        self.release_pokemon(pokemon_id=pokemon["id"])
 
         return self.call()
 
+    @staticmethod
+    def can_we_evolve_this(inventory_item, pokemon_id):
+        return "pokemon_family" in inventory_item['inventory_item_data'] and \
+               inventory_item['inventory_item_data']['pokemon_family']['family_id'] == POKEMON_EVOLUTION_FAMILY[
+                   pokemon_id] and inventory_item['inventory_item_data']['pokemon_family']['candy'] > POKEMON_EVOLUTION[
+            pokemon_id]
 
-    def disk_encounter_pokemon(self, lureinfo):
+    def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:
-             encounter_id = lureinfo['encounter_id']
-             fort_id = lureinfo['fort_id']
-             position = self._posf
-             resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0], player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
-             if resp['result'] == 1:
-                 capture_status = -1
-                 # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
-                 while capture_status != 0 and capture_status != 3:
-                     catch_attempt = self.attempt_catch(encounter_id,fort_id)
-                     capture_status = catch_attempt['status']
-                     # if status == RpcEnum.CATCH_SUCCESS:
-                     if capture_status == 1:
-                         self.log.debug("Caught Pokemon: : %s", catch_attempt)
-                         self.log.info("Caught Pokemon:  %s", self.pokemon_names[str(resp['pokemon_data']['pokemon_id'])])
-                         sleep(2)
-                         return catch_attempt
-                     elif capture_status != 2:
-                         self.log.debug("Failed Catch: : %s", catch_attempt)
-                         self.log.info("Failed to catch Pokemon:  %s", self.pokemon_names[str(resp['pokemon_data']['pokemon_id'])])
-                         return False
-                     sleep(2)
+            encounter_id = lureinfo['encounter_id']
+            fort_id = lureinfo['fort_id']
+            position = self._posf
+            self.log.debug("At Fort with lure %s".encode('ascii', 'ignore'), lureinfo)
+            self.log.info("At Fort with Lure AND Active Pokemon %s", self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
+            resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0],
+                                       player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
+            if resp['result'] == 1:
+                capture_status = -1
+                while capture_status != 0 and capture_status != 3:
+                    catch_attempt = self.attempt_catch(encounter_id, fort_id)
+                    capture_status = catch_attempt['status']
+                    if capture_status == 1:
+                        self.log.debug("(LURE) Caught Pokemon: : %s", catch_attempt)
+                        self.log.info("(LURE) Caught Pokemon:  %s",
+                                      self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
+                        sleep(2)
+                        return True
+                    elif capture_status != 2:
+                        self.log.debug("(LURE) Failed Catch: : %s", catch_attempt)
+                        self.log.info("(LURE) Failed to catch Pokemon:  %s",
+                                      self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
+                        return False
+                    sleep(2)
+            elif resp['result'] == 5:
+                self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
+                              self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
+                self.cleanup_inventory()
+                if not retry:
+                    return self.disk_encounter_pokemon(lureinfo, retry=True)
+            else:
+                self.log.info("Could not start Disk (lure) encounter for pokemon: %s",
+                              self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
         except Exception as e:
             self.log.error("Error in disk encounter %s", e)
             return False
 
-
-    def encounter_pokemon(self,pokemon): #take in a MapPokemon from MapCell.catchable_pokemons
+    def encounter_pokemon(self, pokemon, retry=False): #take in a MapPokemon from MapCell.catchable_pokemons
         encounter_id = pokemon['encounter_id']
         spawn_point_id = pokemon['spawn_point_id']
         # begin encounter_id
-        position = self._posf # FIXME ?
-        encounter = self.encounter(encounter_id=encounter_id,spawn_point_id=spawn_point_id,player_latitude=position[0],player_longitude=position[1]).call()['responses']['ENCOUNTER']
-        self.log.debug("Started Encounter: %s", encounter)
+        position = self.get_position()
+        encounter = self.encounter(encounter_id=encounter_id,
+                                   spawn_point_id=spawn_point_id,
+                                   player_latitude=position[0],
+                                   player_longitude=position[1]).call()['responses']['ENCOUNTER']
+        self.log.debug("Attempting to Start Encounter: %s", encounter)
         if encounter['status'] == 1:
             capture_status = -1
             # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
@@ -330,14 +353,23 @@ class PGoApi:
                 # if status == RpcEnum.CATCH_SUCCESS:
                 if capture_status == 1:
                     self.log.debug("Caught Pokemon: : %s", catch_attempt)
-                    self.log.info("Caught Pokemon:  %s", self.pokemon_names[str(pokemon['pokemon_id'])])
+                    self.log.info("Caught Pokemon:  %s", self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
                     sleep(2)
-                    return catch_attempt
+                    return True
                 elif capture_status != 2:
                     self.log.debug("Failed Catch: : %s", catch_attempt)
-                    self.log.info("Failed to Catch Pokemon:  %s", self.pokemon_names[str(pokemon['pokemon_id'])])
-                return False
+                    self.log.info("Failed to Catch Pokemon:  %s", self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
+                    return False
                 sleep(2)
+        elif encounter['status'] == 7:
+            self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
+                          self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
+            self.cleanup_inventory()
+            if not retry:
+                return self.encounter_pokemon(pokemon, retry=True)
+        else:
+            self.log.info("Could not start encounter for pokemon: %s",
+                          self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
         return False
 
 
@@ -400,15 +432,21 @@ class PGoApi:
         return True
 
     def main_loop(self):
+        catch_attempt = 0
         self.heartbeat()
         while True:
             self.heartbeat()
             sleep(1)
             self.spin_near_fort()
-            while self.catch_near_pokemon():
+            # if catching fails 10 times, maybe you are sofbanned.
+            while self.catch_near_pokemon() and catch_attempt < 10:
                 sleep(4)
+                catch_attempt += 1
                 pass
+            if catch_attempt > 8:
+                self.log.warn("Your account may be softbaned. Failed to catch pokemon %s times", catch_attempt)
+            catch_attempt = 0
 
     @staticmethod
     def flatmap(f, items):
-        return chain.from_iterable(imap(f, items))
+        return list(chain.from_iterable(imap(f, items)))
