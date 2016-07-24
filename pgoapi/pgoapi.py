@@ -267,31 +267,31 @@ class PGoApi:
         return self.get_map_objects(latitude=position[0], longitude=position[1], since_timestamp_ms=[0]*len(neighbors), cell_id=neighbors).call()
 
     def attempt_catch(self, encounter_id, spawn_point_guid):
-        pokeball = 1
-        if self.inventory.poke_balls >= 1:
-            pokeball = Inventory.ITEM_POKE_BALL
-            self.inventory.take_pokeball()
-        elif self.inventory.great_balls >= 1:
-            pokeball = Inventory.ITEM_GREAT_BALL
-            self.inventory.take_masterball()
-        elif self.inventory.ultra_balls >= 1:
-            pokeball = Inventory.ITEM_ULTRA_BALL
-            self.inventory.take_ultraball()
-        elif self.inventory.master_balls >= 1:
-            pokeball = Inventory.ITEM_MASTER_BALL
-            self.inventory.take_masterball()
-
-        r = self.catch_pokemon(
-            normalized_reticle_size=1.950,
-            pokeball=pokeball,
-            spin_modifier=0.850,
-            hit_pokemon=True,
-            normalized_hit_position=1,
-            encounter_id=encounter_id,
-            spawn_point_guid=spawn_point_guid,
-        ).call()['responses']['CATCH_POKEMON']
-        if "status" in r:
-            return r
+        catch_status = -1
+        catch_attempts = 0
+        ret = {}
+        # Max 4 attempts to catch pokemon
+        while catch_status != 1 and self.inventory.can_attempt_catch() and catch_attempts < 5:
+            pokeball = self.inventory.take_next_ball()
+            r = self.catch_pokemon(
+                normalized_reticle_size=1.950,
+                pokeball=pokeball,
+                spin_modifier=0.850,
+                hit_pokemon=True,
+                normalized_hit_position=1,
+                encounter_id=encounter_id,
+                spawn_point_guid=spawn_point_guid,
+            ).call()['responses']['CATCH_POKEMON']
+            catch_attempts += 1
+            if "status" in r:
+                catch_status = r['status']
+                # fleed or error
+                if catch_status == 3 or catch_status == 0:
+                    break
+            ret = r
+        if 'status' in ret:
+            return ret
+        return {}
 
     def cleanup_inventory(self, inventory_items=None):
         if not inventory_items:
