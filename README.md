@@ -9,12 +9,16 @@ Usage:
     * Use `--cached` after you have already logged in once, doing so will cache your login and prevent soft bans
     * The `ACCOUNT_INDEX` is the index of the account you want to use from `config.json` indexing from 0
     * USE_GOOGLE will enable google walking directions for navigation
-     * You will probably need to provide an api key in `GMAPS_API_KEY` to avoid rate limits
+    * * You will probably need to provide an api key in `GMAPS_API_KEY` to avoid rate limits
     * `STEP_SIZE` corresponds to how many meters you want to move at most between server calls, set this around 4-6 for walking or 100-200 for really, really fast driving
     * `MIN_KEEP_IV` is the minimum pokemon IV that you want to keep, note that the highest CP pokemon you have will always be kept regardless of its IV
-     * Setting this to 0 will never transfer anything
+    * * Setting this to 0 will never transfer anything
     * `KEEP_CP_OVER` Never transfer any pokemon above this CP
-     * Setting this to 0 will never transfer anything
+    * * Setting this to 0 will never transfer anything
+    * `EXERIMENTAL` will set the flag to use exeperimental features
+    * `SKIP_VISITED_FORT_DURATION` Avoid a fort for a given number of seconds
+    * * setting tis to 500 means avoid a fort for 500 seconds before returning, (Should be higher than 300 to have any effect). This will let the bot explore a bigger area.
+        
  * Run python web.py to get a webservice to show you player information, this can be seen at:
   * http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
   * Only 1 needs to run regardless of how many bots you are running
