@@ -53,3 +53,6 @@ class Pokemon:
     def get_iv_percentage(self):
         return ((self.individual_attack + self.individual_stamina + self.individual_defense + 0.0) / 45.0) * 100.0
 
+    def is_valid_pokemon(self):
+        return self.pokemon_id > 0
+

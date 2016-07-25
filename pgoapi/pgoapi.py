@@ -39,7 +39,6 @@ from time import sleep
 from expiringdict import ExpiringDict
 
 from pgoapi.auth_google import AuthGoogle
-from pgoapi.pokemon import Pokemon
 from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException
 from pgoapi.inventory import Inventory as Player_Inventory
@@ -197,6 +196,8 @@ class PGoApi:
             self.log.info("Player Items: %s", self.inventory)
             self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
+            self.attempt_evolve(self.inventory.inventory_items)
+            self.cleanup_pokemon(self.inventory.inventory_items)
 
         self._heartbeat_number += 1
         return res
@@ -225,7 +226,7 @@ class PGoApi:
         if destinations:
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
-            if nearest_fort_dis <= 40:
+            if nearest_fort_dis <= 40.00:
                 self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(), fort_distance=nearest_fort_dis)
                 if 'lure_info' in nearest_fort:
                     self.disk_encounter_pokemon(nearest_fort['lure_info'])
@@ -339,56 +340,80 @@ class PGoApi:
     def cleanup_inventory(self, inventory_items=None):
         if not inventory_items:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']
-        caught_pokemon = defaultdict(list)
         for inventory_item in inventory_items:
-            if "pokemon_data" in inventory_item['inventory_item_data']:
-                # is a pokemon:
-                pokemon = Pokemon(inventory_item['inventory_item_data']['pokemon_data'], self.pokemon_names)
-                if pokemon.is_favorite:
-                    caught_pokemon[pokemon.pokemon_id].append(pokemon)
-            elif "item" in inventory_item['inventory_item_data']:
+            if "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
                 if item['item_id'] in MIN_BAD_ITEM_COUNTS and "count" in item and item['count'] > MIN_BAD_ITEM_COUNTS[item['item_id']]:
                     recycle_count = item['count'] - MIN_BAD_ITEM_COUNTS[item['item_id']]
                     self.log.info("Recycling Item_ID {0}, item count {1}".format(item['item_id'], recycle_count))
                     self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count)
-
-        for pokemons in caught_pokemon.values():
-            #Only if we have more than MIN_SIMILAR_POKEMON
-            if len(pokemons) > MIN_SIMILAR_POKEMON:
-                pokemons = sorted(pokemons, lambda x: (x.cp, x.iv), reverse=True)
-                # keep the first pokemon....
-                for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
-                    if pokemon.iv < self.MIN_KEEP_IV and pokemon.cp < self.KEEP_CP_OVER:
-                        if pokemon.pokemon_id in POKEMON_EVOLUTION:
-                            pokemon = self.attempt_evolve(inventory_items, pokemon)
-                            if pokemon.id == 0:
-                                break
-                        self.log.info("Releasing pokemon: %s", pokemon)
-                        self.release_pokemon(pokemon_id=pokemon.id)
-
         return self.call()
 
-    def attempt_evolve(self, inventory_items, pokemon):
+    @staticmethod
+    def get_caught_pokemons(inventory_items, pokemon_names):
+        caught_pokemon = defaultdict(list)
         for inventory_item in inventory_items:
-            if PGoApi.can_we_evolve_this(inventory_item, pokemon_id=pokemon.pokemon_id):
-                self.log.info("Evolving pokemon: %s", pokemon)
-                evo_res = self.evolve_pokemon(pokemon_id=pokemon.id)
-                status = evo_res.get('result', -1)
-                if status == 1:
-                    evolved_pokemon = Pokemon(evo_res.get('pokemon_data', {}), self.pokemon_names)
-                    self.log.info("Evolved to %s", evolved_pokemon)
-                    return evolved_pokemon
-                else:
-                    self.log.info("Could not evolve pokemon %s | Status %s", pokemon, status)
-                    return Pokemon({}, self.pokemon_names)
+            if "pokemon_data" in inventory_item['inventory_item_data']:
+                # is a pokemon:
+                pokemon = Pokemon(inventory_item['inventory_item_data']['pokemon_data'], pokemon_names)
+                if not pokemon.is_favorite:
+                    caught_pokemon[pokemon.pokemon_id].append(pokemon)
+        return caught_pokemon
+
+    def cleanup_pokemon(self, inventory_items=None):
+        if not inventory_items:
+                inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
+                    'inventory_items']
+        caught_pokemon = PGoApi.get_caught_pokemons(inventory_items, self.pokemon_names)
+
+        for pokemons in caught_pokemon.values():
+            # Only if we have more than MIN_SIMILAR_POKEMON
+            if len(pokemons) > MIN_SIMILAR_POKEMON:
+                pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
+                # keep the first pokemon....
+                for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
+                    if pokemon.iv < self.MIN_KEEP_IV and pokemon.cp < self.KEEP_CP_OVER and pokemon.is_valid_pokemon():
+                        self.log.info("Releasing pokemon: %s", pokemon)
+                        self.release_pokemon(pokemon_id=pokemon.id)
+                        release_res = self.call()['responses']['RELEASE_POKEMON']
+                        status = release_res.get('result', -1)
+                        if status == 1:
+                            self.log.info("Successfully Released Pokemon %s", pokemon)
+                        else:
+                            self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
+                            self.log.info("Failed to release Pokemon %s", pokemon)
+                        sleep(3)
+
+    def attempt_evolve(self, inventory_items=None):
+        if not inventory_items:
+            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
+                'inventory_items']
+        caught_pokemon = PGoApi.get_caught_pokemons(inventory_items, self.pokemon_names)
+        self.inventory = Player_Inventory(inventory_items)
+        for pokemons in caught_pokemon.values():
+            if len(pokemons) > MIN_SIMILAR_POKEMON:
+                pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
+                for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
+                    if pokemon.pokemon_id in POKEMON_EVOLUTION:
+                        if PGoApi.can_we_evolve_this(self.inventory, pokemon_id=pokemon.pokemon_id):
+                            self.log.info("Evolving pokemon: %s", pokemon)
+                            evo_res = self.evolve_pokemon(pokemon_id=pokemon.id).call()['responses']['EVOLVE_POKEMON']
+                            status = evo_res.get('result', -1)
+                            sleep(3)
+                            if status == 1:
+                                evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}), self.pokemon_names)
+                                self.log.info("Evolved to %s", evolved_pokemon)
+                                return True
+                            else:
+                                self.log.debug("Could not evolve Pokemon %s", evo_res)
+                                self.log.info("Could not evolve pokemon %s | Status %s", pokemon, status)
+                                return False
+        return False
+
 
     @staticmethod
-    def can_we_evolve_this(inventory_item, pokemon_id):
-        return "pokemon_family" in inventory_item['inventory_item_data'] and \
-               inventory_item['inventory_item_data']['pokemon_family']['family_id'] == POKEMON_EVOLUTION_FAMILY[
-                   pokemon_id] and inventory_item['inventory_item_data']['pokemon_family']['candy'] > POKEMON_EVOLUTION[
-            pokemon_id]
+    def can_we_evolve_this(inventory, pokemon_id):
+        return  inventory.pokemon_candy.get(POKEMON_EVOLUTION_FAMILY[pokemon_id], -1) > POKEMON_EVOLUTION[pokemon_id]
 
     def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:
@@ -424,7 +449,7 @@ class PGoApi:
             elif resp['result'] == 5:
                 self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
                               self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
-                self.cleanup_inventory()
+                self.cleanup_pokemon()
                 if not retry:
                     return self.disk_encounter_pokemon(lureinfo, retry=True)
             else:
@@ -470,7 +495,7 @@ class PGoApi:
         elif encounter['status'] == 7:
             self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
                           self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
-            self.cleanup_inventory()
+            self.cleanup_pokemon()
             if not retry:
                 return self.encounter_pokemon(pokemon, retry=True)
         else:
