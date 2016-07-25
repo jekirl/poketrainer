@@ -72,8 +72,18 @@ def init_configs():
     config = parser.parse_args()
     loaded = [load['accounts'][i] for i in config.accounts]
     # Passed in arguments shoud trump
-    return loaded
+    for key,value in load.iteritems():
+        if key not in config.__dict__ or not config.__dict__[key]:
+            config.__dict__[key] = value
+    if config.auth_service not in ['ptc', 'google']:
+        log.error("Invalid Auth service specified! ('ptc' or 'google')")
+        return None
 
+    if "DEFINE_POKEMON_LV" in config.__dict__ and config.DEFINE_POKEMON_LV not in ['CP', 'IV', 'CP*IV', 'CP+IV']:
+        log.error("Invalid pokemon lvl definer! ('CP' or 'IV' or 'CP*IV' or 'CP+IV')")
+        return None
+
+    return config
 
 def main():
     # log settings

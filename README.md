@@ -71,6 +71,7 @@ What's working:
 * [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR  
 * [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos  
 * [AHAAAAAAA](https://github.com/AHAAAAAAA/PokemonGo-Map) for parts of the s2sphere stuff
+* [beeedy](https://github.com/beeedy) for ability to transfer duplicate pokemon
 * And to anyone on the pokemongodev slack channel <3
 
 >>>>>>> super sketch but yolo

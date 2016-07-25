@@ -110,6 +110,10 @@ class PGoApi:
         self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
         self.max_catch_attempts = config.get("MAX_CATCH_ATTEMPTS", 10)
         self.game_master = parse_game_master()
+        self.RELEASE_DUPLICATES = config.get("RELEASE_DUPLICATES", False)
+        self.RELEASE_DUPLICATES_MAX_LV = config.get("RELEASE_DUPLICATES_MAX_LV", 0) # only release duplicates up to this lvl
+        self.RELEASE_DUPLICATES_SCALER = config.get("RELEAES_DUPLICATES_SCALER", 1.0) # when comparing two pokemon's lvl, multiply larger by this
+        self.DEFINE_POKEMON_LV = config.get("DEFINE_POKEMON_LV", "CP") # define a pokemon's lvl, options are CP, IV, CP*IV, CP+IV
 
     def call(self):
         if not self._req_method_list:
@@ -444,6 +448,36 @@ class PGoApi:
                 pokemons = sorted(pokemons, key=lambda pok: (pok.cp, pok.iv), reverse=True)
                 pokemons_keep_counter = 0
                 pokemons_keep_iv_counter = 0
+
+        if self.RELEASE_DUPLICATES:
+            for pokemons in caught_pokemon.values():
+                if len(pokemons) > MIN_SIMILAR_POKEMON:
+                    pokemons = sorted(pokemons, key=lambda x: (x.iv, x.cp), reverse=True)
+                    last_pokemon = pokemons[0]
+                    for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
+                        # two of the same pokemon, compare and release smaller of the two
+                        if self.pokemon_lvl(pokemon) > self.pokemon_lvl(last_pokemon):
+                            if self.pokemon_lvl(pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(last_pokemon) and self.pokemon_lvl(last_pokemon) < self.RELEASE_DUPLICATES_MAX_LV:
+                                # release the lesser!
+                                self.log.debug("Releasing pokemon: %s", last_pokemon)
+                                self.log.info("Releasing pokemon: %s", last_pokemon)
+                                self.release_pokemon(pokemon_id = last_pokemon.id)
+                            last_pokemon = pokemon
+                        elif self.pokemon_lvl(last_pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(pokemon) and self.pokemon_lvl(pokemon) < self.RELEASE_DUPLICATES_MAX_LV:
+                                # release the lesser!
+                                self.log.debug("Releasing pokemon: %s", pokemon)
+                                self.log.info("Releasing pokemon: %s", pokemon)
+                                self.release_pokemon(pokemon_id = pokemon.id)
+
+    def pokemon_lvl(self, pokemon):
+        if self.DEFINE_POKEMON_LV == "CP":
+            return pokemon.cp
+        elif self.DEFINE_POKEMON_LV == "IV":
+            return pokemon.iv
+        elif self.DEFINE_POKEMON_LV == "CP*IV":
+            return pokemon.cp * pokemon.iv
+        elif self.DEFINE_POKEMON_LV == "CP+IV":
+            return pokemon.cp + pokemon.iv
 
                 for pokemon in pokemons:
                     keep, keep_iv = self.is_pokemon_eligible_for_transfer(pokemon, pokemons_keep_counter,
