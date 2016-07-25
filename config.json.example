@@ -11,7 +11,8 @@
         "STEP_SIZE": 100,
         "EXPERIMENTAL": true,
         "SKIP_VISITED_FORT_DURATION": 600,
-        "SPIN_ALL_FORTS": true
+        "SPIN_ALL_FORTS": true,
+        "KEEP_POKEMON_IDS": [129]
     },
     {  "auth_service": "ptc",
         "username": "someusername",
