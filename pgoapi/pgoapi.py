@@ -212,8 +212,6 @@ class PGoApi:
         return res
 
     def walk_to(self, loc, waypoints=[]):  # location in floats of course...
-        print(self._origPosF)
-        print(self._posf)
         steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""),
                           self.experimental and self.spin_all_forts, waypoints)
         catch_attempt = 0
@@ -236,8 +234,7 @@ class PGoApi:
     def spin_nearest_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.visited_forts, False,
-                                      self.STAY_WITHIN_PROXIMITY)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
         if destinations:
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
@@ -277,8 +274,8 @@ class PGoApi:
     def spin_all_forts_visible(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.visited_forts, self.experimental, True,
-                                      self.STAY_WITHIN_PROXIMITY)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts,
+                                      self.experimental)
         if not destinations:
             self.log.debug("No fort to walk to!")
             self.log.info('No more spinnable forts within proximity. Walking back.')
@@ -296,8 +293,8 @@ class PGoApi:
     def spin_near_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.visited_forts, self.experimental, False,
-                                      self.STAY_WITHIN_PROXIMITY)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts,
+                                      self.experimental)
         if not destinations:
             self.log.debug("No fort to walk to!")
             self.log.info('No more spinnable forts within proximity. Walking back.')

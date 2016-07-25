@@ -51,8 +51,7 @@ def distance_in_meters(p1, p2):
     return vincenty(p1, p2).meters
 
 
-def filtered_forts(startingLocation, origin, forts, visited_forts={}, experimental=False, reverse=False,
-                   proximity=False):
+def filtered_forts(startingLocation, origin, forts, proximity, visited_forts={}, experimental=False, reverse=False):
     forts = filter(lambda f: is_active_pokestop(f[0], experimental=experimental,
                                                 visited_forts=visited_forts, startingLocation=startingLocation,
                                                 proximity=proximity),
@@ -62,7 +61,7 @@ def filtered_forts(startingLocation, origin, forts, visited_forts={}, experiment
     return sorted_forts
 
 
-def is_active_pokestop(fort, experimental, visited_forts, startingLocation, proximity=False):
+def is_active_pokestop(fort, experimental, visited_forts, startingLocation, proximity):
     is_active_fort = fort.get('type', None) == 1 and ("enabled" in fort or 'lure_info' in fort) and fort.get(
         'cooldown_complete_timestamp_ms', -1) < time() * 1000
     if experimental and visited_forts:
@@ -71,7 +70,11 @@ def is_active_pokestop(fort, experimental, visited_forts, startingLocation, prox
                 fort['latitude'], fort['longitude'])) < proximity
         else:
             return is_active_fort and fort['id'] not in visited_forts
-    return is_active_fort
+    if proximity:
+        return is_active_fort and distance_in_meters(startingLocation,
+                                                     (fort['latitude'], fort['longitude'])) < proximity
+    else:
+        return is_active_fort
 
 
 # from pokemongodev slack @erhan
