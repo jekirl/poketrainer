@@ -119,8 +119,12 @@ def main():
     # provide player position on the earth
     api.set_position(*position)
 
-    if not api.login(config.auth_service, config.username, config.password, config.cached):
-        return
+    # retry login every 30 seconds if any errors
+    while not api.login(config.auth_service, config.username, config.password, config.cached):
+        log.error('Retrying Login in 30 seconds')
+        sleep(30)
+
+    # main loop
     while True:
         try:
             api.main_loop()
