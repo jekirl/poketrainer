@@ -1,4 +1,7 @@
 from __future__ import absolute_import
+
+from collections import defaultdict
+
 from pgoapi.protos.POGOProtos import Inventory_pb2 as Inventory_Enum
 
 
@@ -13,6 +16,7 @@ class Inventory:
         self.hyper_potion = 0
         self.super_potion = 0
         self.max_potion = 0
+        self.pokemon_candy = defaultdict()
         self.setup_inventory()
 
     def setup_inventory(self):
@@ -36,6 +40,9 @@ class Inventory:
                 self.master_balls = item_count
             elif item_id == Inventory_Enum.ITEM_ULTRA_BALL:
                 self.ultra_balls = item_count
+            pokemon_family = inventory_item['inventory_item_data'].get('pokemon_family', {})
+            self.pokemon_candy[pokemon_family.get('family_id', -1)] = pokemon_family.get('candy', -1)
+
 
     def can_attempt_catch(self):
         return self.poke_balls + self.great_balls + self.ultra_balls + self.master_balls > 0
