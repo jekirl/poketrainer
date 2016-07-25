@@ -1,9 +1,9 @@
 <div>
 <h2>Level: {{player['level']}}</h2>
-<h2>EXP: {{player['level']}}</h2>
+<h2>EXP: {{player["experience"]}} / {{player["next_level_xp"]}}</h2>
 <h2>Stardust: {{currency}}</h2>
 <h2>Pokemon Count: {{pokemons|length}}</h2>
-<h2>EXP: {{player["experience"]}} / {{player["next_level_xp"]}}
+<h2>
 </div>
 <iframe src="http://maps.google.com/maps?q={{latlng}}&z=15&output=embed" width="900" height="900" frameborder="0" style="border:0"></iframe>
 <table>
