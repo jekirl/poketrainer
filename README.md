@@ -1,3 +1,8 @@
+# Please do not sell the bot, or use it to sell accounts/power leveling or what have you. If you really can't help yourself from trying to make money on it, please donate a portion of your profits to [Kiva](https://www.kiva.org/). 
+## To the people that have done so already (heard from quite a few already), thank you for making the world a better place.
+
+----
+
 # DISCLAIMER, this is super sketch and just a proof of concept. Use at your own risk and I claim no credit or responsibility or what have you for parts of it.
 
 # Don't be a dumbass too, Let's not ruin a good thing...
@@ -59,4 +64,5 @@ What's working:
 * [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos  
 * [AHAAAAAAA](https://github.com/AHAAAAAAA/PokemonGo-Map) for parts of the s2sphere stuff
 * And to anyone on the pokemongodev slack channel <3
+
 >>>>>>> super sketch but yolo

@@ -56,11 +56,14 @@ BAD_ITEM_IDS = [101,102,701,702,703] #Potion, Super Potion, RazzBerry, BlukBerry
 # Minimum number of these items in the inventory when recycling inventory, everything else will be kept.
 MIN_BAD_ITEM_COUNTS = {Inventory.ITEM_POTION: 10,
                        Inventory.ITEM_SUPER_POTION: 10,
-                       Inventory.ITEM_HYPER_POTION: 10,
-                       Inventory.ITEM_MAX_POTION: 10,
+                       Inventory.ITEM_HYPER_POTION: 20,
+                       Inventory.ITEM_MAX_POTION: 20,
                        Inventory.ITEM_BLUK_BERRY: 10,
                        Inventory.ITEM_NANAB_BERRY: 10,
-                       Inventory.ITEM_REVIVE: 10}
+                       Inventory.ITEM_REVIVE: 10,
+                       Inventory.ITEM_MAX_REVIVE: 40,
+                       Inventory.ITEM_RAZZ_BERRY: 10
+                       }
 MIN_SIMILAR_POKEMON = 1
 
 # Add more here as you wish. http://www.serebii.net/pokemongo/evolution.shtml
@@ -165,8 +168,7 @@ class PGoApi:
         res = self.call()
         if 'GET_INVENTORY' in res['responses']:
             self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
-        self.log.info("Plaer Items: %s", self.inventory)
-        return self.inventory
+        self.log.info("Player Items: %s", self.inventory)
 
     def heartbeat(self):
         # making a standard call to update position, etc
@@ -583,6 +585,7 @@ class PGoApi:
     def main_loop(self):
         catch_attempt = 0
         self.heartbeat()
+        self.cleanup_inventory()
         while True:
             self.heartbeat()
             sleep(1)
