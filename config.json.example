@@ -1,23 +1,42 @@
-{"accounts" :
-    [{
-        "auth_service": "google",
-        "username": "test@gmail.com",
-        "password": "password",
-        "location": "University of Southern California, Los Angeles, CA",
-        "USE_GOOGLE": true,
-        "GMAPS_API_KEY": "some api key here",
-        "MIN_KEEP_IV" : 50,
-        "KEEP_CP_OVER": 500,
-        "STEP_SIZE": 100,
-        "EXPERIMENTAL": true,
-        "SKIP_VISITED_FORT_DURATION": 600,
-        "SPIN_ALL_FORTS": true
+{
+  "accounts": [
+    {
+      "auth_service": "google",
+      "username": "test@gmail.com",
+      "password": "password",
+      "location": "University of Southern California, Los Angeles, CA",
+      "USE_GOOGLE": true,
+      "GMAPS_API_KEY": "some api key here",
+      "MIN_KEEP_IV": 50,
+      "KEEP_CP_OVER": 500,
+      "STEP_SIZE": 100,
+      "EXPERIMENTAL": true,
+      "SKIP_VISITED_FORT_DURATION": 600,
+      "SPIN_ALL_FORTS": true,
+      "STAY_WITHIN_PROXIMITY": 500,
+      "MIN_ITEMS": {
+        "ITEM_POTION": 10,
+        "ITEM_SUPER_POTION": 10,
+        "ITEM_HYPER_POTION": 10,
+        "ITEM_MAX_POTION": 20,
+        "ITEM_BLUK_BERRY": 10,
+        "ITEM_NANAB_BERRY": 10,
+        "ITEM_REVIVE": 10,
+        "ITEM_MAX_REVIVE": 10,
+        "ITEM_RAZZ_BERRY": 10
+      },
+      "POKEMON_EVOLUTION": {
+        "PIDGEY": 12
+      },
+      "MIN_SIMILAR_POKEMON": 1
     },
-    {  "auth_service": "ptc",
-        "username": "someusername",
-        "password": "password",
-        "location": "University of Southern California, Los Angeles, CA",
-        "USE_GOOGLE": false,
-        "MIN_KEEP_IV" : 70
+    {
+      "auth_service": "ptc",
+      "username": "someusername",
+      "password": "password",
+      "location": "University of Southern California, Los Angeles, CA",
+      "USE_GOOGLE": false,
+      "MIN_KEEP_IV": 70
     }
-    ]}
+  ]
+}

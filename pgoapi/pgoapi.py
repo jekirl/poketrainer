@@ -51,27 +51,9 @@ from pgoapi.rpc_api import RpcApi
 from .utilities import f2i
 
 logger = logging.getLogger(__name__)
-BAD_ITEM_IDS = [101,102,701,702,703] #Potion, Super Potion, RazzBerry, BlukBerry Add 201 to get rid of revive
 
-# Minimum number of these items in the inventory when recycling inventory, everything else will be kept.
-MIN_BAD_ITEM_COUNTS = {Inventory.ITEM_POTION: 10,
-                       Inventory.ITEM_SUPER_POTION: 10,
-                       Inventory.ITEM_HYPER_POTION: 20,
-                       Inventory.ITEM_MAX_POTION: 20,
-                       Inventory.ITEM_BLUK_BERRY: 10,
-                       Inventory.ITEM_NANAB_BERRY: 10,
-                       Inventory.ITEM_REVIVE: 10,
-                       Inventory.ITEM_MAX_REVIVE: 40,
-                       Inventory.ITEM_RAZZ_BERRY: 10
-                       }
-MIN_SIMILAR_POKEMON = 1
-
-# Add more here as you wish. http://www.serebii.net/pokemongo/evolution.shtml
-POKEMON_EVOLUTION = {Enums_pb2.PIDGEY: 12}
-POKEMON_EVOLUTION_FAMILY = {Enums_pb2.PIDGEY: Enums_pb2.FAMILY_PIDGEY}
 
 class PGoApi:
-
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
 
     def __init__(self, config, pokemon_names):
@@ -81,19 +63,37 @@ class PGoApi:
         self._auth_provider = None
         self._api_endpoint = None
         self.config = config
-        self._position_lat = 0 #int cooords
+        self._position_lat = 0  # int cooords
         self._position_lng = 0
         self._position_alt = 0
-        self._posf = (0,0,0) # this is floats
-        self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0) # release anything under this if we don't have it already
-        self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0) # release anything under this if we don't have it already
+        self._posf = (0, 0, 0)  # this is floats
+        self._origPosF = (0, 0, 0)  # this is original position in floats
         self._req_method_list = []
         self._heartbeat_number = 5
-        self.pokemon_names = pokemon_names
-        self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
-        self.experimental = config.get("EXPERIMENTAL", False)
+        self._firstRun = True
+
         self.pokemon_caught = 0
         self.inventory = Player_Inventory([])
+
+        self.pokemon_names = pokemon_names
+
+        self.MIN_ITEMS = {}
+        for k, v in config.get("MIN_ITEMS", False).items():
+            self.MIN_ITEMS[getattr(Inventory, k)] = v
+
+        self.POKEMON_EVOLUTION = {}
+        self.POKEMON_EVOLUTION_FAMILY = {}
+        for k, v in config.get("POKEMON_EVOLUTION", False).items():
+            self.POKEMON_EVOLUTION[getattr(Enums_pb2, k)] = v
+            self.POKEMON_EVOLUTION_FAMILY[getattr(Enums_pb2, k)] = getattr(Enums_pb2, "FAMILY_" + k)
+
+        self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0)  # release anything under this if we don't have it already
+        self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0)  # release anything under this if we don't have it already
+        self.MIN_SIMILAR_POKEMON = config.get("MIN_SIMILAR_POKEMON", 1)  # Keep atleast one of everything.
+        self.STAY_WITHIN_PROXIMITY = config.get("STAY_WITHIN_PROXIMITY", False)  # Stay within proximity
+
+        self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
+        self.experimental = config.get("EXPERIMENTAL", False)
         self.spin_all_forts = config.get("SPIN_ALL_FORTS", False)
 
     def call(self):
@@ -128,15 +128,20 @@ class PGoApi:
 
     def list_curr_methods(self):
         for i in self._req_method_list:
-            print("{} ({})".format(RequestType.Name(i),i))
+            print("{} ({})".format(RequestType.Name(i), i))
+
     def set_logger(self, logger):
         self._ = logger or logging.getLogger(__name__)
 
     def get_position(self):
         return (self._position_lat, self._position_lng, self._position_alt)
+
     def set_position(self, lat, lng, alt):
         self.log.debug('Set Position - Lat: %s Long: %s Alt: %s', lat, lng, alt)
-        self._posf = (lat,lng,alt)
+        self._posf = (lat, lng, alt)
+        if self._firstRun:
+            self._firstRun = False
+            self._origPosF = self._posf
         self._position_lat = f2i(lat)
         self._position_lng = f2i(lng)
         self._position_alt = f2i(alt)
@@ -149,11 +154,11 @@ class PGoApi:
 
             name = func.upper()
             if kwargs:
-                self._req_method_list.append( { RequestType.Value(name): kwargs } )
+                self._req_method_list.append({RequestType.Value(name): kwargs})
                 self.log.debug("Adding '%s' to RPC request including arguments", name)
                 self.log.debug("Arguments of '%s': \n\r%s", name, kwargs)
             else:
-                self._req_method_list.append( RequestType.Value(name) )
+                self._req_method_list.append(RequestType.Value(name))
                 self.log.debug("Adding '%s' to RPC request", name)
 
             return self
@@ -178,7 +183,7 @@ class PGoApi:
             self.get_inventory()
         # self.download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e")
         res = self.call()
-        if res.get("direction",-1) == 102:
+        if res.get("direction", -1) == 102:
             self.log.error("There were a problem responses for api call: %s. Restarting!!!", res)
             raise AuthException("Token probably expired?")
         self.log.debug('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
@@ -186,7 +191,8 @@ class PGoApi:
         if 'GET_PLAYER' in res['responses']:
             player_data = res['responses'].get('GET_PLAYER', {}).get('player_data', {})
             currencies = player_data.get('currencies', [])
-            currency_data = ",".join(map(lambda x: "{0}: {1}".format(x.get('name', 'NA'), x.get('amount', 'NA')), currencies))
+            currency_data = ",".join(
+                map(lambda x: "{0}: {1}".format(x.get('name', 'NA'), x.get('amount', 'NA')), currencies))
             self.log.info("Username: %s, Currencies: %s, Pokemon Caught in this run: %s",
                           player_data.get('username', 'NA'), currency_data, self.pokemon_caught)
 
@@ -205,12 +211,12 @@ class PGoApi:
         self._heartbeat_number += 1
         return res
 
-    def walk_to(self, loc, waypoints=[]): #location in floats of course...
+    def walk_to(self, loc, waypoints=[]):  # location in floats of course...
         steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""),
                           self.experimental and self.spin_all_forts, waypoints)
         catch_attempt = 0
         for step in steps:
-            for i, next_point in enumerate(get_increments(self._posf,step,self.config.get("STEP_SIZE", 200))):
+            for i, next_point in enumerate(get_increments(self._posf, step, self.config.get("STEP_SIZE", 200))):
                 self.set_position(*next_point)
                 self.heartbeat()
                 if self.experimental and self.spin_all_forts:
@@ -222,17 +228,24 @@ class PGoApi:
                     catch_attempt += 1
                 catch_attempt = 0
 
+    def walkBackToOrigin(self):
+        self.walk_to(self._origPosF)
+
     def spin_nearest_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._posf, forts, self.visited_forts, False)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
         if destinations:
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
             if nearest_fort_dis <= 40.00:
-                self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(), fort_distance=nearest_fort_dis)
+                self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(),
+                                        fort_distance=nearest_fort_dis)
                 if 'lure_info' in nearest_fort:
                     self.disk_encounter_pokemon(nearest_fort['lure_info'])
+        else:
+            self.log.info('No more spinnable forts within proximity. Walking back.')
+            self.walkBackToOrigin()
 
     def fort_search_pgoapi(self, fort, player_postion, fort_distance):
         res = self.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'],
@@ -249,24 +262,30 @@ class PGoApi:
             self.visited_forts[fort['id']] = fort
         elif res['result'] == 2:
             self.log.debug("Could not spin fort -  fort not in range %s", res)
-            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Not in Range %s", fort['latitude'], fort['longitude'], fort_distance)
+            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Not in Range %s", fort['latitude'],
+                          fort['longitude'], fort_distance)
         else:
             self.log.debug("Could not spin fort %s", res)
-            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Error id: %s", fort['latitude'], fort['longitude'], res['result'])
+            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Error id: %s", fort['latitude'],
+                          fort['longitude'], res['result'])
             return False
         return True
 
     def spin_all_forts_visible(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._posf, forts, self.visited_forts, self.experimental, True)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts,
+                                      self.experimental)
         if not destinations:
-            self.log.error("No fort to walk to!")
+            self.log.debug("No fort to walk to!")
+            self.log.info('No more spinnable forts within proximity. Walking back.')
+            self.walkBackToOrigin()
             return False
         if len(destinations) >= 20:
             destinations = destinations[:20]
         furthest_fort = destinations[0][0]
-        self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", furthest_fort['latitude'], furthest_fort['longitude'])
+        self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", furthest_fort['latitude'],
+                      furthest_fort['longitude'])
         self.walk_to((furthest_fort['latitude'], furthest_fort['longitude']),
                      map(lambda x: "via:%f,%f" % (x[0]['latitude'], x[0]['longitude']), destinations[1:]))
         return True
@@ -274,13 +293,17 @@ class PGoApi:
     def spin_near_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._posf, forts, self.visited_forts, self.experimental)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts,
+                                      self.experimental)
         if not destinations:
-            self.log.error("No fort to walk to!")
+            self.log.debug("No fort to walk to!")
+            self.log.info('No more spinnable forts within proximity. Walking back.')
+            self.walkBackToOrigin()
             return False
         for fort_data in destinations:
             fort = fort_data[0]
-            self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
+            self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", fort['latitude'],
+                          fort['longitude'])
             self.walk_to((fort['latitude'], fort['longitude']))
             self.fort_search_pgoapi(fort, self.get_position(), fort_data[1])
             if 'lure_info' in fort:
@@ -293,10 +316,13 @@ class PGoApi:
 
         # catch first pokemon:
         origin = (self._posf[0], self._posf[1])
-        pokemon_distances = [(pokemon, distance_in_meters(origin,(pokemon['latitude'], pokemon['longitude']))) for pokemon in pokemons]
+        pokemon_distances = [(pokemon, distance_in_meters(origin, (pokemon['latitude'], pokemon['longitude']))) for
+                             pokemon
+                             in pokemons]
         if pokemons:
             self.log.debug("Nearby pokemon: : %s", pokemon_distances)
-            self.log.info("Nearby Pokemon: %s", ", ".join(map(lambda x: self.pokemon_names[str(x['pokemon_id'])], pokemons)))
+            self.log.info("Nearby Pokemon: %s",
+                          ", ".join(map(lambda x: self.pokemon_names[str(x['pokemon_id'])], pokemons)))
         else:
             self.log.info("No nearby pokemon")
         catches_successful = False
@@ -311,7 +337,9 @@ class PGoApi:
     def nearby_map_objects(self):
         position = self.get_position()
         neighbors = getNeighbors(self._posf)
-        return self.get_map_objects(latitude=position[0], longitude=position[1], since_timestamp_ms=[0]*len(neighbors), cell_id=neighbors).call()
+        return self.get_map_objects(latitude=position[0], longitude=position[1],
+                                    since_timestamp_ms=[0] * len(neighbors),
+                                    cell_id=neighbors).call()
 
     def attempt_catch(self, encounter_id, spawn_point_guid):
         catch_status = -1
@@ -342,14 +370,17 @@ class PGoApi:
 
     def cleanup_inventory(self, inventory_items=None):
         if not inventory_items:
-            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']
+            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
+                'inventory_items']
         for inventory_item in inventory_items:
             if "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
-                if item['item_id'] in MIN_BAD_ITEM_COUNTS and "count" in item and item['count'] > MIN_BAD_ITEM_COUNTS[item['item_id']]:
-                    recycle_count = item['count'] - MIN_BAD_ITEM_COUNTS[item['item_id']]
+                if item['item_id'] in self.MIN_ITEMS and "count" in item and item['count'] > self.MIN_ITEMS[
+                    item['item_id']]:
+                    recycle_count = item['count'] - self.MIN_ITEMS[item['item_id']]
                     self.log.info("Recycling Item_ID {0}, item count {1}".format(item['item_id'], recycle_count))
-                    res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()['responses']['RECYCLE_INVENTORY_ITEM']
+                    res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()['responses'][
+                        'RECYCLE_INVENTORY_ITEM']
                     response_code = res['result']
                     if response_code == 1:
                         self.log.info("Recycled Item %s, New Count: %s", item['item_id'], res.get('new_count', 0))
@@ -371,16 +402,16 @@ class PGoApi:
 
     def cleanup_pokemon(self, inventory_items=None):
         if not inventory_items:
-                inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
-                    'inventory_items']
+            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
+                'inventory_items']
         caught_pokemon = PGoApi.get_caught_pokemons(inventory_items, self.pokemon_names)
 
         for pokemons in caught_pokemon.values():
             # Only if we have more than MIN_SIMILAR_POKEMON
-            if len(pokemons) > MIN_SIMILAR_POKEMON:
+            if len(pokemons) > self.MIN_SIMILAR_POKEMON:
                 pokemons = sorted(pokemons, key=lambda x: (x.iv, x.cp), reverse=True)
                 # keep the first pokemon....
-                for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
+                for pokemon in pokemons[self.MIN_SIMILAR_POKEMON:]:
                     if pokemon.iv < self.MIN_KEEP_IV and pokemon.cp < self.KEEP_CP_OVER and pokemon.is_valid_pokemon():
                         self.log.info("Releasing pokemon: %s", pokemon)
                         self.release_pokemon(pokemon_id=pokemon.id)
@@ -400,9 +431,9 @@ class PGoApi:
         caught_pokemon = PGoApi.get_caught_pokemons(inventory_items, self.pokemon_names)
         self.inventory = Player_Inventory(inventory_items)
         for pokemons in caught_pokemon.values():
-            if len(pokemons) > MIN_SIMILAR_POKEMON:
+            if len(pokemons) > self.MIN_SIMILAR_POKEMON:
                 pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
-                for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
+                for pokemon in pokemons[self.MIN_SIMILAR_POKEMON:]:
                     # If we can't evolve this type of pokemon anymore, dont check others.
                     if not self.attempt_evolve_pokemon(pokemon):
                         break
@@ -410,8 +441,8 @@ class PGoApi:
         return False
 
     def attempt_evolve_pokemon(self, pokemon):
-        if pokemon.pokemon_id in POKEMON_EVOLUTION:
-            if PGoApi.can_we_evolve_this(self.inventory, pokemon_id=pokemon.pokemon_id):
+        if pokemon.pokemon_id in self.POKEMON_EVOLUTION:
+            if self.can_we_evolve_this(self.inventory, pokemon_id=pokemon.pokemon_id):
                 self.log.info("Evolving pokemon: %s", pokemon)
                 evo_res = self.evolve_pokemon(pokemon_id=pokemon.id).call()['responses']['EVOLVE_POKEMON']
                 status = evo_res.get('result', -1)
@@ -431,9 +462,9 @@ class PGoApi:
         else:
             return False
 
-    @staticmethod
-    def can_we_evolve_this(inventory, pokemon_id):
-        return  inventory.pokemon_candy.get(POKEMON_EVOLUTION_FAMILY[pokemon_id], -1) > POKEMON_EVOLUTION[pokemon_id]
+    def can_we_evolve_this(self, inventory, pokemon_id):
+        return inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY[pokemon_id], -1) > self.POKEMON_EVOLUTION[
+            pokemon_id]
 
     def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:
@@ -445,7 +476,8 @@ class PGoApi:
             fort_id = lureinfo['fort_id']
             position = self._posf
             self.log.debug("At Fort with lure %s".encode('ascii', 'ignore'), lureinfo)
-            self.log.info("At Fort with Lure AND Active Pokemon %s", self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
+            self.log.info("At Fort with Lure AND Active Pokemon %s",
+                          self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
             resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0],
                                        player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
             if resp['result'] == 1:
@@ -479,7 +511,7 @@ class PGoApi:
             self.log.error("Error in disk encounter %s", e)
             return False
 
-    def encounter_pokemon(self, pokemon, retry=False): #take in a MapPokemon from MapCell.catchable_pokemons
+    def encounter_pokemon(self, pokemon, retry=False):  # take in a MapPokemon from MapCell.catchable_pokemons
         # Update Inventory to make sure we can catch this mon
         self.update_player_inventory()
         if not self.inventory.can_attempt_catch():
@@ -498,7 +530,7 @@ class PGoApi:
             capture_status = -1
             # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
             while capture_status != 0 and capture_status != 3:
-                catch_attempt = self.attempt_catch(encounter_id,spawn_point_id)
+                catch_attempt = self.attempt_catch(encounter_id, spawn_point_id)
                 capture_status = catch_attempt.get('status', -1)
                 # if status == RpcEnum.CATCH_SUCCESS:
                 if capture_status == 1:
@@ -509,7 +541,8 @@ class PGoApi:
                     return True
                 elif capture_status != 2:
                     self.log.debug("Failed Catch: : %s", catch_attempt)
-                    self.log.info("Failed to Catch Pokemon:  %s", self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
+                    self.log.info("Failed to Catch Pokemon:  %s",
+                                  self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
                     return False
                 sleep(2)
         elif encounter['status'] == 7:
@@ -523,9 +556,7 @@ class PGoApi:
                           self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
         return False
 
-
-
-    def login(self, provider, username, password,cached=False):
+    def login(self, provider, username, password, cached=False):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
             raise AuthException("Username/password not correctly specified")
 
@@ -561,7 +592,7 @@ class PGoApi:
             response = pickle.load(open(fname))
         else:
             response = self.heartbeat()
-            f = open(fname,"w")
+            f = open(fname, "w")
             pickle.dump(response, f)
         if not response:
             self.log.info('Login failed!')
@@ -599,7 +630,8 @@ class PGoApi:
                 catch_attempt += 1
                 pass
             if catch_attempt > 8:
-                self.log.warn("Your account may be softbaned Or no Pokeballs. Failed to catch pokemon %s times", catch_attempt)
+                self.log.warn("Your account may be softbaned Or no Pokeballs. Failed to catch pokemon %s times",
+                              catch_attempt)
             catch_attempt = 0
 
     @staticmethod
