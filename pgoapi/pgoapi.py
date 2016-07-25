@@ -39,6 +39,7 @@ from time import sleep
 from expiringdict import ExpiringDict
 
 from pgoapi.auth_google import AuthGoogle
+from pgoapi.pokemon import Pokemon
 from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException
 from pgoapi.inventory import Inventory as Player_Inventory
@@ -224,7 +225,7 @@ class PGoApi:
         if destinations:
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
-            if nearest_fort_dis <= 50:
+            if nearest_fort_dis <= 40:
                 self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(), fort_distance=nearest_fort_dis)
                 if 'lure_info' in nearest_fort:
                     self.disk_encounter_pokemon(nearest_fort['lure_info'])
@@ -340,12 +341,12 @@ class PGoApi:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']
         caught_pokemon = defaultdict(list)
         for inventory_item in inventory_items:
-            if "pokemon_data" in  inventory_item['inventory_item_data']:
+            if "pokemon_data" in inventory_item['inventory_item_data']:
                 # is a pokemon:
-                pokemon = inventory_item['inventory_item_data']['pokemon_data']
-                if 'cp' in pokemon and "favorite" not in pokemon:
-                    caught_pokemon[pokemon["pokemon_id"]].append(pokemon)
-            elif "item" in  inventory_item['inventory_item_data']:
+                pokemon = Pokemon(inventory_item['inventory_item_data']['pokemon_data'], self.pokemon_names)
+                if pokemon.is_favorite:
+                    caught_pokemon[pokemon.pokemon_id].append(pokemon)
+            elif "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
                 if item['item_id'] in MIN_BAD_ITEM_COUNTS and "count" in item and item['count'] > MIN_BAD_ITEM_COUNTS[item['item_id']]:
                     recycle_count = item['count'] - MIN_BAD_ITEM_COUNTS[item['item_id']]
@@ -355,22 +356,32 @@ class PGoApi:
         for pokemons in caught_pokemon.values():
             #Only if we have more than MIN_SIMILAR_POKEMON
             if len(pokemons) > MIN_SIMILAR_POKEMON:
-                pokemons = sorted(pokemons, lambda x,y: cmp(x['cp'],y['cp']),reverse=True)
+                pokemons = sorted(pokemons, lambda x: (x.cp, x.iv), reverse=True)
                 # keep the first pokemon....
                 for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
-                    if 'cp' in pokemon and pokemonIVPercentage(pokemon) < self.MIN_KEEP_IV and pokemon['cp'] < self.KEEP_CP_OVER:
-                        # FIXME autoevolve code is jank
-                        if pokemon['pokemon_id'] in POKEMON_EVOLUTION:
-                            for inventory_item in inventory_items:
-                                if PGoApi.can_we_evolve_this(inventory_item, pokemon['pokemon_id']):
-                                    self.log.info("Evolving pokemon: %s",
-                                                  self.pokemon_names[str(pokemon['pokemon_id'])])
-                                    self.evolve_pokemon(pokemon_id=pokemon['id'])
-                        self.log.debug("Releasing pokemon: %s", pokemon)
-                        self.log.info("Releasing pokemon: %s IV: %s", self.pokemon_names[str(pokemon['pokemon_id'])], pokemonIVPercentage(pokemon))
-                        self.release_pokemon(pokemon_id=pokemon["id"])
+                    if pokemon.iv < self.MIN_KEEP_IV and pokemon.cp < self.KEEP_CP_OVER:
+                        if pokemon.pokemon_id in POKEMON_EVOLUTION:
+                            pokemon = self.attempt_evolve(inventory_items, pokemon)
+                            if pokemon.id == 0:
+                                break
+                        self.log.info("Releasing pokemon: %s", pokemon)
+                        self.release_pokemon(pokemon_id=pokemon.id)
 
         return self.call()
+
+    def attempt_evolve(self, inventory_items, pokemon):
+        for inventory_item in inventory_items:
+            if PGoApi.can_we_evolve_this(inventory_item, pokemon_id=pokemon.pokemon_id):
+                self.log.info("Evolving pokemon: %s", pokemon)
+                evo_res = self.evolve_pokemon(pokemon_id=pokemon.id)
+                status = evo_res.get('result', -1)
+                if status == 1:
+                    evolved_pokemon = Pokemon(evo_res.get('pokemon_data', {}), self.pokemon_names)
+                    self.log.info("Evolved to %s", evolved_pokemon)
+                    return evolved_pokemon
+                else:
+                    self.log.info("Could not evolve pokemon %s | Status %s", pokemon, status)
+                    return Pokemon({}, self.pokemon_names)
 
     @staticmethod
     def can_we_evolve_this(inventory_item, pokemon_id):
