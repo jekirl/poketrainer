@@ -4,7 +4,8 @@ from pgoapi.pokemon import Pokemon
 
 
 def pokemonIVPercentage(pokemon):
-    return ((pokemon.individual_attack + pokemon.pokemon.individual_stamina + pokemon.individual_defense + 0.0) / 45.0) * 100.0
+    return ((pokemon.get('individual_attack', 0) + pokemon.get('individual_stamina', 0) + pokemon.get(
+        'individual_defense', 0) + 0.0) / 45.0) * 100.0
 
 
 def get_inventory_data(res, poke_names):
