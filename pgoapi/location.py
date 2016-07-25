@@ -16,12 +16,16 @@ def getLocation(search):
 
 
 # http://python-gmaps.readthedocs.io/en/latest/gmaps.html#module-gmaps.directions
-def get_route(start, end, use_google=False, GMAPS_API_KEY=""):
+def get_route(start, end, use_google=False, GMAPS_API_KEY="", walk_to_all_forts=False, waypoints=[]):
     origin = (start[0], start[1])
     destination = (end[0], end[1])
     if use_google:
         directions_service = Directions(api_key=GMAPS_API_KEY)
-        d = directions_service.directions(origin, destination, mode="walking", units="metric")
+        if walk_to_all_forts and waypoints:
+            d = directions_service.directions(origin, destination, mode="walking", units="metric",
+                                              optimize_waypoints=True, waypoints=waypoints)
+        else:
+            d = directions_service.directions(origin, destination, mode="walking", units="metric")
         steps = d[0]['legs'][0]['steps']
         return [(step['end_location']["lat"], step['end_location']["lng"]) for step in steps]
     else:
@@ -47,13 +51,13 @@ def distance_in_meters(p1, p2):
     return vincenty(p1, p2).meters
 
 
-def filtered_forts(origin, forts, visited_forts={}, experimental=False):
+def filtered_forts(origin, forts, visited_forts={}, experimental=False, reverse=False):
     forts = filter(lambda f: is_active_pokestop(f[0], experimental=experimental,
                                                 visited_forts=visited_forts),
                    map(lambda x: (x, distance_in_meters(origin, (x['latitude'], x['longitude']))), forts))
 
-    sorted_forts = sorted(forts, lambda x, y: cmp(x[1], y[1]))
-    return [x[0] for x in sorted_forts]
+    sorted_forts = sorted(forts, lambda x, y: cmp(x[1], y[1]), reverse=reverse)
+    return sorted_forts
 
 
 def is_active_pokestop(fort, experimental, visited_forts):
