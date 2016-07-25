@@ -1,4 +1,4 @@
-# Please do not sell the bot, or use it to sell accounts/power leveling or what have you. If you really can't help yourself from trying to make money on it, please donate a portion of your proffits to [Kiva](https://www.kiva.org/). 
+# Please do not sell the bot, or use it to sell accounts/power leveling or what have you. If you really can't help yourself from trying to make money on it, please donate a portion of your profits to [Kiva](https://www.kiva.org/). 
 ## To the people that have done so already (heard from quite a few already), thank you for making the world a better place.
 
 ----
