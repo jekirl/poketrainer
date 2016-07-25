@@ -90,6 +90,7 @@ class PGoApi:
         self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0)  # release anything under this if we don't have it already
         self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0)  # release anything under this if we don't have it already
         self.MIN_SIMILAR_POKEMON = config.get("MIN_SIMILAR_POKEMON", 1)  # Keep atleast one of everything.
+        self.STAY_WITHIN_PROXIMITY = config.get("STAY_WITHIN_PROXIMITY", False)  # Stay within proximity
 
         self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
         self.experimental = config.get("EXPERIMENTAL", False)
@@ -211,6 +212,8 @@ class PGoApi:
         return res
 
     def walk_to(self, loc, waypoints=[]):  # location in floats of course...
+        print(self._origPosF)
+        print(self._posf)
         steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""),
                           self.experimental and self.spin_all_forts, waypoints)
         catch_attempt = 0
@@ -227,10 +230,14 @@ class PGoApi:
                     catch_attempt += 1
                 catch_attempt = 0
 
+    def walkBackToOrigin(self):
+        self.walk_to(self._origPosF)
+
     def spin_nearest_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._posf, forts, self.visited_forts, False)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.visited_forts, False,
+                                      self.STAY_WITHIN_PROXIMITY)
         if destinations:
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
@@ -239,6 +246,9 @@ class PGoApi:
                                         fort_distance=nearest_fort_dis)
                 if 'lure_info' in nearest_fort:
                     self.disk_encounter_pokemon(nearest_fort['lure_info'])
+        else:
+            self.log.info('No more spinnable forts within proximity. Walking back.')
+            self.walkBackToOrigin()
 
     def fort_search_pgoapi(self, fort, player_postion, fort_distance):
         res = self.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'],
@@ -267,9 +277,12 @@ class PGoApi:
     def spin_all_forts_visible(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._posf, forts, self.visited_forts, self.experimental, True)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.visited_forts, self.experimental, True,
+                                      self.STAY_WITHIN_PROXIMITY)
         if not destinations:
-            self.log.error("No fort to walk to!")
+            self.log.debug("No fort to walk to!")
+            self.log.info('No more spinnable forts within proximity. Walking back.')
+            self.walkBackToOrigin()
             return False
         if len(destinations) >= 20:
             destinations = destinations[:20]
@@ -283,9 +296,12 @@ class PGoApi:
     def spin_near_fort(self):
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._posf, forts, self.visited_forts, self.experimental)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.visited_forts, self.experimental, False,
+                                      self.STAY_WITHIN_PROXIMITY)
         if not destinations:
-            self.log.error("No fort to walk to!")
+            self.log.debug("No fort to walk to!")
+            self.log.info('No more spinnable forts within proximity. Walking back.')
+            self.walkBackToOrigin()
             return False
         for fort_data in destinations:
             fort = fort_data[0]
