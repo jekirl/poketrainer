@@ -349,8 +349,14 @@ class PGoApi:
                 if item['item_id'] in MIN_BAD_ITEM_COUNTS and "count" in item and item['count'] > MIN_BAD_ITEM_COUNTS[item['item_id']]:
                     recycle_count = item['count'] - MIN_BAD_ITEM_COUNTS[item['item_id']]
                     self.log.info("Recycling Item_ID {0}, item count {1}".format(item['item_id'], recycle_count))
-                    self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count)
-        return self.call()
+                    res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()['responses']['RECYCLE_INVENTORY_ITEM']
+                    response_code = res['result']
+                    if response_code == 1:
+                        self.log.info("Recycled Item %s, New Count: %s", item['item_id'], res['new_count'])
+                    else:
+                        self.log.info("Failed to recycle Item %s, Code: %s", item['item_id'], response_code)
+                    sleep(2)
+        return self.update_player_inventory()
 
     @staticmethod
     def get_caught_pokemons(inventory_items, pokemon_names):
@@ -372,7 +378,7 @@ class PGoApi:
         for pokemons in caught_pokemon.values():
             # Only if we have more than MIN_SIMILAR_POKEMON
             if len(pokemons) > MIN_SIMILAR_POKEMON:
-                pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
+                pokemons = sorted(pokemons, key=lambda x: (x.iv, x.cp), reverse=True)
                 # keep the first pokemon....
                 for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
                     if pokemon.iv < self.MIN_KEEP_IV and pokemon.cp < self.KEEP_CP_OVER and pokemon.is_valid_pokemon():
@@ -397,22 +403,33 @@ class PGoApi:
             if len(pokemons) > MIN_SIMILAR_POKEMON:
                 pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
                 for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
-                    if pokemon.pokemon_id in POKEMON_EVOLUTION:
-                        if PGoApi.can_we_evolve_this(self.inventory, pokemon_id=pokemon.pokemon_id):
-                            self.log.info("Evolving pokemon: %s", pokemon)
-                            evo_res = self.evolve_pokemon(pokemon_id=pokemon.id).call()['responses']['EVOLVE_POKEMON']
-                            status = evo_res.get('result', -1)
-                            sleep(3)
-                            if status == 1:
-                                evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}), self.pokemon_names)
-                                self.log.info("Evolved to %s", evolved_pokemon)
-                                return True
-                            else:
-                                self.log.debug("Could not evolve Pokemon %s", evo_res)
-                                self.log.info("Could not evolve pokemon %s | Status %s", pokemon, status)
-                                return False
+                    # If we can't evolve this type of pokemon anymore, dont check others.
+                    if not self.attempt_evolve_pokemon(pokemon):
+                        break
+
         return False
 
+    def attempt_evolve_pokemon(self, pokemon):
+        if pokemon.pokemon_id in POKEMON_EVOLUTION:
+            if PGoApi.can_we_evolve_this(self.inventory, pokemon_id=pokemon.pokemon_id):
+                self.log.info("Evolving pokemon: %s", pokemon)
+                evo_res = self.evolve_pokemon(pokemon_id=pokemon.id).call()['responses']['EVOLVE_POKEMON']
+                status = evo_res.get('result', -1)
+                sleep(3)
+                if status == 1:
+                    evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}), self.pokemon_names)
+                    self.log.info("Evolved to %s", evolved_pokemon)
+                    self.update_player_inventory()
+                    return True
+                else:
+                    self.log.debug("Could not evolve Pokemon %s", evo_res)
+                    self.log.info("Could not evolve pokemon %s | Status %s", pokemon, status)
+                    self.update_player_inventory()
+                    return False
+            else:
+                return False
+        else:
+            return False
 
     @staticmethod
     def can_we_evolve_this(inventory, pokemon_id):
