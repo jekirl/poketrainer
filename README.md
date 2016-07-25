@@ -1,4 +1,4 @@
-# Please do not sell the bot, or use it to sell accounts/power leveling or what have you. If you really can't help yourself from trying to make money on it, please donate a portion of your profits to [Kiva](https://www.kiva.org/). 
+# Please do not sell the bot, or use it to sell accounts/power leveling or what have you. If you really can't help yourself from trying to make money on it, please donate a portion of your profits to [Kiva](https://www.kiva.org/).
 ## To the people that have done so already (heard from quite a few already), thank you for making the world a better place.
 
 ----
@@ -23,8 +23,9 @@ Usage:
     * `EXERIMENTAL` will set the flag to use exeperimental features
     * `SKIP_VISITED_FORT_DURATION` [Experimental] Avoid a fort for a given number of seconds
      * Setting this to 500 means avoid a fort for 500 seconds before returning, (Should be higher than 300 to have any effect). This will let the bot explore a bigger area.
-    * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever. 
-        
+    * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
+    * `KEEP_POKEMON_IDS` IDs of pokemon you want the bot to hold regardless of IV/CP
+
  * Run python web.py to get a webservice to show you player information, this can be seen at:
   * http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
   * Only 1 needs to run regardless of how many bots you are running

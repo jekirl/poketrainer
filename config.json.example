@@ -28,7 +28,8 @@
       "POKEMON_EVOLUTION": {
         "PIDGEY": 12
       },
-      "MIN_SIMILAR_POKEMON": 1
+      "MIN_SIMILAR_POKEMON": 1,
+      "KEEP_POKEMON_IDS": [129]
     },
     {
       "auth_service": "ptc",

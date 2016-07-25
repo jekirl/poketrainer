@@ -95,6 +95,7 @@ class PGoApi:
         self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
         self.experimental = config.get("EXPERIMENTAL", False)
         self.spin_all_forts = config.get("SPIN_ALL_FORTS", False)
+        self.KEEP_POKEMON_IDS = config.get("KEEP_POKEMON_IDS", [])
 
     def call(self):
         if not self._req_method_list:
@@ -389,22 +390,22 @@ class PGoApi:
                     sleep(2)
         return self.update_player_inventory()
 
-    @staticmethod
-    def get_caught_pokemons(inventory_items, pokemon_names):
+
+    def get_caught_pokemons(self, inventory_items):
         caught_pokemon = defaultdict(list)
         for inventory_item in inventory_items:
             if "pokemon_data" in inventory_item['inventory_item_data']:
                 # is a pokemon:
-                pokemon = Pokemon(inventory_item['inventory_item_data']['pokemon_data'], pokemon_names)
-                if not pokemon.is_favorite:
+                pokemon = Pokemon(inventory_item['inventory_item_data']['pokemon_data'], self.pokemon_names)
+                if not pokemon.is_favorite and pokemon.pokemon_id not in self.KEEP_POKEMON_IDS:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
         return caught_pokemon
 
     def cleanup_pokemon(self, inventory_items=None):
         if not inventory_items:
-            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
-                'inventory_items']
-        caught_pokemon = PGoApi.get_caught_pokemons(inventory_items, self.pokemon_names)
+                inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
+                    'inventory_items']
+        caught_pokemon = self.get_caught_pokemons(inventory_items)
 
         for pokemons in caught_pokemon.values():
             # Only if we have more than MIN_SIMILAR_POKEMON
@@ -428,7 +429,7 @@ class PGoApi:
         if not inventory_items:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
                 'inventory_items']
-        caught_pokemon = PGoApi.get_caught_pokemons(inventory_items, self.pokemon_names)
+        caught_pokemon = self.get_caught_pokemons(inventory_items)
         self.inventory = Player_Inventory(inventory_items)
         for pokemons in caught_pokemon.values():
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
