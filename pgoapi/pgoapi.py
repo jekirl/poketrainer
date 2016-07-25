@@ -352,7 +352,7 @@ class PGoApi:
                     res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()['responses']['RECYCLE_INVENTORY_ITEM']
                     response_code = res['result']
                     if response_code == 1:
-                        self.log.info("Recycled Item %s, New Count: %s", item['item_id'], res['new_count'])
+                        self.log.info("Recycled Item %s, New Count: %s", item['item_id'], res.get('new_count', 0))
                     else:
                         self.log.info("Failed to recycle Item %s, Code: %s", item['item_id'], response_code)
                     sleep(2)
