@@ -578,23 +578,7 @@ class PGoApi:
             resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0],
                                        player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
             if resp['result'] == 1:
-                capture_status = -1
-                while capture_status != 0 and capture_status != 3:
-                    catch_attempt = self.attempt_catch(encounter_id, fort_id)
-                    capture_status = catch_attempt['status']
-                    if capture_status == 1:
-                        self.log.debug("(LURE) Caught Pokemon: : %s", catch_attempt)
-                        self.log.info("(LURE) Caught Pokemon:  %s",
-                                      self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
-                        self.pokemon_caught += 1
-                        sleep(2)
-                        return True
-                    elif capture_status != 2:
-                        self.log.debug("(LURE) Failed Catch: : %s", catch_attempt)
-                        self.log.info("(LURE) Failed to catch Pokemon:  %s",
-                                      self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
-                        return False
-                    sleep(2)
+                return self.handle_encounter(resp, encounter_id, fort_id, lureinfo.get('active_pokemon_id', 0))
             elif resp['result'] == 5:
                 self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
                               self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
@@ -624,24 +608,7 @@ class PGoApi:
                                    player_longitude=position[1]).call()['responses']['ENCOUNTER']
         self.log.debug("Attempting to Start Encounter: %s", encounter)
         if encounter['status'] == 1:
-            capture_status = -1
-            # while capture_status != RpcEnum.CATCH_ERROR and capture_status != RpcEnum.CATCH_FLEE:
-            while capture_status != 0 and capture_status != 3:
-                catch_attempt = self.attempt_catch(encounter_id, spawn_point_id)
-                capture_status = catch_attempt.get('status', -1)
-                # if status == RpcEnum.CATCH_SUCCESS:
-                if capture_status == 1:
-                    self.log.debug("Caught Pokemon: : %s", catch_attempt)
-                    self.log.info("Caught Pokemon:  %s", self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
-                    self.pokemon_caught += 1
-                    sleep(2)
-                    return True
-                elif capture_status != 2:
-                    self.log.debug("Failed Catch: : %s", catch_attempt)
-                    self.log.info("Failed to Catch Pokemon:  %s",
-                                  self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
-                    return False
-                sleep(2)
+            return self.handle_encounter(encounter, encounter_id, spawn_point_id, pokemon['pokemon_id'])
         elif encounter['status'] == 7:
             self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
                           self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
@@ -652,6 +619,36 @@ class PGoApi:
             self.log.info("Could not start encounter for pokemon: %s",
                           self.pokemon_names.get(str(pokemon['pokemon_id']), "NA"))
         return False
+
+    def handle_encounter(self,encounter,encounter_id,pos_info,pokemon_id):
+        self.log.debug("Started Encounter: %s", encounter)
+        while True:
+            catch_attempt = self.attempt_catch(encounter_id, pos_info)
+            capture_status = catch_attempt.get('status', -1)
+            # if status == RpcEnum.CATCH_SUCCESS:
+            if capture_status == 1:  # caught
+                self.log.debug("Caught Pokemon: : %s", catch_attempt)
+                self.log.info("Caught Pokemon:  %s", self.pokemon_names.get(str(pokemon_id), "NA"))
+                self.pokemon_caught += 1
+                sleep(2)
+                return True
+            elif capture_status == 2:  # escaped ball
+                self.log.debug("Failed Catch: %s", catch_attempt)
+                self.log.info("  %s escaped the ball, trying again", self.pokemon_names.get(
+                    str(pokemon_id), "NA"))
+            elif capture_status == 3:  # fled
+                self.log.debug("Failed Catch: %s", catch_attempt)
+                self.log.info("Failed to Catch Pokemon: %s fled", self.pokemon_names[str(pokemon_id)])
+                return False
+            elif capture_status == 4:  # missed shot
+                self.log.debug("Failed Catch: %s", catch_attempt)
+                self.log.info("  Missed %s, trying again", self.pokemon_names[str(pokemon_id)])
+            else:
+                self.log.debug("Failed Catch: : %s", catch_attempt)
+                self.log.info("Failed to Catch Pokemon:  %s",
+                              self.pokemon_names.get(str(pokemon_id), "NA"))
+                return False
+            sleep(2)
 
     def login(self, provider, username, password, cached=False):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
