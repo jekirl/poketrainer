@@ -283,7 +283,7 @@ class PGoApi:
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Or server error')
-            self.return_to_start()
+            self.walk_back_to_origin()
             return False
         if len(destinations) >= 20:
             destinations = destinations[:20]
@@ -306,7 +306,7 @@ class PGoApi:
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Returning back to origin')
-            self.return_to_start()
+            self.walk_back_to_origin()
             return False
         for fort_data in destinations:
             fort = fort_data[0]
