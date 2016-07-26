@@ -481,7 +481,7 @@ class PGoApi:
     def is_pokemon_eligible_for_evolution(self, pokemon):
         return self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None),
                                                 -1) > self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None) \
-               and pokemon.pokemon_id in self.keep_pokemon_ids \
+               and pokemon.pokemon_id not in self.keep_pokemon_ids \
                and not pokemon.is_favorite \
                and pokemon.pokemon_id in self.POKEMON_EVOLUTION
 
