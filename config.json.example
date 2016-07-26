@@ -29,7 +29,8 @@
         "PIDGEY": 12
       },
       "MIN_SIMILAR_POKEMON": 1,
-      "KEEP_POKEMON_NAMES": ["MEWTWO"]
+      "KEEP_POKEMON_NAMES": ["MEWTWO"],
+      "MAX_CATCH_ATTEMPTS": 10
     },
     {
       "auth_service": "ptc",
