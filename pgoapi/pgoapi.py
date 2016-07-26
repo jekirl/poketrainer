@@ -78,12 +78,12 @@ class PGoApi:
         self.pokemon_names = pokemon_names
 
         self.MIN_ITEMS = {}
-        for k, v in config.get("MIN_ITEMS", False).items():
+        for k, v in config.get("MIN_ITEMS", {}).items():
             self.MIN_ITEMS[getattr(Inventory, k)] = v
 
         self.POKEMON_EVOLUTION = {}
         self.POKEMON_EVOLUTION_FAMILY = {}
-        for k, v in config.get("POKEMON_EVOLUTION", False).items():
+        for k, v in config.get("POKEMON_EVOLUTION", {}).items():
             self.POKEMON_EVOLUTION[getattr(Enums_pb2, k)] = v
             self.POKEMON_EVOLUTION_FAMILY[getattr(Enums_pb2, k)] = getattr(Enums_pb2, "FAMILY_" + k)
 
@@ -474,8 +474,8 @@ class PGoApi:
             return False
 
     def is_pokemon_eligible_for_evolution(self, pokemon):
-        return self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY[pokemon.pokemon_id], -1) > self.POKEMON_EVOLUTION[
-            pokemon.pokemon_id] \
+        return self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id,None), -1) > self.POKEMON_EVOLUTION.get(
+            pokemon.pokemon_id,None) \
                and pokemon.pokemon_id in self.keep_pokemon_ids \
                and not pokemon.is_favorite \
                and pokemon.pokemon_id in self.POKEMON_EVOLUTION
