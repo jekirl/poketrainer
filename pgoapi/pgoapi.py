@@ -432,11 +432,12 @@ class PGoApi:
                         sleep(3)
 
     def is_pokemon_eligible_for_transfer(self, pokemon):
-        return not pokemon.is_favorite \
-               and pokemon.iv < self.MIN_KEEP_IV \
-               and pokemon.cp < self.KEEP_CP_OVER \
-               and pokemon.is_valid_pokemon() \
-               and pokemon.pokemon_id not in self.keep_pokemon_ids
+        return (pokemon.pokemon_id in self.throw_pokemon_ids and not pokemon.is_favorite) \
+               or (not pokemon.is_favorite and
+                   pokemon.iv < self.MIN_KEEP_IV and
+                   pokemon.cp < self.KEEP_CP_OVER and
+                   pokemon.is_valid_pokemon() and
+                   pokemon.pokemon_id not in self.keep_pokemon_ids)
 
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:
@@ -474,8 +475,8 @@ class PGoApi:
             return False
 
     def is_pokemon_eligible_for_evolution(self, pokemon):
-        return self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id,None), -1) > self.POKEMON_EVOLUTION.get(
-            pokemon.pokemon_id,None) \
+        return self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None),
+                                                -1) > self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None) \
                and pokemon.pokemon_id in self.keep_pokemon_ids \
                and not pokemon.is_favorite \
                and pokemon.pokemon_id in self.POKEMON_EVOLUTION
