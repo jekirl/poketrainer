@@ -464,6 +464,32 @@ class PGoApi:
                     else:
                         self.do_release_pokemon(pokemon)
 
+                # reset the counters just in case
+                self._pokemons_keep_iv_counter = 0
+                self._pokemons_keep_counter = 0
+
+    def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon=None):
+        # never release favorites and other defined pokemons
+        if pokemon.is_favorite or pokemon.pokemon_id in self.keep_pokemon_ids:
+            self._pokemons_keep_counter += 1
+            return False
+        # release defined throwaway pokemons
+        elif pokemon.pokemon_id in self.throw_pokemon_ids:
+            return True
+        # keep high-iv pokemons based on config values
+        elif pokemon.iv > self.KEEP_IV_OVER and self._pokemons_keep_iv_counter < self.MAX_POKEMON_HIGH_IV and \
+                        pokemon.cp > (best_pokemon.cp * self.KEEP_IV_MIN_PERCENT_CP / 100):
+            self._pokemons_keep_iv_counter += 1
+            self._pokemons_keep_counter += 1
+            return False
+        # keep high-cp pokemons and first MIN_SIMILAR_POKEMON amount of pokemons
+        elif pokemon.cp > self.KEEP_CP_OVER or self._pokemons_keep_counter < self.MIN_SIMILAR_POKEMON:
+            self._pokemons_keep_counter += 1
+            return False
+        # release all other pokemons
+        else:
+            return True
+
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
