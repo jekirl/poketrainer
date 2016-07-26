@@ -34,7 +34,11 @@
       "MIN_SIMILAR_POKEMON": 1,
       "KEEP_POKEMON_NAMES": ["MEWTWO"],
       "THROW_POKEMON_NAMES": ["PIDGEY"],
-      "MAX_CATCH_ATTEMPTS": 10
+      "MAX_CATCH_ATTEMPTS": 10,
+      "LIST_POKEMON_BEFORE_CLEANUP": true,
+      "LIST_INVENTORY_BEFORE_CLEANUP": true,
+      "VERBOSE_PATHING": false,
+      "PLAYER_DATA_FREQUENCY": 1
     },
     {
       "auth_service": "ptc",
