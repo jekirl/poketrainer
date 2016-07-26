@@ -84,8 +84,8 @@ class PGoApi:
         self.POKEMON_EVOLUTION = {}
         self.POKEMON_EVOLUTION_FAMILY = {}
         for k, v in config.get("POKEMON_EVOLUTION", {}).items():
-            self.POKEMON_EVOLUTION[getattr(Enums_pb2, k)] = v
-            self.POKEMON_EVOLUTION_FAMILY[getattr(Enums_pb2, k)] = getattr(Enums_pb2, "FAMILY_" + k)
+            self.POKEMON_EVOLUTION[getattr(Enums_pb2, k, 0)] = v
+            self.POKEMON_EVOLUTION_FAMILY[getattr(Enums_pb2, k, 0)] = getattr(Enums_pb2, "FAMILY_" + k, 0)
 
         self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0)  # release anything under this if we don't have it already
         self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0)  # release anything under this if we don't have it already
