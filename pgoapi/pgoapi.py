@@ -35,7 +35,7 @@ import random
 from collections import defaultdict
 from itertools import chain, imap
 from time import sleep
-
+from Queue import *
 from expiringdict import ExpiringDict
 
 from pgoapi.auth_google import AuthGoogle
@@ -632,11 +632,17 @@ class PGoApi:
 
         return True
 
-    def main_loop(self):
+    def main_loop(self,queue):
         catch_attempt = 0
         self.heartbeat()
-        self.cleanup_inventory()
+        # self.cleanup_inventory()
         while True:
+            try:
+                (function,args,kwargs) = queue.get_nowait()
+                getattr(self,function)(*args,**kwargs)
+                queue.task_done()
+            except Empty:
+                pass
             self.heartbeat()
             sleep(1)
             if self.experimental and self.spin_all_forts:

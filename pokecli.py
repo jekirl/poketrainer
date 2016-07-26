@@ -43,7 +43,9 @@ from geopy.geocoders import GoogleV3
 from s2sphere import CellId, LatLng
 
 log = logging.getLogger(__name__)
-
+from threading import Thread
+from Queue import Queue
+from web import run_web
 def get_pos_by_name(location_name):
     geolocator = GoogleV3()
     loc = geolocator.geocode(location_name)
@@ -53,7 +55,7 @@ def get_pos_by_name(location_name):
 
     return (loc.latitude, loc.longitude, loc.altitude)
 
-def init_config():
+def init_configs():
     parser = argparse.ArgumentParser()
     config_file = "config.json"
 
@@ -64,28 +66,13 @@ def init_config():
             load.update(json.load(data))
 
     # Read passed in Arguments
-    required = lambda x: not x in load['accounts'][0].keys()
-    parser.add_argument("-a", "--auth_service", help="Auth Service ('ptc' or 'google')",
-        required=required("auth_service"))
-    parser.add_argument("-i", "--config_index", help="config_index", default=0, type=int)
-    parser.add_argument("-u", "--username", help="Username", required=required("username"))
-    parser.add_argument("-p", "--password", help="Password", required=required("password"))
-    parser.add_argument("-l", "--location", help="Location", required=required("location"))
-    parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true')
-    parser.add_argument("-c", "--cached", help="cached", action='store_true')
-    parser.add_argument("-t", "--test", help="Only parse the specified location", action='store_true')
-    parser.set_defaults(DEBUG=False, TEST=False,CACHED=False)
+    parser.add_argument("-a", "--accounts", help="config_index", nargs='+', default=[0], type=int)
+    # parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true')
+    # parser.set_defaults(DEBUG=False)
     config = parser.parse_args()
-    load = load['accounts'][config.__dict__['config_index']]
+    loaded = [load['accounts'][i] for i in config.accounts]
     # Passed in arguments shoud trump
-    for key,value in load.iteritems():
-        if key not in config.__dict__ or not config.__dict__[key]:
-            config.__dict__[key] = value
-    if config.auth_service not in ['ptc', 'google']:
-      log.error("Invalid Auth service specified! ('ptc' or 'google')")
-      return None
-
-    return config
+    return loaded
 
 
 def main():
@@ -99,42 +86,33 @@ def main():
     # log level for internal pgoapi class
     logging.getLogger("rpc_api").setLevel(logging.INFO)
 
-    config = init_config()
-    if not config:
-        return
+    # FIXME
+    # if config.debug:
+    #     logging.getLogger("requests").setLevel(logging.DEBUG)
+    #     logging.getLogger("pgoapi").setLevel(logging.DEBUG)
+    #     logging.getLogger("rpc_api").setLevel(logging.DEBUG)
+    queues = {}
+    for config in init_configs():
+        queues[config["username"]] = Queue()
+        position = get_pos_by_name(config['location'])
+        # instantiate pgoapi
+        pokemon_names = json.load(open("pokemon.en.json"))
+        api = PGoApi(config, pokemon_names)
 
-    if config.debug:
-        logging.getLogger("requests").setLevel(logging.DEBUG)
-        logging.getLogger("pgoapi").setLevel(logging.DEBUG)
-        logging.getLogger("rpc_api").setLevel(logging.DEBUG)
-
-    position = get_pos_by_name(config.location)
-    if config.test:
-        return
-
-    # instantiate pgoapi
-    pokemon_names = json.load(open("pokemon.en.json"))
-    api = PGoApi(config.__dict__, pokemon_names)
-
-    # provide player position on the earth
-    api.set_position(*position)
-
-    # retry login every 30 seconds if any errors
-    while not api.login(config.auth_service, config.username, config.password, config.cached):
-        log.error('Retrying Login in 30 seconds')
-        sleep(30)
-
-    # main loop
-    while True:
+        # provide player position on the earth
+        api.set_position(*position)
+        if not api.login(config["auth_service"], config["username"], config["password"], config.get("cached",False)):
+            return
         try:
-            api.main_loop()
+            t = Thread(target=api.main_loop, args=[queues[config["username"]]])
+            t.daemon = True
+            t.start()
         except Exception as e:
             log.error('Error in main loop, restarting %s', e)
             # restart after sleep
             sleep(30)
             main()
-
-    import ipdb; ipdb.set_trace()
-
+    run_web(queues)
+    t.join(1)
 if __name__ == '__main__':
     main()
