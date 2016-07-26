@@ -70,6 +70,8 @@ class PGoApi:
         self._origPosF = (0, 0, 0)  # this is original position in floats
         self._req_method_list = []
         self._heartbeat_number = 5
+        self._pokemons_keep_counter = 0
+        self._pokemons_keep_iv_counter = 0
         self._firstRun = True
 
         self.pokemon_caught = 0
@@ -87,8 +89,17 @@ class PGoApi:
             self.POKEMON_EVOLUTION[getattr(Enums_pb2, k)] = v
             self.POKEMON_EVOLUTION_FAMILY[getattr(Enums_pb2, k)] = getattr(Enums_pb2, "FAMILY_" + k)
 
-        self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0)  # release anything under this if we don't have it already
-        self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0)  # release anything under this if we don't have it already
+        self.KEEP_IV_OVER = config.get("KEEP_IV_OVER", 0)  # release anything under this
+        self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0)  # release anything under this
+
+        # Minimum CP (percentage of strongest pokemon) for a pokemon to keep because of the KEEP_IV_OVER
+        # 0 = ignore this value
+        self.KEEP_IV_MIN_PERCENT_CP = config.get("KEEP_IV_MIN_PERCENT_CP", 0)
+
+        # Maximum nr of Pokemon to keep because of the KEEP_IV_OVER vlaue
+        # 999 = basically ignore this value
+        self.MAX_POKEMON_HIGH_IV = config.get("MAX_POKEMON_HIGH_IV", 999)
+
         self.MIN_SIMILAR_POKEMON = config.get("MIN_SIMILAR_POKEMON", 1)  # Keep atleast one of everything.
         self.STAY_WITHIN_PROXIMITY = config.get("STAY_WITHIN_PROXIMITY", False)  # Stay within proximity
 
@@ -408,6 +419,18 @@ class PGoApi:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
         return caught_pokemon
 
+    def do_release_pokemon(self, pokemon):
+        self.log.info("Releasing pokemon: %s", pokemon)
+        self.release_pokemon(pokemon_id=pokemon.id)
+        release_res = self.call()['responses']['RELEASE_POKEMON']
+        status = release_res.get('result', -1)
+        if status == 1:
+            self.log.info("Successfully Released Pokemon %s", pokemon)
+        else:
+            self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
+            self.log.info("Failed to release Pokemon %s", pokemon)
+        sleep(3)
+
     def cleanup_pokemon(self, inventory_items=None):
         if not inventory_items:
                 inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
@@ -415,30 +438,41 @@ class PGoApi:
         caught_pokemon = self.get_caught_pokemons(inventory_items)
 
         for pokemons in caught_pokemon.values():
-            # Only if we have more than MIN_SIMILAR_POKEMON
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
-                pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
-                # keep the first pokemon....
-                for pokemon in pokemons[self.MIN_SIMILAR_POKEMON:]:
-                    if self.is_pokemon_eligible_for_transfer(pokemon):
-                        self.log.info("Releasing pokemon: %s", pokemon)
-                        self.release_pokemon(pokemon_id=pokemon.id)
-                        release_res = self.call()['responses']['RELEASE_POKEMON']
-                        status = release_res.get('result', -1)
-                        if status == 1:
-                            self.log.info("Successfully Released Pokemon %s", pokemon)
-                        else:
-                            self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
-                            self.log.info("Failed to release Pokemon %s", pokemon)
-                        sleep(3)
+                # highest CP pokemon first
+                pokemons = sorted(pokemons, key=lambda pok: (pok.cp, pok.iv), reverse=True)
+                self._pokemons_keep_counter = 0
+                self._pokemons_keep_iv_counter = 0
 
-    def is_pokemon_eligible_for_transfer(self, pokemon):
-        return (pokemon.pokemon_id in self.throw_pokemon_ids and not pokemon.is_favorite) \
-               or (not pokemon.is_favorite and
-                   pokemon.iv < self.MIN_KEEP_IV and
-                   pokemon.cp < self.KEEP_CP_OVER and
-                   pokemon.is_valid_pokemon() and
-                   pokemon.pokemon_id not in self.keep_pokemon_ids)
+                for pokemon in pokemons:
+                    if self.is_pokemon_eligible_for_transfer(pokemon, pokemons[0]):
+                        self.do_release_pokemon(pokemon)
+
+                # reset the counters just in case
+                self._pokemons_keep_iv_counter = 0
+                self._pokemons_keep_counter = 0
+
+    def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon=None):
+        # never release favorites and other defined pokemons
+        if pokemon.is_favorite or pokemon.pokemon_id in self.keep_pokemon_ids:
+            self._pokemons_keep_counter += 1
+            return False
+        # release defined throwaway pokemons
+        elif pokemon.pokemon_id in self.throw_pokemon_ids:
+            return True
+        # keep high-iv pokemons based on config values
+        elif pokemon.iv > self.KEEP_IV_OVER and self._pokemons_keep_iv_counter < self.MAX_POKEMON_HIGH_IV and \
+                        pokemon.cp > (best_pokemon.cp * self.KEEP_IV_MIN_PERCENT_CP / 100):
+            self._pokemons_keep_iv_counter += 1
+            self._pokemons_keep_counter += 1
+            return False
+        # keep high-cp pokemons and first MIN_SIMILAR_POKEMON amount of pokemons
+        elif pokemon.cp > self.KEEP_CP_OVER or self._pokemons_keep_counter < self.MIN_SIMILAR_POKEMON:
+            self._pokemons_keep_counter += 1
+            return False
+        # release all other pokemons
+        else:
+            return True
 
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:
