@@ -397,7 +397,7 @@ class PGoApi:
                     sleep(2)
         return self.update_player_inventory()
 
-    def get_caught_pokemons(self, inventory_items, filter_on):
+    def get_caught_pokemons(self, inventory_items):
         caught_pokemon = defaultdict(list)
         for inventory_item in inventory_items:
             if "pokemon_data" in inventory_item['inventory_item_data']:

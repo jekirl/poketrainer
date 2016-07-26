@@ -65,12 +65,12 @@ def is_active_pokestop(fort, experimental, visited_forts, startingLocation, prox
     is_active_fort = fort.get('type', None) == 1 and ("enabled" in fort or 'lure_info' in fort) and fort.get(
         'cooldown_complete_timestamp_ms', -1) < time() * 1000
     if experimental and visited_forts:
-        if proximity:
+        if proximity and proximity > 0:
             return is_active_fort and fort['id'] not in visited_forts and distance_in_meters(startingLocation, (
                 fort['latitude'], fort['longitude'])) < proximity
         else:
             return is_active_fort and fort['id'] not in visited_forts
-    if proximity:
+    if proximity and proximity > 0:
         return is_active_fort and distance_in_meters(startingLocation,
                                                      (fort['latitude'], fort['longitude'])) < proximity
     else:
