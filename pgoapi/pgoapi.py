@@ -70,6 +70,8 @@ class PGoApi:
         self._origPosF = (0, 0, 0)  # this is original position in floats
         self._req_method_list = []
         self._heartbeat_number = 5
+        self._pokemons_keep_counter = 0
+        self._pokemons_keep_iv_counter = 0
         self._firstRun = True
 
         self.pokemon_caught = 0
@@ -427,7 +429,7 @@ class PGoApi:
         else:
             self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
             self.log.info("Failed to release Pokemon %s", pokemon)
-        sleep(1)
+        sleep(3)
 
     def cleanup_pokemon(self, inventory_items=None):
         if not inventory_items:
@@ -439,29 +441,11 @@ class PGoApi:
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
                 # highest CP pokemon first
                 pokemons = sorted(pokemons, key=lambda pok: (pok.cp, pok.iv), reverse=True)
-                pokemons_keep_counter = 0
-                pokemons_keep_iv_counter = 0
+                self._pokemons_keep_counter = 0
+                self._pokemons_keep_iv_counter = 0
 
                 for pokemon in pokemons:
-                    # never release favorites and other defined pokemons
-                    if pokemon.is_favorite or pokemon.pokemon_id in self.keep_pokemon_ids:
-                        pokemons_keep_counter += 1
-                        continue
-                    # release defined throwaway pokemons
-                    elif pokemon.pokemon_id in self.throw_pokemon_ids:
-                        self.do_release_pokemon(pokemon)
-                    # keep high-iv pokemons based on config values
-                    elif pokemon.iv > self.KEEP_IV_OVER and pokemons_keep_iv_counter < self.MAX_POKEMON_HIGH_IV and \
-                                    pokemon.cp > (pokemons[0].cp * self.KEEP_IV_MIN_PERCENT_CP / 100):
-                        pokemons_keep_iv_counter += 1
-                        pokemons_keep_counter += 1
-                        continue
-                    # keep high-cp pokemons and first MIN_SIMILAR_POKEMON amount of pokemons
-                    elif pokemon.cp > self.KEEP_CP_OVER or pokemons_keep_counter < self.MIN_SIMILAR_POKEMON:
-                        pokemons_keep_counter += 1
-                        continue
-                    # release all other pokemons
-                    else:
+                    if self.is_pokemon_eligible_for_transfer(pokemon, pokemons[0]):
                         self.do_release_pokemon(pokemon)
 
                 # reset the counters just in case
