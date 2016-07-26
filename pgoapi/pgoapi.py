@@ -110,6 +110,7 @@ class PGoApi:
         self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
         self.max_catch_attempts = config.get("MAX_CATCH_ATTEMPTS", 10)
         self.game_master = parse_game_master()
+        self.should_catch_pokemon = config.get("CATCH_POKEMON", True)
 
     def call(self):
         if not self._req_method_list:
@@ -226,22 +227,61 @@ class PGoApi:
         self._heartbeat_number += 1
         return res
 
-    def walk_to(self, loc, waypoints=[]):  # location in floats of course...
+    def _walk(self, loc, waypoints=[], directly=False):  # location in floats of course...
         steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""),
                           self.experimental and self.spin_all_forts, waypoints)
         catch_attempt = 0
+        base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (self._posf[0], self._posf[1])
+        step_size = self.config.get("STEP_SIZE", 200)
+        total_distance_traveled = 0
+        total_distance = distance_in_meters(self._posf, loc)
+        new_loc = (loc[0], loc[1], 0)
+
         for step in steps:
-            for i, next_point in enumerate(get_increments(self._posf, step, self.config.get("STEP_SIZE", 200))):
+            for i, next_point in enumerate(get_increments(self._posf, step, step_size)):
+                # we are less than a step away, lets just go there!
+                travel_remaining = total_distance - total_distance_traveled
+                distance_to_point = distance_in_meters(self._posf, next_point)
+
+                if travel_remaining < step_size or distance_to_point + total_distance_traveled > total_distance:
+                    next_point = new_loc
+                    distance_to_point = distance_in_meters(self._posf, next_point)
+
+                total_distance_traveled += distance_to_point
+                self.log.info('=================================')
+                self.log.info(
+                    "On my way to the next fort! :) Traveled %.2f meters of %.2f ",
+                    total_distance_traveled,
+                    total_distance,
+                )
+
+                travel_link = '%s%s,%s' % (base_travel_link, next_point[0], next_point[1])
+                self.log.info("Travel Link: %s", travel_link)
                 self.set_position(*next_point)
                 self.heartbeat()
-                if self.experimental and self.spin_all_forts:
-                    self.spin_nearest_fort()
-                self.log.info("On my way to the next fort! :)")
+
+                if directly is False:
+                    if self.experimental and self.spin_all_forts:
+                        self.spin_nearest_fort()
+
                 sleep(1)
                 while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
                     sleep(1)
                     catch_attempt += 1
                 catch_attempt = 0
+
+                # Don't continue with the steps if we've reached our location
+                if next_point == new_loc:
+                    self.log.info('=================================')
+                    return
+
+        self.log.info('=================================')
+
+    def walk_directly(self, loc, waypoints=[]):
+        self._walk(loc, waypoints=waypoints, directly=True)
+
+    def walk_to(self, loc, waypoints=[]):
+        self._walk(loc, waypoints=waypoints, directly=False)
 
     def walk_back_to_origin(self):
         self.walk_to(self._origPosF)
@@ -253,11 +293,21 @@ class PGoApi:
         if destinations:
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
+            self.log.info('Nearest fort distance is %s', nearest_fort_dis)
+
+            # Fort is close enough to change our route and walk to
+            if nearest_fort_dis > 40.00 and nearest_fort_dis <= 100:
+                lat = nearest_fort['latitude']
+                long = nearest_fort['longitude']
+                self.walk_to_fort(destinations[0])
+                self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(),
+                                        fort_distance=nearest_fort_dis)
             if nearest_fort_dis <= 40.00:
                 self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(),
                                         fort_distance=nearest_fort_dis)
-                if 'lure_info' in nearest_fort:
-                    self.disk_encounter_pokemon(nearest_fort['lure_info'])
+            if 'lure_info' in nearest_fort:
+                self.disk_encounter_pokemon(nearest_fort['lure_info'])
+
         else:
             self.log.info('No spinnable forts within proximity. Or server returned no map objects.')
 
@@ -308,6 +358,19 @@ class PGoApi:
     def return_to_start(self):
         self.set_position(*self._origPosF)
 
+    def walk_to_fort(self, fort_data, directly=False):
+        fort = fort_data[0]
+        self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", fort['latitude'],
+                        fort['longitude'])
+        if directly is True:
+            self.walk_directly((fort['latitude'], fort['longitude']))
+        else:
+            self.walk_to((fort['latitude'], fort['longitude']))
+
+        self.fort_search_pgoapi(fort, self.get_position(), fort_data[1])
+        if 'lure_info' in fort:
+            self.disk_encounter_pokemon(fort['lure_info'])
+
     def spin_near_fort(self):
         res = self.nearby_map_objects()
         map_cells = res['responses'].get('GET_MAP_OBJECTS', {}).get('map_cells', [])
@@ -319,17 +382,16 @@ class PGoApi:
             self.log.info('No more spinnable forts within proximity. Returning back to origin')
             self.walk_back_to_origin()
             return False
+
         for fort_data in destinations:
-            fort = fort_data[0]
-            self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", fort['latitude'],
-                          fort['longitude'])
-            self.walk_to((fort['latitude'], fort['longitude']))
-            self.fort_search_pgoapi(fort, self.get_position(), fort_data[1])
-            if 'lure_info' in fort:
-                self.disk_encounter_pokemon(fort['lure_info'])
+            self.walk_to_fort(fort_data)
+
         return True
 
     def catch_near_pokemon(self):
+        if self.should_catch_pokemon is False:
+            return False
+
         map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
         pokemons = PGoApi.flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
 
