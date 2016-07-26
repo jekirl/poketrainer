@@ -36,7 +36,7 @@ def get_inventory_data(res, poke_names):
                           map(lambda x: x.get('inventory_item_data', {}), inventory_items)))
     inventory_items_pokemon_list = filter(lambda x: not x.is_egg, pokemons)
     inventory_items_pokemon_list = sorted(inventory_items_pokemon_list,
-                                          key=lambda pokemon: pokemon['pokemon_data']['pokemon_id'])
+                                          key=lambda pokemon: pokemon.pokemon_data['pokemon_id'])
 
     return os.linesep.join(map(str, inventory_items_pokemon_list))
 
