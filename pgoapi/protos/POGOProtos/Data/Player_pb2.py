@@ -420,7 +420,7 @@ _PLAYERSTATS = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='km_walked', full_name='POGOProtos.Data.Player.PlayerStats.km_walked', index=4,
       number=5, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),

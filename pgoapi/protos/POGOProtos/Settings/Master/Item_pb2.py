@@ -14,10 +14,12 @@ _sym_db = _symbol_database.Default()
 
 
 from POGOProtos import Inventory_pb2 as POGOProtos_dot_Inventory__pb2
+POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
 POGOProtos_dot_Data__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Data__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Data_dot_Player__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Enums__pb2
+POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Data_dot_Player__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Enums__pb2
@@ -48,7 +50,7 @@ _BATTLEATTRIBUTES = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='sta_percent', full_name='POGOProtos.Settings.Master.Item.BattleAttributes.sta_percent', index=0,
       number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -93,7 +95,7 @@ _EGGINCUBATORATTRIBUTES = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='distance_multiplier', full_name='POGOProtos.Settings.Master.Item.EggIncubatorAttributes.distance_multiplier', index=2,
       number=3, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -124,7 +126,7 @@ _EXPERIENCEBOOSTATTRIBUTES = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='xp_multiplier', full_name='POGOProtos.Settings.Master.Item.ExperienceBoostAttributes.xp_multiplier', index=0,
       number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -176,7 +178,7 @@ _FOODATTRIBUTES = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='growth_percent', full_name='POGOProtos.Settings.Master.Item.FoodAttributes.growth_percent', index=2,
       number=3, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -259,7 +261,7 @@ _INCENSEATTRIBUTES = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='pokemon_incense_type_probability', full_name='POGOProtos.Settings.Master.Item.IncenseAttributes.pokemon_incense_type_probability', index=2,
       number=3, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -363,21 +365,21 @@ _POKEBALLATTRIBUTES = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='capture_multi', full_name='POGOProtos.Settings.Master.Item.PokeballAttributes.capture_multi', index=1,
       number=2, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='capture_multi_effect', full_name='POGOProtos.Settings.Master.Item.PokeballAttributes.capture_multi_effect', index=2,
       number=3, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='item_effect_mod', full_name='POGOProtos.Settings.Master.Item.PokeballAttributes.item_effect_mod', index=3,
       number=4, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -408,7 +410,7 @@ _POTIONATTRIBUTES = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='sta_percent', full_name='POGOProtos.Settings.Master.Item.PotionAttributes.sta_percent', index=0,
       number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -446,7 +448,7 @@ _REVIVEATTRIBUTES = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='sta_percent', full_name='POGOProtos.Settings.Master.Item.ReviveAttributes.sta_percent', index=0,
       number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
