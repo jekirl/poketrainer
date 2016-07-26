@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='POGOProtos.Networking.Envelopes.proto',
   package='POGOProtos.Networking.Envelopes',
   syntax='proto3',
-  serialized_pb=_b('\n%POGOProtos.Networking.Envelopes.proto\x12\x1fPOGOProtos.Networking.Envelopes\x1a$POGOProtos.Networking.Requests.proto\"E\n\nAuthTicket\x12\r\n\x05start\x18\x01 \x01(\x0c\x12\x1b\n\x13\x65xpire_timestamp_ms\x18\x02 \x01(\x04\x12\x0b\n\x03\x65nd\x18\x03 \x01(\x0c\"\xa4\x04\n\x0fRequestEnvelope\x12\x13\n\x0bstatus_code\x18\x01 \x01(\x05\x12\x12\n\nrequest_id\x18\x03 \x01(\x04\x12\x39\n\x08requests\x18\x04 \x03(\x0b\x32\'.POGOProtos.Networking.Requests.Request\x12;\n\x08unknown6\x18\x06 \x01(\x0b\x32).POGOProtos.Networking.Envelopes.Unknown6\x12\x10\n\x08latitude\x18\x07 \x01(\x06\x12\x11\n\tlongitude\x18\x08 \x01(\x06\x12\x10\n\x08\x61ltitude\x18\t \x01(\x06\x12L\n\tauth_info\x18\n \x01(\x0b\x32\x39.POGOProtos.Networking.Envelopes.RequestEnvelope.AuthInfo\x12@\n\x0b\x61uth_ticket\x18\x0b \x01(\x0b\x32+.POGOProtos.Networking.Envelopes.AuthTicket\x12\x11\n\tunknown12\x18\x0c \x01(\x03\x1a\x95\x01\n\x08\x41uthInfo\x12\x10\n\x08provider\x18\x01 \x01(\t\x12L\n\x05token\x18\x02 \x01(\x0b\x32=.POGOProtos.Networking.Envelopes.RequestEnvelope.AuthInfo.JWT\x1a)\n\x03JWT\x12\x10\n\x08\x63ontents\x18\x01 \x01(\t\x12\x10\n\x08unknown2\x18\x02 \x01(\x05\"\xb0\x02\n\x10ResponseEnvelope\x12\x13\n\x0bstatus_code\x18\x01 \x01(\x05\x12\x12\n\nrequest_id\x18\x02 \x01(\x04\x12\x0f\n\x07\x61pi_url\x18\x03 \x01(\t\x12;\n\x08unknown6\x18\x06 \x01(\x0b\x32).POGOProtos.Networking.Envelopes.Unknown6\x12@\n\x0b\x61uth_ticket\x18\x07 \x01(\x0b\x32+.POGOProtos.Networking.Envelopes.AuthTicket\x12\x0f\n\x07returns\x18\x64 \x03(\x0c\x12\r\n\x05\x65rror\x18\x65 \x01(\t\x1a\x43\n\x08Unknown7\x12\x11\n\tunknown71\x18\x01 \x01(\x0c\x12\x11\n\tunknown72\x18\x02 \x01(\x03\x12\x11\n\tunknown73\x18\x03 \x01(\x0c\"\x80\x01\n\x08Unknown6\x12\x10\n\x08unknown1\x18\x01 \x01(\x05\x12\x44\n\x08unknown2\x18\x02 \x01(\x0b\x32\x32.POGOProtos.Networking.Envelopes.Unknown6.Unknown2\x1a\x1c\n\x08Unknown2\x12\x10\n\x08unknown1\x18\x01 \x01(\x0cP\x00\x62\x06proto3')
+  serialized_pb=_b('\n%POGOProtos.Networking.Envelopes.proto\x12\x1fPOGOProtos.Networking.Envelopes\x1a$POGOProtos.Networking.Requests.proto\"E\n\nAuthTicket\x12\r\n\x05start\x18\x01 \x01(\x0c\x12\x1b\n\x13\x65xpire_timestamp_ms\x18\x02 \x01(\x04\x12\x0b\n\x03\x65nd\x18\x03 \x01(\x0c\"\xa4\x04\n\x0fRequestEnvelope\x12\x13\n\x0bstatus_code\x18\x01 \x01(\x05\x12\x12\n\nrequest_id\x18\x03 \x01(\x04\x12\x39\n\x08requests\x18\x04 \x03(\x0b\x32\'.POGOProtos.Networking.Requests.Request\x12;\n\x08unknown6\x18\x06 \x01(\x0b\x32).POGOProtos.Networking.Envelopes.Unknown6\x12\x10\n\x08latitude\x18\x07 \x01(\x06\x12\x11\n\tlongitude\x18\x08 \x01(\x06\x12\x10\n\x08\x61ltitude\x18\t \x01(\x06\x12L\n\tauth_info\x18\n \x01(\x0b\x32\x39.POGOProtos.Networking.Envelopes.RequestEnvelope.AuthInfo\x12@\n\x0b\x61uth_ticket\x18\x0b \x01(\x0b\x32+.POGOProtos.Networking.Envelopes.AuthTicket\x12\x11\n\tunknown12\x18\x0c \x01(\x03\x1a\x95\x01\n\x08\x41uthInfo\x12\x10\n\x08provider\x18\x01 \x01(\t\x12L\n\x05token\x18\x02 \x01(\x0b\x32=.POGOProtos.Networking.Envelopes.RequestEnvelope.AuthInfo.JWT\x1a)\n\x03JWT\x12\x10\n\x08\x63ontents\x18\x01 \x01(\t\x12\x10\n\x08unknown2\x18\x02 \x01(\x05\"\xb8\x02\n\x10ResponseEnvelope\x12\x13\n\x0bstatus_code\x18\x01 \x01(\x05\x12\x12\n\nrequest_id\x18\x02 \x01(\x04\x12\x0f\n\x07\x61pi_url\x18\x03 \x01(\t\x12\x43\n\x08unknown6\x18\x06 \x01(\x0b\x32\x31.POGOProtos.Networking.Envelopes.Unknown6Response\x12@\n\x0b\x61uth_ticket\x18\x07 \x01(\x0b\x32+.POGOProtos.Networking.Envelopes.AuthTicket\x12\x0f\n\x07returns\x18\x64 \x03(\x0c\x12\r\n\x05\x65rror\x18\x65 \x01(\t\x1a\x43\n\x08Unknown7\x12\x11\n\tunknown71\x18\x01 \x01(\x0c\x12\x11\n\tunknown72\x18\x02 \x01(\x03\x12\x11\n\tunknown73\x18\x03 \x01(\x0c\"\x80\x01\n\x08Unknown6\x12\x10\n\x08unknown1\x18\x01 \x01(\x05\x12\x44\n\x08unknown2\x18\x02 \x01(\x0b\x32\x32.POGOProtos.Networking.Envelopes.Unknown6.Unknown2\x1a\x1c\n\x08Unknown2\x12\x10\n\x08unknown1\x18\x01 \x01(\x0c\"\x90\x01\n\x10Unknown6Response\x12\x10\n\x08unknown1\x18\x01 \x01(\x05\x12L\n\x08unknown2\x18\x02 \x01(\x0b\x32:.POGOProtos.Networking.Envelopes.Unknown6Response.Unknown2\x1a\x1c\n\x08Unknown2\x12\x10\n\x08unknown1\x18\x01 \x01(\x04P\x00\x62\x06proto3')
   ,
   dependencies=[POGOProtos_dot_Networking_dot_Requests__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -282,8 +282,8 @@ _RESPONSEENVELOPE_UNKNOWN7 = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=972,
-  serialized_end=1039,
+  serialized_start=980,
+  serialized_end=1047,
 )
 
 _RESPONSEENVELOPE = _descriptor.Descriptor(
@@ -355,7 +355,7 @@ _RESPONSEENVELOPE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=735,
-  serialized_end=1039,
+  serialized_end=1047,
 )
 
 
@@ -385,8 +385,8 @@ _UNKNOWN6_UNKNOWN2 = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1142,
-  serialized_end=1170,
+  serialized_start=1150,
+  serialized_end=1178,
 )
 
 _UNKNOWN6 = _descriptor.Descriptor(
@@ -422,8 +422,76 @@ _UNKNOWN6 = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1042,
-  serialized_end=1170,
+  serialized_start=1050,
+  serialized_end=1178,
+)
+
+
+_UNKNOWN6RESPONSE_UNKNOWN2 = _descriptor.Descriptor(
+  name='Unknown2',
+  full_name='POGOProtos.Networking.Envelopes.Unknown6Response.Unknown2',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='unknown1', full_name='POGOProtos.Networking.Envelopes.Unknown6Response.Unknown2.unknown1', index=0,
+      number=1, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1297,
+  serialized_end=1325,
+)
+
+_UNKNOWN6RESPONSE = _descriptor.Descriptor(
+  name='Unknown6Response',
+  full_name='POGOProtos.Networking.Envelopes.Unknown6Response',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='unknown1', full_name='POGOProtos.Networking.Envelopes.Unknown6Response.unknown1', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='unknown2', full_name='POGOProtos.Networking.Envelopes.Unknown6Response.unknown2', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_UNKNOWN6RESPONSE_UNKNOWN2, ],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1181,
+  serialized_end=1325,
 )
 
 _REQUESTENVELOPE_AUTHINFO_JWT.containing_type = _REQUESTENVELOPE_AUTHINFO
@@ -434,14 +502,17 @@ _REQUESTENVELOPE.fields_by_name['unknown6'].message_type = _UNKNOWN6
 _REQUESTENVELOPE.fields_by_name['auth_info'].message_type = _REQUESTENVELOPE_AUTHINFO
 _REQUESTENVELOPE.fields_by_name['auth_ticket'].message_type = _AUTHTICKET
 _RESPONSEENVELOPE_UNKNOWN7.containing_type = _RESPONSEENVELOPE
-_RESPONSEENVELOPE.fields_by_name['unknown6'].message_type = _UNKNOWN6
+_RESPONSEENVELOPE.fields_by_name['unknown6'].message_type = _UNKNOWN6RESPONSE
 _RESPONSEENVELOPE.fields_by_name['auth_ticket'].message_type = _AUTHTICKET
 _UNKNOWN6_UNKNOWN2.containing_type = _UNKNOWN6
 _UNKNOWN6.fields_by_name['unknown2'].message_type = _UNKNOWN6_UNKNOWN2
+_UNKNOWN6RESPONSE_UNKNOWN2.containing_type = _UNKNOWN6RESPONSE
+_UNKNOWN6RESPONSE.fields_by_name['unknown2'].message_type = _UNKNOWN6RESPONSE_UNKNOWN2
 DESCRIPTOR.message_types_by_name['AuthTicket'] = _AUTHTICKET
 DESCRIPTOR.message_types_by_name['RequestEnvelope'] = _REQUESTENVELOPE
 DESCRIPTOR.message_types_by_name['ResponseEnvelope'] = _RESPONSEENVELOPE
 DESCRIPTOR.message_types_by_name['Unknown6'] = _UNKNOWN6
+DESCRIPTOR.message_types_by_name['Unknown6Response'] = _UNKNOWN6RESPONSE
 
 AuthTicket = _reflection.GeneratedProtocolMessageType('AuthTicket', (_message.Message,), dict(
   DESCRIPTOR = _AUTHTICKET,
@@ -502,6 +573,21 @@ Unknown6 = _reflection.GeneratedProtocolMessageType('Unknown6', (_message.Messag
   ))
 _sym_db.RegisterMessage(Unknown6)
 _sym_db.RegisterMessage(Unknown6.Unknown2)
+
+Unknown6Response = _reflection.GeneratedProtocolMessageType('Unknown6Response', (_message.Message,), dict(
+
+  Unknown2 = _reflection.GeneratedProtocolMessageType('Unknown2', (_message.Message,), dict(
+    DESCRIPTOR = _UNKNOWN6RESPONSE_UNKNOWN2,
+    __module__ = 'POGOProtos.Networking.Envelopes_pb2'
+    # @@protoc_insertion_point(class_scope:POGOProtos.Networking.Envelopes.Unknown6Response.Unknown2)
+    ))
+  ,
+  DESCRIPTOR = _UNKNOWN6RESPONSE,
+  __module__ = 'POGOProtos.Networking.Envelopes_pb2'
+  # @@protoc_insertion_point(class_scope:POGOProtos.Networking.Envelopes.Unknown6Response)
+  ))
+_sym_db.RegisterMessage(Unknown6Response)
+_sym_db.RegisterMessage(Unknown6Response.Unknown2)
 
 
 # @@protoc_insertion_point(module_scope)
