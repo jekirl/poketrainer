@@ -84,8 +84,8 @@ class PGoApi:
         self.POKEMON_EVOLUTION = {}
         self.POKEMON_EVOLUTION_FAMILY = {}
         for k, v in config.get("POKEMON_EVOLUTION", {}).items():
-            self.POKEMON_EVOLUTION[getattr(Enums_pb2, k, 0)] = v
-            self.POKEMON_EVOLUTION_FAMILY[getattr(Enums_pb2, k, 0)] = getattr(Enums_pb2, "FAMILY_" + k, 0)
+            self.POKEMON_EVOLUTION[getattr(Enums_pb2, k)] = v
+            self.POKEMON_EVOLUTION_FAMILY[getattr(Enums_pb2, k)] = getattr(Enums_pb2, "FAMILY_" + k)
 
         self.MIN_KEEP_IV = config.get("MIN_KEEP_IV", 0)  # release anything under this if we don't have it already
         self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0)  # release anything under this if we don't have it already
@@ -432,11 +432,12 @@ class PGoApi:
                         sleep(3)
 
     def is_pokemon_eligible_for_transfer(self, pokemon):
-        return not pokemon.is_favorite \
-               and pokemon.iv < self.MIN_KEEP_IV \
-               and pokemon.cp < self.KEEP_CP_OVER \
-               and pokemon.is_valid_pokemon() \
-               and pokemon.pokemon_id not in self.keep_pokemon_ids
+        return (pokemon.pokemon_id in self.throw_pokemon_ids and not pokemon.is_favorite) \
+               or (not pokemon.is_favorite and
+                   pokemon.iv < self.MIN_KEEP_IV and
+                   pokemon.cp < self.KEEP_CP_OVER and
+                   pokemon.is_valid_pokemon() and
+                   pokemon.pokemon_id not in self.keep_pokemon_ids)
 
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:

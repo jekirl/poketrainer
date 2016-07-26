@@ -31,6 +31,7 @@
       },
       "MIN_SIMILAR_POKEMON": 1,
       "KEEP_POKEMON_NAMES": ["MEWTWO"],
+      "THROW_POKEMON_NAMES": ["PIDGEY"],
       "MAX_CATCH_ATTEMPTS": 10
     },
     {
