@@ -5,6 +5,8 @@
 
 # DISCLAIMER, this is super sketch and just a proof of concept. Use at your own risk and I claim no credit or responsibility or what have you for parts of it.
 
+## For Contributions: Please open pull request to develop branch not *master* Thank you!
+
 # Don't be a dumbass too, Let's not ruin a good thing...
 
 Usage:
