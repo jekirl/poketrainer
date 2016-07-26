@@ -27,7 +27,7 @@
       },
       "POKEMON_EVOLUTION": {
         "PIDGEY": 12,
-        "WEEDLE":12,
+        "WEEDLE":12 
       },
       "MIN_SIMILAR_POKEMON": 1,
       "KEEP_POKEMON_NAMES": ["MEWTWO"]
