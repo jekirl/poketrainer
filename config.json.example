@@ -30,7 +30,7 @@
         "WEEDLE":12,
       },
       "MIN_SIMILAR_POKEMON": 1,
-      "KEEP_POKEMON_IDS": [129]
+      "KEEP_POKEMON_NAMES": ["MEWTWO"]
     },
     {
       "auth_service": "ptc",

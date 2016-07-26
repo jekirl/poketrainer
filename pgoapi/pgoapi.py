@@ -95,7 +95,7 @@ class PGoApi:
         self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
         self.experimental = config.get("EXPERIMENTAL", False)
         self.spin_all_forts = config.get("SPIN_ALL_FORTS", False)
-        self.KEEP_POKEMON_IDS = config.get("KEEP_POKEMON_IDS", [])
+        self.KEEP_POKEMON_IDS = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
 
     def call(self):
         if not self._req_method_list:

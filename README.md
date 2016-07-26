@@ -50,6 +50,11 @@ Optionally create an alias:
 
     alias pokecli='docker run pokecli'
 
+For Chosing what Items to keep, get the names here, [AeonLucidProtos_ItemID](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Inventory/Item/ItemId.proto)
+For Choosing what pokemon to keep get the names here,[AeonLucidProtos_Pokemon](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Enums/PokemonId.proto)
+
+Put them in config. Type exactly as the name appears
+
 ### What's working:
 What's working:
  * Walking to pokestops and spinning them
