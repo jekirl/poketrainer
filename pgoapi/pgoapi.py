@@ -98,6 +98,7 @@ class PGoApi:
         self.keep_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
         self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
         self.max_catch_attempts = config.get("MAX_CATCH_ATTEMPTS", 10)
+        self.game_master = parse_game_master()
 
     def call(self):
         if not self._req_method_list:
@@ -186,7 +187,7 @@ class PGoApi:
             self.get_inventory()
         # self.download_settings(hash="4a2e9bc330dae60e7b74fc85b98868ab4700802e")
         res = self.call()
-        if res.get("direction", -1) == 102:
+        if not res or res.get("direction", -1) == 102:
             self.log.error("There were a problem responses for api call: %s. Restarting!!!", res)
             raise AuthException("Token probably expired?")
         self.log.debug('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
@@ -402,6 +403,7 @@ class PGoApi:
             if "pokemon_data" in inventory_item['inventory_item_data']:
                 # is a pokemon:
                 pokemon = Pokemon(inventory_item['inventory_item_data']['pokemon_data'], self.pokemon_names)
+                pokemon.pokemon_additional_data = self.game_master.get(pokemon.pokemon_id, PokemonData())
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
         return caught_pokemon
@@ -461,7 +463,10 @@ class PGoApi:
             status = evo_res.get('result', -1)
             sleep(3)
             if status == 1:
-                evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}), self.pokemon_names)
+                evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}), self.pokemon_names,
+                                          self.game_master.get(str(pokemon.pokemon_id), PokemonData()))
+                # I don' think we need additional stats for evolved pokemon. Since we do not do anything with it.
+                # evolved_pokemon.pokemon_additional_data = self.game_master.get(pokemon.pokemon_id, PokemonData())
                 self.log.info("Evolved to %s", evolved_pokemon)
                 self.update_player_inventory()
                 return True

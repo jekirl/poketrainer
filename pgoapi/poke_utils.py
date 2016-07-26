@@ -1,6 +1,26 @@
 from __future__ import absolute_import
 import os
 from pgoapi.pokemon import Pokemon
+from pgoapi.game_master import PokemonData
+import csv
+
+
+def parse_game_master():
+    line_count = 0
+    game_master = {}
+    with open("GAME_MASTER_POKEMON_v0_2.tsv") as tsvfile:
+        tsvreader = csv.reader(tsvfile, delimiter="\t")
+        attributes = []
+        for line in tsvreader:
+            if line_count == 0:
+                attributes = line
+                line_count += 1
+                continue
+            pokemon_data = PokemonData()
+            for x in range(0, len(line)):
+                setattr(pokemon_data, attributes[x], line[x])
+            game_master[int(line[0])] = pokemon_data
+    return game_master
 
 
 def pokemonIVPercentage(pokemon):
