@@ -90,8 +90,8 @@
               <td data-order="{{pokemon["individual_attack"]}}">Att IV: {{pokemon["individual_attack"]}}</td>
               <td data-order="{{pokemon["individual_stamina"]}}">Sta IV: {{pokemon["individual_stamina"]}}</td>
               <td data-order="{{pokemon["individual_defense"]}}">Def IV: {{pokemon["individual_defense"]}}</td>
-              <td>{{pokemon["move_1"]}}</td>
-              <td>{{pokemon["move_2"]}}</td>
+              <td>{{attacks[pokemon["move_1"]]}}</td>
+              <td>{{attacks[pokemon["move_2"]]}}</td>
             </tr>
             {% endfor %}
           </table>
