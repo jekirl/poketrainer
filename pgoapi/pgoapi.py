@@ -717,10 +717,12 @@ class PGoApi:
                 incubator_egg_distance = incubator['target_km_walked'] - incubator['start_km_walked']
                 incubator_distance_done = self.player_stats.km_walked - incubator['start_km_walked']
                 if incubator_distance_done > incubator_egg_distance:
-                    if not self.attempt_finish_incubation():
-                        break
-                else:
-                    self.log.info('Incubating %skm egg, %skm done', incubator_egg_distance, round(incubator_distance_done, 2))
+                    self.attempt_finish_incubation()
+                    break
+            for incubator in self.inventory.incubators_busy:
+                incubator_egg_distance = incubator['target_km_walked'] - incubator['start_km_walked']
+                incubator_distance_done = self.player_stats.km_walked - incubator['start_km_walked']
+                self.log.info('Incubating %skm egg, %skm done', incubator_egg_distance, round(incubator_distance_done, 2))
         for incubator in self.inventory.incubators_available:
             if incubator['item_id'] == 901:  # unlimited use
                 pass
@@ -733,7 +735,7 @@ class PGoApi:
                                     reverse=False)  # oldest first
             eggs_available = sorted(eggs_available, key=lambda egg: egg['egg_km_walked_target'],
                                     reverse=self.INCUBATE_BIG_EGGS_FIRST)  # now sort as defined
-            if not self.attempt_start_incubation(eggs_available[0], incubator):
+            if not len(eggs_available) > 0 or not self.attempt_start_incubation(eggs_available[0], incubator):
                 break
 
     def attempt_start_incubation(self, egg, incubator):
