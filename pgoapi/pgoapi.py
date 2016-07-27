@@ -102,9 +102,9 @@ class PGoApi:
         self.LIST_POKEMON_BEFORE_CLEANUP = config.get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
         self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
 
-        self.EGG_INCUBATION_ENABLED = config.get("EGG_INCUBATION", {}).get("ENABLE", False)
+        self.EGG_INCUBATION_ENABLED = config.get("EGG_INCUBATION", {}).get("ENABLE", True)
         self.USE_DISPOSABLE_INCUBATORS = config.get("EGG_INCUBATION", {}).get("USE_DISPOSABLE_INCUBATORS", False)
-        self.INCUBATE_BIG_EGGS_FIRST = config.get("EGG_INCUBATION", {}).get("BIG_EGGS_FIRST", False)
+        self.INCUBATE_BIG_EGGS_FIRST = config.get("EGG_INCUBATION", {}).get("BIG_EGGS_FIRST", True)
 
         self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
         self.experimental = config.get("EXPERIMENTAL", False)
@@ -757,10 +757,17 @@ class PGoApi:
         status = hatch_res.get('success', -1)
         sleep(3)
         if status == 1:
-            # still trying to find out how to get the values right, including the pokemon
-            self.log.info("Egg Hatched! XP +%s, Candy +%s, Stardust +%s",
-                          hatch_res['experience_awarded'], hatch_res['candy_awarded'], hatch_res['stardust_awarded'])
             self.update_player_inventory()
+            i = 0
+            for pokemon_id in hatch_res['pokemon_id']:
+                pokemon = get_pokemon_by_long_id(pokemon_id, self.inventory.inventory_items,
+                                                    self.pokemon_names)
+                self.log.info("Egg Hatched! XP +%s, Candy +%s, Stardust +%s, %s",
+                              hatch_res['experience_awarded'][i],
+                              hatch_res['candy_awarded'][i],
+                              hatch_res['stardust_awarded'][i],
+                              pokemon)
+                i += 1
             return True
         else:
             self.log.debug("Could not get hatched eggs %s", hatch_res)

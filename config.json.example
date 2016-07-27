@@ -16,9 +16,9 @@
       "STAY_WITHIN_PROXIMITY": 9999,
       "AUTO_USE_LUCKY_EGG": false,
       "EGG_INCUBATION": {
-        "ENABLE": false,
+        "ENABLE": true,
         "USE_DISPOSABLE_INCUBATORS": false,
-        "BIG_EGGS_FIRST": false
+        "BIG_EGGS_FIRST": true
       },
       "MIN_ITEMS": {
         "ITEM_POTION": 10,

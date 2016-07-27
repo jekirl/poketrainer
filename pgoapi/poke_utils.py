@@ -54,6 +54,14 @@ def create_capture_probability(capture_probability):
     else:
         return dict(zip(capture_balls, capture_rate))
 
+
+def get_pokemon_by_long_id(pokemon_id, res, poke_names):
+    for inventory_item in res:
+        pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
+        if not pokemon_data.get('is_egg', False) and pokemon_data.get('id', 'NA') == pokemon_id:
+            return Pokemon(pokemon_data, poke_names)
+    return None
+
 DISK_ENCOUNTER = {0: "UNKNOWN",
                   1: "SUCCESS",
                   2: "NOT_AVAILABLE",

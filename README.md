@@ -46,6 +46,10 @@ optional arguments:
     * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
     * `KEEP_POKEMON_IDS` IDs of pokemon you want the bot to hold regardless of IV/CP
     * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
+    * `EGG_INCUBATION`
+     * `ENABLE` enables automatic use of incubators (default: true)
+     * `USE_DISPOSABLE_INCUBATORS` enables use of disposable (3-times use) incubators (default: false)
+     * `BIG_EGGS_FIRST` incubate big eggs (most km) first (default: true)
 
 ----
 
