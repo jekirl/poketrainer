@@ -46,9 +46,10 @@ optional arguments:
     * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
     * `KEEP_POKEMON_IDS` IDs of pokemon you want the bot to hold regardless of IV/CP
     * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
-
-----
-
+    * `EGG_INCUBATION`
+     * `ENABLE` enables automatic use of incubators (default: true)
+     * `USE_DISPOSABLE_INCUBATORS` enables use of disposable (3-times use) incubators (default: false)
+     * `BIG_EGGS_FIRST` incubate big eggs (most km) first (default: true)
     * `RELEASE_DUPLICATES` The bot seems to have a bad habit of hoarding pokemon. Enabling this feature (disabled by default) will have the bot automatically transfer pokemon that are duplicates. To determine which pokemon to transfer when duplicates exist, the lvl's of the pokemon are compared. A pokemon's lvl is an arbitrary and configurable parameter that can either be representative of a pokemon's CP, IV, CPxIV, or CP+IV. The bot will transfer the lowest lvl pokemon, maintaining` MIN_SIMILAR_POKEMON` of each type. To be completely confident that the bot will not transfer your high lvl pokemon, when this feature is enabled only pokemon with a lvl below `RELEASE_DUPLICATES_MAX_LVL`. If you have multiple pokemon that are close to the same lvl the bot can be configured to not transfer them by using `RELEASE_DUPLICATES_SCALER`. The value of this config is multiplied by the highest lvl pokemon of a type and only those pokemon that are less than the scaled lvl are transfered.
      * EXAMPlES: If you set lvl to "IV" while having two Snorlaxs, one with stats CP:14 IV:95 and the other with CP:1800 IV:30 the bot will transfer the Snorlax with CP of 1800 and keep the CP 14 Snorlax because you have indicated you only care about a pokemon's IV. It must be fully understood why this happens to avoid unwanted transfer of pokemon. If not used correctly this feature can very easily transfer a large ammount of your pokemon so please make sure you fully understand it's mechanics before attempting use!
 

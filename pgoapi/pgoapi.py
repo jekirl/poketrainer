@@ -42,6 +42,8 @@ from expiringdict import ExpiringDict
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException
+from pgoapi.player import Player as Player
+from pgoapi.player_stats import PlayerStats as PlayerStats
 from pgoapi.inventory import Inventory as Player_Inventory
 from pgoapi.location import *
 from pgoapi.poke_utils import *
@@ -75,6 +77,8 @@ class PGoApi:
         self._last_egg_use_time = 0
 
         self.pokemon_caught = 0
+        self.player = Player({})
+        self.player_stats = PlayerStats({})
         self.inventory = Player_Inventory([])
 
         self.pokemon_names = pokemon_names
@@ -97,6 +101,11 @@ class PGoApi:
 
         self.LIST_POKEMON_BEFORE_CLEANUP = config.get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
         self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
+
+        self.EGG_INCUBATION_ENABLED = config.get("EGG_INCUBATION", {}).get("ENABLE", True)
+        self.USE_DISPOSABLE_INCUBATORS = config.get("EGG_INCUBATION", {}).get("USE_DISPOSABLE_INCUBATORS", False)
+        self.INCUBATE_BIG_EGGS_FIRST = config.get("EGG_INCUBATION", {}).get("BIG_EGGS_FIRST", True)
+
         self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
         self.experimental = config.get("EXPERIMENTAL", False)
         self.spin_all_forts = config.get("SPIN_ALL_FORTS", False)
@@ -203,12 +212,8 @@ class PGoApi:
         self.log.debug('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
 
         if 'GET_PLAYER' in res['responses']:
-            player_data = res['responses'].get('GET_PLAYER', {}).get('player_data', {})
-            currencies = player_data.get('currencies', [])
-            currency_data = ",".join(
-                map(lambda x: "{0}: {1}".format(x.get('name', 'NA'), x.get('amount', 'NA')), currencies))
-            self.log.info("Username: %s, Currencies: %s, Pokemon Caught in this run: %s",
-                          player_data.get('username', 'NA'), currency_data, self.pokemon_caught)
+            self.player = Player(res['responses'].get('GET_PLAYER', {}).get('player_data', {}))
+            self.log.info("Player Info: %s, Pokemon Caught in this run: %s", self.player, self.pokemon_caught)
 
         if 'GET_INVENTORY' in res['responses']:
             with open("data_dumps/%s.json" % self.config['username'], "w") as f:
@@ -217,12 +222,17 @@ class PGoApi:
                 f.write(json.dumps(res['responses'], indent=2))
 
             self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
+            for inventory_item in self.inventory.inventory_items:
+                if "player_stats" in inventory_item['inventory_item_data']:
+                    self.player_stats = PlayerStats(inventory_item['inventory_item_data']['player_stats'])
+                    self.log.info("Player Stats: %s", self.player_stats)
             if self.LIST_INVENTORY_BEFORE_CLEANUP:
                 self.log.info("Player Items Before Cleanup: %s", self.inventory)
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
             self.log.info("Player Inventory after cleanup: %s", self.inventory)
             if self.LIST_POKEMON_BEFORE_CLEANUP:
                 self.log.info(get_inventory_data(res, self.pokemon_names))
+            self.incubate_eggs()
             self.attempt_evolve(self.inventory.inventory_items)
             self.cleanup_pokemon(self.inventory.inventory_items)
         # Auto-use lucky-egg if applicable
@@ -321,7 +331,7 @@ class PGoApi:
             if nearest_fort_dis <= 40.00:
                 self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(),
                                         fort_distance=nearest_fort_dis)
-            if 'lure_info' in nearest_fort:
+            if 'lure_info' in nearest_fort and self.should_catch_pokemon:
                 self.disk_encounter_pokemon(nearest_fort['lure_info'])
 
         else:
@@ -334,8 +344,15 @@ class PGoApi:
                                player_longitude=player_postion[1]).call()['responses']['FORT_SEARCH']
         result = res.get('result', -1)
         if result == 1:
+            items = defaultdict(int)
+            for item in res['items_awarded']:
+                items[item['item_id']] += item['item_count']
+            reward = 'XP +' + str(res['experience_awarded'])
+            for item_id, amount in items.iteritems():
+                reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
             self.log.debug("Fort spinned: %s", res)
-            self.log.info("Fort Spinned: http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
+            self.log.info("Fort Spinned, %s (http://maps.google.com/maps?q=%s,%s)",
+                          reward, fort['latitude'], fort['longitude'])
             self.visited_forts[fort['id']] = fort
         elif result == 4:
             self.log.debug("For spinned but Your inventory is full : %s", res)
@@ -471,12 +488,14 @@ class PGoApi:
         if not inventory_items:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
                 'inventory_items']
+        item_count = 0
         for inventory_item in inventory_items:
             if "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
                 if item['item_id'] in self.MIN_ITEMS and "count" in item and item['count'] > self.MIN_ITEMS[
                     item['item_id']]:
                     recycle_count = item['count'] - self.MIN_ITEMS[item['item_id']]
+                    item_count += item['count'] - recycle_count
                     self.log.info("Recycling Item_ID {0}, item count {1}".format(item['item_id'], recycle_count))
                     res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()['responses'][
                         'RECYCLE_INVENTORY_ITEM']
@@ -486,6 +505,10 @@ class PGoApi:
                     else:
                         self.log.info("Failed to recycle Item %s, Code: %s", item['item_id'], response_code)
                     sleep(2)
+                elif "count" in item:
+                    item_count += item['count']
+        if item_count > 0:
+            self.log.info('Intentory has %s/%s items', item_count, self.player.max_item_storage)
         return self.update_player_inventory()
 
     def get_caught_pokemons(self, inventory_items):
@@ -604,7 +627,7 @@ class PGoApi:
             encounter_id = lureinfo['encounter_id']
             fort_id = lureinfo['fort_id']
             position = self._posf
-            self.log.debug("At Fort with lure %s".encode('ascii', 'ignore'), lureinfo)
+            self.log.debug("At Fort with lure %s".encode('utf-8', 'ignore'), lureinfo)
             self.log.info("At Fort with Lure AND Active Pokemon %s",
                           self.pokemon_names.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
             resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0],
@@ -685,6 +708,74 @@ class PGoApi:
         else:
             self.log.info("Could not start encounter for pokemon: %s", pokemon)
         return False
+
+    def incubate_eggs(self):
+        if not self.EGG_INCUBATION_ENABLED:
+            return
+        if self.player_stats.km_walked > 0:
+            for incubator in self.inventory.incubators_busy:
+                incubator_egg_distance = incubator['target_km_walked'] - incubator['start_km_walked']
+                incubator_distance_done = self.player_stats.km_walked - incubator['start_km_walked']
+                if incubator_distance_done > incubator_egg_distance:
+                    self.attempt_finish_incubation()
+                    break
+            for incubator in self.inventory.incubators_busy:
+                incubator_egg_distance = incubator['target_km_walked'] - incubator['start_km_walked']
+                incubator_distance_done = self.player_stats.km_walked - incubator['start_km_walked']
+                self.log.info('Incubating %skm egg, %skm done', incubator_egg_distance, round(incubator_distance_done, 2))
+        for incubator in self.inventory.incubators_available:
+            if incubator['item_id'] == 901:  # unlimited use
+                pass
+            elif self.USE_DISPOSABLE_INCUBATORS and incubator['item_id'] == 902:  # limited use
+                pass
+            else:
+                continue
+            eggs_available = self.inventory.eggs_available
+            eggs_available = sorted(eggs_available, key=lambda egg: egg['creation_time_ms'],
+                                    reverse=False)  # oldest first
+            eggs_available = sorted(eggs_available, key=lambda egg: egg['egg_km_walked_target'],
+                                    reverse=self.INCUBATE_BIG_EGGS_FIRST)  # now sort as defined
+            if not len(eggs_available) > 0 or not self.attempt_start_incubation(eggs_available[0], incubator):
+                break
+
+    def attempt_start_incubation(self, egg, incubator):
+        self.log.info("Start incubating %skm egg", egg['egg_km_walked_target'])
+        incubate_res = self.use_item_egg_incubator(item_id=incubator['id'], pokemon_id=egg['id']).call()['responses']['USE_ITEM_EGG_INCUBATOR']
+        status = incubate_res.get('result', -1)
+        sleep(3)
+        if status == 1:
+            self.log.info("Incubation started with %skm egg !", egg['egg_km_walked_target'])
+            self.update_player_inventory()
+            return True
+        else:
+            self.log.debug("Could not start incubating %s", incubate_res)
+            self.log.info("Could not start incubating %s egg | Status %s", egg['egg_km_walked_target'], status)
+            self.update_player_inventory()
+            return False
+
+    def attempt_finish_incubation(self):
+        self.log.info("Checking for hatched eggs")
+        hatch_res = self.get_hatched_eggs().call()['responses']['GET_HATCHED_EGGS']
+        status = hatch_res.get('success', -1)
+        sleep(3)
+        if status == 1:
+            self.update_player_inventory()
+            i = 0
+            for pokemon_id in hatch_res['pokemon_id']:
+                pokemon = get_pokemon_by_long_id(pokemon_id, self.inventory.inventory_items,
+                                                    self.pokemon_names)
+                self.log.info("Egg Hatched! XP +%s, Candy +%s, Stardust +%s, %s",
+                              hatch_res['experience_awarded'][i],
+                              hatch_res['candy_awarded'][i],
+                              hatch_res['stardust_awarded'][i],
+                              pokemon)
+                i += 1
+            return True
+        else:
+            self.log.debug("Could not get hatched eggs %s", hatch_res)
+            self.log.info("Could not get hatched eggs Status %s", status)
+            self.update_player_inventory()
+            return False
 
     def login(self, provider, username, password, cached=False):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
