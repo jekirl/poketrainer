@@ -3,26 +3,31 @@
 
 ----
 
-# DISCLAIMER, this is super sketch and just a proof of concept. Use at your own risk and I claim no credit or responsibility or what have you for parts of it.
+# DISCLAIMER: <del>this is super sketch and just a proof of concept</del> It's not that bad any more, but still, use at your own risk and I claim no credit or responsibility or what have you for parts of it.
 
 ## For Contributions: Please open pull request to develop branch not *master* Thank you!
 
 # Don't be a dumbass too, Let's not ruin a good thing...
 
-Usage:
+----
 
+ #### Rename `config.json.example` to `config.json`
+```
+usage: pokecli.py [-h] [-i CONFIG_INDEX] [-l LOCATION] [-d]
 
- * Rename `config.json.example` to `config.json`
- * Running:
- `usage: python pokecli.py [-h] [-a ACCOUNTS [ACCOUNTS ...]]`
-  * `-a` allows you to run as many bots as you want with a single web process to control them all
-  * `pokecli.py -a 0 1 2 3` would run bots for configurations with index 0,1,2,3 in the config.json `array`
-  * default is to run it only for the first config in the "accounts" array from `config.json`
+optional arguments:
+  -h, --help            show this help message and exit
+  -i CONFIG_INDEX, --config_index CONFIG_INDEX
+                        Index of account in config.json
+  -l LOCATION, --location LOCATION
+                        Location
+  -d, --debug           Debug Mode
+```
 
 ### Web UI
-   * A web interface is started when you run `pokecli.py` on port `5000`
-   * It can be accessed here: http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
- ###### ONLY ONE `pokecly.py` should be running at a given time
+ * Run python web.py to get a webservice to show you player information, this can be seen at:
+  * http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
+  * Only 1 needs to run regardless of how many bots you are running
 
 ----
 

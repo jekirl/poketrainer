@@ -45,7 +45,6 @@ from s2sphere import CellId, LatLng
 log = logging.getLogger(__name__)
 from threading import Thread
 from Queue import Queue
-from web import run_web
 def get_pos_by_name(location_name):
     geolocator = GoogleV3()
     loc = geolocator.geocode(location_name)
@@ -55,7 +54,7 @@ def get_pos_by_name(location_name):
 
     return (loc.latitude, loc.longitude, loc.altitude)
 
-def init_configs():
+def init_config():
     parser = argparse.ArgumentParser()
     config_file = "config.json"
 
@@ -66,13 +65,21 @@ def init_configs():
             load.update(json.load(data))
 
     # Read passed in Arguments
-    parser.add_argument("-a", "--accounts", help="config_index", nargs='+', default=[0], type=int)
-    # parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true')
-    # parser.set_defaults(DEBUG=False)
+    required = lambda x: not x in load['accounts'][0].keys()
+    parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
+    parser.add_argument("-l", "--location", help="Location", required=required("location"))
+    parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
     config = parser.parse_args()
-    loaded = [load['accounts'][i] for i in config.accounts]
+    load = load['accounts'][config.__dict__['config_index']]
     # Passed in arguments shoud trump
-    return loaded
+    for key,value in load.iteritems():
+        if key not in config.__dict__ or not config.__dict__[key]:
+            config.__dict__[key] = value
+    if config.auth_service not in ['ptc', 'google']:
+      log.error("Invalid Auth service specified! ('ptc' or 'google')")
+      return None
+
+    return config.__dict__
 
 
 def main():
@@ -86,33 +93,38 @@ def main():
     # log level for internal pgoapi class
     logging.getLogger("rpc_api").setLevel(logging.INFO)
 
-    # FIXME
-    # if config.debug:
-    #     logging.getLogger("requests").setLevel(logging.DEBUG)
-    #     logging.getLogger("pgoapi").setLevel(logging.DEBUG)
-    #     logging.getLogger("rpc_api").setLevel(logging.DEBUG)
-    queues = {}
-    for config in init_configs():
-        queues[config["username"]] = Queue()
-        position = get_pos_by_name(config['location'])
-        # instantiate pgoapi
-        pokemon_names = json.load(open("pokemon.en.json"))
-        api = PGoApi(config, pokemon_names)
+    config = init_config()
+    if not config:
+        return
 
-        # provide player position on the earth
-        api.set_position(*position)
-        if not api.login(config["auth_service"], config["username"], config["password"], config.get("cached",False)):
-            return
+    if config["debug"]:
+        logging.getLogger("requests").setLevel(logging.DEBUG)
+        logging.getLogger("pgoapi").setLevel(logging.DEBUG)
+        logging.getLogger("rpc_api").setLevel(logging.DEBUG)
+
+    position = get_pos_by_name(config["location"])
+
+    # instantiate pgoapi
+    pokemon_names = json.load(open("pokemon.en.json"))
+    api = PGoApi(config, pokemon_names)
+
+    # provide player position on the earth
+    api.set_position(*position)
+
+    # retry login every 30 seconds if any errors
+    while not api.login(config["auth_service"], config["username"], config["password"]):
+        log.error('Retrying Login in 30 seconds')
+        sleep(30)
+
+    # main loop
+    while True:
         try:
-            t = Thread(target=api.main_loop, args=[queues[config["username"]]])
-            t.daemon = True
-            t.start()
+            api.main_loop()
         except Exception as e:
             log.error('Error in main loop, restarting %s', e)
             # restart after sleep
             sleep(30)
             main()
-    run_web(queues)
-    t.join(1)
+
 if __name__ == '__main__':
     main()

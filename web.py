@@ -1,4 +1,4 @@
-# DISCLAIMER: This
+# DISCLAIMER: This is jank
 from flask import Flask, render_template
 import json
 import csv
@@ -21,10 +21,7 @@ with open ("GAME_MASTER_POKEMON_v0_2.tsv") as tsv:
             "family_id": family_id
         }
 
-@app.route("/<username>/<int:pokemon_id>/upgrade", methods=['POST'])
-def upgrade(username, pokemon_id):
-    app.config['q'][username].put(("upgrade_pokemon", [], {"pokemon_id": pokemon_id}))
-    return "Message sent"
+
 
 @app.route("/<username>/pokemon")
 def inventory(username):
@@ -56,6 +53,5 @@ def inventory(username):
             pokemon['candy'] = candy[pokemon['family_id']]
         return render_template('pokemon.html', pokemons=pokemons, player=player,currency="{:,d}".format(currency), candy=candy,latlng=latlng)
 
-def run_web(q):
-    app.config['q'] = q
-    app.run(host='0.0.0.0',debug=False)
+if __name__ == "__main__":
+    app.run(host='0.0.0.0',debug=True)

@@ -672,17 +672,11 @@ class PGoApi:
 
         return True
 
-    def main_loop(self,queue):
+    def main_loop(self):
         catch_attempt = 0
         self.heartbeat()
         # self.cleanup_inventory()
         while True:
-            try:
-                (function,args,kwargs) = queue.get_nowait()
-                getattr(self,function)(*args,**kwargs)
-                queue.task_done()
-            except Empty:
-                pass
             self.heartbeat()
             sleep(1)
             if self.experimental and self.spin_all_forts:
