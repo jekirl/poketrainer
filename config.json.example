@@ -16,6 +16,7 @@
       "SKIP_VISITED_FORT_DURATION": 600,
       "SPIN_ALL_FORTS": true,
       "STAY_WITHIN_PROXIMITY": 9999,
+      "AUTO_USE_LUCKY_EGG": false,
       "MIN_ITEMS": {
         "ITEM_POTION": 10,
         "ITEM_SUPER_POTION": 10,
