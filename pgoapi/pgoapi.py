@@ -34,8 +34,9 @@ import pickle
 import random
 from collections import defaultdict
 from itertools import chain, imap
-from time import sleep
 from Queue import *
+from time import time, sleep
+
 from expiringdict import ExpiringDict
 
 from pgoapi.auth_google import AuthGoogle
@@ -73,6 +74,7 @@ class PGoApi:
         self._pokemons_keep_counter = 0
         self._pokemons_keep_iv_counter = 0
         self._firstRun = True
+        self._last_egg_use_time = 0
 
         self.pokemon_caught = 0
         self.inventory = Player_Inventory([])
@@ -101,11 +103,12 @@ class PGoApi:
         self.MAX_POKEMON_HIGH_IV = config.get("MAX_POKEMON_HIGH_IV", 999)
 
         self.MIN_SIMILAR_POKEMON = config.get("MIN_SIMILAR_POKEMON", 1)  # Keep atleast one of everything.
-        self.STAY_WITHIN_PROXIMITY = config.get("STAY_WITHIN_PROXIMITY", False)  # Stay within proximity
+        self.STAY_WITHIN_PROXIMITY = config.get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
 
         self.LIST_POKEMON_BEFORE_CLEANUP = config.get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
         self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
 
+        self.auto_use_lucky_egg = config.get("AUTO_USE_LUCKY_EGG", False)
         self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
         self.experimental = config.get("EXPERIMENTAL", False)
         self.spin_all_forts = config.get("SPIN_ALL_FORTS", False)
@@ -195,6 +198,8 @@ class PGoApi:
         return res
 
     def heartbeat(self):
+        current_time = time()
+
         # making a standard call to update position, etc
         self.get_player()
         if self._heartbeat_number % 10 == 0:
@@ -230,6 +235,15 @@ class PGoApi:
                 self.log.info(get_inventory_data(res, self.pokemon_names))
             self.attempt_evolve(self.inventory.inventory_items)
             self.cleanup_pokemon(self.inventory.inventory_items)
+        # Auto-use lucky-egg if applicable
+        if self.auto_use_lucky_egg and self.inventory.has_lucky_egg() and current_time - self._last_egg_use_time > 30*60:
+            self.use_item_xp_boost(item_id=Inventory.ITEM_LUCKY_EGG)
+            response = self.call()
+
+            if 'USE_ITEM_XP_BOOST' in response['responses'] and 'result' in response['responses']['USE_ITEM_XP_BOOST'] and response['responses']['USE_ITEM_XP_BOOST']['result'] == 1:
+                self.log.info("Ate a lucky egg! Yummy! :)")
+                self.inventory.take_lucky_egg()
+                self._last_egg_use_time = current_time
         self._heartbeat_number += 1
         return res
 
@@ -743,6 +757,7 @@ class PGoApi:
         while True:
             self.heartbeat()
             sleep(1)
+
             if self.experimental and self.spin_all_forts:
                 self.spin_all_forts_visible()
             else:

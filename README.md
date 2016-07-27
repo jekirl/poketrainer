@@ -13,7 +13,7 @@
 
  #### Rename `config.json.example` to `config.json`
 ```
-usage: pokecli.py [-h] [-i CONFIG_INDEX] [-l LOCATION] [-d]
+usage: python pokecli.py [-h] [-i CONFIG_INDEX] [-l LOCATION] [-d]
 
 optional arguments:
   -h, --help            show this help message and exit
