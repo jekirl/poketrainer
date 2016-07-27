@@ -221,16 +221,15 @@ class PGoApi:
                 res['responses']['lng'] = self._posf[1]
                 f.write(json.dumps(res['responses'], indent=2))
 
-            if self.LIST_INVENTORY_BEFORE_CLEANUP:
-                self.log.info("Player Items: %s", self.inventory)
             self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
+            if self.LIST_INVENTORY_BEFORE_CLEANUP:
+                self.log.info("Player Items Before Cleanup: %s", self.inventory)
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
-            self.log.info(self.inventory)
+            self.log.info("Player Inventory after cleanup: %s", self.inventory)
             if self.LIST_POKEMON_BEFORE_CLEANUP:
                 self.log.info(get_inventory_data(res, self.pokemon_names))
             self.attempt_evolve(self.inventory.inventory_items)
             self.cleanup_pokemon(self.inventory.inventory_items)
-
         self._heartbeat_number += 1
         return res
 
