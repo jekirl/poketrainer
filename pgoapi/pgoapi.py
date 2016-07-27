@@ -46,7 +46,7 @@ from pgoapi.inventory import Inventory as Player_Inventory
 from pgoapi.location import *
 from pgoapi.poke_utils import *
 from pgoapi.protos.POGOProtos import Enums_pb2
-from pgoapi.protos.POGOProtos import Inventory_pb2 as Inventory
+from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.rpc_api import RpcApi
 from .utilities import f2i
@@ -107,8 +107,6 @@ class PGoApi:
 
         self.LIST_POKEMON_BEFORE_CLEANUP = config.get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
         self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
-
-        self.auto_use_lucky_egg = config.get("AUTO_USE_LUCKY_EGG", False)
         self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
         self.experimental = config.get("EXPERIMENTAL", False)
         self.spin_all_forts = config.get("SPIN_ALL_FORTS", False)
@@ -198,8 +196,6 @@ class PGoApi:
         return res
 
     def heartbeat(self):
-        current_time = time()
-
         # making a standard call to update position, etc
         self.get_player()
         if self._heartbeat_number % 10 == 0:
@@ -236,16 +232,28 @@ class PGoApi:
             self.attempt_evolve(self.inventory.inventory_items)
             self.cleanup_pokemon(self.inventory.inventory_items)
         # Auto-use lucky-egg if applicable
-        if self.auto_use_lucky_egg and self.inventory.has_lucky_egg() and current_time - self._last_egg_use_time > 30*60:
-            self.use_item_xp_boost(item_id=Inventory.ITEM_LUCKY_EGG)
-            response = self.call()
-
-            if 'USE_ITEM_XP_BOOST' in response['responses'] and 'result' in response['responses']['USE_ITEM_XP_BOOST'] and response['responses']['USE_ITEM_XP_BOOST']['result'] == 1:
-                self.log.info("Ate a lucky egg! Yummy! :)")
-                self.inventory.take_lucky_egg()
-                self._last_egg_use_time = current_time
+            self.use_lucky_egg()
         self._heartbeat_number += 1
         return res
+
+    def use_lucky_egg(self):
+        if self.config.get("AUTO_USE_LUCKY_EGG", False) and self.inventory.has_lucky_egg() and time() - self._last_egg_use_time > 30*60:
+            self.use_item_xp_boost(item_id=Inventory.ITEM_LUCKY_EGG)
+            response = self.call()
+            result = response.get('responses', {}).get('USE_ITEM_XP_BOOST', {}).get('result', -1)
+            if result == 1:
+                self.log.info("Ate a lucky egg! Yummy! :)")
+                self.inventory.take_lucky_egg()
+                self._last_egg_use_time = time()
+                return True
+            elif result == 3:
+                self.log.info("Lucky egg already active")
+                return False
+            else:
+                self.log.info("Lucky Egg couldn't be used, status code %s", result)
+                return False
+        else:
+            return False
 
     def walk_to(self, loc, waypoints=[], directly=False):  # location in floats of course...
         steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""),
