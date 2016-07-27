@@ -81,7 +81,6 @@ def init_config():
 
     return config.__dict__
 
-
 def main():
     # log settings
     # log format
