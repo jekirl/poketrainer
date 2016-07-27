@@ -548,9 +548,14 @@ class PGoApi:
                         if self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0]):
                             self.do_release_pokemon(pokemon)
                 else:
+                    remaining = len(pokemons)
                     for pokemon in pokemons:
                         if self.is_pokemon_eligible_for_transfer(pokemon, None):
                             self.do_release_pokemon(pokemon)
+                            remaining -= 1
+                        if remaining <= self.MIN_SIMILAR_POKEMON:
+                            break
+
 
 
     def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon):
