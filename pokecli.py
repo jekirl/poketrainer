@@ -121,7 +121,7 @@ def main():
         try:
             api.main_loop()
         except Exception as e:
-            log.error('Error in main loop, restarting %s', e)
+            log.exception('Error in main loop, restarting %s')
             # restart after sleep
             sleep(30)
             main()
