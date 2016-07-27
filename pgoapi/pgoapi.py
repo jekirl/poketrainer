@@ -536,8 +536,8 @@ class PGoApi:
 
     def cleanup_pokemon(self, inventory_items=None):
         if not inventory_items:
-            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
-                'inventory_items']
+                inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
+                    'inventory_items']
         caught_pokemon = self.get_caught_pokemons(inventory_items)
         for pokemons in caught_pokemon.values():
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
@@ -552,8 +552,8 @@ class PGoApi:
         if pokemon.is_favorite or pokemon.pokemon_id in self.keep_pokemon_ids:
             return False
         elif self.RELEASE_DUPLICATES and (
-                            self.pokemon_lvl(best_pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(
-                        pokemon) and pokemon.cp < self.RELEASE_DUPLICATES_MAX_LV):
+                    self.pokemon_lvl(best_pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(
+                    pokemon) and pokemon.cp < self.RELEASE_DUPLICATES_MAX_LV):
             return True
         # release defined throwaway pokemons  but make sure we have kept at least 1 (dont throw away all of them)
         elif pokemon.pokemon_id in self.throw_pokemon_ids:
@@ -564,6 +564,16 @@ class PGoApi:
         # if we haven't found a reason to keep it, transfer it
         else:
             return True
+
+    def pokemon_lvl(self, pokemon):
+        if self.DEFINE_POKEMON_LV == "CP":
+            return pokemon.cp
+        elif self.DEFINE_POKEMON_LV == "IV":
+            return pokemon.iv
+        elif self.DEFINE_POKEMON_LV == "CP*IV":
+            return pokemon.cp * pokemon.iv
+        elif self.DEFINE_POKEMON_LV == "CP+IV":
+            return pokemon.cp + pokemon.iv
 
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:
