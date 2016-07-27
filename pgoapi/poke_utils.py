@@ -2,8 +2,16 @@ from __future__ import absolute_import
 import os
 from pgoapi.pokemon import Pokemon
 from pgoapi.game_master import PokemonData
+from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Enum_Items
 import csv
 
+
+def get_item_name(s_item_id):
+    available_items = Enum_Items.ItemId.DESCRIPTOR.values_by_number.items()
+    for (item_id, item) in available_items:
+        if item_id == s_item_id:
+            return item.name.replace('ITEM_', '', 1)
+    return 'Unknown'
 
 def parse_game_master():
     line_count = 0

@@ -70,6 +70,7 @@ class PGoApi:
         self._origPosF = (0, 0, 0)  # this is original position in floats
         self._req_method_list = []
         self._heartbeat_number = 5
+        self._player_max_item_storage = 'NA'
         self._pokemons_keep_counter = 0
         self._pokemons_keep_iv_counter = 0
         self._firstRun = True
@@ -206,6 +207,7 @@ class PGoApi:
 
         if 'GET_PLAYER' in res['responses']:
             player_data = res['responses'].get('GET_PLAYER', {}).get('player_data', {})
+            self._player_max_item_storage = str(player_data.get('max_item_storage', 'NA'))
             currencies = player_data.get('currencies', [])
             currency_data = ",".join(
                 map(lambda x: "{0}: {1}".format(x.get('name', 'NA'), x.get('amount', 'NA')), currencies))
@@ -218,8 +220,15 @@ class PGoApi:
                 res['responses']['lng'] = self._posf[1]
                 f.write(json.dumps(res['responses'], indent=2))
 
+            inventory_items = res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']
+            self.inventory = Player_Inventory(inventory_items)
+
+            for inventory_item in inventory_items:
+                if "player_stats" in inventory_item['inventory_item_data']:
+                    player_stats = inventory_item['inventory_item_data']['player_stats']
+                    self.log.info("Player level: %s, %s/%sXP", player_stats['level'], player_stats['experience'], player_stats['next_level_xp'])
+
             self.log.info("Player Items: %s", self.inventory)
-            self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
             self.log.info(self.inventory)
             self.log.info(get_inventory_data(res, self.pokemon_names))
@@ -314,8 +323,16 @@ class PGoApi:
                                player_longitude=player_postion[1]).call()['responses']['FORT_SEARCH']
         result = res.get('result', -1)
         if result == 1:
+            items = defaultdict(int)
+            for item in res['items_awarded']:
+                items[item['item_id']] += item['item_count']
+            reward = 'XP +' + str(res['experience_awarded'])
+            for item_id, amount in items.iteritems():
+                reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
+
             self.log.debug("Fort spinned: %s", res)
-            self.log.info("Fort Spinned: http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
+            self.log.info("Fort Spinned, %s http://maps.google.com/maps?q=%s,%s",
+                          reward, fort['latitude'], fort['longitude'])
             self.visited_forts[fort['id']] = fort
         elif result == 4:
             self.log.debug("For spinned but Your inventory is full : %s", res)
@@ -451,6 +468,7 @@ class PGoApi:
         if not inventory_items:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
                 'inventory_items']
+        item_count = 0
         for inventory_item in inventory_items:
             if "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
@@ -462,10 +480,18 @@ class PGoApi:
                         'RECYCLE_INVENTORY_ITEM']
                     response_code = res['result']
                     if response_code == 1:
+                        item_count += item['count'] - recycle_count
                         self.log.info("Recycled Item %s, New Count: %s", item['item_id'], res.get('new_count', 0))
                     else:
+                        item_count += item['count']
                         self.log.info("Failed to recycle Item %s, Code: %s", item['item_id'], response_code)
                     sleep(2)
+                elif "count" in item:
+                    item_count += item['count']
+
+        if item_count > 0:
+            self.log.info('Intentory has %s/%s items', item_count, self._player_max_item_storage)
+
         return self.update_player_inventory()
 
     def get_caught_pokemons(self, inventory_items):
