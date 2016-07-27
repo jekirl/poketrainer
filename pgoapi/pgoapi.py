@@ -342,8 +342,8 @@ class PGoApi:
                                fort_longitude=fort['longitude'],
                                player_latitude=player_postion[0],
                                player_longitude=player_postion[1]).call()['responses']['FORT_SEARCH']
-        result = res.get('result', -1)
-        if result == 1:
+        result = res.pop('result', -1)
+        if result == 1 and res:
             items = defaultdict(int)
             for item in res['items_awarded']:
                 items[item['item_id']] += item['item_count']
@@ -365,7 +365,7 @@ class PGoApi:
         else:
             self.log.debug("Could not spin fort %s", res)
             self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Error id: %s", fort['latitude'],
-                          fort['longitude'], res['result'])
+                          fort['longitude'], result)
             return False
         return True
 
