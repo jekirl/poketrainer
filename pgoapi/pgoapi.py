@@ -321,7 +321,7 @@ class PGoApi:
             if nearest_fort_dis <= 40.00:
                 self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(),
                                         fort_distance=nearest_fort_dis)
-            if 'lure_info' in nearest_fort:
+            if 'lure_info' in nearest_fort and self.should_catch_pokemon:
                 self.disk_encounter_pokemon(nearest_fort['lure_info'])
 
         else:
