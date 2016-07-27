@@ -5,7 +5,6 @@ import csv
 from math import floor
 from collections import defaultdict
 import re
-import random
 from pgoapi.poke_utils import *
 app = Flask(__name__, template_folder="templates")
 
@@ -59,4 +58,4 @@ def inventory(username):
 
 def run_web(q):
     app.config['q'] = q
-    app.run(host='0.0.0.0', port=random.randrange(5000, 8000), debug=False)
+    app.run(host='0.0.0.0',debug=False)
