@@ -16,6 +16,11 @@
       "SKIP_VISITED_FORT_DURATION": 600,
       "SPIN_ALL_FORTS": true,
       "STAY_WITHIN_PROXIMITY": 500,
+      "EGG_INCUBATION": {
+        "ENABLE": false,
+        "USE_DISPOSABLE_INCUBATORS": false,
+        "BIG_EGGS_FIRST": false
+      },
       "MIN_ITEMS": {
         "ITEM_POTION": 10,
         "ITEM_SUPER_POTION": 10,

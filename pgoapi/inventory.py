@@ -17,6 +17,9 @@ class Inventory:
         self.super_potion = 0
         self.max_potion = 0
         self.pokemon_candy = defaultdict()
+        self.eggs_available = []
+        self.incubators_available = []
+        self.incubators_busy = []
         self.setup_inventory()
 
     def setup_inventory(self):
@@ -42,6 +45,15 @@ class Inventory:
                 self.ultra_balls = item_count
             pokemon_family = inventory_item['inventory_item_data'].get('pokemon_family', {})
             self.pokemon_candy[pokemon_family.get('family_id', -1)] = pokemon_family.get('candy', -1)
+            pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
+            if pokemon_data.get('is_egg', False) and not pokemon_data.get('egg_incubator_id', False):
+                self.eggs_available.append(pokemon_data)
+            egg_incubators = inventory_item['inventory_item_data'].get('egg_incubators', {}).get('egg_incubator', {})
+            for incubator in egg_incubators:
+                if "pokemon_id" in incubator:
+                    self.incubators_busy.append(incubator)
+                else:
+                    self.incubators_available.append(incubator)
 
     def can_attempt_catch(self):
         return self.poke_balls + self.great_balls + self.ultra_balls + self.master_balls > 0
