@@ -227,7 +227,7 @@ class PGoApi:
         self._heartbeat_number += 1
         return res
 
-    def _walk(self, loc, waypoints=[], directly=False):  # location in floats of course...
+    def walk_to(self, loc, waypoints=[], directly=False):  # location in floats of course...
         steps = get_route(self._posf, loc, self.config.get("USE_GOOGLE", False), self.config.get("GMAPS_API_KEY", ""),
                           self.experimental and self.spin_all_forts, waypoints)
         catch_attempt = 0
@@ -277,12 +277,6 @@ class PGoApi:
 
         self.log.info('=================================')
 
-    def walk_directly(self, loc, waypoints=[]):
-        self._walk(loc, waypoints=waypoints, directly=True)
-
-    def walk_to(self, loc, waypoints=[]):
-        self._walk(loc, waypoints=waypoints, directly=False)
-
     def walk_back_to_origin(self):
         self.walk_to(self._origPosF)
 
@@ -299,7 +293,7 @@ class PGoApi:
             if nearest_fort_dis > 40.00 and nearest_fort_dis <= 100:
                 lat = nearest_fort['latitude']
                 long = nearest_fort['longitude']
-                self.walk_to_fort(destinations[0])
+                self.walk_to_fort(destinations[0], directly=True)
                 self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(),
                                         fort_distance=nearest_fort_dis)
             if nearest_fort_dis <= 40.00:
@@ -362,11 +356,7 @@ class PGoApi:
         fort = fort_data[0]
         self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", fort['latitude'],
                         fort['longitude'])
-        if directly is True:
-            self.walk_directly((fort['latitude'], fort['longitude']))
-        else:
-            self.walk_to((fort['latitude'], fort['longitude']))
-
+        self.walk_to((fort['latitude'], fort['longitude']), directly=directly)
         self.fort_search_pgoapi(fort, self.get_position(), fort_data[1])
         if 'lure_info' in fort:
             self.disk_encounter_pokemon(fort['lure_info'])
