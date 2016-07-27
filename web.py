@@ -21,8 +21,6 @@ with open ("GAME_MASTER_POKEMON_v0_2.tsv") as tsv:
             "family_id": family_id
         }
 
-
-
 @app.route("/<username>/pokemon")
 def inventory(username):
     with open("data_dumps/%s.json"%username) as f:
@@ -51,6 +49,8 @@ def inventory(username):
         # add candy back into pokemon json
         for pokemon in pokemons:
             pokemon['candy'] = candy[pokemon['family_id']]
+        player['level_xp'] = player['experience']-player['prev_level_xp']
+        player['goal_xp'] = player['next_level_xp']-player['prev_level_xp']
         return render_template('pokemon.html', pokemons=pokemons, player=player,currency="{:,d}".format(currency), candy=candy,latlng=latlng)
 
 if __name__ == "__main__":
