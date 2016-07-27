@@ -3,18 +3,36 @@
 
 ----
 
-# DISCLAIMER, this is super sketch and just a proof of concept. Use at your own risk and I claim no credit or responsibility or what have you for parts of it.
+# DISCLAIMER: <del>this is super sketch and just a proof of concept</del> It's not that bad any more, but still, use at your own risk and I claim no credit or responsibility or what have you for parts of it.
 
 ## For Contributions: Please open pull request to develop branch not *master* Thank you!
 
 # Don't be a dumbass too, Let's not ruin a good thing...
 
-Usage:
+----
 
- * Rename `config.json.example` to `config.json`
- * Run the client with `python pokecli.py -i ACCOUNT_INDEX --[cached]`
-    * Use `--cached` after you have already logged in once, doing so will cache your login and prevent soft bans
-    * The `ACCOUNT_INDEX` is the index of the account you want to use from `config.json` indexing from 0
+ #### Rename `config.json.example` to `config.json`
+```
+usage: python pokecli.py [-h] [-i CONFIG_INDEX] [-l LOCATION] [-d]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i CONFIG_INDEX, --config_index CONFIG_INDEX
+                        Index of account in config.json
+  -l LOCATION, --location LOCATION
+                        Location
+  -d, --debug           Debug Mode
+```
+
+### Web UI
+ * Run python web.py to get a webservice to show you player information, this can be seen at:
+  * http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
+  * Only 1 needs to run regardless of how many bots you are running
+
+----
+
+
+* Configuration (non-exhaustive)
     * USE_GOOGLE will enable google walking directions for navigation
      * You will probably need to provide an api key in `GMAPS_API_KEY` to avoid rate limits
     * `STEP_SIZE` corresponds to how many meters you want to move at most between server calls, set this around 4-6 for walking or 100-200 for really, really fast driving
@@ -22,15 +40,21 @@ Usage:
      * Setting this to 0 will never transfer anything
     * `KEEP_CP_OVER` Never transfer any pokemon above this CP
      * Setting this to 0 will never transfer anything
-    * `EXERIMENTAL` will set the flag to use exeperimental features
+    * `EXPERIMENTAL` will set the flag to use exeperimental features
     * `SKIP_VISITED_FORT_DURATION` [Experimental] Avoid a fort for a given number of seconds
      * Setting this to 500 means avoid a fort for 500 seconds before returning, (Should be higher than 300 to have any effect). This will let the bot explore a bigger area.
     * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
     * `KEEP_POKEMON_IDS` IDs of pokemon you want the bot to hold regardless of IV/CP
+    * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
+    * `EGG_INCUBATION`
+     * `ENABLE` enables automatic use of incubators (default: true)
+     * `USE_DISPOSABLE_INCUBATORS` enables use of disposable (3-times use) incubators (default: false)
+     * `BIG_EGGS_FIRST` incubate big eggs (most km) first (default: true)
 
- * Run python web.py to get a webservice to show you player information, this can be seen at:
-  * http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
-  * Only 1 needs to run regardless of how many bots you are running
+----
+
+    * `RELEASE_DUPLICATES` The bot seems to have a bad habit of hoarding pokemon. Enabling this feature (disabled by default) will have the bot automatically transfer pokemon that are duplicates. To determine which pokemon to transfer when duplicates exist, the lvl's of the pokemon are compared. A pokemon's lvl is an arbitrary and configurable parameter that can either be representative of a pokemon's CP, IV, CPxIV, or CP+IV. The bot will transfer the lowest lvl pokemon, maintaining` MIN_SIMILAR_POKEMON` of each type. To be completely confident that the bot will not transfer your high lvl pokemon, when this feature is enabled only pokemon with a lvl below `RELEASE_DUPLICATES_MAX_LVL`. If you have multiple pokemon that are close to the same lvl the bot can be configured to not transfer them by using `RELEASE_DUPLICATES_SCALER`. The value of this config is multiplied by the highest lvl pokemon of a type and only those pokemon that are less than the scaled lvl are transfered.
+     * EXAMPlES: If you set lvl to "IV" while having two Snorlaxs, one with stats CP:14 IV:95 and the other with CP:1800 IV:30 the bot will transfer the Snorlax with CP of 1800 and keep the CP 14 Snorlax because you have indicated you only care about a pokemon's IV. It must be fully understood why this happens to avoid unwanted transfer of pokemon. If not used correctly this feature can very easily transfer a large ammount of your pokemon so please make sure you fully understand it's mechanics before attempting use!
 
 
 ## Requirements
@@ -63,14 +87,15 @@ What's working:
  * Capturing any pokemon it sees on the way
  * Releasing pokemon that you have duplicates of if under CP_CUTOFF (FIXME this is not the best idea....)
   * Change CP_CUTOFF in `pgoapi.py` to configure this, by default it is 0 (to never release)
- * And other stufff, readme needs to be updated...
+
+ * And much more, README to be updated soon
 
 ## Credits
-* [tejado](https://github.com/tejado) for the base of this and everything else really
-* [Mila432](https://github.com/Mila432/Pokemon_Go_API) for the login secrets  
+* [tejado](https://github.com/tejado) for the base of this
 * [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR  
 * [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos  
 * [AHAAAAAAA](https://github.com/AHAAAAAAA/PokemonGo-Map) for parts of the s2sphere stuff
+* [beeedy](https://github.com/beeedy) for ability to transfer duplicate pokemon
 * And to anyone on the pokemongodev slack channel <3
 
 >>>>>>> super sketch but yolo

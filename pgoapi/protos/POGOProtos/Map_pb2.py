@@ -16,20 +16,14 @@ _sym_db = _symbol_database.Default()
 
 from POGOProtos.Map import Fort_pb2 as POGOProtos_dot_Map_dot_Fort__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Map_dot_Fort__pb2.POGOProtos_dot_Enums__pb2
-POGOProtos_dot_Inventory__pb2 = POGOProtos_dot_Map_dot_Fort__pb2.POGOProtos_dot_Inventory__pb2
-POGOProtos_dot_Data__pb2 = POGOProtos_dot_Map_dot_Fort__pb2.POGOProtos_dot_Data__pb2
-POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Map_dot_Fort__pb2.POGOProtos_dot_Enums__pb2
-POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Map_dot_Fort__pb2.POGOProtos_dot_Data_dot_Player__pb2
-POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Map_dot_Fort__pb2.POGOProtos_dot_Enums__pb2
-POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Map_dot_Fort__pb2.POGOProtos_dot_Data_dot_Player__pb2
-POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Map_dot_Fort__pb2.POGOProtos_dot_Enums__pb2
-POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Map_dot_Fort__pb2.POGOProtos_dot_Enums__pb2
+POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Map_dot_Fort__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
 from POGOProtos.Map import Pokemon_pb2 as POGOProtos_dot_Map_dot_Pokemon__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Map_dot_Pokemon__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data__pb2 = POGOProtos_dot_Map_dot_Pokemon__pb2.POGOProtos_dot_Data__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Map_dot_Pokemon__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Map_dot_Pokemon__pb2.POGOProtos_dot_Data_dot_Player__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Map_dot_Pokemon__pb2.POGOProtos_dot_Enums__pb2
+POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Map_dot_Pokemon__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
 
 from POGOProtos.Map.Fort_pb2 import *
 from POGOProtos.Map.Pokemon_pb2 import *
@@ -187,14 +181,14 @@ _SPAWNPOINT = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='latitude', full_name='POGOProtos.Map.SpawnPoint.latitude', index=0,
       number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='longitude', full_name='POGOProtos.Map.SpawnPoint.longitude', index=1,
       number=3, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=float(0),
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),

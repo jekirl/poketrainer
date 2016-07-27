@@ -7,13 +7,19 @@
       "location": "University of Southern California, Los Angeles, CA",
       "USE_GOOGLE": true,
       "GMAPS_API_KEY": "some api key here",
-      "MIN_KEEP_IV": 50,
       "KEEP_CP_OVER": 500,
+      "KEEP_IV_OVER": 50,
       "STEP_SIZE": 100,
       "EXPERIMENTAL": true,
       "SKIP_VISITED_FORT_DURATION": 600,
       "SPIN_ALL_FORTS": true,
-      "STAY_WITHIN_PROXIMITY": 500,
+      "STAY_WITHIN_PROXIMITY": 9999,
+      "AUTO_USE_LUCKY_EGG": false,
+      "EGG_INCUBATION": {
+        "ENABLE": true,
+        "USE_DISPOSABLE_INCUBATORS": false,
+        "BIG_EGGS_FIRST": true
+      },
       "MIN_ITEMS": {
         "ITEM_POTION": 10,
         "ITEM_SUPER_POTION": 10,
@@ -27,12 +33,18 @@
       },
       "POKEMON_EVOLUTION": {
         "PIDGEY": 12,
-        "WEEDLE":12 
+        "WEEDLE":12
       },
       "MIN_SIMILAR_POKEMON": 1,
       "KEEP_POKEMON_NAMES": ["MEWTWO"],
       "THROW_POKEMON_NAMES": ["PIDGEY"],
-      "MAX_CATCH_ATTEMPTS": 10
+      "LIST_POKEMON_BEFORE_CLEANUP": true,
+      "LIST_INVENTORY_BEFORE_CLEANUP": true,
+      "MAX_CATCH_ATTEMPTS": 10,
+      "RELEASE_DUPLICATES": false,
+      "RELEASE_DUPLICATES_MAX_LV": 1000,
+      "RELEASE_DUPLICATES_SCALER": 0.9,
+      "DEFINE_POKEMON_LV": "CP"
     },
     {
       "auth_service": "ptc",

@@ -1,6 +1,6 @@
 
 class Pokemon:
-    def __init__(self, pokemon_data, pokemon_names, additional_data=None):
+    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None):
         self.pokemon_data = pokemon_data
         self.stamina = 0
         self.pokemon_id = 0
@@ -22,7 +22,7 @@ class Pokemon:
         self.is_favorite = False
         self.iv = 0.0
         self.parse_values()
-        self.pokemon_type = pokemon_names.get(str(self.pokemon_id), "NA").encode('ascii', 'ignore')
+        self.pokemon_type = pokemon_names.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore')
         self.pokemon_additional_data = additional_data
 
     def parse_values(self):
@@ -42,7 +42,7 @@ class Pokemon:
         self.individual_stamina = self.pokemon_data.get('individual_stamina', 0)
         self.cp_multiplier = self.pokemon_data.get('cp_multiplier', 0.0)
         self.additional_cp_multiplier = self.pokemon_data.get('additional_cp_multiplier', 0.0)
-        self.nickname = self.pokemon_data.get('nickname', "")
+        self.nickname = self.pokemon_data.get('nickname', "").encode('utf8')
         self.iv = self.get_iv_percentage()
 
     def __str__(self):
@@ -56,4 +56,3 @@ class Pokemon:
 
     def is_valid_pokemon(self):
         return self.pokemon_id > 0
-

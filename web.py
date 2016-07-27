@@ -1,4 +1,4 @@
-# DISCLAIMER: This
+# DISCLAIMER: This is jank
 from flask import Flask, render_template
 import json
 import csv
