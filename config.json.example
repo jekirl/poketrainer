@@ -34,11 +34,11 @@
       "MIN_SIMILAR_POKEMON": 1,
       "KEEP_POKEMON_NAMES": ["MEWTWO"],
       "THROW_POKEMON_NAMES": ["PIDGEY"],
-      "MAX_CATCH_ATTEMPTS": 10
-        "RELEASE_DUPLICATES": false,
-        "RELEASE_DUPLICATES_MAX_LV": 1000,
-        "RELEASE_DUPLICATES_SCALER": 0.9,
-        "DEFINE_POKEMON_LV": "CP"
+      "MAX_CATCH_ATTEMPTS": 10,
+      "RELEASE_DUPLICATES": false,
+      "RELEASE_DUPLICATES_MAX_LV": 1000,
+      "RELEASE_DUPLICATES_SCALER": 0.9,
+      "DEFINE_POKEMON_LV": "CP"
     },
     {
       "auth_service": "ptc",
