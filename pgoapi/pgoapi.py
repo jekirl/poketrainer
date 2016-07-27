@@ -35,7 +35,7 @@ import random
 from collections import defaultdict
 from itertools import chain, imap
 from time import sleep
-
+from Queue import *
 from expiringdict import ExpiringDict
 
 from pgoapi.auth_google import AuthGoogle
@@ -281,7 +281,7 @@ class PGoApi:
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts,
                                       self.experimental)
         if not destinations:
-            self.log.debug("No fort to walk to! %s", res)
+            self.log.info("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Or server error')
             self.walk_back_to_origin()
             return False
@@ -349,7 +349,7 @@ class PGoApi:
                                     since_timestamp_ms=[0] * len(neighbors),
                                     cell_id=neighbors).call()
 
-    def attempt_catch(self, encounter_id, spawn_point_guid):
+    def attempt_catch(self, encounter_id, spawn_point_id):
         catch_status = -1
         catch_attempts = 0
         ret = {}
@@ -363,7 +363,7 @@ class PGoApi:
                 hit_pokemon=True,
                 normalized_hit_position=1,
                 encounter_id=encounter_id,
-                spawn_point_guid=spawn_point_guid,
+                spawn_point_id=spawn_point_id,
             ).call()['responses']['CATCH_POKEMON']
             catch_attempts += 1
             if "status" in r:
@@ -632,11 +632,17 @@ class PGoApi:
 
         return True
 
-    def main_loop(self):
+    def main_loop(self,queue):
         catch_attempt = 0
         self.heartbeat()
-        self.cleanup_inventory()
+        # self.cleanup_inventory()
         while True:
+            try:
+                (function,args,kwargs) = queue.get_nowait()
+                getattr(self,function)(*args,**kwargs)
+                queue.task_done()
+            except Empty:
+                pass
             self.heartbeat()
             sleep(1)
             if self.experimental and self.spin_all_forts:
