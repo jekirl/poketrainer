@@ -11,17 +11,23 @@
 
 Usage:
 
+
  * Rename `config.json.example` to `config.json`
  * Running:
  `usage: python pokecli.py [-h] [-a ACCOUNTS [ACCOUNTS ...]]`
-  * `pokecli.py -a 0 1 2 3` would run bots for configurations 0,1,2,3 in your config file
-  * Default is to run it only for the first config in the "accounts" array from `config.json`
+  * `-a` allows you to run as many bots as you want with a single web process to control them all
+  * `pokecli.py -a 0 1 2 3` would run bots for configurations with index 0,1,2,3 in the config.json `array`
+  * default is to run it only for the first config in the "accounts" array from `config.json`
 
+### Web UI
+   * A web interface is started when you run `pokecli.py` on port `5000`
+   * It can be accessed here: http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
+ ###### ONLY ONE `pokecly.py` should be running at a given time
 
+----
 
 
 * Configuration (non-exhaustive)
-    * The `ACCOUNT_INDEX` is the index of the account you want to use from `config.json` indexing from 0
     * USE_GOOGLE will enable google walking directions for navigation
      * You will probably need to provide an api key in `GMAPS_API_KEY` to avoid rate limits
     * `STEP_SIZE` corresponds to how many meters you want to move at most between server calls, set this around 4-6 for walking or 100-200 for really, really fast driving
@@ -29,16 +35,13 @@ Usage:
      * Setting this to 0 will never transfer anything
     * `KEEP_CP_OVER` Never transfer any pokemon above this CP
      * Setting this to 0 will never transfer anything
-    * `EXERIMENTAL` will set the flag to use exeperimental features
+    * `EXPERIMENTAL` will set the flag to use exeperimental features
     * `SKIP_VISITED_FORT_DURATION` [Experimental] Avoid a fort for a given number of seconds
      * Setting this to 500 means avoid a fort for 500 seconds before returning, (Should be higher than 300 to have any effect). This will let the bot explore a bigger area.
     * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
     * `KEEP_POKEMON_IDS` IDs of pokemon you want the bot to hold regardless of IV/CP
 
- * Run python web.py to get a webservice to show you player information, this can be seen at:
-  * http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
-  * Only 1 needs to run regardless of how many bots you are running
-
+----
 
 ## Requirements
  * Run `pip install -r requirements.txt`
@@ -70,11 +73,11 @@ What's working:
  * Capturing any pokemon it sees on the way
  * Releasing pokemon that you have duplicates of if under CP_CUTOFF (FIXME this is not the best idea....)
   * Change CP_CUTOFF in `pgoapi.py` to configure this, by default it is 0 (to never release)
- * And other stufff, readme needs to be updated...
+
+ * And much more, README to be updated soon
 
 ## Credits
-* [tejado](https://github.com/tejado) for the base of this and everything else really
-* [Mila432](https://github.com/Mila432/Pokemon_Go_API) for the login secrets  
+* [tejado](https://github.com/tejado) for the base of this
 * [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR  
 * [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos  
 * [AHAAAAAAA](https://github.com/AHAAAAAAA/PokemonGo-Map) for parts of the s2sphere stuff
