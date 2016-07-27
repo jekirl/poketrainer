@@ -468,6 +468,20 @@ class PGoApi:
         elif self.DEFINE_POKEMON_LV == "CP+IV":
             return pokemon.cp + pokemon.iv
 
+    def attempt_evolve(self, inventory_items=None):
+        if not inventory_items:
+            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
+                'inventory_items']
+        caught_pokemon = self.get_caught_pokemons(inventory_items)
+        self.inventory = Player_Inventory(inventory_items)
+        for pokemons in caught_pokemon.values():
+            if len(pokemons) > self.MIN_SIMILAR_POKEMON:
+                pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
+                for pokemon in pokemons[self.MIN_SIMILAR_POKEMON:]:
+                    # If we can't evolve this type of pokemon anymore, don't check others.
+                    if not self.attempt_evolve_pokemon(pokemon):
+                        break
+
     def attempt_evolve_pokemon(self, pokemon):
         if self.is_pokemon_eligible_for_evolution(pokemon=pokemon):
             self.log.info("Evolving pokemon: %s", pokemon)
