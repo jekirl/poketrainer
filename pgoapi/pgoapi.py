@@ -472,7 +472,7 @@ class PGoApi:
                 and pokemons_keep_iv_counter < self.MAX_POKEMON_HIGH_IV \
                 and (pokemon.cp * self.KEEP_IV_MIN_PERCENT_CP / 100) > (best_pokemon.cp * self.KEEP_IV_MIN_PERCENT_CP / 100):
             return False, False
-        # keep high-cp pokemons and first MIN_SIMILAR_POKEMON amount of pokemons
+        # keep high-cp pokemons
         elif pokemon.cp > self.KEEP_CP_OVER:
             return False, True
         # release all other pokemons
