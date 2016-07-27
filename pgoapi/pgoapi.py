@@ -96,14 +96,6 @@ class PGoApi:
         self.KEEP_IV_OVER = config.get("KEEP_IV_OVER", 0)  # release anything under this
         self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0)  # release anything under this
 
-        # Minimum CP (percentage of strongest pokemon) for a pokemon to keep because of the KEEP_IV_OVER
-        # 0 = ignore this value
-        self.KEEP_IV_MIN_PERCENT_CP = config.get("KEEP_IV_MIN_PERCENT_CP", 0)
-
-        # Maximum nr of Pokemon to keep because of the KEEP_IV_OVER vlaue
-        # 999 = basically ignore this value
-        self.MAX_POKEMON_HIGH_IV = config.get("MAX_POKEMON_HIGH_IV", 999)
-
         self.MIN_SIMILAR_POKEMON = config.get("MIN_SIMILAR_POKEMON", 1)  # Keep atleast one of everything.
         self.STAY_WITHIN_PROXIMITY = config.get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
 
@@ -123,9 +115,9 @@ class PGoApi:
         self.game_master = parse_game_master()
         self.should_catch_pokemon = config.get("CATCH_POKEMON", True)
         self.RELEASE_DUPLICATES = config.get("RELEASE_DUPLICATES", False)
-        self.RELEASE_DUPLICATES_MAX_LV = config.get("RELEASE_DUPLICATES_MAX_LV", 0)  # only release duplicates up to this lvl
-        self.RELEASE_DUPLICATES_SCALER = config.get("RELEAES_DUPLICATES_SCALER", 1.0)  # when comparing two pokemon's lvl, multiply larger by this
-        self.DEFINE_POKEMON_LV = config.get("DEFINE_POKEMON_LV", "CP")  # define a pokemon's lvl, options are CP, IV, CP*IV, CP+IV
+        self.RELEASE_DUPLICATES_MAX_LV = config.get("RELEASE_DUPLICATES_MAX_LV", 0) # only release duplicates up to this lvl
+        self.RELEASE_DUPLICATES_SCALER = config.get("RELEAES_DUPLICATES_SCALER", 1.0) # when comparing two pokemon's lvl, multiply larger by this
+        self.DEFINE_POKEMON_LV = config.get("DEFINE_POKEMON_LV", "CP") # define a pokemon's lvl, options are CP, IV, CP*IV, CP+IV
 
     def call(self):
         if not self._req_method_list:
@@ -249,7 +241,7 @@ class PGoApi:
         return res
 
     def use_lucky_egg(self):
-        if self.config.get("AUTO_USE_LUCKY_EGG", False) and self.inventory.has_lucky_egg() and time() - self._last_egg_use_time > 30 * 60:
+        if self.config.get("AUTO_USE_LUCKY_EGG", False) and self.inventory.has_lucky_egg() and time() - self._last_egg_use_time > 30*60:
             self.use_item_xp_boost(item_id=Inventory.ITEM_LUCKY_EGG)
             response = self.call()
             result = response.get('responses', {}).get('USE_ITEM_XP_BOOST', {}).get('result', -1)
@@ -547,32 +539,31 @@ class PGoApi:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
                 'inventory_items']
         caught_pokemon = self.get_caught_pokemons(inventory_items)
-
         for pokemons in caught_pokemon.values():
-            # Only if we have more than MIN_SIMILAR_POKEMON
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
-                pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
-                # keep the first pokemon....
-                for pokemon in pokemons[self.MIN_SIMILAR_POKEMON:]:
-                    if self.is_pokemon_eligible_for_transfer(pokemon):
-                        self.log.info("Releasing pokemon: %s", pokemon)
-                        self.release_pokemon(pokemon_id=pokemon.id)
-                        release_res = self.call()['responses']['RELEASE_POKEMON']
-                        status = release_res.get('result', -1)
-                        if status == 1:
-                            self.log.info("Successfully Released Pokemon %s", pokemon)
-                        else:
-                            self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
-                            self.log.info("Failed to release Pokemon %s", pokemon)
-                        sleep(3)
+                # highest lvl pokemon first
+                sorted_pokemons = sorted(pokemons, key=self.pokemon_lvl, reverse=True)
+                for pokemon in sorted_pokemons[self.MIN_SIMILAR_POKEMON:]:
+                    if self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0]):
+                        self.do_release_pokemon(pokemon)
 
-    def is_pokemon_eligible_for_transfer(self, pokemon):
-            return (pokemon.pokemon_id in self.throw_pokemon_ids and not pokemon.is_favorite) \
-                   or (not pokemon.is_favorite and
-                       pokemon.iv < self.MIN_KEEP_IV and
-                       pokemon.cp < self.KEEP_CP_OVER and
-                       pokemon.is_valid_pokemon() and
-                       pokemon.pokemon_id not in self.keep_pokemon_ids)
+    def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon):
+        # never release favorites and other defined pokemons
+        if pokemon.is_favorite or pokemon.pokemon_id in self.keep_pokemon_ids:
+            return False
+        elif self.RELEASE_DUPLICATES and (
+                            self.pokemon_lvl(best_pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(
+                        pokemon) and pokemon.cp < self.RELEASE_DUPLICATES_MAX_LV):
+            return True
+        # release defined throwaway pokemons  but make sure we have kept at least 1 (dont throw away all of them)
+        elif pokemon.pokemon_id in self.throw_pokemon_ids:
+            return True
+        # keep high-cp pokemons
+        elif pokemon.cp > self.KEEP_CP_OVER or pokemon.iv > self.KEEP_IV_OVER:
+            return False
+        # if we haven't found a reason to keep it, transfer it
+        else:
+            return True
 
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:
@@ -587,8 +578,6 @@ class PGoApi:
                     # If we can't evolve this type of pokemon anymore, don't check others.
                     if not self.attempt_evolve_pokemon(pokemon):
                         break
-
-        return False
 
     def attempt_evolve_pokemon(self, pokemon):
         if self.is_pokemon_eligible_for_evolution(pokemon=pokemon):
