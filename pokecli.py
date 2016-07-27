@@ -108,7 +108,7 @@ def main():
             t.daemon = True
             t.start()
         except Exception as e:
-            log.error('Error in main loop, restarting %s', e)
+            log.exception('Error in main loop, restarting %s')
             # restart after sleep
             sleep(30)
             main()

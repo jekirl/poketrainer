@@ -1,6 +1,6 @@
 
 class Pokemon:
-    def __init__(self, pokemon_data, pokemon_names, additional_data=None):
+    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None):
         self.pokemon_data = pokemon_data
         self.stamina = 0
         self.pokemon_id = 0
