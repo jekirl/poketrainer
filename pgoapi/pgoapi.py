@@ -330,11 +330,12 @@ class PGoApi:
             items = defaultdict(int)
             for item in res['items_awarded']:
                 items[item['item_id']] += item['item_count']
-            result = 'XP +' + str(res['experience_awarded'])
+            reward = 'XP +' + str(res['experience_awarded'])
             for item_id, amount in items.iteritems():
-                result += ', ' + str(amount) + 'x ' + get_item_name(item_id)
+                reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
             self.log.debug("Fort spinned: %s", res)
-            self.log.info("Fort Spinned: http://maps.google.com/maps?q=%s,%s", fort['latitude'], fort['longitude'])
+            self.log.info("Fort Spinned, %s (http://maps.google.com/maps?q=%s,%s)",
+                          reward, fort['latitude'], fort['longitude'])
             self.visited_forts[fort['id']] = fort
         elif result == 4:
             self.log.debug("For spinned but Your inventory is full : %s", res)
