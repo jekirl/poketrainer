@@ -9,8 +9,6 @@
       "GMAPS_API_KEY": "some api key here",
       "KEEP_CP_OVER": 500,
       "KEEP_IV_OVER": 50,
-      "KEEP_IV_MIN_PERCENT_CP": 0,
-      "MAX_POKEMON_HIGH_IV": 999,
       "STEP_SIZE": 100,
       "EXPERIMENTAL": true,
       "SKIP_VISITED_FORT_DURATION": 600,
@@ -37,7 +35,11 @@
       "THROW_POKEMON_NAMES": ["PIDGEY"],
       "LIST_POKEMON_BEFORE_CLEANUP": true,
       "LIST_INVENTORY_BEFORE_CLEANUP": true,
-      "MAX_CATCH_ATTEMPTS": 10
+      "MAX_CATCH_ATTEMPTS": 10,
+      "RELEASE_DUPLICATES": false,
+      "RELEASE_DUPLICATES_MAX_LV": 1000,
+      "RELEASE_DUPLICATES_SCALER": 0.9,
+      "DEFINE_POKEMON_LV": "CP"
     },
     {
       "auth_service": "ptc",
