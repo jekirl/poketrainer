@@ -731,6 +731,30 @@ class PGoApi:
         self.log.info('Login process completed')
 
         return True
+        
+    
+    def incubate_eggs(self, inventory_items=None):
+        if not inventory_items:
+            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta']['inventory_items']
+        incubators = None
+        for inventory_item in inventory_items:
+            #Finds incubators..for some reason only one is ever found
+            if "egg_incubators" in inventory_item['inventory_item_data']:
+                incubators = inventory_item['inventory_item_data']['egg_incubators']
+                self.log.info("Incubators %s", incubators)
+            #Attempts to place egg into each incubator
+            if "pokemon_data" in inventory_item['inventory_item_data']:
+                if "is_egg" in inventory_item['inventory_item_data']['pokemon_data']:
+                    egg = inventory_item['inventory_item_data']['pokemon_data']
+                    self.log.info("Egg %s", egg)
+                    for incubator in incubators:
+                        self.log.info("  Incubating in %s",incubators[incubator])
+                        incubate_res = self.use_item_egg_incubator(item_id=incubators[incubator]['id'], pokemon_id=egg['id']).call()['responses']['USE_ITEM_EGG_INCUBATOR']
+                        status = incubate_res.get('result', -1)
+                        if status == 1:
+                            self.log.info("Success! %s", status)
+                        else:
+                            self.log.info("Failed... %s", status)
 
     def main_loop(self):
         catch_attempt = 0
