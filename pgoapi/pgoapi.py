@@ -437,7 +437,7 @@ class PGoApi:
                 # highest lvl pokemon first
                 pokemons = sorted(pokemons, key=self.pokemon_lvl, reverse=True)
                 for pokemon in pokemons[self.MIN_SIMILAR_POKEMON:]:
-                    if self.RELEASE_DUPLICATES and pokemon is not pokemons[0]:
+                    if self.RELEASE_DUPLICATES and pokemon is not pokemons[0] and not pokemon.is_favorite and not pokemon.pokemon_id in self.keep_pokemon_ids:
                         if self.pokemon_lvl(pokemons[0]) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(pokemon) and pokemon.cp < self.RELEASE_DUPLICATES_MAX_LV:
                             self.do_release_pokemon(pokemon)
                     elif self.is_pokemon_eligible_for_transfer(pokemon):
