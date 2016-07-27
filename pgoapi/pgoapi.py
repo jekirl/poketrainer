@@ -458,60 +458,6 @@ class PGoApi:
         else:
             return True
 
-    # def cleanup_pokemon(self, inventory_items=None):
-    #     if not inventory_items:
-    #             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
-    #                 'inventory_items']
-    #     caught_pokemon = self.get_caught_pokemons(inventory_items)
-
-    #     for pokemons in caught_pokemon.values():
-    #         # Only if we have more than MIN_SIMILAR_POKEMON
-    #         if len(pokemons) > MIN_SIMILAR_POKEMON:
-    #             pokemons = sorted(pokemons, key=lambda x: (x.iv, x.cp), reverse=True)
-    #             # keep the first pokemon....
-    #             last_pokemon = pokemons[0]
-    #             for pokemon in pokemons[MIN_SIMILAR_POKEMON:]:
-    #                 if self.pokemon_lvl(pokemon) > self.pokemon_lvl(last_pokemon) and self.RELEASE_DUPLICATES:
-    #                     if self.pokemon_lvl(pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(last_pokemon) and self.pokemon_lvl(last_pokemon) < self.RELEASE_DUPLICATES_MAX_LV:
-    #                         self.log.info("Releasing pokemon: %s", last_pokemon)
-    #                         self.release_pokemon(pokemon_id = last_pokemon.id)
-    #                         release_res = self.call()['responses']['RELEASE_POKEMON']
-    #                         status = release_res.get('result', -1)
-    #                         if status == 1:
-    #                             self.log.info("Successfully Released Pokemon %s", pokemon)
-    #                         else:
-    #                             self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
-    #                             self.log.info("Failed to release Pokemon %s", pokemon)
-    #                         sleep(3)
-    #                     last_pokemon = pokemon
-    #                 elif self.pokemon_lvl(last_pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(pokemon) and self.pokemon_lvl(pokemon) < self.RELEASE_DUPLICATES_MAX_LV and self.RELEASE_DUPLICATES:
-    #                     self.log.info("Releasing pokemon: %s", pokemon)
-    #                     self.release_pokemon(pokemon_id = pokemon.id)
-    #                     release_res = self.call()['responses']['RELEASE_POKEMON']
-    #                     status = release_res.get('result', -1)
-    #                     if status == 1:
-    #                         self.log.info("Successfully Released Pokemon %s", pokemon)
-    #                     else:
-    #                         self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
-    #                         self.log.info("Failed to release Pokemon %s", pokemon)
-    #                     sleep(3)
-    #                 elif pokemon.iv < self.MIN_KEEP_IV and pokemon.cp < self.KEEP_CP_OVER and pokemon.is_valid_pokemon():
-    #                     self.log.info("Releasing pokemon: %s", pokemon)
-    #                     self.release_pokemon(pokemon_id=pokemon.id)
-    #                     release_res = self.call()['responses']['RELEASE_POKEMON']
-    #                     status = release_res.get('result', -1)
-    #                     if status == 1:
-    #                         self.log.info("Successfully Released Pokemon %s", pokemon)
-    #                     else:
-    #                         self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
-    #                         self.log.info("Failed to release Pokemon %s", pokemon)
-    #                     sleep(3)
-    #         if len(pokemons) > self.MIN_SIMILAR_POKEMON:
-    #             # highest CP pokemon first
-    #             pokemons = sorted(pokemons, key=lambda pok: (pok.cp, pok.iv), reverse=True)
-    #             pokemons_keep_counter = 0
-    #             pokemons_keep_iv_counter = 0
-
     def pokemon_lvl(self, pokemon):
         if self.DEFINE_POKEMON_LV == "CP":
             return pokemon.cp
@@ -521,45 +467,6 @@ class PGoApi:
             return pokemon.cp * pokemon.iv
         elif self.DEFINE_POKEMON_LV == "CP+IV":
             return pokemon.cp + pokemon.iv
-
-    def is_pokemon_eligible_for_transfer(self, pokemon, pokemons_keep_counter,
-                                         pokemons_keep_iv_counter,
-                                         best_pokemon=Pokemon()):
-        # never release favorites and other defined pokemons
-        if pokemon.is_favorite or pokemon.pokemon_id in self.keep_pokemon_ids:
-            pokemons_keep_counter += 1
-            return False, True
-        # release defined throwaway pokemons  but make sure we have kept at least 1 (dont throw away all of them)
-        elif pokemon.pokemon_id in self.throw_pokemon_ids and pokemons_keep_counter >= 1:
-            return True, True
-        # keep high-iv pokemons based on config values
-        elif pokemon.iv > self.KEEP_IV_OVER \
-                and pokemons_keep_iv_counter < self.MAX_POKEMON_HIGH_IV \
-                and (pokemon.cp * self.KEEP_IV_MIN_PERCENT_CP / 100) > (best_pokemon.cp * self.KEEP_IV_MIN_PERCENT_CP / 100):
-            return False, False
-        # keep high-cp pokemons and first MIN_SIMILAR_POKEMON amount of pokemons
-        elif pokemon.cp > self.KEEP_CP_OVER:
-            return False, True
-        # release all other pokemons
-        elif pokemons_keep_counter >= self.MIN_SIMILAR_POKEMON:
-            return True, True
-        return False, True
-
-    def attempt_evolve(self, inventory_items=None):
-        if not inventory_items:
-            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
-                'inventory_items']
-        caught_pokemon = self.get_caught_pokemons(inventory_items)
-        self.inventory = Player_Inventory(inventory_items)
-        for pokemons in caught_pokemon.values():
-            if len(pokemons) > self.MIN_SIMILAR_POKEMON:
-                pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
-                for pokemon in pokemons[self.MIN_SIMILAR_POKEMON:]:
-                    # If we can't evolve this type of pokemon anymore, don't check others.
-                    if not self.attempt_evolve_pokemon(pokemon):
-                        break
-
-        return False
 
     def attempt_evolve_pokemon(self, pokemon):
         if self.is_pokemon_eligible_for_evolution(pokemon=pokemon):
