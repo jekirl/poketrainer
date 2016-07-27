@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 from collections import defaultdict
 
-from pgoapi.protos.POGOProtos import Inventory_pb2 as Inventory_Enum
+from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory_Enum
 
 
 class Inventory:
@@ -43,7 +43,6 @@ class Inventory:
             pokemon_family = inventory_item['inventory_item_data'].get('pokemon_family', {})
             self.pokemon_candy[pokemon_family.get('family_id', -1)] = pokemon_family.get('candy', -1)
 
-
     def can_attempt_catch(self):
         return self.poke_balls + self.great_balls + self.ultra_balls + self.master_balls > 0
 
@@ -59,21 +58,38 @@ class Inventory:
     def take_ultraball(self):
         self.ultra_balls -= 1
 
-    def take_next_ball(self):
-        if self.poke_balls > 0:
-            self.take_pokeball()
-            return Inventory_Enum.ITEM_POKE_BALL
-        elif self.great_balls > 0:
-            self.take_greatball()
-            return Inventory_Enum.ITEM_GREAT_BALL
-        elif self.ultra_balls > 0:
-            self.take_ultraball()
-            return Inventory_Enum.ITEM_ULTRA_BALL
-        elif self.master_balls > 0:
-            self.take_masterball()
-            return Inventory_Enum.ITEM_MASTER_BALL
+    def take_next_ball(self, capture_priority=None):
+        if not capture_priority:
+            capture_priority = {1: 35.0, 2: 45.0, 3: 55.0}
+        priority = Inventory.__get_ball_priority(capture_priority)
+        if self.can_attempt_catch() and priority <= Inventory_Enum.ITEM_MASTER_BALL:
+            if priority <= Inventory_Enum.ITEM_POKE_BALL and self.poke_balls > 0:
+                self.take_pokeball()
+                return Inventory_Enum.ITEM_POKE_BALL
+            if priority <= Inventory_Enum.ITEM_GREAT_BALL and self.great_balls > 0:
+                self.take_greatball()
+                return Inventory_Enum.ITEM_GREAT_BALL
+            if priority <= Inventory_Enum.ITEM_ULTRA_BALL and self.ultra_balls > 0:
+                self.take_ultraball()
+                return Inventory_Enum.ITEM_ULTRA_BALL
+            if priority <= Inventory_Enum.ITEM_MASTER_BALL and self.master_balls > 0:
+                self.take_masterball()
+                return Inventory_Enum.ITEM_MASTER_BALL
+            else:
+                return self.take_next_ball()
         else:
             return -1
+
+    @staticmethod
+    def __get_ball_priority(capture_priority):
+        if capture_priority.get(Inventory_Enum.ITEM_POKE_BALL, 0.0) > 0.30:
+            return Inventory_Enum.ITEM_POKE_BALL
+        if capture_priority.get(Inventory_Enum.ITEM_GREAT_BALL, 0.0) > 0.30:
+            return Inventory_Enum.ITEM_GREAT_BALL
+        if capture_priority.get(Inventory_Enum.ITEM_ULTRA_BALL, 0.0) > 0.30:
+            return Inventory_Enum.ITEM_ULTRA_BALL
+        else:
+            return Inventory_Enum.ITEM_MASTER_BALL
 
     def take_ball(self, ball_id):
         if ball_id == Inventory_Enum.ITEM_POKE_BALL:
