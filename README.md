@@ -12,8 +12,15 @@
 Usage:
 
  * Rename `config.json.example` to `config.json`
- * Run the client with `python pokecli.py -i ACCOUNT_INDEX --[cached]`
-    * Use `--cached` after you have already logged in once, doing so will cache your login and prevent soft bans
+ * Running:
+ `usage: python pokecli.py [-h] [-a ACCOUNTS [ACCOUNTS ...]]`
+  * `pokecli.py -a 0 1 2 3` would run bots for configurations 0,1,2,3 in your config file
+  * Default is to run it only for the first config in the "accounts" array from `config.json`
+
+
+
+
+* Configuration (non-exhaustive)
     * The `ACCOUNT_INDEX` is the index of the account you want to use from `config.json` indexing from 0
     * USE_GOOGLE will enable google walking directions for navigation
      * You will probably need to provide an api key in `GMAPS_API_KEY` to avoid rate limits
