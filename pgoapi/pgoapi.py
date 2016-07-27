@@ -524,7 +524,7 @@ class PGoApi:
                                          pokemons_keep_iv_counter,
                                          best_pokemon=Pokemon()):
         # never release favorites and other defined pokemons
-        if pokemon.is_favorite or pokemon.pokemon_id in self.keep_pokemon_ids:
+        if pokemon.is_favorite or (pokemon.pokemon_id in self.keep_pokemon_ids and pokemons_keep_counter <= self.config.get('KEEP_POKEMON_MAX_COUNT', 999)):
             pokemons_keep_counter += 1
             return False, True
         # release defined throwaway pokemons  but make sure we have kept at least 1 (dont throw away all of them)
