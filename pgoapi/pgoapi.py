@@ -278,7 +278,7 @@ class PGoApi:
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
             self.log.info("Player Inventory after cleanup: %s", self.inventory)
             if self.LIST_POKEMON_BEFORE_CLEANUP:
-                self.log.info(get_inventory_data(res, self.pokemon_names))
+                self.log.info(get_inventory_data(res, self.pokemon_names, self.game_master, self.player_stats.level))
             self.incubate_eggs()
             self.attempt_evolve(self.inventory.inventory_items)
             self.cleanup_pokemon(self.inventory.inventory_items)
@@ -590,7 +590,9 @@ class PGoApi:
             if "pokemon_data" in inventory_item['inventory_item_data']:
                 # is a pokemon:
                 pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
-                pokemon = Pokemon(pokemon_data, self.pokemon_names, self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()))
+                pokemon = Pokemon(pokemon_data, self.pokemon_names,
+                                  self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()),
+                                  self.player_stats.level)
 
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
@@ -680,7 +682,8 @@ class PGoApi:
             sleep(3)
             if status == 1:
                 evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}), self.pokemon_names,
-                                          self.game_master.get(str(pokemon.pokemon_id), PokemonData()))
+                                          self.game_master.get(str(pokemon.pokemon_id), PokemonData()),
+                                          self.player_stats.level)
                 # I don' think we need additional stats for evolved pokemon. Since we do not do anything with it.
                 # evolved_pokemon.pokemon_additional_data = self.game_master.get(pokemon.pokemon_id, PokemonData())
                 self.log.info("Evolved to %s", evolved_pokemon)
