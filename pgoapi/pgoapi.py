@@ -839,17 +839,6 @@ class PGoApi:
 
         if not response:
             self.log.info('Login failed!')
-        if os.path.isfile("auth_cache") and cached:
-            response = pickle.load(open("auth_cache"))
-        fname = "auth_cache_%s" % username
-        if os.path.isfile(fname) and cached:
-            response = pickle.load(open(fname))
-        else:
-            response = self.heartbeat()
-            f = open(fname, "w")
-            pickle.dump(response, f)
-        if not response:
-            self.log.info('Login failed!')
             return False
 
         if 'api_url' in response:
