@@ -705,7 +705,7 @@ class PGoApi:
                 self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try", pokemon)
                 self.cleanup_pokemon()
                 if not retry:
-                    return self.encounter_pokemon(pokemon, retry=True)
+                    return self.encounter_pokemon(pokemon_data, retry=True)
             else:
                 self.log.info("Could not start encounter for pokemon: %s", pokemon)
             return False
