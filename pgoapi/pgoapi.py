@@ -36,6 +36,7 @@ from collections import defaultdict
 from itertools import chain, imap
 from Queue import *
 from time import time, sleep
+from operator import attrgetter
 
 from expiringdict import ExpiringDict
 
@@ -99,6 +100,9 @@ class PGoApi:
         self.MIN_SIMILAR_POKEMON = config.get("MIN_SIMILAR_POKEMON", 1)  # Keep atleast one of everything.
         self.STAY_WITHIN_PROXIMITY = config.get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
 
+        self.SCORE_CP_WEIGHT = config.get("SCORE_CP_WEIGHT", 0.5)
+        self.SCORE_IV_WEIGHT = config.get("SCORE_IV_WEIGHT", 0.5)
+
         self.LIST_POKEMON_BEFORE_CLEANUP = config.get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
         self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
 
@@ -115,9 +119,8 @@ class PGoApi:
         self.game_master = parse_game_master()
         self.should_catch_pokemon = config.get("CATCH_POKEMON", True)
         self.RELEASE_DUPLICATES = config.get("RELEASE_DUPLICATES", False)
-        self.RELEASE_DUPLICATES_MAX_LV = config.get("RELEASE_DUPLICATES_MAX_LV", 0) # only release duplicates up to this lvl
-        self.RELEASE_DUPLICATES_SCALER = config.get("RELEAES_DUPLICATES_SCALER", 1.0) # when comparing two pokemon's lvl, multiply larger by this
-        self.DEFINE_POKEMON_LV = config.get("DEFINE_POKEMON_LV", "CP") # define a pokemon's lvl, options are CP, IV, CP*IV, CP+IV
+        self.RELEASE_DUPLICATES_MAX_SCORE = config.get("RELEASE_DUPLICATES_MAX_SCORE", 0.7) # only release duplicates up to this score
+        self.RELEASE_DUPLICATES_SIMILARITY_RATIO = config.get("RELEASE_DUPLICATES_SIMILARITY_RATIO", 0.8) # when comparing two pokemon's scores, multiply larger by this
 
     def call(self):
         if not self._req_method_list:
@@ -519,6 +522,10 @@ class PGoApi:
                 pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
                 pokemon = Pokemon(pokemon_data, self.pokemon_names, self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()))
 
+                # Need to calculate score here since we want to read in the specified weights from the config file
+                if pokemon.max_cp > 0 and pokemon.iv > 0:
+                    pokemon.score = pokemon.iv / 100.0 * self.SCORE_IV_WEIGHT + pokemon.cp / pokemon.max_cp * self.SCORE_CP_WEIGHT
+
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
         return caught_pokemon
@@ -540,6 +547,7 @@ class PGoApi:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
                 'inventory_items']
         caught_pokemon = self.get_caught_pokemons(inventory_items)
+
         for pokemons in caught_pokemon.values():
             for pokemon in pokemons:
                 self.log.info("%s", pokemon)
@@ -551,8 +559,8 @@ class PGoApi:
         caught_pokemon = self.get_caught_pokemons(inventory_items)
         for pokemons in caught_pokemon.values():
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
-                # highest lvl pokemon first
-                sorted_pokemons = sorted(pokemons, key=self.pokemon_lvl, reverse=True)
+                # highest score pokemon first
+                sorted_pokemons = sorted(pokemons, key=attrgetter('score'), reverse=True)
                 for pokemon in sorted_pokemons[self.MIN_SIMILAR_POKEMON:]:
                     if self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0]):
                         self.do_release_pokemon(pokemon)
@@ -561,29 +569,20 @@ class PGoApi:
         # never release favorites and other defined pokemons
         if pokemon.is_favorite or pokemon.pokemon_id in self.keep_pokemon_ids:
             return False
-        elif self.RELEASE_DUPLICATES and (
-                    self.pokemon_lvl(best_pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(
-                    pokemon) and self.pokemon_lvl(pokemon) < self.RELEASE_DUPLICATES_MAX_LV):
-            return True
+        elif self.RELEASE_DUPLICATES:
+            if pokemon.score <= 0: # We couldn't calculate a score, so better to be safe than sorry!
+                return False
+            if best_pokemon.score * self.RELEASE_DUPLICATES_SIMILARITY_RATIO > pokemon.score and pokemon.score < self.RELEASE_DUPLICATES_MAX_SCORE):
+                return True
         # release defined throwaway pokemons  but make sure we have kept at least 1 (dont throw away all of them)
         elif pokemon.pokemon_id in self.throw_pokemon_ids:
             return True
         # keep high-cp pokemons
         elif pokemon.cp > self.KEEP_CP_OVER or pokemon.iv > self.KEEP_IV_OVER:
             return False
-        # if we haven't found a reason to keep it, transfer it
-        else:
-            return True
 
-    def pokemon_lvl(self, pokemon):
-        if self.DEFINE_POKEMON_LV == "CP":
-            return pokemon.cp
-        elif self.DEFINE_POKEMON_LV == "IV":
-            return pokemon.iv
-        elif self.DEFINE_POKEMON_LV == "CP*IV":
-            return pokemon.cp * pokemon.iv
-        elif self.DEFINE_POKEMON_LV == "CP+IV":
-            return pokemon.cp + pokemon.iv
+        # if we don't know what to do with it, keep it - better to be safe than sorry!
+        return False
 
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:
