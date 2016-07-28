@@ -82,7 +82,7 @@ class Pokemon:
 
         if self.max_cp > 0:
             return "{0}Type: {1} CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, " \
-                   "LvlWild: {5:.1f}, MaxCP: {6:.0f}, MaxCPAbs: {7:.0f}, IV-Score: {8:.0f}".format(nickname,
+                   "LvlWild: {5:.1f}, MaxCP: {6:.0f}, MaxCPAbs: {7:.0f}, IV-Norm.: {8:.0f}".format(nickname,
                                                                                                    self.pokemon_type,
                                                                                                    self.cp, self.iv,
                                                                                                    self.level,
