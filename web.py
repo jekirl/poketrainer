@@ -56,6 +56,7 @@ def inventory(username):
         for pokemon in pokemons:
             pokemon['candy'] = candy[pokemon['family_id']]
         player['level_xp'] = player['experience']-player['prev_level_xp']
+        player['hourly_exp'] = data["hourly_exp"]
         player['goal_xp'] = player['next_level_xp']-player['prev_level_xp']
         return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
 

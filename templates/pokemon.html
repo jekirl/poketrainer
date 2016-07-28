@@ -40,7 +40,7 @@
       <div class="col-sm-3 col-md-2 sidebar">
         <div class="panel panel-default">
           <div class="panel-body">
-            Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
+            Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
           </div>
           <div class="container-fluid">
             Level XP: {{player["level_xp"]}} / {{player["goal_xp"]}}
