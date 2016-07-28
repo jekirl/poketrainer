@@ -16,7 +16,7 @@
       "STAY_WITHIN_PROXIMITY": 9999,
       "AUTO_USE_LUCKY_EGG": false,
       "CAPTURE": {
-        "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 1
+        "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 3
       },
       "EGG_INCUBATION": {
         "ENABLE": true,

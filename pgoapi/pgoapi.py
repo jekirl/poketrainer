@@ -532,10 +532,10 @@ class PGoApi:
             item_capture_mult = 1.0
 
             # Try to use a berry to increase the chance of catching the pokemon when we have failed enough attempts
-            if catch_attempts > self.config.get("CAPTURE", {}).get("MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY", 1) and self.inventory.has_berry():
+            if catch_attempts > self.config.get("CAPTURE", {}).get("MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY", 3) and self.inventory.has_berry():
                 self.log.info("Feeding da razz berry!")
                 r = self.use_item_capture(item_id=self.inventory.take_berry(), encounter_id=encounter_id, spawn_point_id=spawn_point_id).call()['responses']['USE_ITEM_CAPTURE']
-                if "success" in r:
+                if r.get("success", False):
                     item_capture_mult = r.get("item_capture_mult", 1.0)
                 else:
                     self.log.info("Could not feed the Pokemon. (%s)", r)
