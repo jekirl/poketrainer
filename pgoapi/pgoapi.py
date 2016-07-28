@@ -32,6 +32,7 @@ import logging
 import os.path
 import pickle
 import random
+import gevent
 from collections import defaultdict
 from itertools import chain, imap
 from Queue import *
@@ -315,7 +316,7 @@ class PGoApi:
                     if self.experimental and self.spin_all_forts:
                         self.spin_nearest_fort()
 
-                sleep(1)
+                gevent.sleep(1)
                 while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
                     sleep(1)
                     catch_attempt += 1
@@ -541,17 +542,21 @@ class PGoApi:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
         return caught_pokemon
 
-    def do_release_pokemon(self, pokemon):
-        self.log.info("Releasing pokemon: %s", pokemon)
-        self.release_pokemon(pokemon_id=pokemon.id)
+    def do_release_pokemon_by_id(self, p_id):
+        self.release_pokemon(pokemon_id=int(p_id))
         release_res = self.call()['responses']['RELEASE_POKEMON']
         status = release_res.get('result', -1)
-        if status == 1:
+        return status
+
+    def do_release_pokemon(self, pokemon):
+        self.log.info("Releasing pokemon: %s", pokemon)
+        if self.do_release_pokemon_by_id(pokemon.id):
             self.log.info("Successfully Released Pokemon %s", pokemon)
         else:
             self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
             self.log.info("Failed to release Pokemon %s", pokemon)
         sleep(3)
+
 
     def cleanup_pokemon(self, inventory_items=None):
         if not inventory_items:
@@ -862,7 +867,7 @@ class PGoApi:
         self.heartbeat()
         while True:
             self.heartbeat()
-            sleep(1)
+            gevent.sleep(1)
 
             if self.experimental and self.spin_all_forts:
                 self.spin_all_forts_visible()

@@ -33,6 +33,11 @@ import struct
 import logging
 import requests
 import argparse
+import tempfile
+import zerorpc
+import os
+import gevent
+from listener import Listener
 from time import sleep
 from pgoapi import PGoApi
 from pgoapi.utilities import f2i, h2f
@@ -109,6 +114,13 @@ def main():
 
     # provide player position on the earth
     api.set_position(*position)
+
+    sock_file = os.path.join( tempfile.gettempdir(), "pogoapi", config["username"])
+    if not os.path.exists(os.path.dirname(sock_file)):
+        os.mkdir(os.path.dirname(sock_file))
+    s = zerorpc.Server(Listener(api))
+    s.bind("ipc://"+sock_file)
+    gevent.spawn(s.run)
 
     # retry login every 30 seconds if any errors
     while not api.login(config["auth_service"], config["username"], config["password"]):

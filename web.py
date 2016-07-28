@@ -1,12 +1,17 @@
 # DISCLAIMER: This is jank
-from flask import Flask, render_template
+from flask import Flask, render_template, flash, redirect, url_for
 import json
 import csv
 from math import floor
 from collections import defaultdict
 import re
 from pgoapi.poke_utils import *
+import tempfile
+import zerorpc
+import os
+
 app = Flask(__name__, template_folder="templates")
+app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 
 pokemon_names = json.load(open("pokemon.en.json"))
 pokemon_details = {}
@@ -57,7 +62,21 @@ def inventory(username):
             pokemon['candy'] = candy[pokemon['family_id']]
         player['level_xp'] = player['experience']-player['prev_level_xp']
         player['goal_xp'] = player['next_level_xp']-player['prev_level_xp']
+        player['username'] = username
         return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
 
+@app.route("/<username>/transfer/<p_id>")
+def transfer(username, p_id):
+    sock_file = os.path.join( tempfile.gettempdir(), "pogoapi", username)
+    if not os.path.exists(sock_file):
+        return "Not running for user " + username
+    c = zerorpc.Client()
+    c.connect("ipc://" + sock_file)
+    if c.releasePokemonById(p_id) == 1:
+        flash("Released")
+    else:
+        flash("Failed!")
+    return redirect(url_for('inventory', username = username))
+    
 if __name__ == "__main__":
     app.run(host='0.0.0.0',debug=True)
