@@ -1,52 +1,54 @@
+from math import sqrt
 
 class Pokemon:
     def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None):
         self.pokemon_data = pokemon_data
-        self.stamina = 0
-        self.pokemon_id = 0
-        self.cp = 0
-        self.stamina_max = 0
-        self.is_egg = False
-        self.origin = -1
-        self.height_m = 0.0
-        self.weight_kg = 0.0
-        self.individual_attack = 0
-        self.individual_defense = 0
-        self.individual_stamina = 0
-        self.cp_multiplier = 0.0
-        self.nickname = ""
-        self.additional_cp_multiplier = 0.0
-        self.id = 0
-        self.pokemon_id = 0
-        self.favorite = -1
-        self.is_favorite = False
-        self.iv = 0.0
-        self.parse_values()
+        self.stamina = pokemon_data.get('stamina', 0)
+        self.favorite = pokemon_data.get('favorite', -1)
+        self.is_favorite = self.favorite != -1
+        self.pokemon_id = pokemon_data.get('pokemon_id', 0)
+        self.id = pokemon_data.get('id', 0)
+        self.cp = pokemon_data.get('cp', 0)
+        self.stamina_max = pokemon_data.get('stamina_max', 0)
+        self.is_egg = pokemon_data.get('is_egg', False)
+        self.origin = pokemon_data.get('origin', 0)
+        self.height_m = pokemon_data.get('height', 0.0)
+        self.weight_kg = pokemon_data.get('weight_kg', 0.0)
+        self.individual_attack = pokemon_data.get('individual_attack', 0)
+        self.individual_defense = pokemon_data.get('individual_defense', 0)
+        self.individual_stamina = pokemon_data.get('individual_stamina', 0)
+        self.cp_multiplier = pokemon_data.get('cp_multiplier', 0.0)
+        self.additional_cp_multiplier = pokemon_data.get('additional_cp_multiplier', 0.0)
+        self.nickname = pokemon_data.get('nickname', "").encode('utf8')
+        self.iv = self.get_iv_percentage()
         self.pokemon_type = pokemon_names.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore')
         self.pokemon_additional_data = additional_data
 
-    def parse_values(self):
-        self.stamina = self.pokemon_data.get('stamina', 0)
-        self.favorite = self.pokemon_data.get('favorite', -1)
-        self.is_favorite = self.favorite != -1
-        self.pokemon_id = self.pokemon_data.get('pokemon_id', 0)
-        self.id = self.pokemon_data.get('id', 0)
-        self.cp = self.pokemon_data.get('cp', 0)
-        self.stamina_max = self.pokemon_data.get('stamina_max', 0)
-        self.is_egg = self.pokemon_data.get('is_egg', False)
-        self.origin = self.pokemon_data.get('origin', 0)
-        self.height_m = self.pokemon_data.get('height', 0.0)
-        self.weight_kg = self.pokemon_data.get('weight_kg', 0.0)
-        self.individual_attack = self.pokemon_data.get('individual_attack', 0)
-        self.individual_defense = self.pokemon_data.get('individual_defense', 0)
-        self.individual_stamina = self.pokemon_data.get('individual_stamina', 0)
-        self.cp_multiplier = self.pokemon_data.get('cp_multiplier', 0.0)
-        self.additional_cp_multiplier = self.pokemon_data.get('additional_cp_multiplier', 0.0)
-        self.nickname = self.pokemon_data.get('nickname', "").encode('utf8')
-        self.iv = self.get_iv_percentage()
+        self.max_cp = -1.0
+        self.score = -1.0
+
+        if additional_data is not None:
+            # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
+            cp_multiplier = self.cp_multiplier + self.additional_cp_multiplier
+            attack = float(additional_data.BaseAttack) + 15
+            defense = float(additional_data.BaseDefense) + 15
+            stamina = float(additional_data.BaseStamina) + 15
+
+            self.max_cp = (attack * sqrt(defense) * sqrt(stamina) * cp_multiplier * cp_multiplier) / 10
+
+            if self.max_cp > 0:
+                self.score = self.iv / 100.0 * 0.5 + self.cp / self.max_cp * 0.5
 
     def __str__(self):
-        return "Nickname: {0}, Type: {1}, CP: {2}, IV: {3}".format(self.nickname, self.pokemon_type, self.cp, self.iv)
+        nickname = ""
+
+        if len(self.nickname) > 0:
+            nickname = "Nickname: " + self.nickname + ", "
+
+        if self.max_cp > 0:
+            return "{0}Type: {1}, CP: {2}, IV: {3}, Max CP: {4}, Score: {5}".format(nickname, self.pokemon_type, self.cp, self.iv, self.max_cp, self.score)
+        else:
+            return "{0}Type: {1}, CP: {2}, IV: {3}".format(nickname, self.pokemon_type, self.cp, self.iv)
 
     def __repr__(self):
         return self.__str__()
