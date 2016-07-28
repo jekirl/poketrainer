@@ -83,6 +83,10 @@ class PGoApi:
 
         self.pokemon_names = pokemon_names
 
+        self.start_time = time()
+        self.exp_start = None
+        self.exp_current = None
+
         self.MIN_ITEMS = {}
         for k, v in config.get("MIN_ITEMS", {}).items():
             self.MIN_ITEMS[getattr(Inventory, k)] = v
@@ -191,6 +195,20 @@ class PGoApi:
         else:
             raise AttributeError
 
+    def hourly_exp(self, exp):
+        if self.exp_start is None:
+            self.exp_start = exp
+        self.exp_current = exp
+
+        run_time = time() - self.start_time
+        run_time_hours = float(run_time/3600.00)
+        exp_earned = float(self.exp_current - self.exp_start)
+        exp_hour = float(exp_earned/run_time_hours)
+
+        self.log.info("=== Exp/Hour: %s ===", round(exp_hour,2))
+
+        return exp_hour
+
     def update_player_inventory(self):
         self.get_inventory()
         res = self.call()
@@ -226,6 +244,7 @@ class PGoApi:
                 if "player_stats" in inventory_item['inventory_item_data']:
                     self.player_stats = PlayerStats(inventory_item['inventory_item_data']['player_stats'])
                     self.log.info("Player Stats: %s", self.player_stats)
+                    self.hourly_exp(self.player_stats.experience)
             if self.LIST_INVENTORY_BEFORE_CLEANUP:
                 self.log.info("Player Items Before Cleanup: %s", self.inventory)
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
