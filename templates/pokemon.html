@@ -68,6 +68,7 @@
             <thead>
               <th>Recent</th>
               <th>Name</th>
+              <th>Nickname</th>
               <th>CP</th>
               <th>IV</th>
               <th>Candies</th>
@@ -83,6 +84,7 @@
               <td data-order="{{ pokemon["creation_time_ms"] }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon[
                   'pokemon_id']) }}></td>
               <td>{{pokemon["name"]}}</td>
+              <td data-order="{{pokemon["nickname"]}}">{{pokemon["nickname"]}}</td>
               <td data-order="{{pokemon["cp"]}}">CP: {{pokemon["cp"]}}</td>
               <td data-order="{{pokemon["iv"]|round(1, 'floor')}}">IV: {{pokemon["iv"]|round(1, 'floor')}}%</td>
               <td data-order="{{pokemon["candy"]}}">Candy: {{pokemon["candy"]}}</td>
