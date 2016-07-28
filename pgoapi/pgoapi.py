@@ -538,7 +538,7 @@ class PGoApi:
             if "pokemon_data" in inventory_item['inventory_item_data']:
                 # is a pokemon:
                 pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
-                pokemon = Pokemon(pokemon_data, self.pokemon_names, self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()), self.SCORE_EXPRESSION)
+                pokemon = Pokemon(pokemon_data, self.pokemon_names, self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()), self.SCORE_EXPRESSION, self.player_stats.level)
 
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
@@ -560,6 +560,7 @@ class PGoApi:
         if not inventory_items:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
                 'inventory_items']
+
         caught_pokemon = self.get_caught_pokemons(inventory_items)
 
         for pokemons in caught_pokemon.values():

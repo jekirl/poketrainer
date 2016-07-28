@@ -1,7 +1,10 @@
+from __future__ import absolute_import
+
 from math import sqrt
+from pgoapi.player import Player as Player
 
 class Pokemon:
-    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None, score_expression=None):
+    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None, score_expression=None, player_level=1):
         self.pokemon_data = pokemon_data
         self.stamina = pokemon_data.get('stamina', 0)
         self.favorite = pokemon_data.get('favorite', -1)
@@ -29,7 +32,7 @@ class Pokemon:
 
         if additional_data is not None:
             # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
-            cp_multiplier = self.cp_multiplier + self.additional_cp_multiplier
+            cp_multiplier = Player.CP_Multipliers[player_level-1]
             attack = float(additional_data.BaseAttack) + 15
             defense = float(additional_data.BaseDefense) + 15
             stamina = float(additional_data.BaseStamina) + 15
