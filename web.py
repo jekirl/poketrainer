@@ -60,8 +60,9 @@ def inventory(username):
         # add candy back into pokemon json
         for pokemon in pokemons:
             pokemon['candy'] = candy[pokemon['family_id']]
-        player['level_xp'] = player['experience']-player['prev_level_xp']
-        player['goal_xp'] = player['next_level_xp']-player['prev_level_xp']
+        player['level_xp'] = player.get('experience',0)-player.get('prev_level_xp',0)
+        player['hourly_exp'] = data.get("hourly_exp",0)
+        player['goal_xp'] = player.get('next_level_xp',0)-player.get('prev_level_xp',0)
         player['username'] = username
         return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
 

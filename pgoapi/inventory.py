@@ -51,7 +51,7 @@ class Inventory:
             pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
             if pokemon_data.get('is_egg', False) and not pokemon_data.get('egg_incubator_id', False):
                 self.eggs_available.append(pokemon_data)
-            egg_incubators = inventory_item['inventory_item_data'].get('egg_incubators', {}).get('egg_incubator', {})
+            egg_incubators = inventory_item['inventory_item_data'].get('egg_incubators', {}).get('egg_incubator', [])
             for incubator in egg_incubators:
                 if "pokemon_id" in incubator:
                     self.incubators_busy.append(incubator)
