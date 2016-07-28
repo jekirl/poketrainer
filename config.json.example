@@ -6,7 +6,7 @@
       "password": "password",
       "location": "University of Southern California, Los Angeles, CA",
       "GMAPS_API_KEY": "some api key here",
-      "_info": "copy values from the default section below this this to make individual changes, example:",
+      "_info": "copy values from the default section below this to make individual changes, example:",
       "BEHAVIOR": {
         "STEP_SIZE": 50
       }
