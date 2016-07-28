@@ -623,11 +623,22 @@ class PGoApi:
         caught_pokemon = self.get_caught_pokemons(inventory_items)
         for pokemons in caught_pokemon.values():
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
-                # highest lvl pokemon first
-                sorted_pokemons = sorted(pokemons, key=self.pokemon_lvl, reverse=True)
-                for pokemon in sorted_pokemons[self.MIN_SIMILAR_POKEMON:]:
-                    if self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0]):
-                        self.do_release_pokemon(pokemon)
+                if self.RELEASE_DUPLICATES:
+                    sorted_pokemons = sorted(pokemons, key=self.pokemon_lvl, reverse=True)
+
+                    for pokemon in sorted_pokemons[self.MIN_SIMILAR_POKEMON:]:
+                        if self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0]):
+                            self.do_release_pokemon(pokemon)
+                else:
+                    remaining = len(pokemons)
+                    for pokemon in pokemons:
+                        if self.is_pokemon_eligible_for_transfer(pokemon, None):
+                            self.do_release_pokemon(pokemon)
+                            remaining -= 1
+                        if remaining <= self.MIN_SIMILAR_POKEMON:
+                            break
+
+
 
     def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon):
         # never release favorites and other defined pokemons
