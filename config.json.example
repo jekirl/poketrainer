@@ -10,7 +10,7 @@
       "KEEP_CP_OVER": 500,
       "KEEP_IV_OVER": 50,
       "STEP_SIZE": 100,
-      "EXPERIMENTAL": true,
+      "EXPERIMENTAL": false,
       "SKIP_VISITED_FORT_DURATION": 600,
       "SPIN_ALL_FORTS": true,
       "STAY_WITHIN_PROXIMITY": 9999,
@@ -35,7 +35,7 @@
         "ITEM_RAZZ_BERRY": 10
       },
       "NEEDY_ITEM_FARMING": {
-        "ENABLE": true,
+        "ENABLE": false,
         "POKEBALL_CONTINUE_THRESHOLD": 50,
         "POKEBALL_FARM_THRESHOLD": 10,
         "FARM_IGNORE_POKEBALL_COUNT": false,
