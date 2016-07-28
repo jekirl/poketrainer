@@ -87,6 +87,9 @@ What's working:
 
  * And much more, README to be updated soon
 
+## Chatting with us:
+We're hanging out at the [Pokemon GO Reverse Engineering team on Slack](https://shielded-earth-81203.herokuapp.com/).
+
 ## Credits
 * [tejado](https://github.com/tejado) for the base of this
 * [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR  
