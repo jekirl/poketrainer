@@ -36,9 +36,6 @@ class Pokemon:
 
             self.max_cp = (attack * sqrt(defense) * sqrt(stamina) * cp_multiplier * cp_multiplier) / 10
 
-            if self.max_cp > 0:
-                self.score = self.iv / 100.0 * 0.5 + self.cp / self.max_cp * 0.5
-
     def __str__(self):
         nickname = ""
 
