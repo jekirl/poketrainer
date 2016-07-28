@@ -57,7 +57,7 @@
       <div class="col-sm-3 col-md-2 sidebar">
         <div class="panel panel-default">
           <div class="panel-body">
-            Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
+            {{player['username']}}<br> Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
           </div>
           <div class="container-fluid">
             Level XP: {{player["level_xp"]}} / {{player["goal_xp"]}}
@@ -85,10 +85,13 @@
             <thead>
               <th>Recent</th>
               <th>Name</th>
-              <th>Nickname</th>
-              <th>CP</th>
               <th>IV</th>
+              <th>CP</th>
+              <th>Max CP</th>
               <th>Candies</th>
+              <th>Candy Needed</th>
+              <th>Dust Needed</th>
+              <th>Power Up</th>
               <th>Stamina</th>
               <th>Att IV</th>
               <th>Sta IV</th>
@@ -102,10 +105,13 @@
               <td data-order="{{ pokemon["creation_time_ms"] }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon[
                   'pokemon_id']) }}></td>
               <td>{{pokemon["name"]}}</td>
-              <td data-order="{{pokemon["nickname"]}}">{{pokemon["nickname"]}}</td>
-              <td data-order="{{pokemon["cp"]}}">CP: {{pokemon["cp"]}}</td>
               <td data-order="{{pokemon["iv"]|round(1, 'floor')}}">IV: {{pokemon["iv"]|round(1, 'floor')}}%</td>
+              <td data-order="{{pokemon["cp"]}}">CP: {{pokemon["cp"]}}</td>
+              <td data-order="{{pokemon["maxCP"]}}">{{pokemon["maxCP"]}}</td>
               <td data-order="{{pokemon["candy"]}}">Candy: {{pokemon["candy"]}}</td>
+              <td data-order="{{pokemon["candyNeeded"]}}">Candy: {{pokemon["candyNeeded"]}}</td>
+              <td data-order="{{pokemon["dustNeeded"]}}">Dust: {{pokemon["dustNeeded"]}}</td>
+              <td data-order="{{pokemon["PowerUpResult"]}}">CP: {{pokemon["PowerUpResult"]}}</td>
               <td data-order="{{pokemon["stamina"]}}">Stamina: {{pokemon["stamina"]}}</td>
               <td data-order="{{pokemon["individual_attack"]}}">Att IV: {{pokemon["individual_attack"]}}</td>
               <td data-order="{{pokemon["individual_stamina"]}}">Sta IV: {{pokemon["individual_stamina"]}}</td>
