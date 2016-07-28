@@ -26,6 +26,7 @@
       "BEHAVIOR": {
         "USE_GOOGLE": true,
         "STEP_SIZE": 100,
+        "WANDER_STEPS": 0,
         "EXPERIMENTAL": true,
         "SKIP_VISITED_FORT_DURATION": 600,
         "SPIN_ALL_FORTS": true,
