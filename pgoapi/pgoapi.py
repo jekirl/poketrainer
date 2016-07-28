@@ -284,7 +284,7 @@ class PGoApi:
             self.incubate_eggs()
             self.attempt_evolve(self.inventory.inventory_items)
             self.cleanup_pokemon(self.inventory.inventory_items)
-        # Auto-use lucky-egg if applicable
+            # Auto-use lucky-egg if applicable
             self.use_lucky_egg()
 
             # Farm precon
@@ -529,9 +529,20 @@ class PGoApi:
             capture_probability = {}
         # Max 4 attempts to catch pokemon
         while catch_status != 1 and self.inventory.can_attempt_catch() and catch_attempts < 11:
+            item_capture_mult = 1.0
+
+            # Try to use a berry to increase the chance of catching the pokemon when we have failed enough attempts
+            if catch_attempts > self.config.get("CAPTURE", {}).get("MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY", 1) and self.inventory.has_berry():
+                self.log.info("Feeding da razz berry!")
+                r = self.use_item_capture(item_id=self.inventory.take_berry(), encounter_id=encounter_id, spawn_point_id=spawn_point_id).call()['responses']['USE_ITEM_CAPTURE']
+                if "success" in r:
+                    item_capture_mult = r.get("item_capture_mult", 1.0)
+                else:
+                    self.log.info("Could not feed the Pokemon. (%s)", r)
+
             pokeball = self.inventory.take_next_ball(capture_probability)
             self.log.info("Attempting catch with ball type {0}  at {1:.2f} % chance. Try Number: {2}".format(pokeball,
-                          capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
+                          item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
             r = self.catch_pokemon(
                 normalized_reticle_size=1.950,
                 pokeball=pokeball,

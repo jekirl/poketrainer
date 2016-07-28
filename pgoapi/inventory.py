@@ -17,6 +17,8 @@ class Inventory:
         self.super_potion = 0
         self.max_potion = 0
         self.lucky_eggs = 0
+        self.razz_berries = 0
+
         self.pokemon_candy = defaultdict()
         self.eggs_available = []
         self.incubators_available = []
@@ -46,6 +48,8 @@ class Inventory:
                 self.ultra_balls = item_count
             elif item_id == Inventory_Enum.ITEM_LUCKY_EGG:
                 self.lucky_eggs = item_count
+            elif item_id == Inventory_Enum.ITEM_RAZZ_BERRY:
+                self.razz_berries = item_count
             pokemon_family = inventory_item['inventory_item_data'].get('pokemon_family', {})
             self.pokemon_candy[pokemon_family.get('family_id', -1)] = pokemon_family.get('candy', -1)
             pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
@@ -106,6 +110,16 @@ class Inventory:
         else:
             return Inventory_Enum.ITEM_MASTER_BALL
 
+    def take_ball(self, ball_id):
+        if ball_id == Inventory_Enum.ITEM_POKE_BALL:
+            self.poke_balls -= 1
+        elif ball_id == Inventory_Enum.ITEM_GREAT_BALL:
+            self.great_balls -= 1
+        elif ball_id == Inventory_Enum.ITEM_ULTRA_BALL:
+            self.ultra_balls -= 1
+        elif ball_id == Inventory_Enum.ITEM_MASTER_BALL:
+            self.master_balls -= 1
+
     def has_lucky_egg(self):
         for inventory_item in self.inventory_items:
             item = inventory_item['inventory_item_data'].get('item', {})
@@ -118,19 +132,22 @@ class Inventory:
         self.lucky_eggs -= 1
         return Inventory_Enum.ITEM_LUCKY_EGG
 
-    def take_ball(self, ball_id):
-        if ball_id == Inventory_Enum.ITEM_POKE_BALL:
-            self.poke_balls -= 1
-        elif ball_id == Inventory_Enum.ITEM_GREAT_BALL:
-            self.great_balls -= 1
-        elif ball_id == Inventory_Enum.ITEM_ULTRA_BALL:
-            self.ultra_balls -= 1
-        elif ball_id == Inventory_Enum.ITEM_MASTER_BALL:
-            self.master_balls -= 1
+    def has_berry(self):
+        # Only Razz berries are in the game at the moment
+        for inventory_item in self.inventory_items:
+            item = inventory_item['inventory_item_data'].get('item', {})
+            item_id = item.get('item_id', -1)
+            if item_id == Inventory_Enum.ITEM_RAZZ_BERRY:
+                return True
+        return False
+
+    def take_berry(self):
+        self.razz_berries -= 1
+        return Inventory_Enum.ITEM_RAZZ_BERRY
 
     def __str__(self):
         return "PokeBalls: {0}, GreatBalls: {1}, MasterBalls: {2}, UltraBalls: {3} \n " \
-               "Potion: {4}, Super Potion: {5}, Max Potion {6}, Hyper Potion {7}, Lucky Eggs {8}".format(self.poke_balls,
+               "Potion: {4}, Super Potion: {5}, Max Potion {6}, Hyper Potion {7}, Lucky Eggs {8}, Razz Berries {9}".format(self.poke_balls,
                                                                                         self.great_balls,
                                                                                         self.master_balls,
                                                                                         self.ultra_balls,
@@ -138,7 +155,8 @@ class Inventory:
                                                                                         self.super_potion,
                                                                                         self.max_potion,
                                                                                         self.hyper_potion,
-                                                                                        self.lucky_eggs)
+                                                                                        self.lucky_eggs,
+                                                                                        self.razz_berries)
 
     def __repr__(self):
         return self.__str__()
