@@ -123,7 +123,13 @@ def main():
             log.exception('Error in main loop, restarting %s')
             # restart after sleep
             sleep(30)
-            main()
+            try:
+                main()
+            except:
+                pass
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except:
+        pass
