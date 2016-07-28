@@ -516,8 +516,9 @@ class PGoApi:
         for inventory_item in inventory_items:
             if "pokemon_data" in inventory_item['inventory_item_data']:
                 # is a pokemon:
-                pokemon = Pokemon(inventory_item['inventory_item_data']['pokemon_data'], self.pokemon_names)
-                pokemon.pokemon_additional_data = self.game_master.get(pokemon.pokemon_id, PokemonData())
+                pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
+                pokemon = Pokemon(pokemon_data, self.pokemon_names, self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()))
+
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
         return caught_pokemon
@@ -533,6 +534,15 @@ class PGoApi:
             self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
             self.log.info("Failed to release Pokemon %s", pokemon)
         sleep(3)
+
+    def get_pokemon_stats(self, inventory_items=None):
+        if not inventory_items:
+            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
+                'inventory_items']
+        caught_pokemon = self.get_caught_pokemons(inventory_items)
+        for pokemons in caught_pokemon.values():
+            for pokemon in pokemons:
+                self.log.info("%s", pokemon)
 
     def cleanup_pokemon(self, inventory_items=None):
         if not inventory_items:
