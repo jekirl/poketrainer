@@ -16,7 +16,7 @@ def getLocation(search):
 
 
 # http://python-gmaps.readthedocs.io/en/latest/gmaps.html#module-gmaps.directions
-def get_route(start, end, use_google=False, GMAPS_API_KEY="", walk_to_all_forts=False, waypoints=[]):
+def get_route(start, end, use_google=False, GMAPS_API_KEY="", walk_to_all_forts=False, waypoints=[], step_size=200):
     origin = (start[0], start[1])
     destination = (end[0], end[1])
     if use_google:
@@ -27,10 +27,35 @@ def get_route(start, end, use_google=False, GMAPS_API_KEY="", walk_to_all_forts=
         else:
             d = directions_service.directions(origin, destination, mode="walking", units="metric")
         steps = d[0]['legs'][0]['steps']
-        return [(step['end_location']["lat"], step['end_location']["lng"]) for step in steps]
-    else:
-        return [destination]
+        final_steps = [
+            {
+                'lat': step['end_location']['lat'],
+                'long': step['end_location']['lng'],
+                'distance': step['distance']['value'],
+            } for step in steps
+        ]
 
+        return {
+            'total_distance': d[0]['legs'][0]['distance']['value'],
+            'steps': final_steps
+        }
+    else:
+        total_distance = distance_in_meters(start, end)
+        step_increments = get_increments(start, end, step_size)
+        final_steps = []
+        previous_step = step_increments[0]
+        for step in step_increments[1:]:
+            final_steps.append({
+                'lat': step[0],
+                'long': step[1],
+                'distance': distance_in_meters(previous_step, step)
+            })
+            previous_step = step
+
+        return {
+            'total_distance': total_distance,
+            'steps': final_steps
+        }
 
 # step_size corresponds to how many meters between each step we want
 def get_increments(start, end, step_size=200):
