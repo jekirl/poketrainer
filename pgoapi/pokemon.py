@@ -46,9 +46,9 @@ class Pokemon:
             nickname = "Nickname: " + self.nickname + ", "
 
         if self.max_cp > 0:
-            return "{0}Type: {1}, CP: {2}, IV: {3}, Max CP: {4}, Score: {5}".format(nickname, self.pokemon_type, self.cp, self.iv, self.max_cp, self.score)
+            return "{0}Type: {1}, CP: {2}, IV: {3:.2f}, Max CP: {4:.0f}, Score: {5:.2f}".format(nickname, self.pokemon_type, self.cp, self.iv, self.max_cp, self.score)
         else:
-            return "{0}Type: {1}, CP: {2}, IV: {3}".format(nickname, self.pokemon_type, self.cp, self.iv)
+            return "{0}Type: {1}, CP: {2}, IV: {3:.2f}".format(nickname, self.pokemon_type, self.cp, self.iv)
 
     def __repr__(self):
         return self.__str__()
