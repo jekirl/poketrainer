@@ -80,12 +80,10 @@ Put them in config. Type exactly as the name appears
 
 ### What's working:
 What's working:
- * Walking to pokestops and spinning them
- * Capturing any pokemon it sees on the way
- * Releasing pokemon that you have duplicates of if under CP_CUTOFF (FIXME this is not the best idea....)
-  * Change CP_CUTOFF in `pgoapi.py` to configure this, by default it is 0 (to never release)
+ * A lot of things. Check out the example config to see some of the features. Catching Lured pokemon, regular pokemon, multiple kinds of navigation (google maps, walking, driving, customized speed), a web ui, auto transfers, auto evolves, auto power ups, auto egg incubation, inventory managament, multiple account botting. And much more, README to be updated soon
 
- * And much more, README to be updated soon
+## Chatting with us:
+We're hanging out at the [Pokemon GO Reverse Engineering team on Slack](https://pkre.slack.com). [Need an invite?](https://shielded-earth-81203.herokuapp.com/)
 
 ## Credits
 * [tejado](https://github.com/tejado) for the base of this
