@@ -6,6 +6,7 @@ COPY container/launch.sh /
 COPY ./pokecli.py /
 COPY ./web.py /
 COPY GAME_MASTER_POKEMON_v0_2.tsv /
+COPY GAME_ATTACKS_v0_1.tsv /
 COPY pokemon.en.json /
 #folders
 COPY ./pgoapi /pgoapi
