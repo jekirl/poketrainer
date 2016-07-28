@@ -45,6 +45,8 @@ from s2sphere import CellId, LatLng
 log = logging.getLogger(__name__)
 from threading import Thread
 from Queue import Queue
+
+
 def get_pos_by_name(location_name):
     geolocator = GoogleV3()
     loc = geolocator.geocode(location_name)
@@ -53,6 +55,17 @@ def get_pos_by_name(location_name):
     log.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
 
     return (loc.latitude, loc.longitude, loc.altitude)
+
+
+def dict_merge(dct, merge_dct):
+    for k, v in merge_dct.iteritems():
+        if (k in dct and isinstance(dct[k], dict)
+                and isinstance(merge_dct[k], collections.Mapping)):
+            dict_merge(dct[k], merge_dct[k])
+        else:
+            dct[k] = merge_dct[k]
+    return dct
+
 
 def init_config():
     parser = argparse.ArgumentParser()
@@ -70,7 +83,9 @@ def init_config():
     parser.add_argument("-l", "--location", help="Location", required=required("location"))
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
     config = parser.parse_args()
-    load = load['accounts'][config.__dict__['config_index']]
+    defaults = load.get('defaults', {})
+    account = load['accounts'][config.__dict__['config_index']]
+    load = dict_merge(defaults, account)
     # Passed in arguments shoud trump
     for key,value in load.iteritems():
         if key not in config.__dict__ or not config.__dict__[key]:
@@ -80,6 +95,7 @@ def init_config():
       return None
 
     return config.__dict__
+
 
 def main():
     # log settings
