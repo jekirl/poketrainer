@@ -572,13 +572,16 @@ class PGoApi:
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
                 # highest lvl pokemon first
                 sorted_pokemons = sorted(pokemons, key=self.pokemon_lvl, reverse=True)
+                kept_pokemon_of_type = 1
                 for pokemon in sorted_pokemons[self.MIN_SIMILAR_POKEMON:]:
-                    if self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0]):
+                    if self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0], kept_pokemon_of_type):
                         self.do_release_pokemon(pokemon)
+                    else:
+                        kept_pokemon_of_type += 1
 
-    def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon):
+    def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon, kept_pokemon_of_type):
         # never release favorites and other defined pokemons
-        if pokemon.is_favorite or pokemon.pokemon_id in self.keep_pokemon_ids:
+        if pokemon.is_favorite or (pokemon.pokemon_id in self.keep_pokemon_ids and kept_pokemon_of_type <= self.config.get("KEEP_POKEMON_MAX_COUNT", 9999)):
             return False
         elif self.RELEASE_DUPLICATES and (
                     self.pokemon_lvl(best_pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(
