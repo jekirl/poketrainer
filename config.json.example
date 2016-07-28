@@ -31,6 +31,16 @@
         "ITEM_MAX_REVIVE": 10,
         "ITEM_RAZZ_BERRY": 10
       },
+      "NEEDY_ITEM_FARMING": {
+        "ENABLE": true,
+        "POKEBALL_CONTINUE_THRESHOLD": 50,
+        "POKEBALL_FARM_THRESHOLD": 10,
+        "FARM_IGNORE_POKEBALL_COUNT": false,
+        "FARM_IGNORE_GREATBALL_COUNT": false,
+        "FARM_IGNORE_ULTRABALL_COUNT": false,
+        "FARM_IGNORE_MASTERBALL_COUNT": true,
+        "FARM_OVERRIDE_STEP_SIZE": -1
+      },
       "POKEMON_EVOLUTION": {
         "PIDGEY": 12,
         "WEEDLE":12

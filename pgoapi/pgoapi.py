@@ -75,6 +75,8 @@ class PGoApi:
         self._heartbeat_number = 5
         self._firstRun = True
         self._last_egg_use_time = 0
+        self._farm_mode_triggered = False
+        self._orig_step_size = config.get("STEP_SIZE", 200)
 
         self.pokemon_caught = 0
         self.player = Player({})
@@ -93,6 +95,10 @@ class PGoApi:
             self.POKEMON_EVOLUTION[getattr(Enums_pb2, k)] = v
             self.POKEMON_EVOLUTION_FAMILY[getattr(Enums_pb2, k)] = getattr(Enums_pb2, "FAMILY_" + k)
 
+        self.experimental = config.get("EXPERIMENTAL", False)
+
+        self.STEP_SIZE = self._orig_step_size
+
         self.KEEP_IV_OVER = config.get("KEEP_IV_OVER", 0)  # release anything under this
         self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0)  # release anything under this
 
@@ -106,8 +112,17 @@ class PGoApi:
         self.USE_DISPOSABLE_INCUBATORS = config.get("EGG_INCUBATION", {}).get("USE_DISPOSABLE_INCUBATORS", False)
         self.INCUBATE_BIG_EGGS_FIRST = config.get("EGG_INCUBATION", {}).get("BIG_EGGS_FIRST", True)
 
+        self.FARM_ITEMS_ENABLED = config.get("NEEDY_ITEM_FARMING", {}).get("ENABLE", True and self.experimental) # be concious of pokeball/item limits
+        self.POKEBALL_CONTINUE_THRESHOLD = config.get("NEEDY_ITEM_FARMING", {}).get("POKEBALL_CONTINUE_THRESHOLD", 50) # keep at least 10 pokeballs of any assortment, otherwise go farming
+        self.POKEBALL_FARM_THRESHOLD = config.get("NEEDY_ITEM_FARMING", {}).get("POKEBALL_FARM_THRESHOLD", 10) # at this point, go collect pokeballs
+        self.FARM_IGNORE_POKEBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_POKEBALL_COUNT", False) # ignore pokeballs in the continue tally
+        self.FARM_IGNORE_GREATBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_GREATBALL_COUNT", False) # ignore greatballs in the continue tally
+        self.FARM_IGNORE_ULTRABALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_ULTRABALL_COUNT", False) # ignore ultraballs in the continue tally
+        self.FARM_IGNORE_MASTERBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_MASTERBALL_COUNT", True) # ignore masterballs in the continue tally
+        self.FARM_OVERRIDE_STEP_SIZE = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_OVERRIDE_STEP_SIZE", -1) # should the step size be overriden when looking for more inventory, -1 to disable
+        # OVERRIDE STEP SIZE could be softbannable. No data to suggest either way.
+
         self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
-        self.experimental = config.get("EXPERIMENTAL", False)
         self.spin_all_forts = config.get("SPIN_ALL_FORTS", False)
         self.keep_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
         self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
@@ -118,6 +133,19 @@ class PGoApi:
         self.RELEASE_DUPLICATES_MAX_LV = config.get("RELEASE_DUPLICATES_MAX_LV", 0) # only release duplicates up to this lvl
         self.RELEASE_DUPLICATES_SCALER = config.get("RELEAES_DUPLICATES_SCALER", 1.0) # when comparing two pokemon's lvl, multiply larger by this
         self.DEFINE_POKEMON_LV = config.get("DEFINE_POKEMON_LV", "CP") # define a pokemon's lvl, options are CP, IV, CP*IV, CP+IV
+
+        # Sanity checking
+        self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon # Experimental, and we needn't do this if we're farming anyway
+        if ( self.FARM_ITEMS_ENABLED         
+           and self.FARM_IGNORE_POKEBALL_COUNT  
+           and self.FARM_IGNORE_GREATBALL_COUNT 
+           and self.FARM_IGNORE_ULTRABALL_COUNT 
+           and self.FARM_IGNORE_MASTERBALL_COUNT ):
+          self.FARM_ITEMS_ENABLED = False
+          self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
+        elif   self.FARM_ITEMS_ENABLED and not (self.POKEBALL_FARM_THRESHOLD < self.POKEBALL_CONTINUE_THRESHOLD):
+          self.FARM_ITEMS_ENABLED = False
+          self.log.warn("FARM_ITEMS has been disabled due to farming threshold being below the continue. Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")
 
     def call(self):
         if not self._req_method_list:
@@ -237,6 +265,32 @@ class PGoApi:
             self.cleanup_pokemon(self.inventory.inventory_items)
         # Auto-use lucky-egg if applicable
             self.use_lucky_egg()
+
+            # Farm precon
+            if self.FARM_ITEMS_ENABLED:
+                pokeball_count = 0
+                if not self.FARM_IGNORE_POKEBALL_COUNT:
+                    pokeball_count += self.inventory.poke_balls
+                if not self.FARM_IGNORE_GREATBALL_COUNT:
+                    pokeball_count += self.inventory.great_balls
+                if not self.FARM_IGNORE_ULTRABALL_COUNT:
+                    pokeball_count += self.inventory.ultra_balls
+                if not self.FARM_IGNORE_MASTERBALL_COUNT:
+                    pokeball_count += self.inventory.master_balls
+                if self.POKEBALL_FARM_THRESHOLD > pokeball_count and not self._farm_mode_triggered:
+                    self.should_catch_pokemon = False
+                    self._farm_mode_triggered = True
+                    self.log.info("Player only has %s Pokeballs, farming for more...", pokeball_count)
+                    if self.FARM_OVERRIDE_STEP_SIZE != -1:
+                        self.STEP_SIZE = self.FARM_OVERRIDE_STEP_SIZE
+                        self.log.info("Player has changed speed to %s", self.STEP_SIZE)
+                elif self.POKEBALL_CONTINUE_THRESHOLD <= pokeball_count and self._farm_mode_triggered:
+                    self.should_catch_pokemon = True
+                    self._farm_mode_triggered = False
+                    self.log.info("Player has %s Pokeballs, continuing to catch more!", pokeball_count)
+                    if self.FARM_OVERRIDE_STEP_SIZE != -1:
+                        self.STEP_SIZE = self._orig_step_size
+                        self.log.info("Player has returned to normal speed of %s", self.STEP_SIZE)
         self._heartbeat_number += 1
         return res
 
@@ -264,7 +318,7 @@ class PGoApi:
                           self.experimental and self.spin_all_forts, waypoints)
         catch_attempt = 0
         base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (self._posf[0], self._posf[1])
-        step_size = self.config.get("STEP_SIZE", 200)
+        step_size = self.STEP_SIZE
         total_distance_traveled = 0
         total_distance = distance_in_meters(self._posf, loc)
         new_loc = (loc[0], loc[1], 0)
