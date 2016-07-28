@@ -68,11 +68,18 @@ def inventory(username):
 
 @app.route("/<username>/transfer/<p_id>")
 def transfer(username, p_id):
-    sock_file = os.path.join( tempfile.gettempdir(), "pogoapi", username)
-    if not os.path.exists(sock_file):
-        return "Not running for user " + username
+    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+    sock_port = 0
+    with open(desc_file) as f:
+        data = f.read()
+        data = json.loads(data.encode() if len(data) > 0 else '{}')
+        if username not in data:
+            flash("There is not such username!")
+            return redirect(url_for('inventory', username = username))#will also fail?
+        sock_port = int(data[username])
+
     c = zerorpc.Client()
-    c.connect("ipc://" + sock_file)
+    c.connect("tcp://127.0.0.1:%i"%sock_port)
     if c.releasePokemonById(p_id) == 1:
         flash("Released")
     else:

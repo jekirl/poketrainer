@@ -37,6 +37,7 @@ import tempfile
 import zerorpc
 import os
 import gevent
+import socket
 from listener import Listener
 from time import sleep
 from pgoapi import PGoApi
@@ -50,6 +51,7 @@ from s2sphere import CellId, LatLng
 log = logging.getLogger(__name__)
 from threading import Thread
 from Queue import Queue
+
 def get_pos_by_name(location_name):
     geolocator = GoogleV3()
     loc = geolocator.geocode(location_name)
@@ -115,11 +117,20 @@ def main():
     # provide player position on the earth
     api.set_position(*position)
 
-    sock_file = os.path.join( tempfile.gettempdir(), "pogoapi", config["username"])
-    if not os.path.exists(os.path.dirname(sock_file)):
-        os.mkdir(os.path.dirname(sock_file))
+    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+    sock_port = 0
+    s=socket.socket()
+    s.bind(("", 0)) #let the kernel find a free port
+    sock_port = s.getsockname()[1]
+    s.close()
+    with open(desc_file,'w+') as f:
+        data = f.read()
+        data = json.loads(data.encode() if len(data) > 0 else '{}')
+        data[config["username"]] = sock_port
+        f.write(json.dumps(data,indent=2))
+
     s = zerorpc.Server(Listener(api))
-    s.bind("ipc://"+sock_file)
+    s.bind("tcp://127.0.0.1:%i"%sock_port) # the free port should still be the same
     gevent.spawn(s.run)
 
     # retry login every 30 seconds if any errors
