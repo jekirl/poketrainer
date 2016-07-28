@@ -140,10 +140,10 @@ class PGoApi:
 
         # Sanity checking
         self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon # Experimental, and we needn't do this if we're farming anyway
-        if ( self.FARM_ITEMS_ENABLED         
-           and self.FARM_IGNORE_POKEBALL_COUNT  
-           and self.FARM_IGNORE_GREATBALL_COUNT 
-           and self.FARM_IGNORE_ULTRABALL_COUNT 
+        if ( self.FARM_ITEMS_ENABLED
+           and self.FARM_IGNORE_POKEBALL_COUNT
+           and self.FARM_IGNORE_GREATBALL_COUNT
+           and self.FARM_IGNORE_ULTRABALL_COUNT
            and self.FARM_IGNORE_MASTERBALL_COUNT ):
           self.FARM_ITEMS_ENABLED = False
           self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
@@ -265,6 +265,7 @@ class PGoApi:
             with open("data_dumps/%s.json" % self.config['username'], "w") as f:
                 res['responses']['lat'] = self._posf[0]
                 res['responses']['lng'] = self._posf[1]
+                res['responses']['hourly_exp'] = self.hourly_exp(self.player_stats.experience)
                 f.write(json.dumps(res['responses'], indent=2))
 
             self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
