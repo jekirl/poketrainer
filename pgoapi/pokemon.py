@@ -1,7 +1,7 @@
 from math import sqrt
 
 class Pokemon:
-    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None):
+    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None, score_expression=None):
         self.pokemon_data = pokemon_data
         self.stamina = pokemon_data.get('stamina', 0)
         self.favorite = pokemon_data.get('favorite', -1)
@@ -35,6 +35,16 @@ class Pokemon:
             stamina = float(additional_data.BaseStamina) + 15
 
             self.max_cp = (attack * sqrt(defense) * sqrt(stamina) * cp_multiplier * cp_multiplier) / 10
+
+        if score_expression is not None:
+            CP = self.cp
+            MAX_CP = self.max_cp
+            IV = self.iv
+
+            try:
+                self.score = eval(score_expression)
+            except Exception as e:
+                pass
 
     def __str__(self):
         nickname = ""

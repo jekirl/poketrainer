@@ -100,8 +100,7 @@ class PGoApi:
         self.MIN_SIMILAR_POKEMON = config.get("MIN_SIMILAR_POKEMON", 1)  # Keep atleast one of everything.
         self.STAY_WITHIN_PROXIMITY = config.get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
 
-        self.SCORE_CP_WEIGHT = config.get("SCORE_CP_WEIGHT", 0.5)
-        self.SCORE_IV_WEIGHT = config.get("SCORE_IV_WEIGHT", 0.5)
+        self.SCORE_EXPRESSION = config.get("SCORE_EXPRESSION", "0.5*(CP/MAX_CP)+0.5*(IV/100)")
 
         self.LIST_POKEMON_BEFORE_CLEANUP = config.get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
         self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
@@ -520,11 +519,7 @@ class PGoApi:
             if "pokemon_data" in inventory_item['inventory_item_data']:
                 # is a pokemon:
                 pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
-                pokemon = Pokemon(pokemon_data, self.pokemon_names, self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()))
-
-                # Need to calculate score here since we want to read in the specified weights from the config file
-                if pokemon.max_cp > 0 and pokemon.iv > 0:
-                    pokemon.score = pokemon.iv / 100.0 * self.SCORE_IV_WEIGHT + pokemon.cp / pokemon.max_cp * self.SCORE_CP_WEIGHT
+                pokemon = Pokemon(pokemon_data, self.pokemon_names, self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()), self.SCORE_EXPRESSION)
 
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
@@ -850,6 +845,7 @@ class PGoApi:
     def main_loop(self):
         catch_attempt = 0
         self.heartbeat()
+
         while True:
             self.heartbeat()
             sleep(1)
