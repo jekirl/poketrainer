@@ -583,14 +583,17 @@ class PGoApi:
                     item['item_id']]:
                     recycle_count = item['count'] - self.MIN_ITEMS[item['item_id']]
                     item_count += item['count'] - recycle_count
-                    self.log.info("Recycling Item_ID {0}, item count {1}".format(item['item_id'], recycle_count))
+                    self.log.info("Recycling {0}, recycle count {1}".format(
+                        get_item_name(item['item_id']), recycle_count))
                     res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()['responses'][
                         'RECYCLE_INVENTORY_ITEM']
                     response_code = res['result']
                     if response_code == 1:
-                        self.log.info("Recycled Item %s, New Count: %s", item['item_id'], res.get('new_count', 0))
+                        self.log.info("Recycled Item %s, New Count: %s",
+                                      get_item_name(item['item_id']), res.get('new_count', 0))
                     else:
-                        self.log.info("Failed to recycle Item %s, Code: %s", item['item_id'], response_code)
+                        self.log.info("Failed to recycle Item %s, Code: %s",
+                                      get_item_name(item['item_id']), response_code)
                     sleep(2)
                 elif "count" in item:
                     item_count += item['count']
