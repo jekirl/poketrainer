@@ -31,12 +31,12 @@ optional arguments:
 
 ----
 
-### Configuration
+## Configuration
 
 Copy config.json.example to config.json and change your account information.
 Below the accounts you can change options in the `default` section. If you need to change some options for an individual account, you can copy them to the account section and modify as needed.
 
-* Configuration options (non-exhaustive)
+#### Configuration options (non-exhaustive)
     * `BEHAVIOR`
      * `USE_GOOGLE` will enable google walking directions for navigation
       * You will probably need to provide an api key in `GMAPS_API_KEY` to avoid rate limits
