@@ -28,7 +28,7 @@ class Pokemon:
         }
     ]
 
-    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None, player_level=0):
+    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None, player_level=0, score_expression=None):
         self.pokemon_data = pokemon_data
         self.stamina = pokemon_data.get('stamina', 0)
         self.favorite = pokemon_data.get('favorite', -1)
@@ -56,6 +56,8 @@ class Pokemon:
         self.cpm_total = self.cp_multiplier + self.additional_cp_multiplier
         self.level_wild = self.get_level_by_cpm(self.cp_multiplier)
         self.level = self.get_level_by_cpm(self.cpm_total)
+        self.score = -1.0
+
         if additional_data is not None:
             # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
             attack = float(additional_data.BaseAttack)
@@ -74,6 +76,18 @@ class Pokemon:
                            sqrt(stamina + self.individual_stamina) *
                            pow(self.get_cpm_by_level(40), 2)) / 10
 
+        if score_expression is not None:
+            try:
+                CP = self.cp
+                LVL = self.level
+                IV = self.iv
+                MAX_CP = self.max_cp
+                ABSOLUTE_MAX_CP = self.max_cp_absolute
+
+                self.score = eval(score_expression)
+            except Exception as e:
+                pass
+
     def __str__(self):
         nickname = ""
 
@@ -82,14 +96,15 @@ class Pokemon:
 
         if self.max_cp > 0:
             return "{0}Type: {1} CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, " \
-                   "LvlWild: {5:.1f}, MaxCP: {6:.0f}, MaxCPAbs: {7:.0f}, IV-Norm.: {8:.0f}".format(nickname,
+                   "LvlWild: {5:.1f}, MaxCP: {6:.0f}, MaxCPAbs: {7:.0f}, IV-Norm.: {8:.0f}, Score: {9:.2f}".format(nickname,
                                                                                                    self.pokemon_type,
                                                                                                    self.cp, self.iv,
                                                                                                    self.level,
                                                                                                    self.level_wild,
                                                                                                    self.max_cp,
                                                                                                    self.max_cp_absolute,
-                                                                                                   self.iv_normalized)
+                                                                                                   self.iv_normalized,
+                                                                                                   self.score)
         else:
             return "{0}Type: {1}, CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, LvlWild: {5:.1f}".format(nickname,
                                                                                                 self.pokemon_type,

@@ -593,7 +593,7 @@ class PGoApi:
             if "pokemon_data" in inventory_item['inventory_item_data']:
                 # is a pokemon:
                 pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
-                pokemon = Pokemon(pokemon_data, self.pokemon_names, self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()), self.SCORE_EXPRESSION, self.player_stats.level)
+                pokemon = Pokemon(pokemon_data, self.pokemon_names, self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()), self.player_stats.level, self.SCORE_EXPRESSION)
 
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
@@ -677,7 +677,7 @@ class PGoApi:
             if status == 1:
                 evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}), self.pokemon_names,
                                           self.game_master.get(str(pokemon.pokemon_id), PokemonData()),
-                                          self.player_stats.level)
+                                          self.player_stats.level, self.SCORE_EXPRESSION)
                 # I don' think we need additional stats for evolved pokemon. Since we do not do anything with it.
                 # evolved_pokemon.pokemon_additional_data = self.game_master.get(pokemon.pokemon_id, PokemonData())
                 self.log.info("Evolved to %s", evolved_pokemon)
