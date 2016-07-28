@@ -349,39 +349,19 @@ class PGoApi:
                 travel_remaining = total_distance - total_distance_traveled
                 distance_to_point = distance_in_meters(self._posf, next_point)
 
-                if travel_remaining < step_size or distance_to_point + total_distance_traveled > total_distance:
-                    next_point = new_loc
-                    distance_to_point = distance_in_meters(self._posf, next_point)
-
                 total_distance_traveled += distance_to_point
-                self.log.info('=================================')
-                self.log.info(
-                    "On my way to the next fort! :) Traveled %.2f meters of %.2f ",
-                    total_distance_traveled,
-                    total_distance,
-                )
-
-                travel_link = '%s%s,%s' % (base_travel_link, next_point[0], next_point[1])
-                self.log.info("Travel Link: %s", travel_link)
+                self.log.info("On my way to the next fort! :)")
                 self.set_position(*next_point)
                 self.heartbeat()
 
-                if directly is False:
-                    if self.experimental and self.spin_all_forts:
-                        self.spin_nearest_fort()
+                if self.experimental and self.spin_all_forts:
+                    self.spin_nearest_fort()
 
                 sleep(1)
                 while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
                     sleep(1)
                     catch_attempt += 1
                 catch_attempt = 0
-
-                # Don't continue with the steps if we've reached our location
-                if next_point == new_loc:
-                    self.log.info('=================================')
-                    return
-
-        self.log.info('=================================')
 
     def walk_back_to_origin(self):
         self.walk_to(self._origPosF)
@@ -395,13 +375,6 @@ class PGoApi:
             nearest_fort_dis = destinations[0][1]
             self.log.info('Nearest fort distance is %s', nearest_fort_dis)
 
-            # Fort is close enough to change our route and walk to
-            if nearest_fort_dis > 40.00 and nearest_fort_dis <= 100:
-                lat = nearest_fort['latitude']
-                long = nearest_fort['longitude']
-                self.walk_to_fort(destinations[0], directly=True)
-                self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(),
-                                        fort_distance=nearest_fort_dis)
             if nearest_fort_dis <= 40.00:
                 self.fort_search_pgoapi(nearest_fort, player_postion=self.get_position(),
                                         fort_distance=nearest_fort_dis)
