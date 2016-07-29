@@ -5,6 +5,7 @@ use Poketrainer\controller\IndexController;
 use Poketrainer\controller\SettingsController;
 use Poketrainer\helper\A;
 use Poketrainer\helper\Lng;
+use Poketrainer\helper\Msg;
 use Poketrainer\helper\Tpl;
 
 ?>
@@ -41,6 +42,7 @@ use Poketrainer\helper\Tpl;
         <h1 class="page-header"><?=$title?></h1>
       </div>
     </div>
+    <?=Msg::get()?>
     <?=Tpl::get("main")?>
   </div>
 </div>

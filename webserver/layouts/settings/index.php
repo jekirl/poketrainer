@@ -12,7 +12,7 @@ if (!$this->settingsModel->configFileExists()) {
   $this->settingsModel->createConfigFile();
   ?>
   <div class="row">
-    <div class="col-lg-4">
+    <div class="col-lg-12">
       <div class="panel panel-info">
         <div class="panel-heading">
           <?= Lng::translate("Info") ?>
@@ -55,6 +55,7 @@ if (!$this->settingsModel->configFileExists()) {
                 throw new Exception("Type of $config not found");
               }
               $value = $this->settingsModel->getConfigValue($config);
+              $config = str_replace(".","---",$config);
               ?>
               <tr>
                 <td class="col-lg-7"><label for="setting-<?=$i?>"><?= $description ?></label></td>
@@ -75,7 +76,7 @@ if (!$this->settingsModel->configFileExists()) {
                     case "select":
                       ?>
                       <select id="setting-<?=$i?>" class="form-control" name="<?=$config?>">
-                        <option value="">---</option>
+                        <option value="null">---</option>
                         <?php
                         foreach ($typeInfo["options"] as $optValue => $displayValue) {
                           $selected = $optValue == $value?"selected":"";

@@ -4,6 +4,7 @@ namespace Poketrainer\model;
 
 use Poketrainer\exceptions\ConfigNotFoundException;
 use Poketrainer\helper\Lng;
+use Poketrainer\helper\Msg;
 use Poketrainer\model\CandyCountEnumModel as CandyCount;
 
 class SettingsModel extends Model {
@@ -209,10 +210,7 @@ class SettingsModel extends Model {
             "USE_DISPOSABLE_INCUBATORS" => FALSE,
             "BIG_EGGS_FIRST" => TRUE,
           ],
-          "POKEMON_EVOLUTION" => [
-            "PIDGEY" => CandyCount::PIDGEY,
-            "WEEDLE" => CandyCount::WEEDLE,
-          ],
+          "POKEMON_EVOLUTION" => [],
           "POKEMON_CLEANUP" => [
             "MIN_SIMILAR_POKEMON" => 1,
             "MAX_SIMILAR_POKEMON" => 999,
@@ -301,6 +299,38 @@ class SettingsModel extends Model {
       return $this->configTypes[$config];
     }
     throw new ConfigNotFoundException("The specified config ($config) not found in config types.");
+  }
+
+  public function saveSettings() {
+    $data = file_get_contents($this->file);
+    $json = json_decode($data, true);
+    foreach ($_POST as $key => $value) {
+      if($key == "settings-update") {
+        continue;
+      }
+      if($value == "null") {
+        continue;
+      }
+      $key = str_replace("---",".",$key);
+      if(strpos($key,".") === false) {
+        $json["accounts"][$this->accountId][$key] = $value;
+      } else {
+        $newkey = explode(".",$key);
+        $count = count($newkey);
+        if($count == 2) {
+          $json["accounts"][$this->accountId][$newkey[0]][$newkey[1]] = $value;
+        } else if($count == 3) {
+          $json["accounts"][$this->accountId][$newkey[0]][$newkey[1]][$newkey[2]] = $value;
+        }
+      }
+    }
+    $json = json_encode($json,JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    if(file_put_contents($this->file, $json)) {
+      Msg::set(Lng::translate("Settings were successfully updated."));
+    } else {
+      Msg::set(Lng::translate("We were unable to save settings :("));
+    }
+    Redirect();
   }
 
 }
