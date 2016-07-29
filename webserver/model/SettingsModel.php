@@ -210,7 +210,9 @@ class SettingsModel extends Model {
             "USE_DISPOSABLE_INCUBATORS" => FALSE,
             "BIG_EGGS_FIRST" => TRUE,
           ],
-          "POKEMON_EVOLUTION" => [],
+          "POKEMON_EVOLUTION" => [
+            "MISSINGNO" => 0
+          ],
           "POKEMON_CLEANUP" => [
             "MIN_SIMILAR_POKEMON" => 1,
             "MAX_SIMILAR_POKEMON" => 999,
@@ -305,6 +307,12 @@ class SettingsModel extends Model {
     $data = file_get_contents($this->file);
     $json = json_decode($data, true);
     foreach ($_POST as $key => $value) {
+      if($value === "true") {
+        $value = true;
+      }
+      if($value === "false") {
+        $value = false;
+      }
       if($key == "settings-update") {
         continue;
       }
@@ -324,7 +332,8 @@ class SettingsModel extends Model {
         }
       }
     }
-    $json = json_encode($json,JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    $json = json_encode($json,JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+    $json = str_replace(["\"true\"","\"false\""],["true","false"],$json);
     if(file_put_contents($this->file, $json)) {
       Msg::set(Lng::translate("Settings were successfully updated."));
     } else {
