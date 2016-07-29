@@ -4,7 +4,10 @@ import json
 from math import sqrt
 
 from pgoapi.game_master import GAME_MASTER
-from pgoapi.poke_utils import POKEMON_NAMES
+
+
+# TODO wrap this with some error handling?
+POKEMON_NAMES = json.load(open("pokemon.en.json"))
 
 
 class Pokemon:
