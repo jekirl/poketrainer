@@ -1,9 +1,99 @@
 from __future__ import absolute_import
 
+import csv
+import json
 import os
+from math import floor, sqrt
 
+from pgoapi.game_master import GAME_MASTER, PokemonData
 from pgoapi.pokemon import Pokemon
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Enum_Items
+from pgoapi.utilities import all_in, take_closest
+
+POKEMON_NAMES = json.load(open("pokemon.en.json"))
+pokemon_lvls = {}
+tcmp_vals = []
+with open("PoGopoke_lvl.tsv") as tsv:  # data gathered from here: https://www.reddit.com/r/TheSilphRoad/comments/4sa4p5/stardust_costs_increase_every_4_power_ups/
+    reader = csv.DictReader(tsv, delimiter='\t')
+    for row in reader:
+        pokemon_lvls[float(row["TotalCpMultiplier"])] = {
+            "DustSoFar": int(row["Stardust to this level"]),
+            "CandySoFar": int(row["Candies to this level"]),
+            "PokemonLvl": int(row["Pokemon level"]),
+            "PowerUpResult": float(row["Delta(TCpM^2)"]),
+            "TCPMDif": float(row["TCPM Difference"])
+        }
+        tcmp_vals.append(float(row["TotalCpMultiplier"]))
+
+
+def set_max_cp(pokemon, max_tcpm):
+    poke_game_data = GAME_MASTER.get(pokemon.pokemon_id, PokemonData())
+    if int(poke_game_data.PkMn) == 0 or not all_in(['cp', 'cp_multiplier'], pokemon.pokemon_data):
+        return
+
+    candy_to_evolve = int(poke_game_data.candy_to_evolve)
+
+    pokemon.candyNeededToMaxEvolve = pokemon_lvls[max_tcpm]['CandySoFar'] - pokemon_lvls[pokemon.cpm_total]['CandySoFar'] + candy_to_evolve
+    pokemon.dustNeededToMaxEvolve = pokemon_lvls[max_tcpm]['DustSoFar'] - pokemon_lvls[pokemon.cpm_total]['DustSoFar']
+
+    i = 0
+    if pokemon.pokemon_id == 133:  # is an Eevee
+        if pokemon.nickname is 'Sparky':
+            i = 2
+        elif pokemon.nickname is 'Pyro':
+            i = 3
+        else: # Rainer or Vaporean is the default
+            i = 1
+    else:
+        while GAME_MASTER.get(pokemon.pokemon_id + i + 1, PokemonData()).FamilyId == poke_game_data.FamilyId and candy_to_evolve > 0:
+            candy_to_evolve = int(GAME_MASTER.get(pokemon.pokemon_id + i + 1, PokemonData()).candy_to_evolve)
+            pokemon.candyNeededToMaxEvolve += candy_to_evolve
+            i += 1
+
+    if(i == 0):
+        pokemon.maxEvolveCP = calc_cp(pokemon.pokemon_data, max_tcpm, poke_game_data)
+    else:
+        evolved_poke_data = GAME_MASTER.get(pokemon.pokemon_id + i, PokemonData())
+        pokemon.maxEvolveCP = calc_cp(pokemon.pokemon_data, max_tcpm, evolved_poke_data)
+
+    poke_lvl = pokemon_lvls[pokemon.cpm_total]['PokemonLvl']
+    pokemon.PowerUpResult = calc_cp(pokemon.pokemon_data, tcmp_vals[poke_lvl], poke_game_data) - pokemon.cp
+
+
+# TCPM = CPM + ACPM
+# Stamina =  (base_stamina + IndividualStamina) * TCPM
+# Attack = (BaseAttack + IndividualAttack) * TCPM
+# Defense = (base_defense + IndividualDefense) * TCPM
+# CP = MAX(10, FLOOR(Stamina0.5 * Attack * Def0.5 / 10))
+def calc_acpm(pokemon, pokemon_details):
+    if not all_in(['cp', 'cp_multiplier'], pokemon.pokemon_data):
+        return 0
+
+    base_attk = int(pokemon_details.BaseAttack)
+    base_def = int(pokemon_details.base_defense)
+    base_stamina = int(pokemon_details.base_stamina)
+    cpm = pokemon.cp_multiplier
+    return max(
+        0,
+        sqrt(sqrt((100 * pow(pokemon.cp, 2)) / (pow((base_attk + pokemon.individual_attack), 2) *
+             (base_def + pokemon.individual_defense) * (base_stamina + pokemon.individual_stamina)))) - cpm
+    )
+
+
+def calc_cp(pokemon, tcpm, pokemon_details):
+    base_attk = int(pokemon_details.BaseAttack)
+    base_def = int(pokemon_details.base_defense)
+    base_stamina = int(pokemon_details.base_stamina)
+
+    attk = (base_attk + pokemon.get('individual_attack', 0)) * tcpm
+    defense = (base_def + pokemon.get('individual_defense', 0)) * tcpm
+    stamina = (base_stamina + pokemon.get('individual_stamina', 0)) * tcpm
+
+    return int(max(10, floor(sqrt(stamina) * attk * sqrt(defense) / 10)))
+
+
+def get_tcpm(tcpm):
+    return take_closest(tcpm, tcmp_vals)
 
 
 def get_item_name(s_item_id):
