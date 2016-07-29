@@ -36,7 +36,6 @@ class Pokemon:
     def __init__(self, pokemon_data, player_level=0,
                  score_method="CP", score_settings=dict()):
         self.pokemon_data = pokemon_data
-        self.creation_time_ms = pokemon_data.get('creation_time_ms', 0)
         self.stamina = pokemon_data.get('stamina', 0)
         self.favorite = pokemon_data.get('favorite', -1)
         self.is_favorite = self.favorite != -1
@@ -57,35 +56,14 @@ class Pokemon:
         self.iv = self.get_iv_percentage()
         self.pokemon_type = POKEMON_NAMES.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore')
 
-        # Vals Used in Web.py
-        if self.nickname is not "":
-            self.name = self.nickname
-        else:
-            self.name = self.pokemon_type
-        self.candy = 0
-        self.move_1 = pokemon_data.get('move_1', 0)
-        self.move_2 = pokemon_data.get('move_2', 0)
-
-        # Max Evolve based on ur lvl vals and Power Up
-        self.candyNeededToMaxEvolve = 0
-        self.dustNeededToMaxEvolve = 0
-        self.maxEvolveCP = 0
-        self.PowerUpResult = 0
-
         self.iv_normalized = -1.0
         self.max_cp = -1.0
         self.max_cp_absolute = -1.0
-        additional_data = GAME_MASTER[self.pokemon_id]
-        self.family_id = additional_data.FamilyId
-
-        # ACPM, TCPM, Rating
-        if 'additional_cp_multiplier' not in pokemon_data:
-            self.additional_cp_multiplier = calc_acpm(self, additional_data)
-
-        # helps with rounding errors
-        self.cpm_total = get_tcpm(self.cp_multiplier + self.additional_cp_multiplier)
+        self.cpm_total = self.cp_multiplier + self.additional_cp_multiplier
         self.level_wild = self.get_level_by_cpm(self.cp_multiplier)
         self.level = self.get_level_by_cpm(self.cpm_total)
+        additional_data = GAME_MASTER[self.pokemon_id]
+        self.family_id = additional_data.FamilyId
 
         # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
         attack = float(additional_data.BaseAttack)

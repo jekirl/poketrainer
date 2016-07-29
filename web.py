@@ -15,7 +15,20 @@ app = Flask(__name__, template_folder="templates")
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 app.debug = True
 
-options = {}
+pokemon_names = json.load(open("pokemon.en.json"))
+pokemon_details = {}
+
+with open ("GAME_MASTER_POKEMON_v0_2.tsv") as tsv:
+    reader = csv.DictReader(tsv, delimiter='\t')
+    for row in reader:
+        family_id = re.match("HoloPokemonFamilyId.V([0-9]*).*",row["FamilyId"]).group(1)
+        pokemon_details[row["PkMn"]] = {
+            "BaseStamina": float(row["BaseStamina"]),
+            "BaseAttack": float(row["BaseAttack"]),
+            "BaseDefense": float(row["BaseDefense"]),
+            "family_id": family_id
+        }
+
 attacks = {}
 
 with open("GAME_ATTACKS_v0_1.tsv") as tsv:
@@ -56,6 +69,9 @@ def status(username):
             item = item['inventory_item_data']
             pokemon = item.get("pokemon_data", {})
             if "pokemon_id" in pokemon:
+                pokemon['name'] = pokemon_names[str(pokemon['pokemon_id'])]
+                pokemon.update(pokemon_details[str(pokemon['pokemon_id'])])
+                pokemon['iv'] = pokemonIVPercentage(pokemon)
                 pokemons.append(pokemon)
             if 'player_stats' in item:
                 player = item['player_stats']

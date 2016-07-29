@@ -267,7 +267,7 @@ class PGoApi:
         return res
     def get_player_inventory(self, as_json=True):
         return self.inventory.to_json()
-        
+
     def heartbeat(self):
         # making a standard call to update position, etc
         self.get_player()
@@ -650,7 +650,7 @@ class PGoApi:
         if self.do_release_pokemon_by_id(pokemon.id):
             self.log.info("Successfully Released Pokemon %s", pokemon)
         else:
-            # self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res) $ FIXME release_res is not in scope!
+            # self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)  # FIXME release_res is not in scope!
             self.log.info("Failed to release Pokemon %s", pokemon)
         gevent.sleep(3)
 
