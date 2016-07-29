@@ -1,0 +1,15 @@
+{% set active_page = 'inventory_items' %}
+{% extends "layout.html" %}
+{% block title %}{{username}}'s Inventory{% endblock title %}
+{% block content %}
+<div class="container-">
+  <pre>
+    {{inventory}}
+  </pre>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+  crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+
+{% endblock content %}

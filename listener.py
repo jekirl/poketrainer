@@ -6,7 +6,11 @@ class Listener(object):
   def current_location(self):
     print self.api._posf
     return self.api._posf
-#  def getCaughtPokemons(self):
-#    return self.api.get_caught_pokemons()
+  def getCaughtPokemons(self):
+    return self.api.get_caught_pokemons(as_json=True)
+  def getInventory(self):
+    return self.api.get_player_inventory(as_json=True)
+  def getPlayerInfo(self):
+    return self.api.get_player_info()
   def ping(self):
     return "pong"

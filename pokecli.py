@@ -44,7 +44,7 @@ from time import sleep
 from pgoapi import PGoApi
 from pgoapi.utilities import f2i, h2f
 from pgoapi.location import getNeighbors
-
+import os.path
 from google.protobuf.internal import encoder
 from geopy.geocoders import GoogleV3
 from s2sphere import CellId, LatLng
@@ -85,9 +85,8 @@ def init_config():
             load.update(json.load(data))
 
     # Read passed in Arguments
-    required = lambda x: not x in load['accounts'][0].keys()
     parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
-    parser.add_argument("-l", "--location", help="Location", required=required("location"))
+    parser.add_argument("-l", "--location", help="Location")
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
     config = parser.parse_args()
     defaults = load.get('defaults', {})
@@ -141,11 +140,13 @@ def main(position=None):
     s.bind(("", 0)) #let the kernel find a free port
     sock_port = s.getsockname()[1]
     s.close()
-    data = None
-    with open(desc_file,'r+') as f:
-        data = f.read()
-        data = json.loads(data.encode() if len(data) > 0 else '{}')
-        data[config["username"]] = sock_port
+    data = {}
+
+    if os.path.isfile(desc_file):
+        with open(desc_file,'r+') as f:
+            data = f.read()
+            data = json.loads(data.encode() if len(data) > 0 else '{}')
+    data[config["username"]] = sock_port
     with open(desc_file, "w+") as f:
         f.write(json.dumps(data,indent=2))
 
@@ -168,6 +169,8 @@ def main(position=None):
             sleep(30)
             try:
                 main(api._posf)
+            except KeyboardInterrupt:
+                raise
             except:
                 pass
 
