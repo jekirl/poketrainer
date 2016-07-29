@@ -34,16 +34,16 @@ with open ("GAME_ATTACKS_v0_1.tsv") as tsv:
 
 @app.route("/")
 def users():
-	import glob
-	data_files = glob.glob("data_dumps/*.json")
-	users = []
-	
-	for file_path in data_files:
-		match = re.search('\/([^\.]+)\.', file_path)
-		if match:
-			users.append(match.group()[1:-1])
+   import glob
+   data_files = glob.glob("data_dumps/*.json")
+   users = []
+   
+   for file_path in data_files:
+       match = re.search('\/([^\.]+)\.', file_path)
+       if match:
+           users.append(match.group()[1:-1])
 
-	return render_template('users.html', users=users)
+   return render_template('users.html', users=users)
 
 @app.route("/<username>/pokemon")
 def inventory(username):
@@ -77,7 +77,6 @@ def inventory(username):
         player['hourly_exp'] = data.get("hourly_exp",0)
         player['goal_xp'] = player.get('next_level_xp',0)-player.get('prev_level_xp',0)
         player['username'] = username
-
         return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
 
 @app.route("/<username>/transfer/<p_id>")
