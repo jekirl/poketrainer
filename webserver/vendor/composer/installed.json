@@ -1,0 +1,38 @@
+[
+    {
+        "name": "rikudou/getp",
+        "version": "1.0",
+        "version_normalized": "1.0.0.0",
+        "dist": {
+            "type": "zip",
+            "url": "https://composer.chrastecky.cz/files/rikudou_getp.zip",
+            "reference": null,
+            "shasum": null
+        },
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "files": [
+                "getp.php"
+            ]
+        }
+    },
+    {
+        "name": "rikudou/redirect",
+        "version": "1.0",
+        "version_normalized": "1.0.0.0",
+        "dist": {
+            "type": "zip",
+            "url": "https://composer.chrastecky.cz/files/rikudou_redirect.zip",
+            "reference": null,
+            "shasum": null
+        },
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "files": [
+                "redirect.php"
+            ]
+        }
+    }
+]

@@ -1,0 +1,28 @@
+@import "bootstrap";
+@import "sbadmin2";
+@import "timeline";
+@import "metisMenu";
+
+#top-navigation {
+  margin-bottom: 0;
+}
+
+.sidebar-nav {
+  margin-top: 40px;
+}
+
+.sidebar {
+  ul {
+    li {
+      &:first-of-type {
+        border-top: 1px solid #e7e7e7;
+      }
+    }
+  }
+}
+
+table {
+  label {
+    font-weight: normal;
+  }
+}
