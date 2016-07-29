@@ -65,10 +65,10 @@ def setMaxCP(pokemon, maxTCPM):
     maxPokeId = pokemon['pokemon_id']
     i = 0
     
-    if pokemon['pokemon_id'] == 133 and 'nickname' in pokemon: #is an Eevee
-        if pokemon['nickname'] is 'Sparky':
+    if pokemon['pokemon_id'] == 133: #is an Eevee
+        if 'nickname' in pokemon and pokemon['nickname'] is 'Sparky':
             i = 2
-        elif pokemon['nickname'] is 'Pyro': 
+        elif 'nickname' in pokemon and pokemon['nickname'] is 'Pyro': 
             i = 3
         else: #Rainer or Vaporean is the default
             i = 1
