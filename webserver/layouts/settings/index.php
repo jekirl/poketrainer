@@ -44,8 +44,15 @@ if (!$this->settingsModel->configFileExists()) {
           <?php
           $i = 0;
           foreach ($this->settingsModel->getConfig() as $config => $description) {
-            $type = $this->settingsModel->getConfigType($config);
-            $type = $this->settingsModel->getConfigValue($config);
+            $typeInfo = $this->settingsModel->getConfigType($config);
+            if(is_string($typeInfo)) {
+              $type = $typeInfo;
+            } else if(is_array($typeInfo) && isset($typeInfo["type"])) {
+              $type = $typeInfo["type"];
+            } else {
+              throw new Exception("Type of $config not found");
+            }
+            $value = $this->settingsModel->getConfigValue($config);
             ?>
             <tr>
               <td><label for="setting-<?=$i?>"><?= $description ?></label></td>
