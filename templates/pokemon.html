@@ -122,6 +122,7 @@
 >>>>>>> Added the ability to hide columns in the webtemplate. Add "IGNORE_COLUMNS":  ["Rating", "Test"], to your config file. This is an optional feature. Columns to be hidden should match column names.
             </thead>
             {% for pokemon in pokemons %}
+<<<<<<< HEAD
             <tr id="{{pokemon['id']}}">
               <td style="{{options["ignore_recent"]}}" data-order="{{ pokemon["creation_time_ms"] }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon[
                   'pokemon_id']) }}></td>
@@ -160,6 +161,27 @@
               <td style="{{options["ignore_move1"]}}">{{attacks[pokemon["move_1"]]}}</td>
               <td style="{{options["ignore_move2"]}}">{{attacks[pokemon["move_2"]]}}</td>
 >>>>>>> Added the ability to hide columns in the webtemplate. Add "IGNORE_COLUMNS":  ["Rating", "Test"], to your config file. This is an optional feature. Columns to be hidden should match column names.
+=======
+            <tr id="{{pokemon.id}}">
+              <td  style="{{options["ignore_recent"]}}" data-order="{{ pokemon.creation_time_ms }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon.pokemon_id) }}></td>
+              <td style="{{options["ignore_id"]}}" data-order="{{pokemon.pokemon_id}}">{{pokemon.pokemon_id}}</td>
+              <td style="{{options["ignore_name"]}}">{{pokemon.name}}</td>
+              <td style="{{options["ignore_lvl"]}}" data-order="{{pokemon.level}}">{{pokemon.level}}</td>
+              <td style="{{options["ignore_rating"]}}" data-order="{{pokemon.rating}}">{{pokemon.rating}}</td>
+              <td style="{{options["ignore_IV"]}}" data-order="{{pokemon.iv|round(1, 'floor')}}">IV: {{pokemon.iv|round(1, 'floor')}}%</td>
+              <td style="{{options["ignore_CP"]}}" data-order="{{pokemon.cp}}">CP: {{pokemon.cp}}</td>
+              <td style="{{options["ignore_max_CP"]}}" data-order="{{pokemon.maxEvolveCP}}">CP: {{pokemon.maxEvolveCP}}</td>
+              <td style="{{options["ignore_candies"]}}" data-order="{{pokemon.candy}}">Candy: {{pokemon.candy}}</td>
+              <td style="{{options["ignore_candy_needed"]}}" data-order="{{pokemon.candyNeededToMaxEvolve}}">Candy: {{pokemon.candyNeededToMaxEvolve}}</td>
+              <td style="{{options["ignore_dust_needed"]}}" data-order="{{pokemon.dustNeededToMaxEvolve}}">Dust: {{pokemon.dustNeededToMaxEvolve}}</td>
+              <td style="{{options["ignore_power_up"]}}" data-order="{{pokemon.PowerUpResult}}">CP: {{pokemon.PowerUpResult}}</td>
+              <td style="{{options["ignore_stamina"]}}" data-order="{{pokemon.stamina}}">Stamina: {{pokemon.stamina}}</td>
+              <td style="{{options["ignore_attkIV"]}}" data-order="{{pokemon.individual_attack}}">Att IV: {{pokemon.individual_attack}}</td>
+              <td style="{{options["ignore_staIV"]}}" data-order="{{pokemon.individual_stamina}}">Sta IV: {{pokemon.individual_stamina}}</td>
+              <td style="{{options["ignore_defIV"]}}" data-order="{{pokemon.individual_defense}}">Def IV: {{pokemon.individual_defense}}</td>
+              <td style="{{options["ignore_move1"]}}">{{attacks[pokemon.move_1]}}</td>
+              <td style="{{options["ignore_move2"]}}">{{attacks[pokemon.move_2]}}</td>
+>>>>>>> Fixed some edge cases were I thought data was missing but it was actually just 0 (+1 squashed commits)
             </tr>
             {% endfor %}
           </table>

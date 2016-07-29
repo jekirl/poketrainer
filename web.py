@@ -9,47 +9,22 @@ import argparse
 
 from pgoapi.poke_utils import *
 from pgoapi.utilities import *
+from pgoapi.pokemon import Pokemon
+from flask_socketio import SocketIO
 import tempfile
 import zerorpc
 import os
-from flask_socketio import SocketIO
 app = Flask(__name__, template_folder="templates")
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 
 pokemon_names = json.load(open("pokemon.en.json"))
-pokemon_details = {}
-pokemon_lvls = {}
-tcmpVals = []
 options = {}
-with open ("GAME_MASTER_POKEMON_v0_2.tsv") as tsv:
-    reader = csv.DictReader(tsv, delimiter='\t')
-    for row in reader:
-        family_id = re.match("HoloPokemonFamilyId.V([0-9]*).*",row["FamilyId"]).group(1)
-        pokemon_details[row["PkMn"]] = {
-            "BaseStamina": float(row["BaseStamina"]),
-            "BaseAttack": float(row["BaseAttack"]),
-            "BaseDefense": float(row["BaseDefense"]),
-            "CandyToEvolve": int(row["CandyToEvolve"]),
-            "family_id": family_id
-        }
-
+game_master = parse_game_master()
 attacks = {}
 with open ("GAME_ATTACKS_v0_1.tsv") as tsv:
     reader = csv.DictReader(tsv, delimiter='\t')
     for row in reader:
         attacks[int(row["Num"])] = row["Move"]
-
-with open ("PoGoPokeLvl.tsv") as tsv: #data gathered from here: https://www.reddit.com/r/TheSilphRoad/comments/4sa4p5/stardust_costs_increase_every_4_power_ups/
-    reader = csv.DictReader(tsv, delimiter='\t')
-    for row in reader:
-        pokemon_lvls[float(row["TotalCpMultiplier"])] = {
-            "DustSoFar": int(row["Stardust to this level"]),
-            "CandySoFar": int(row["Candies to this level"]),
-            "PokemonLvl": int(row["Pokemon level"]),
-            "PowerUpResult": float(row["Delta(TCpM^2)"]),
-            "TCPMDif": float(row["TCPM Difference"])
-        }
-        tcmpVals.append(float(row["TotalCpMultiplier"]))
 
 def init_config():
     parser = argparse.ArgumentParser()
@@ -73,54 +48,6 @@ def init_config():
 
     return config.__dict__
 config = init_config()
-
-
-
-def setMaxCP(pokemon, maxTCPM):
-    if not all_in(['cp', 'cp_multiplier', 'individual_stamina', 'individual_attack', 'individual_defense'], pokemon):
-        pokemon['candyNeeded'] = 0
-        pokemon['dustNeeded'] = 0
-        pokemon['maxCP'] = 0
-        pokemon['PowerUpResult'] = 0
-        return
-
-    candyToEvolve = pokemon_details[str(pokemon['pokemon_id'])]['CandyToEvolve']
-
-    pokemon['candyNeeded'] = pokemon_lvls[maxTCPM]['CandySoFar'] - pokemon_lvls[pokemon['tcpm']]['CandySoFar'] + candyToEvolve
-    pokemon['dustNeeded'] = pokemon_lvls[maxTCPM]['DustSoFar'] - pokemon_lvls[pokemon['tcpm']]['DustSoFar']
-
-    family_id = pokemon_details[str(pokemon['pokemon_id'])]['family_id']
-    maxPokeId = pokemon['pokemon_id']
-    i = 0
-    
-    if pokemon['pokemon_id'] == 133: #is an Eevee
-        if 'nickname' in pokemon and pokemon['nickname'] is 'Sparky':
-            i = 2
-        elif 'nickname' in pokemon and pokemon['nickname'] is 'Pyro': 
-            i = 3
-        else: #Rainer or Vaporean is the default
-            i = 1
-    else:
-        while pokemon_details[str(pokemon['pokemon_id'] + i + 1)]['family_id'] == family_id and candyToEvolve > 0:
-            candyToEvolve = pokemon_details[str(pokemon['pokemon_id'] + i + 1)]['CandyToEvolve']
-            pokemon['candyNeeded'] += candyToEvolve
-        i+=1
-
-    if(i == 0):
-        pokemon['maxCP'] = calcCP(pokemon, maxTCPM, pokemon_details)
-    else:
-        evolvedPoke = {}
-        evolvedPoke['pokemon_id'] = pokemon['pokemon_id'] + i
-        evolvedPoke['cp'] = pokemon['cp']
-        evolvedPoke['cp_multiplier'] = pokemon['cp_multiplier']
-        evolvedPoke['individual_defense'] = pokemon['individual_defense']
-        evolvedPoke['individual_stamina'] = pokemon['individual_stamina']
-        evolvedPoke['individual_attack'] = pokemon['individual_attack']
-
-        pokemon['maxCP'] = calcCP(evolvedPoke, maxTCPM, pokemon_details)
-
-    pokeLvl = pokemon_lvls[pokemon['tcpm']]['PokemonLvl']
-    pokemon['PowerUpResult'] = calcCP(pokemon, tcmpVals[pokeLvl], pokemon_details) - pokemon['cp']
 
 def setColumnsToIgnore(columnsToIgnore):
     options['ignore_recent'] = ''
@@ -180,8 +107,6 @@ def setColumnsToIgnore(columnsToIgnore):
         elif column.lower() == 'move 2':
             options['ignore_move2'] = 'display: none;'
 
-
-
 @app.route("/<username>/pokemon")
 def inventory(username):
     c = get_api_rpc(username)
@@ -197,9 +122,8 @@ def inventory(username):
         latlng = c.current_location()
         latlng = "%f,%f" % (latlng[0],latlng[1])
         items = data['GET_INVENTORY']['inventory_delta']['inventory_items']
-        pokemons = []
+        pokemonsData = []
         candy = defaultdict(int)
-        player = {}
         for item in items:
             item = item['inventory_item_data']
             pokemon = item.get("pokemon_data",{})
@@ -217,16 +141,25 @@ def inventory(username):
                 pokemon['rating'] = 0
                 pokemon['CalcCP'] = calcCP(pokemon, pokemon['tcpm'], pokemon_details)
                 pokemons.append(pokemon)
+            if "pokemon_id" in pokemon:
+                pokemonsData.append(pokemon)
             if 'player_stats' in item:
                 player = item['player_stats']
             if "pokemon_family" in item:
                 filled_family = str(item['pokemon_family']['family_id']).zfill(4)
                 candy[filled_family] += item['pokemon_family'].get("candy",0)
-        pokemons = sorted(pokemons, lambda x,y: cmp(x["iv"],y["iv"]),reverse=True)
         # add candy back into pokemon json
-        for pokemon in pokemons:
-            pokemon['candy'] = candy[pokemon['family_id']]
-            setMaxCP(pokemon, tcmpVals[player['level']*2 + 1])
+        pokemons = []
+        for pokemon in pokemonsData:
+            test = game_master.get(pokemon['pokemon_id'], PokemonData())
+            pkmn = Pokemon(pokemon, pokemon_names, test, player['level'])
+
+            family_id = re.match("HoloPokemonFamilyId.V([0-9]*).*", pkmn.pokemon_additional_data.FamilyId).group(1)
+            pkmn.candy = candy[family_id]
+            setMaxCP(pkmn, tcmpVals[int(player['level']*2 + 1)], game_master)
+            pkmn.rating = pokemon_lvl(options['DEFINE_POKEMON_LV'], pkmn)
+            pokemons.append(pkmn)           
+        pokemons = sorted(pokemons, lambda x,y: cmp(x.iv, y.iv),reverse=True)             
         player['username'] = data['GET_PLAYER']['player_data']['username']
         player['level_xp'] = player.get('experience',0)-player.get('prev_level_xp',0)
         player['hourly_exp'] = data.get("hourly_exp",0)
