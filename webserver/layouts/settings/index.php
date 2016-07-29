@@ -116,6 +116,11 @@ if (!$this->settingsModel->configFileExists()) {
               $i++;
             }
             ?>
+            <tr>
+              <td colspan="2">
+                <input type="submit" class="btn btn-default" value="<?=Lng::translate("Save settings")?>" name="settings-update" />
+              </td>
+            </tr>
             </tbody>
           </table>
         </form>
