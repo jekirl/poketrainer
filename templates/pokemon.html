@@ -83,24 +83,6 @@
         <div class="table-responsive">
           <table id="poke-table" class="table table-striped">
             <thead>
-<<<<<<< HEAD
-              <th>Recent</th>
-              <th>Name</th>
-              <th>IV</th>
-              <th>CP</th>
-              <th>Max CP</th>
-              <th>Candies</th>
-              <th>Candy Needed</th>
-              <th>Dust Needed</th>
-              <th>Power Up</th>
-              <th>Stamina</th>
-              <th>Att IV</th>
-              <th>Sta IV</th>
-              <th>Def IV</th>
-              <th>Move 1</th>
-              <th>Move 2</th>
-              <th>Transfer</th>
-=======
               <th style="{{options["ignore_recent"]}}">Recent</th>
               <th style="{{options["ignore_id"]}}">#</th>
               <th style="{{options["ignore_name"]}}">Name</th>
@@ -119,55 +101,15 @@
               <th style="{{options["ignore_defIV"]}}">Def IV</th>
               <th style="{{options["ignore_move1"]}}">Move 1</th>
               <th style="{{options["ignore_move2"]}}">Move 2</th>
->>>>>>> Added the ability to hide columns in the webtemplate. Add "IGNORE_COLUMNS":  ["Rating", "Test"], to your config file. This is an optional feature. Columns to be hidden should match column names.
+              <th>Transfer</th>
             </thead>
             {% for pokemon in pokemons %}
-<<<<<<< HEAD
-            <tr id="{{pokemon['id']}}">
-              <td style="{{options["ignore_recent"]}}" data-order="{{ pokemon["creation_time_ms"] }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon[
-                  'pokemon_id']) }}></td>
-<<<<<<< HEAD
-              <td>{{pokemon["name"]}}</td>
-              <td data-order="{{pokemon["iv"]|round(1, 'floor')}}">IV: {{pokemon["iv"]|round(1, 'floor')}}%</td>
-              <td data-order="{{pokemon["cp"]}}">CP: {{pokemon["cp"]}}</td>
-              <td data-order="{{pokemon["maxCP"]}}">{{pokemon["maxCP"]}}</td>
-              <td data-order="{{pokemon["candy"]}}">Candy: {{pokemon["candy"]}}</td>
-              <td data-order="{{pokemon["candyNeeded"]}}">Candy: {{pokemon["candyNeeded"]}}</td>
-              <td data-order="{{pokemon["dustNeeded"]}}">Dust: {{pokemon["dustNeeded"]}}</td>
-              <td data-order="{{pokemon["PowerUpResult"]}}">CP: {{pokemon["PowerUpResult"]}}</td>
-              <td data-order="{{pokemon["stamina"]}}">Stamina: {{pokemon["stamina"]}}</td>
-              <td data-order="{{pokemon["individual_attack"]}}">Att IV: {{pokemon["individual_attack"]}}</td>
-              <td data-order="{{pokemon["individual_stamina"]}}">Sta IV: {{pokemon["individual_stamina"]}}</td>
-              <td data-order="{{pokemon["individual_defense"]}}">Def IV: {{pokemon["individual_defense"]}}</td>
-              <td>{{attacks[pokemon["move_1"]]}}</td>
-              <td>{{attacks[pokemon["move_2"]]}}</td>
-              <td><a href="{{ url_for('transfer', username = player['username'], p_id = pokemon['id'])}}">Transfer</a></td>
-=======
-              <td style="{{options["ignore_id"]}}" data-order="{{pokemon["pokemon_id"]}}">{{pokemon["pokemon_id"]}}</td>
-              <td style="{{options["ignore_name"]}}">{{pokemon["name"]}}</td>
-              <td style="{{options["ignore_lvl"]}}" data-order="{{pokemon["lvl"]}}">{{pokemon["lvl"]}}</td>
-              <td style="{{options["ignore_rating"]}}" data-order="{{pokemon["rating"]}}">{{pokemon["rating"]}}</td>
-              <td style="{{options["ignore_IV"]}}" data-order="{{pokemon["iv"]|round(1, 'floor')}}">IV: {{pokemon["iv"]|round(1, 'floor')}}%</td>
-              <td style="{{options["ignore_CP"]}}" data-order="{{pokemon["cp"]}}">CP: {{pokemon["cp"]}}</td>
-              <td style="{{options["ignore_max_CP"]}}" data-order="{{pokemon["maxCP"]}}">CP: {{pokemon["maxCP"]}}</td>
-              <td style="{{options["ignore_candies"]}}" data-order="{{pokemon["candy"]}}">Candy: {{pokemon["candy"]}}</td>
-              <td style="{{options["ignore_candy_needed"]}}" data-order="{{pokemon["candyNeeded"]}}">Candy: {{pokemon["candyNeeded"]}}</td>
-              <td style="{{options["ignore_dust_needed"]}}" data-order="{{pokemon["dustNeeded"]}}">Dust: {{pokemon["dustNeeded"]}}</td>
-              <td style="{{options["ignore_power_up"]}}" data-order="{{pokemon["PowerUpResult"]}}">CP: {{pokemon["PowerUpResult"]}}</td>
-              <td style="{{options["ignore_stamina"]}}" data-order="{{pokemon["stamina"]}}">Stamina: {{pokemon["stamina"]}}</td>
-              <td style="{{options["ignore_attkIV"]}}" data-order="{{pokemon["individual_attack"]}}">Att IV: {{pokemon["individual_attack"]}}</td>
-              <td style="{{options["ignore_staIV"]}}" data-order="{{pokemon["individual_stamina"]}}">Sta IV: {{pokemon["individual_stamina"]}}</td>
-              <td style="{{options["ignore_defIV"]}}" data-order="{{pokemon["individual_defense"]}}">Def IV: {{pokemon["individual_defense"]}}</td>
-              <td style="{{options["ignore_move1"]}}">{{attacks[pokemon["move_1"]]}}</td>
-              <td style="{{options["ignore_move2"]}}">{{attacks[pokemon["move_2"]]}}</td>
->>>>>>> Added the ability to hide columns in the webtemplate. Add "IGNORE_COLUMNS":  ["Rating", "Test"], to your config file. This is an optional feature. Columns to be hidden should match column names.
-=======
             <tr id="{{pokemon.id}}">
               <td  style="{{options["ignore_recent"]}}" data-order="{{ pokemon.creation_time_ms }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon.pokemon_id) }}></td>
               <td style="{{options["ignore_id"]}}" data-order="{{pokemon.pokemon_id}}">{{pokemon.pokemon_id}}</td>
               <td style="{{options["ignore_name"]}}">{{pokemon.name}}</td>
               <td style="{{options["ignore_lvl"]}}" data-order="{{pokemon.level}}">{{pokemon.level}}</td>
-              <td style="{{options["ignore_rating"]}}" data-order="{{pokemon.rating}}">{{pokemon.rating}}</td>
+              <td style="{{options["ignore_rating"]}}" data-order="{{pokemon.score}}">{{pokemon.score}}</td>
               <td style="{{options["ignore_IV"]}}" data-order="{{pokemon.iv|round(1, 'floor')}}">IV: {{pokemon.iv|round(1, 'floor')}}%</td>
               <td style="{{options["ignore_CP"]}}" data-order="{{pokemon.cp}}">CP: {{pokemon.cp}}</td>
               <td style="{{options["ignore_max_CP"]}}" data-order="{{pokemon.maxEvolveCP}}">CP: {{pokemon.maxEvolveCP}}</td>
@@ -181,7 +123,7 @@
               <td style="{{options["ignore_defIV"]}}" data-order="{{pokemon.individual_defense}}">Def IV: {{pokemon.individual_defense}}</td>
               <td style="{{options["ignore_move1"]}}">{{attacks[pokemon.move_1]}}</td>
               <td style="{{options["ignore_move2"]}}">{{attacks[pokemon.move_2]}}</td>
->>>>>>> Fixed some edge cases were I thought data was missing but it was actually just 0 (+1 squashed commits)
+              <td><a href="{{ url_for('transfer', username = player['username'], p_id = pokemon.id)}}">Transfer</a></td>
             </tr>
             {% endfor %}
           </table>

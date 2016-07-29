@@ -63,7 +63,6 @@ class Pokemon:
         else:
             self.name = self.pokemon_type
         self.candy = 0
-        self.rating = 0
         self.move_1 = pokemon_data.get('move_1', 0)
         self.move_2 = pokemon_data.get('move_2', 0)
 
@@ -94,8 +93,8 @@ class Pokemon:
         worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.cpm_total, 2)) / 10
         perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.cpm_total, 2)) / 10
         if perfect_iv_cp - worst_iv_cp > 0:
-            self.iv_normalized = 100 * (self.cp - worst_iv_cp) / (perfect_iv_cp - worst_iv_cp)
-        
+            self.iv_normalized = 100 * (self.cp - worst_iv_cp) / (perfect_iv_cp - worst_iv_cp)        
+
         self.max_cp = calcCP(self.pokemon_data, self.get_cpm_by_level(player_level+1.5),additional_data)
         self.max_cp_absolute = calcCP(self.pokemon_data, self.get_cpm_by_level(40),additional_data)
         self.score = 0.0

@@ -14,6 +14,7 @@ from flask_socketio import SocketIO
 import tempfile
 import zerorpc
 import os
+
 app = Flask(__name__, template_folder="templates")
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 
@@ -128,20 +129,6 @@ def inventory(username):
             item = item['inventory_item_data']
             pokemon = item.get("pokemon_data",{})
             if "pokemon_id" in pokemon:
-                if 'nickname' in pokemon:
-                    pokemon['name'] = str(pokemon['nickname'])
-                else:
-                pokemon['name'] = pokemon_names[str(pokemon['pokemon_id'])]
-                pokemon.update(pokemon_details[str(pokemon['pokemon_id'])])
-                pokemon['iv'] = pokemonIVPercentage(pokemon)
-                pokemon['acpm'] = calcACPM(pokemon, pokemon_details)
-                pokemon['tcpm'] = takeClosest((pokemon.get('cp_multiplier', 0) + pokemon['acpm']), tcmpVals) 
-                pokemon['lvl'] = pokemon_lvls[pokemon['tcpm']]['PokemonLvl']
-                #todo get rating
-                pokemon['rating'] = 0
-                pokemon['CalcCP'] = calcCP(pokemon, pokemon['tcpm'], pokemon_details)
-                pokemons.append(pokemon)
-            if "pokemon_id" in pokemon:
                 pokemonsData.append(pokemon)
             if 'player_stats' in item:
                 player = item['player_stats']
@@ -152,12 +139,11 @@ def inventory(username):
         pokemons = []
         for pokemon in pokemonsData:
             test = game_master.get(pokemon['pokemon_id'], PokemonData())
-            pkmn = Pokemon(pokemon, pokemon_names, test, player['level'])
+            pkmn = Pokemon(pokemon, pokemon_names, test, player['level'], options['DEFINE_POKEMON_LV'])
 
             family_id = re.match("HoloPokemonFamilyId.V([0-9]*).*", pkmn.pokemon_additional_data.FamilyId).group(1)
             pkmn.candy = candy[family_id]
             setMaxCP(pkmn, tcmpVals[int(player['level']*2 + 1)], game_master)
-            pkmn.rating = pokemon_lvl(options['DEFINE_POKEMON_LV'], pkmn)
             pokemons.append(pkmn)           
         pokemons = sorted(pokemons, lambda x,y: cmp(x.iv, y.iv),reverse=True)             
         player['username'] = data['GET_PLAYER']['player_data']['username']

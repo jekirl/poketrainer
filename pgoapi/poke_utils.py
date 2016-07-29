@@ -93,16 +93,6 @@ def get_item_name(s_item_id):
     return 'Unknown'
 
 
-def pokemon_lvl(DEFINE_POKEMON_LV, pokemon):
-    if DEFINE_POKEMON_LV == "CP":
-        return pokemon.cp
-    elif DEFINE_POKEMON_LV == "IV":
-        return pokemon.iv
-    elif DEFINE_POKEMON_LV == "CP*IV":
-        return pokemon.cp * pokemon.iv
-    elif DEFINE_POKEMON_LV == "CP+IV":
-        return pokemon.cp + pokemon.iv
-
 def pokemonIVPercentage(pokemon):
     return ((pokemon.get('individual_attack', 0) + pokemon.get('individual_stamina', 0) + pokemon.get(
         'individual_defense', 0) + 0.0) / 45.0) * 100.0
