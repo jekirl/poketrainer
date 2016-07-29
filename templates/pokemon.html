@@ -57,23 +57,31 @@
       <div class="col-sm-3 col-md-2 sidebar">
         <div class="panel panel-default">
           <div class="panel-body">
-            Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
+            Level: <span id="player-level">{{player['level']}}</span><br> Exp: <span id="player-exp">{{player['experience']}}</span><br> EXP/Hour: <span id="player-exp-hour">{{player['hourly_exp']|int}}</span><br> Stardust: <span id="currency">{{currency}}</span><br> Pokemon Count: <span id="pokemons">{{pokemons|length}}</span><br>
           </div>
           <div class="container-fluid">
-            Level XP: {{player["level_xp"]}} / {{player["goal_xp"]}}
+            Level XP: <span id="level-exp">{{player["level_xp"]}}</span> / <span id="goal-exp">{{player["goal_xp"]}}</span>
             <div class="progress">
-              <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["experience"] / player["next_level_xp"] * 100)|int }}%;">
+              <div id="xp-bar" class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["experience"] / player["next_level_xp"] * 100)|int }}%;">
                 {{ (player["level_xp"] / player["goal_xp"] * 100)|int }}%
               </div>
             </div>
-            Unique Pokemon: {{player["unique_pokedex_entries"]}} / 151
+            Unique Pokemon: <span id="unique-pokemon">{{player["unique_pokedex_entries"]}}</span> / 151
             <div class="progress">
-              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["unique_pokedex_entries"] / 151 * 100)|int }}%;">
+              <div id="poke-bar" class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["unique_pokedex_entries"] / 151 * 100)|int }}%;">
                 {{ (player["unique_pokedex_entries"] / 151 * 100)|int }}%
               </div>
             </div>
+            <div class="input-group">
+              <input type="text" class="form-control" id="snipe-coords" placeholder="Coords ...">
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="button" id="poke-snipe" data-url="{{ url_for('snipe', username = player['username'], latlng = '')}}">Snipe!</button>
+              </span>
+            </div>
+            <br/>
           </div>
         </div>
+
       </div>
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         <div id="overlay" class="map">
@@ -125,8 +133,41 @@
     crossorigin="anonymous"></script>
   <script src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
 
+  <script type=text/javascript>
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $PATH = {{ request.path|tojson|safe }};
+  </script>
   <script>
+      INTERVAL = 60000;
+
       $(document).ready(function () {
+        function worker() {
+          username = $PATH.substr(1, $PATH.indexOf('/',1)-1);
+          $.getJSON($SCRIPT_ROOT + '/' + username + '/_refresh_data', {
+                // a: $('input[name="a"]').val(),
+                // b: $('input[name="b"]').val()
+          }, function(data) {
+                $("#player-level").text(data.player.level);
+                $("#player-exp").text(data.player.experience);
+                $("#player-exp-hour").text(data.player.hourly_exp);
+                $("#currency").text(data.currency);
+                $("#pokemons").text(data.pokemons.length);
+                $("#level-exp").text(data.player.level_xp);
+                $("#goal-exp").text(data.player.goal_xp);
+                $("#unique-pokemon").text(data.player.unique_pokedex_entries);
+                
+                $("#xp-bar").css("width", Math.trunc(data.player.experience / data.player.next_level_xp * 100) + "%");
+                $("#xp-bar").text( Math.trunc(data.player.level_xp / data.player.goal_xp * 100) + "%");
+                $("#poke-bar").text( Math.trunc(data.player.unique_pokedex_entries / 151 * 100) + "%");
+                $("#poke-bar").text( Math.trunc(data.player.unique_pokedex_entries / 151 * 100) + "%");
+                // TODO: update table
+                // TODO: update map location
+              }).always(function() {
+                  setTimeout(worker, INTERVAL);
+          });
+          return false;
+        }
+
         $('#map').addClass('scrolloff');
 
         $('#overlay').on("mouseup",function(){
@@ -144,6 +185,18 @@
           searching: false,
           paging: false
         });
+
+        $("button#poke-snipe").on("click",function(){
+          var coords = $('#snipe-coords').val();
+          if (coords.length == 0) {
+            alert('Empty coordinates!');
+            return
+          }
+
+          window.location = $(this).attr('data-url') + coords;
+        });
+
+        setTimeout(worker, INTERVAL);
     });
     </script>
 </body>

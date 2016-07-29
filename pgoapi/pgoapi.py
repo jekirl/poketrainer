@@ -38,6 +38,7 @@ from itertools import chain, imap
 from Queue import *
 from time import time, sleep
 
+
 from expiringdict import ExpiringDict
 
 from pgoapi.auth_google import AuthGoogle
@@ -52,6 +53,7 @@ from pgoapi.protos.POGOProtos import Enums_pb2
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.rpc_api import RpcApi
+from pgoapi.pokedex import pokedex
 from .utilities import f2i
 
 logger = logging.getLogger(__name__)
@@ -243,6 +245,42 @@ class PGoApi:
             return function
         else:
             raise AttributeError
+
+    def snipe_pokemon(self, lat, lng):
+        curr_lat = self._posf[0]
+        curr_lng = self._posf[1]
+
+        self.log.info("Sniping pokemon at %f, %f", lat, lng)
+
+        # move to snipe location
+        self.set_position(lat, lng, 0.0)
+        self.heartbeat()
+
+        self.log.debug("Teleported to sniping location %f, %f", lat, lng)
+
+        # find pokemons in dest
+        map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
+        pokemons = PGoApi.flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
+
+        # catch first pokemon:
+        origin = (self._posf[0], self._posf[1])
+        pokemon_rarity_and_dist = [(pokemon, pokedex.getRarityById(pokemon['pokemon_id']), distance_in_meters(origin, (pokemon['latitude'], pokemon['longitude']))) for
+                             pokemon
+                             in pokemons]
+        pokemon_rarity_and_dist.sort(key=lambda x: x[1], reverse=True)
+
+        if pokemon_rarity_and_dist:
+            self.log.info("Rarest pokemon: : %s", POKEMON_NAMES[ str(pokemon_rarity_and_dist[0][0]['pokemon_id']) ])
+        else:
+            self.log.info("No nearby pokemon. Can't snipe!")
+            self.set_position(curr_lat, curr_lng, 0.0)
+            self.heartbeat()
+            sleep(2)
+            orig_lat, orig_lng, _ = self.get_position()
+            self.log.debug("Teleported back to origin at %f, %f", self._posf[0], self._posf[1])
+            return
+
+        return self.encounter_pokemon(pokemon_rarity_and_dist[0][0], new_loc=(curr_lat, curr_lng))
 
     def hourly_exp(self, exp):
         if self.exp_start is None:
@@ -814,7 +852,7 @@ class PGoApi:
             self.log.info("Could not catch pokemon:  %s, status: %s", pokemon, capture_status)
             return False
 
-    def encounter_pokemon(self, pokemon_data, retry=False):  # take in a MapPokemon from MapCell.catchable_pokemons
+    def encounter_pokemon(self, pokemon_data, retry=False, new_loc=None):  # take in a MapPokemon from MapCell.catchable_pokemons
         # Update Inventory to make sure we can catch this mon
         try:
             self.update_player_inventory()
@@ -836,12 +874,19 @@ class PGoApi:
             capture_probability = create_capture_probability(encounter.get('capture_probability', {}))
             self.log.debug("Attempt Encounter Capture Probability: %s", json.dumps(encounter, indent=4, sort_keys=True))
             if result == 1:
+                if new_loc:
+                    # change loc for sniping
+                    self.set_position(new_loc[0], new_loc[1], 0.0)
+                    self.heartbeat()
+                    gevent.sleep(2)
+                    orig_lat, orig_lng, _ = self.get_position()
+                    self.log.debug("Teleported back to origin (before catching) at %f, %f", self._posf[0], self._posf[1])
                 return self.do_catch_pokemon(encounter_id, spawn_point_id, capture_probability, pokemon)
             elif result == 7:
                 self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try", pokemon)
                 self.cleanup_pokemon()
                 if not retry:
-                    return self.encounter_pokemon(pokemon_data, retry=True)
+                    return self.encounter_pokemon(pokemon_data, retry=True, new_loc=new_loc)
             else:
                 self.log.info("Could not start encounter for pokemon: %s", pokemon)
             return False

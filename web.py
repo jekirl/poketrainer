@@ -1,5 +1,5 @@
 # DISCLAIMER: This is jank
-from flask import Flask, render_template, flash, redirect, url_for, abort
+from flask import Flask, render_template, flash, redirect, url_for, abort, jsonify
 import json
 import csv
 from math import floor
@@ -96,5 +96,30 @@ def transfer(username, p_id):
     else:
         flash("Failed!")
     return redirect(url_for('inventory', username = username))
+
+@app.route("/<username>/snipe/<latlng>")
+def snipe(username, latlng):
+    c = get_api_rpc(username)
+
+    try:
+        if len(latlng.split(',')) == 2:
+            l = latlng.split(',')
+            lat = float(l[0])
+            lng = float(l[1])
+        else:
+            l = latlng.split(' ')
+            lat = float(l[0])
+            lng = float(l[1])
+    except:
+        flash("Error parsing coordinates.")
+        return redirect(url_for('inventory', username = username))
+
+    if c.snipePokemon(lat, lng):
+        flash("Sniped!")
+    else:
+        flash("Failed sniping!")
+    return redirect(url_for('inventory', username = username))
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0',debug=True)
