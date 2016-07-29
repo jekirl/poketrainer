@@ -5,9 +5,9 @@ import os
 import re
 from collections import defaultdict
 
+import zerorpc
 from flask import Flask, flash, redirect, render_template, url_for
 
-import zerorpc
 from pgoapi.poke_utils import pokemon_iv_percentage
 
 app = Flask(__name__, template_folder="templates")

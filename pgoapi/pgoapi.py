@@ -36,9 +36,9 @@ from collections import defaultdict
 from itertools import chain, imap
 from time import time
 
+import gevent
 from expiringdict import ExpiringDict
 
-import gevent
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException
