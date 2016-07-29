@@ -29,6 +29,7 @@ Modifications by: j-e-k <https://github.com/j-e-k>
 import os
 import re
 import json
+import collections
 import struct
 import logging
 import requests
