@@ -859,11 +859,8 @@ class PGoApi:
         if not self.EGG_INCUBATION_ENABLED:
             return
         if self.player_stats.km_walked > 0:
-            incubator_start_km_walked = self.player_stats.km_walked
-
             for incubator in self.inventory.incubators_busy:
-                if 'start_km_walked' in incubator:
-                    incubator_start_km_walked = incubator['start_km_walked']
+                incubator_start_km_walked = incubator.get('start_km_walked', self.player_stats.km_walked)
 
                 incubator_egg_distance = incubator['target_km_walked'] - incubator_start_km_walked
                 incubator_distance_done = self.player_stats.km_walked - incubator_start_km_walked
@@ -871,8 +868,7 @@ class PGoApi:
                     self.attempt_finish_incubation()
                     break
             for incubator in self.inventory.incubators_busy:
-                if 'start_km_walked' in incubator:
-                    incubator_start_km_walked = incubator['start_km_walked']
+                incubator_start_km_walked = incubator.get('start_km_walked', self.player_stats.km_walked)
 
                 incubator_egg_distance = incubator['target_km_walked'] - incubator_start_km_walked
                 incubator_distance_done = self.player_stats.km_walked - incubator_start_km_walked
