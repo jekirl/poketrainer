@@ -130,8 +130,7 @@ def main(position=None):
 
 
     # instantiate pgoapi
-    pokemon_names = json.load(open("pokemon.en.json"))
-    api = PGoApi(config, pokemon_names)
+    api = PGoApi(config)
 
     # provide player position on the earth
     api.set_position(*position)
@@ -162,7 +161,7 @@ def main(position=None):
         try:
             api.main_loop()
         except Exception as e:
-            log.exception('Error in main loop %s, restarting at location: %s', e, api.get_position())
+            log.exception('Error in main loop %s, restarting at location: %s', e, api._posf)
             # restart after sleep
             sleep(30)
             try:
