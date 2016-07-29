@@ -1,4 +1,4 @@
-{% set active_page = 'botlist' %}
+{% set active_page = 'accounts' %}
 {% extends "layout.html" %}
 {% block title %}List of running bots{% endblock title %}
 {% block content %}
@@ -17,7 +17,7 @@
         <tbody>
         {% for user in users %}
         <tr>
-          <td><a href="/{{user.username}}/pokemon">{{user.username}}</a></td>
+          <td><a href="/{{user.username}}/status">{{user.username}}</a></td>
           <td class="text-right">{{user["unique_pokedex_entries"]}} / 151</td>
           <td class="text-right">{{user['level']}}</td>
           <td>
