@@ -144,7 +144,9 @@ def main(position=None):
     s.close()
     with open(desc_file,'w+') as f:
         data = f.read()
-        data = json.loads(data.encode() if len(data) > 0 else '{}')
+        if len(data) == 0
+            data = '{}'
+        data = json.loads(data.encode())
         data[config["username"]] = sock_port
         f.write(json.dumps(data,indent=2))
 
