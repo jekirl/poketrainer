@@ -106,7 +106,7 @@ def pokemon(username):
 def inventory(username):
     s = get_api_rpc(username)
     try:
-        inventory = json.loads(s.getInventory())
+        inventory = json.loads(s.get_inventory())
     except ValueError:
         # FIXME Use logger instead of print statements!
         print "Not valid Json"
