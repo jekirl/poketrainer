@@ -142,13 +142,12 @@ def main(position=None):
     s.bind(("", 0)) #let the kernel find a free port
     sock_port = s.getsockname()[1]
     s.close()
-    with open(desc_file,'w+') as f:
+    data = None
+    with open(desc_file,'r+') as f:
         data = f.read()
-        if len(data) == 0:
-            data = '{}'
-        log.error('Length of file: $s', len(data), data)
-        data = json.loads(data.encode())
+        data = json.loads(data.encode() if len(data) > 0 else '{}')
         data[config["username"]] = sock_port
+    with open(desc_file, "w+") as f:
         f.write(json.dumps(data,indent=2))
 
     s = zerorpc.Server(Listener(api))
