@@ -81,7 +81,7 @@
             </thead>
             {% for pokemon in pokemons %}
             <tr id="{{pokemon['id']}}">
-              <td data-order="{{ pokemon["creation_time_ms"] }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon[
+              <td data-order="{{ pokemon["creation_time_ms"] }}" title="Caught: {{ pokemon["creation_time_ms"]|epochToDate }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon[
                   'pokemon_id']) }}></td>
               <td>{{pokemon["name"]}}</td>
               <td data-order="{{pokemon["nickname"]}}">{{pokemon["nickname"]}}</td>
