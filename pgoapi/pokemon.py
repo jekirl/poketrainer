@@ -1,9 +1,10 @@
 from __future__ import absolute_import
 
+import json
 from math import sqrt
 
 from pgoapi.game_master import GAME_MASTER
-from pgoapi.poke_utils import POKEMON_NAMES, calc_acpm, calc_cp, get_tcpm
+from pgoapi.poke_utils import POKEMON_NAMES
 
 
 class Pokemon:
@@ -72,11 +73,11 @@ class Pokemon:
         self.max_cp = ((attack + self.individual_attack) *
                        sqrt(defense + self.individual_defense) *
                        sqrt(stamina + self.individual_stamina) *
-                       pow(self.get_cpm_by_level(player_level+1.5), 2)) / 10
+                       pow(self.get_cpm_by_level(player_level + 1.5), 2)) / 10
         self.max_cp_absolute = ((attack + self.individual_attack) *
-                       sqrt(defense + self.individual_defense) *
-                       sqrt(stamina + self.individual_stamina) *
-                       pow(self.get_cpm_by_level(40), 2)) / 10
+                                sqrt(defense + self.individual_defense) *
+                                sqrt(stamina + self.individual_stamina) *
+                                pow(self.get_cpm_by_level(40), 2)) / 10
         # calculating these for level 40 to get more accurate values
         worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.get_cpm_by_level(40), 2)) / 10
         perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.get_cpm_by_level(40), 2)) / 10

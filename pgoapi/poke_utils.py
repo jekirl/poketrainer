@@ -1,14 +1,9 @@
 from __future__ import absolute_import
 
-import csv
-import json
 import os
-from math import floor, sqrt
 
-from pgoapi.game_master import GAME_MASTER, PokemonData
 from pgoapi.pokemon import Pokemon
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Enum_Items
-from pgoapi.utilities import all_in, take_closest
 
 
 def get_item_name(s_item_id):
