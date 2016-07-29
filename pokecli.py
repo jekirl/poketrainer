@@ -146,6 +146,7 @@ def main(position=None):
         data = f.read()
         if len(data) == 0:
             data = '{}'
+        log.error('Length of file: $s', len(data), data)
         data = json.loads(data.encode())
         data[config["username"]] = sock_port
         f.write(json.dumps(data,indent=2))
