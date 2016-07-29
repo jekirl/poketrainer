@@ -23,7 +23,7 @@ class Lng extends Helper {
     }
 
     self::$called[] = $key;
-    if(isset(self::$dictionary[$key])) {
+    if(isset(self::$dictionary[$key]) && self::$dictionary[$key]) {
       return self::$dictionary[$key];
     }
 

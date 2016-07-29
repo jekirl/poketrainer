@@ -134,7 +134,7 @@ class SettingsModel extends Model {
       "options" => [
         "CP" => "CP",
         "IV" => "IV",
-        "CPxIV" => "CP * IV",
+        "CPxIV" => "CP x IV",
         "CP+IV" => "CP + IV",
       ],
     ],
