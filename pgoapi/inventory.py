@@ -1,7 +1,6 @@
 from __future__ import absolute_import
-
+import json
 from collections import defaultdict
-
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory_Enum
 
 
@@ -161,3 +160,6 @@ class Inventory:
 
     def __repr__(self):
         return self.__str__()
+
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__)

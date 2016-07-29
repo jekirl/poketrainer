@@ -90,14 +90,20 @@ class Pokemon:
         # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
         attack = float(additional_data.BaseAttack)
         defense = float(additional_data.BaseDefense)
-        stamina = float(additional_data.base_stamina)
-        worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.cpm_total, 2)) / 10
-        perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.cpm_total, 2)) / 10
+        stamina = float(additional_data.BaseStamina)
+        self.max_cp = ((attack + self.individual_attack) *
+                       sqrt(defense + self.individual_defense) *
+                       sqrt(stamina + self.individual_stamina) *
+                       pow(self.get_cpm_by_level(player_level+1.5), 2)) / 10
+        self.max_cp_absolute = ((attack + self.individual_attack) *
+                       sqrt(defense + self.individual_defense) *
+                       sqrt(stamina + self.individual_stamina) *
+                       pow(self.get_cpm_by_level(40), 2)) / 10
+        # calculating these for level 40 to get more accurate values
+        worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.get_cpm_by_level(40), 2)) / 10
+        perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.get_cpm_by_level(40), 2)) / 10
         if perfect_iv_cp - worst_iv_cp > 0:
-            self.iv_normalized = 100 * (self.cp - worst_iv_cp) / (perfect_iv_cp - worst_iv_cp)
-
-        self.max_cp = calc_cp(self.pokemon_data, self.get_cpm_by_level(player_level + 1.5), additional_data)
-        self.max_cp_absolute = calc_cp(self.pokemon_data, self.get_cpm_by_level(40), additional_data)
+                self.iv_normalized = 100 * (self.max_cp_absolute - worst_iv_cp) / (perfect_iv_cp - worst_iv_cp)
         self.score = 0.0
         if score_method == "CP":
             self.score = self.cp
@@ -185,3 +191,6 @@ class Pokemon:
 
     def is_valid_pokemon(self):
         return self.pokemon_id > 0
+
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__)

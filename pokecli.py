@@ -162,6 +162,8 @@ def main(position=None):
             sleep(30)
             try:
                 main(api._posf)
+            except KeyboardInterrupt:
+                raise
             except:
                 pass
 

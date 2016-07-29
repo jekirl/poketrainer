@@ -90,7 +90,7 @@ ENV/
 
 # Personal load details
 config.json
-
+.listeners
 .DS_Store
 data_dumps/*.json
 .idea

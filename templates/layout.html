@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% block head %}
+  <meta charset="UTF-8">
+  <title>{% block title %}{% endblock title %}</title>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="http://getbootstrap.com/examples/dashboard/dashboard.css">
+  <style>
+    .scrolloff {
+        pointer-events: none;
+    }
+    table.dataTable thead .sorting, table.dataTable thead .sorting_asc, table.dataTable thead .sorting_desc, table.dataTable thead .sorting_asc_disabled, table.dataTable thead .sorting_desc_disabled {
+        background-repeat: no-repeat;
+        background-position: center right;
+    }
+    table thead .sorting_asc {
+        background-image: url("https://cdn.datatables.net/1.10.12/images/sort_asc.png");
+    }
+    table thead .sorting_desc {
+        background-image: url("https://cdn.datatables.net/1.10.12/images/sort_desc.png");
+    }
+  </style>
+  {% endblock head %}
+</head>
+<body>
+  {% set navigation_bar = [
+    ("/%s/status"%username, 'status', 'Status'),
+    ("/%s/inventory"%username, 'inventory', 'Inventory'),
+    ("/%s/pokemon"%username, 'pokemon', 'Pokémon'),
+    ("/%s/eggs"%username, 'eggs', 'Eggs'),
+    ("/%s/journal"%username, 'journal', 'Journal')
+  ] -%}
+  {% set active_page = active_page|default('status') -%}
+
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">Where am i now?</a>
+      </div>
+      <ul class="nav navbar-nav">
+        {% for href, id, caption in navigation_bar %}
+          <li{% if id == active_page %} class="active"{% endif%}>
+            <a href="{{ href|e }}">{{ caption|e }}</a>
+          </li>
+        {% endfor %}
+    </div>
+  </nav>
+  {% block content %}{% endblock content %}
+</body>
+
+</html>

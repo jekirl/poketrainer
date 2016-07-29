@@ -13,6 +13,7 @@ from pgoapi.pokemon import Pokemon
 
 app = Flask(__name__, template_folder="templates")
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
+app.debug = True
 
 options = {}
 attacks = {}
@@ -21,136 +22,8 @@ with open("GAME_ATTACKS_v0_1.tsv") as tsv:
     reader = csv.DictReader(tsv, delimiter='\t')
     for row in reader:
         attacks[int(row["Num"])] = row["Move"]
-
-
-def init_config():
-    parser = argparse.ArgumentParser()
-    config_file = "config.json"
-
-    # If config file exists, load variables from json
-    load = {}
-    if os.path.isfile(config_file):
-        with open(config_file) as data:
-            load.update(json.load(data))
-
-    # Read passed in Arguments
-    # required = lambda x: not x in load['accounts'][0].keys()
-    def required(x):
-        return x not in load['accounts'][0].keys()
-    parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
-    config = parser.parse_args()
-    load = load['accounts'][config.__dict__['config_index']]
-    # Passed in arguments shoud trump
-    for key, value in load.iteritems():
-        if key not in config.__dict__ or not config.__dict__[key]:
-            config.__dict__[key] = value
-
-    return config.__dict__
-config = init_config()
-
-
-def set_columns_to_ignore(columns_to_ignore):
-    options['ignore_recent'] = ''
-    options['ignore_#'] = ''
-    options['ignore_name'] = ''
-    options['ignore_lvl'] = ''
-    options['ignore_score'] = ''
-    options['ignore_IV'] = ''
-    options['ignore_CP'] = ''
-    options['ignore_max_CP'] = ''
-    options['ignore_candies'] = ''
-    options['ignore_candy_needed'] = ''
-    options['ignore_dust_needed'] = ''
-    options['ignore_power_up'] = ''
-    options['ignore_stamina'] = ''
-    options['ignore_attkIV'] = ''
-    options['ignore_staIV'] = ''
-    options['ignore_defIV'] = ''
-    options['ignore_move1'] = ''
-    options['ignore_move2'] = ''
-
-    for column in columns_to_ignore:
-        if column.lower() == 'recent':
-            options['ignore_recent'] = 'display: none;'
-        elif column.lower() == '#':
-            options['ignore_id'] = 'display: none;'
-        elif column.lower() == 'name':
-            options['ignore_name'] = 'display: none;'
-        elif column.lower() == 'lvl':
-            options['ignore_lvl'] = 'display: none;'
-        elif column.lower() == 'score':
-            options['ignore_score'] = 'display: none;'
-        elif column.lower() == 'iv':
-            options['ignore_IV'] = 'display: none;'
-        elif column.lower() == 'cp':
-            options['ignore_CP'] = 'display: none;'
-        elif column.lower() == 'max cp':
-            options['ignore_max_CP'] = 'display: none;'
-        elif column.lower() == 'candies':
-            options['ignore_candies'] = 'display: none;'
-        elif column.lower() == 'candy needed':
-            options['ignore_candy_needed'] = 'display: none;'
-        elif column.lower() == 'dust needed':
-            options['ignore_dust_needed'] = 'display: none;'
-        elif column.lower() == 'power up':
-            options['ignore_power_up'] = 'display: none;'
-        elif column.lower() == 'stamina':
-            options['ignore_stamina'] = 'display: none;'
-        elif column.lower() == 'att iv':
-            options['ignore_attkIV'] = 'display: none;'
-        elif column.lower() == 'sta iv':
-            options['ignore_staIV'] = 'display: none;'
-        elif column.lower() == 'def iv':
-            options['ignore_defIV'] = 'display: none;'
-        elif column.lower() == 'move 1':
-            options['ignore_move1'] = 'display: none;'
-        elif column.lower() == 'move 2':
-            options['ignore_move2'] = 'display: none;'
-
-
-@app.route("/<username>/pokemon")
-def inventory(username):
-    c = get_api_rpc(username)
-    if c is None:
-        return("There is no bot running with the input username!")
-    options['DEFINE_POKEMON_LV'] = config.get("DEFINE_POKEMON_LV", "CP")
-    options['IGNORE_COLUMNS'] = config.get("IGNORE_COLUMNS", [])
-    set_columns_to_ignore(options['IGNORE_COLUMNS'])
-    with open("data_dumps/%s.json" % username) as f:
-        data = f.read()
-        data = json.loads(data.encode())
-        currency = data['GET_PLAYER']['player_data']['currencies'][1]['amount']
-        latlng = c.current_location()
-        latlng = "%f,%f" % (latlng[0], latlng[1])
-        items = data['GET_INVENTORY']['inventory_delta']['inventory_items']
-        pokemons_data = []
-        candy = defaultdict(int)
-        for item in items:
-            item = item['inventory_item_data']
-            pokemon = item.get("pokemon_data", {})
-            if "pokemon_id" in pokemon:
-                pokemons_data.append(pokemon)
-            if 'player_stats' in item:
-                player = item['player_stats']
-            if "pokemon_family" in item:
-                filled_family = str(item['pokemon_family']['family_id']).zfill(4)
-                candy[filled_family] += item['pokemon_family'].get("candy", 0)
-        pokemons = []
-        for pokemon in pokemons_data:
-            pkmn = Pokemon(pokemon, player['level'], options['DEFINE_POKEMON_LV'])
-            pkmn.candy = candy[pkmn.family_id]
-            set_max_cp(pkmn, tcmp_vals[int(player['level'] * 2 + 1)])
-            pokemons.append(pkmn)
-        pokemons = sorted(pokemons, lambda x, y: cmp(x.iv, y.iv), reverse=True)
-        player['username'] = data['GET_PLAYER']['player_data']['username']
-        player['level_xp'] = player.get('experience', 0) - player.get('prev_level_xp', 0)
-        player['hourly_exp'] = data.get("hourly_exp", 0)
-        player['goal_xp'] = player.get('next_level_xp', 0) - player.get('prev_level_xp', 0)
-        return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, options=options)
-
-
 def get_api_rpc(username):
-    desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
+    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
     sock_port = 0
     with open(desc_file) as f:
         data = f.read()
@@ -161,8 +34,61 @@ def get_api_rpc(username):
         sock_port = int(data[username])
 
     c = zerorpc.Client()
-    c.connect("tcp://127.0.0.1:%i" % sock_port)
+    c.connect("tcp://127.0.0.1:%i"%sock_port)
     return c
+
+@app.route("/<username>")
+@app.route("/<username>/status")
+def status(username):
+    c = get_api_rpc(username)
+    if c is None:
+        return("There is no bot running with the input username!")
+    with open("data_dumps/%s.json" % username) as f:
+        data = f.read()
+        data = json.loads(data.encode())
+        currency = data['GET_PLAYER']['player_data']['currencies'][1]['amount']
+        latlng = c.current_location()
+        latlng = "%f,%f" % (latlng[0], latlng[1])
+        items = data['GET_INVENTORY']['inventory_delta']['inventory_items']
+        pokemons = []
+        candy = defaultdict(int)
+        for item in items:
+            item = item['inventory_item_data']
+            pokemon = item.get("pokemon_data", {})
+            if "pokemon_id" in pokemon:
+                pokemons.append(pokemon)
+            if 'player_stats' in item:
+                player = item['player_stats']
+            if "pokemon_family" in item:
+                filled_family = str(item['pokemon_family']['family_id']).zfill(4)
+                candy[filled_family] += item['pokemon_family'].get("candy",0)
+        pokemons = sorted(pokemons, lambda x,y: cmp(x["iv"],y["iv"]),reverse=True)
+        # add candy back into pokemon json
+        for pokemon in pokemons:
+            pokemon['candy'] = candy[pokemon['family_id']]
+        player['level_xp'] = player.get('experience',0)-player.get('prev_level_xp',0)
+        player['hourly_exp'] = data.get("hourly_exp",0)
+        player['goal_xp'] = player.get('next_level_xp',0)-player.get('prev_level_xp',0)
+        return render_template('status.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, username = username)
+@app.route("/<username>/pokemon")
+def pokemon(username):
+    s = get_api_rpc(username)
+    try:
+        pokemons = json.loads(s.getCaughtPokemons())
+    except ValueError, e:
+        print "Not valid Json"
+
+    return render_template('pokemon.html', pokemons=pokemons, username = username)
+
+@app.route("/<username>/inventory")
+def inventory(username):
+    s = get_api_rpc(username)
+    try:
+        inventory = json.loads(s.getInventory())
+    except ValueError, e:
+        print "Not valid Json"
+
+    return render_template('inventory.html', inventory=json.dumps(inventory, indent=2), username = username)
 
 
 @app.route("/<username>/transfer/<p_id>")
@@ -172,6 +98,7 @@ def transfer(username, p_id):
         flash("Released")
     else:
         flash("Failed!")
-    return redirect(url_for('inventory', username=username))
+    return redirect(url_for('inventory', username = username))
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
