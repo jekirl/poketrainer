@@ -10,12 +10,15 @@
         "USE_GOOGLE": true,
         "STEP_SIZE": 100,
         "WANDER_STEPS": 0,
-        "EXPERIMENTAL": true,
+        "EXPERIMENTAL": false,
         "SKIP_VISITED_FORT_DURATION": 600,
         "SPIN_ALL_FORTS": true,
         "STAY_WITHIN_PROXIMITY": 9999,
         "AUTO_USE_LUCKY_EGG": false,
-        "CATCH_POKEMON": true,
+        "CATCH_POKEMON": true
+      },
+      "CAPTURE": {
+        "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 3,
         "MAX_CATCH_ATTEMPTS": 10
       },
       "EGG_INCUBATION": {

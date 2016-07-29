@@ -32,6 +32,7 @@ import logging
 import os.path
 import pickle
 import random
+import gevent
 from collections import defaultdict
 from itertools import chain, imap
 from Queue import *
@@ -132,14 +133,22 @@ class PGoApi:
         self.USE_DISPOSABLE_INCUBATORS = config.get("EGG_INCUBATION", {}).get("USE_DISPOSABLE_INCUBATORS", False)
         self.INCUBATE_BIG_EGGS_FIRST = config.get("EGG_INCUBATION", {}).get("BIG_EGGS_FIRST", True)
 
-        self.FARM_ITEMS_ENABLED = config.get("NEEDY_ITEM_FARMING", {}).get("ENABLE", True and self.experimental) # be concious of pokeball/item limits
-        self.POKEBALL_CONTINUE_THRESHOLD = config.get("NEEDY_ITEM_FARMING", {}).get("POKEBALL_CONTINUE_THRESHOLD", 50) # keep at least 10 pokeballs of any assortment, otherwise go farming
-        self.POKEBALL_FARM_THRESHOLD = config.get("NEEDY_ITEM_FARMING", {}).get("POKEBALL_FARM_THRESHOLD", 10) # at this point, go collect pokeballs
-        self.FARM_IGNORE_POKEBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_POKEBALL_COUNT", False) # ignore pokeballs in the continue tally
-        self.FARM_IGNORE_GREATBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_GREATBALL_COUNT", False) # ignore greatballs in the continue tally
-        self.FARM_IGNORE_ULTRABALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_ULTRABALL_COUNT", False) # ignore ultraballs in the continue tally
-        self.FARM_IGNORE_MASTERBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_MASTERBALL_COUNT", True) # ignore masterballs in the continue tally
-        self.FARM_OVERRIDE_STEP_SIZE = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_OVERRIDE_STEP_SIZE", -1) # should the step size be overriden when looking for more inventory, -1 to disable
+        self.FARM_ITEMS_ENABLED = config.get("NEEDY_ITEM_FARMING", {}).get("ENABLE",
+                                                                           True and self.experimental)  # be concious of pokeball/item limits
+        self.POKEBALL_CONTINUE_THRESHOLD = config.get("NEEDY_ITEM_FARMING", {}).get("POKEBALL_CONTINUE_THRESHOLD",
+                                                                                    50)  # keep at least 10 pokeballs of any assortment, otherwise go farming
+        self.POKEBALL_FARM_THRESHOLD = config.get("NEEDY_ITEM_FARMING", {}).get("POKEBALL_FARM_THRESHOLD",
+                                                                                10)  # at this point, go collect pokeballs
+        self.FARM_IGNORE_POKEBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_POKEBALL_COUNT",
+                                                                                   False)  # ignore pokeballs in the continue tally
+        self.FARM_IGNORE_GREATBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_GREATBALL_COUNT",
+                                                                                    False)  # ignore greatballs in the continue tally
+        self.FARM_IGNORE_ULTRABALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_ULTRABALL_COUNT",
+                                                                                    False)  # ignore ultraballs in the continue tally
+        self.FARM_IGNORE_MASTERBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_MASTERBALL_COUNT",
+                                                                                     True)  # ignore masterballs in the continue tally
+        self.FARM_OVERRIDE_STEP_SIZE = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_OVERRIDE_STEP_SIZE",
+                                                                                -1)  # should the step size be overriden when looking for more inventory, -1 to disable
 
         self.LIST_POKEMON_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
         self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
@@ -149,20 +158,21 @@ class PGoApi:
         self.STAY_WITHIN_PROXIMITY = config.get("BEHAVIOR", {}).get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
         self.game_master = parse_game_master()
         self.should_catch_pokemon = config.get("BEHAVIOR", {}).get("CATCH_POKEMON", True)
-        self.max_catch_attempts = config.get("BEHAVIOR", {}).get("MAX_CATCH_ATTEMPTS", 10)
+        self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
 
         # Sanity checking
-        self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon # Experimental, and we needn't do this if we're farming anyway
-        if ( self.FARM_ITEMS_ENABLED
-           and self.FARM_IGNORE_POKEBALL_COUNT
-           and self.FARM_IGNORE_GREATBALL_COUNT
-           and self.FARM_IGNORE_ULTRABALL_COUNT
-           and self.FARM_IGNORE_MASTERBALL_COUNT ):
-          self.FARM_ITEMS_ENABLED = False
-          self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
-        elif   self.FARM_ITEMS_ENABLED and not (self.POKEBALL_FARM_THRESHOLD < self.POKEBALL_CONTINUE_THRESHOLD):
-          self.FARM_ITEMS_ENABLED = False
-          self.log.warn("FARM_ITEMS has been disabled due to farming threshold being below the continue. Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")
+        self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon  # Experimental, and we needn't do this if we're farming anyway
+        if (self.FARM_ITEMS_ENABLED
+            and self.FARM_IGNORE_POKEBALL_COUNT
+            and self.FARM_IGNORE_GREATBALL_COUNT
+            and self.FARM_IGNORE_ULTRABALL_COUNT
+            and self.FARM_IGNORE_MASTERBALL_COUNT):
+            self.FARM_ITEMS_ENABLED = False
+            self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
+        elif self.FARM_ITEMS_ENABLED and not (self.POKEBALL_FARM_THRESHOLD < self.POKEBALL_CONTINUE_THRESHOLD):
+            self.FARM_ITEMS_ENABLED = False
+            self.log.warn(
+                "FARM_ITEMS has been disabled due to farming threshold being below the continue. Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")
 
     def call(self):
         if not self._req_method_list:
@@ -242,11 +252,11 @@ class PGoApi:
         self.exp_current = exp
 
         run_time = time() - self.start_time
-        run_time_hours = float(run_time/3600.00)
+        run_time_hours = float(run_time / 3600.00)
         exp_earned = float(self.exp_current - self.exp_start)
-        exp_hour = float(exp_earned/run_time_hours)
+        exp_hour = float(exp_earned / run_time_hours)
 
-        self.log.info("=== Exp/Hour: %s ===", round(exp_hour,2))
+        self.log.info("=== Exp/Hour: %s ===", round(exp_hour, 2))
 
         return exp_hour
 
@@ -297,7 +307,7 @@ class PGoApi:
             self.incubate_eggs()
             self.attempt_evolve(self.inventory.inventory_items)
             self.cleanup_pokemon(self.inventory.inventory_items)
-        # Auto-use lucky-egg if applicable
+            # Auto-use lucky-egg if applicable
             self.use_lucky_egg()
 
             # Farm precon
@@ -329,7 +339,8 @@ class PGoApi:
         return res
 
     def use_lucky_egg(self):
-        if self.config.get("BEHAVIOR", {}).get("AUTO_USE_LUCKY_EGG", False) and self.inventory.has_lucky_egg() and time() - self._last_egg_use_time > 30*60:
+        if self.config.get("BEHAVIOR", {}).get("AUTO_USE_LUCKY_EGG", False) and \
+                self.inventory.has_lucky_egg() and time() - self._last_egg_use_time > 30 * 60:
             self.use_item_xp_boost(item_id=Inventory.ITEM_LUCKY_EGG)
             response = self.call()
             result = response.get('responses', {}).get('USE_ITEM_XP_BOOST', {}).get('result', -1)
@@ -385,7 +396,7 @@ class PGoApi:
                     if self.experimental and self.spin_all_forts:
                         self.spin_nearest_fort()
 
-                sleep(1)
+                gevent.sleep(1)
                 while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
                     sleep(1)
                     catch_attempt += 1
@@ -478,7 +489,7 @@ class PGoApi:
     def walk_to_fort(self, fort_data, directly=False):
         fort = fort_data[0]
         self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", fort['latitude'],
-                        fort['longitude'])
+                      fort['longitude'])
         self.walk_to((fort['latitude'], fort['longitude']), directly=directly)
         self.fort_search_pgoapi(fort, self.get_position(), fort_data[1])
         if 'lure_info' in fort:
@@ -542,9 +553,20 @@ class PGoApi:
             capture_probability = {}
         # Max 4 attempts to catch pokemon
         while catch_status != 1 and self.inventory.can_attempt_catch() and catch_attempts < 11:
+            item_capture_mult = 1.0
+
+            # Try to use a berry to increase the chance of catching the pokemon when we have failed enough attempts
+            if catch_attempts > self.config.get("CAPTURE", {}).get("MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY", 3) and self.inventory.has_berry():
+                self.log.info("Feeding da razz berry!")
+                r = self.use_item_capture(item_id=self.inventory.take_berry(), encounter_id=encounter_id, spawn_point_id=spawn_point_id).call()['responses']['USE_ITEM_CAPTURE']
+                if r.get("success", False):
+                    item_capture_mult = r.get("item_capture_mult", 1.0)
+                else:
+                    self.log.info("Could not feed the Pokemon. (%s)", r)
+
             pokeball = self.inventory.take_next_ball(capture_probability)
             self.log.info("Attempting catch with ball type {0}  at {1:.2f} % chance. Try Number: {2}".format(pokeball,
-                          capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
+                          item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
             r = self.catch_pokemon(
                 normalized_reticle_size=1.950,
                 pokeball=pokeball,
@@ -579,22 +601,21 @@ class PGoApi:
                     item['item_id']]:
                     recycle_count = item['count'] - self.MIN_ITEMS[item['item_id']]
                     item_count += item['count'] - recycle_count
-                    self.log.info("Recycling {0}, recycle count {1}".format(
-                        get_item_name(item['item_id']), recycle_count))
+                    self.log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
                     res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()['responses'][
                         'RECYCLE_INVENTORY_ITEM']
                     response_code = res['result']
                     if response_code == 1:
-                        self.log.info("Recycled Item %s, New Count: %s",
-                                      get_item_name(item['item_id']), res.get('new_count', 0))
+                        self.log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
+                                      item['item_id']), res.get('new_count', 0)))
                     else:
-                        self.log.info("Failed to recycle Item %s, Code: %s",
-                                      get_item_name(item['item_id']), response_code)
+                        self.log.info("Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']),
+                                                                                response_code))
                     sleep(2)
                 elif "count" in item:
                     item_count += item['count']
         if item_count > 0:
-            self.log.info('Intentory has %s/%s items', item_count, self.player.max_item_storage)
+            self.log.info("Inventory has {0}/{1} items".format(item_count, self.player.max_item_storage))
         return self.update_player_inventory()
 
     def get_caught_pokemons(self, inventory_items):
@@ -611,12 +632,15 @@ class PGoApi:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
         return caught_pokemon
 
-    def do_release_pokemon(self, pokemon):
-        self.log.info("Releasing pokemon: %s", pokemon)
-        self.release_pokemon(pokemon_id=pokemon.id)
+    def do_release_pokemon_by_id(self, p_id):
+        self.release_pokemon(pokemon_id=int(p_id))
         release_res = self.call()['responses']['RELEASE_POKEMON']
         status = release_res.get('result', -1)
-        if status == 1:
+        return status
+
+    def do_release_pokemon(self, pokemon):
+        self.log.info("Releasing pokemon: %s", pokemon)
+        if self.do_release_pokemon_by_id(pokemon.id):
             self.log.info("Successfully Released Pokemon %s", pokemon)
         else:
             self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
@@ -634,60 +658,60 @@ class PGoApi:
 
     def cleanup_pokemon(self, inventory_items=None):
         if not inventory_items:
-                inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
-                    'inventory_items']
+            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
+                'inventory_items']
         caught_pokemon = self.get_caught_pokemons(inventory_items)
         for pokemons in caught_pokemon.values():
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
                 # highest scoring pokemon first
                 sorted_pokemons = sorted(pokemons, key=lambda x: (x.score, x.cp), reverse=True)
-                pokemons_keep_counter = 0
-                pokemons_keep_iv_counter = 0
+                kept_pokemon_of_type = 0
+                kept_pokemon_of_type_high_iv = 0
                 for pokemon in sorted_pokemons:
-                    eligible, keep_iv = self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0],
-                                                                              pokemons_keep_counter,
-                                                                              pokemons_keep_iv_counter)
+                    eligible, high_iv = self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0],
+                                                                              kept_pokemon_of_type,
+                                                                              kept_pokemon_of_type_high_iv)
                     # MIN_SIMILAR_POKEMON should be respected in the is_eligible function, check it here anyway
-                    if eligible and pokemons_keep_counter >= self.MIN_SIMILAR_POKEMON:
+                    if eligible and kept_pokemon_of_type >= self.MIN_SIMILAR_POKEMON:
                         self.do_release_pokemon(pokemon)
                         continue
                     else:
-                        pokemons_keep_counter += 1
-                        if keep_iv:
-                            pokemons_keep_iv_counter += 1
+                        kept_pokemon_of_type += 1
+                        if high_iv:
+                            kept_pokemon_of_type_high_iv += 1
 
     def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon=Pokemon(),
-                                         pokemons_keep_counter=0, pokemons_keep_iv_counter=0):
+                                         kept_pokemon_of_type=0, kept_pokemon_of_type_high_iv=0):
         # never release favorites
         if pokemon.is_favorite:
             return False, False
         # dont keep more than MAX_SIMILAR_POKEMON
-        elif pokemons_keep_counter >= self.MAX_SIMILAR_POKEMON:
+        elif kept_pokemon_of_type >= self.MAX_SIMILAR_POKEMON:
             return True, False
         # keep defined pokemons
         elif pokemon.pokemon_id in self.keep_pokemon_ids:
             return False, False
         # release defined throwaway pokemons, but make sure we have kept at least 1 (dont throw away all of them)
-        elif pokemon.pokemon_id in self.throw_pokemon_ids and pokemons_keep_counter >= self.MIN_SIMILAR_POKEMON:
+        elif pokemon.pokemon_id in self.throw_pokemon_ids and kept_pokemon_of_type >= self.MIN_SIMILAR_POKEMON:
             return True, False
         # release duplicates if applicable
         elif self.RELEASE_METHOD == "DUPLICATES":
-            if (self.pokemon_score(best_pokemon) * self.RELEASE_DUPLICATES_SCALAR > self.pokemon_score(pokemon) and
-                    self.pokemon_score(pokemon) < self.RELEASE_DUPLICATES_MAX_SCORE) and \
-                            pokemons_keep_counter >= self.MIN_SIMILAR_POKEMON:
+            if (best_pokemon.score * self.RELEASE_DUPLICATES_SCALAR > pokemon.score and
+                    pokemon.score < self.RELEASE_DUPLICATES_MAX_SCORE) and \
+                            kept_pokemon_of_type >= self.MIN_SIMILAR_POKEMON:
                 return True, False
             else:
                 return False, False
         # keep high-iv pokemons based on config values
         elif pokemon.iv_normalized > self.KEEP_IV_OVER \
-                and pokemons_keep_iv_counter < self.MAX_POKEMON_HIGH_IV \
+                and kept_pokemon_of_type_high_iv < self.MAX_POKEMON_HIGH_IV \
                 and pokemon.cp > (best_pokemon.cp * self.KEEP_IV_ONLY_WITH_PERCENT_CP / 100):
             return False, True
         # keep high-cp pokemons
         elif pokemon.cp > self.KEEP_CP_OVER:
             return False, False
         # release all other pokemons
-        elif pokemons_keep_counter >= self.MIN_SIMILAR_POKEMON:
+        elif kept_pokemon_of_type >= self.MIN_SIMILAR_POKEMON:
             return True, False
         # if we haven't found a reason, keep it! (probably not at MIN_SIMILAR yet)
         return False, False
@@ -844,7 +868,8 @@ class PGoApi:
             for incubator in self.inventory.incubators_busy:
                 incubator_egg_distance = incubator['target_km_walked'] - incubator['start_km_walked']
                 incubator_distance_done = self.player_stats.km_walked - incubator['start_km_walked']
-                self.log.info('Incubating %skm egg, %skm done', incubator_egg_distance, round(incubator_distance_done, 2))
+                self.log.info('Incubating %skm egg, %skm done', incubator_egg_distance,
+                              round(incubator_distance_done, 2))
         for incubator in self.inventory.incubators_available:
             if incubator['item_id'] == 901:  # unlimited use
                 pass
@@ -862,7 +887,8 @@ class PGoApi:
 
     def attempt_start_incubation(self, egg, incubator):
         self.log.info("Start incubating %skm egg", egg['egg_km_walked_target'])
-        incubate_res = self.use_item_egg_incubator(item_id=incubator['id'], pokemon_id=egg['id']).call()['responses']['USE_ITEM_EGG_INCUBATOR']
+        incubate_res = self.use_item_egg_incubator(item_id=incubator['id'], pokemon_id=egg['id']).call()['responses'][
+            'USE_ITEM_EGG_INCUBATOR']
         status = incubate_res.get('result', -1)
         sleep(3)
         if status == 1:
@@ -885,7 +911,7 @@ class PGoApi:
             i = 0
             for pokemon_id in hatch_res['pokemon_id']:
                 pokemon = get_pokemon_by_long_id(pokemon_id, self.inventory.inventory_items,
-                                                    self.pokemon_names)
+                                                 self.pokemon_names)
                 self.log.info("Egg Hatched! XP +%s, Candy +%s, Stardust +%s, %s",
                               hatch_res['experience_awarded'][i],
                               hatch_res['candy_awarded'][i],
@@ -950,7 +976,7 @@ class PGoApi:
         self.heartbeat()
         while True:
             self.heartbeat()
-            sleep(1)
+            gevent.sleep(1)
 
             if self.experimental and self.spin_all_forts:
                 self.spin_all_forts_visible()
