@@ -35,12 +35,21 @@
       </div>
     </div>
   </nav>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
   <div class="container-fluid">
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
         <div class="panel panel-default">
           <div class="panel-body">
-            Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
+            Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
           </div>
           <div class="container-fluid">
             Level XP: {{player["level_xp"]}} / {{player["goal_xp"]}}
@@ -78,6 +87,7 @@
               <th>Def IV</th>
               <th>Move 1</th>
               <th>Move 2</th>
+              <th>Transfer</th>
             </thead>
             {% for pokemon in pokemons %}
             <tr id="{{pokemon['id']}}">
@@ -94,6 +104,7 @@
               <td data-order="{{pokemon["individual_defense"]}}">Def IV: {{pokemon["individual_defense"]}}</td>
               <td>{{attacks[pokemon["move_1"]]}}</td>
               <td>{{attacks[pokemon["move_2"]]}}</td>
+              <td><a href="{{ url_for('transfer', username = player['username'], p_id = pokemon['id'])}}">Transfer</a></td>
             </tr>
             {% endfor %}
           </table>

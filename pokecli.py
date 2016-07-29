@@ -29,10 +29,17 @@ Modifications by: j-e-k <https://github.com/j-e-k>
 import os
 import re
 import json
+import collections
 import struct
 import logging
 import requests
 import argparse
+import tempfile
+import zerorpc
+import os
+import gevent
+import socket
+from listener import Listener
 from time import sleep
 from pgoapi import PGoApi
 from pgoapi.utilities import f2i, h2f
@@ -45,6 +52,8 @@ from s2sphere import CellId, LatLng
 log = logging.getLogger(__name__)
 from threading import Thread
 from Queue import Queue
+
+
 def get_pos_by_name(location_name):
     geolocator = GoogleV3()
     loc = geolocator.geocode(location_name)
@@ -53,6 +62,17 @@ def get_pos_by_name(location_name):
     log.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
 
     return (loc.latitude, loc.longitude, loc.altitude)
+
+
+def dict_merge(dct, merge_dct):
+    for k, v in merge_dct.iteritems():
+        if (k in dct and isinstance(dct[k], dict)
+                and isinstance(merge_dct[k], collections.Mapping)):
+            dict_merge(dct[k], merge_dct[k])
+        else:
+            dct[k] = merge_dct[k]
+    return dct
+
 
 def init_config():
     parser = argparse.ArgumentParser()
@@ -70,7 +90,9 @@ def init_config():
     parser.add_argument("-l", "--location", help="Location", required=required("location"))
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
     config = parser.parse_args()
-    load = load['accounts'][config.__dict__['config_index']]
+    defaults = load.get('defaults', {})
+    account = load['accounts'][config.__dict__['config_index']]
+    load = dict_merge(defaults, account)
     # Passed in arguments shoud trump
     for key,value in load.iteritems():
         if key not in config.__dict__ or not config.__dict__[key]:
@@ -80,6 +102,7 @@ def init_config():
       return None
 
     return config.__dict__
+
 
 def main():
     # log settings
@@ -110,6 +133,22 @@ def main():
     # provide player position on the earth
     api.set_position(*position)
 
+    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+    sock_port = 0
+    s=socket.socket()
+    s.bind(("", 0)) #let the kernel find a free port
+    sock_port = s.getsockname()[1]
+    s.close()
+    with open(desc_file,'w+') as f:
+        data = f.read()
+        data = json.loads(data.encode() if len(data) > 0 else '{}')
+        data[config["username"]] = sock_port
+        f.write(json.dumps(data,indent=2))
+
+    s = zerorpc.Server(Listener(api))
+    s.bind("tcp://127.0.0.1:%i"%sock_port) # the free port should still be the same
+    gevent.spawn(s.run)
+
     # retry login every 30 seconds if any errors
     while not api.login(config["auth_service"], config["username"], config["password"]):
         log.error('Retrying Login in 30 seconds')
@@ -123,7 +162,13 @@ def main():
             log.exception('Error in main loop, restarting %s')
             # restart after sleep
             sleep(30)
-            main()
+            try:
+                main()
+            except:
+                pass
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except:
+        pass
