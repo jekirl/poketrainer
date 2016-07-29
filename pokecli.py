@@ -33,12 +33,14 @@ import collections
 import json
 import logging
 import os
+import os.path
 import socket
 from time import sleep
 
 import gevent
 import zerorpc
 from geopy.geocoders import GoogleV3
+
 from listener import Listener
 from pgoapi import PGoApi
 
@@ -78,10 +80,8 @@ def init_config():
             load.update(json.load(data))
 
     # Read passed in Arguments
-    def required(x):
-        return x not in load['accounts'][0].keys()
     parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
-    parser.add_argument("-l", "--location", help="Location", required=required("location"))
+    parser.add_argument("-l", "--location", help="Location")
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
     config = parser.parse_args()
     defaults = load.get('defaults', {})
@@ -122,22 +122,25 @@ def main(position=None):
         position = get_pos_by_name(config["location"])
 
     # instantiate pgoapi
-    pokemon_names = json.load(open("pokemon.en.json"))
-    api = PGoApi(config, pokemon_names)
+    api = PGoApi(config)
 
     # provide player position on the earth
     api.set_position(*position)
 
-    desc_file = os.path(os.path.dirname(os.path.realpath(__file__)), ".listeners")
+    desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
     sock_port = 0
     s = socket.socket()
     s.bind(("", 0))  # let the kernel find a free port
     sock_port = s.getsockname()[1]
     s.close()
-    with open(desc_file, 'w+') as f:
-        data = f.read()
-        data = json.loads(data.encode() if len(data) > 0 else '{}')
-        data[config["username"]] = sock_port
+    data = {}
+
+    if os.path.isfile(desc_file):
+        with open(desc_file, 'r+') as f:
+            data = f.read()
+            data = json.loads(data.encode() if len(data) > 0 else '{}')
+    data[config["username"]] = sock_port
+    with open(desc_file, "w+") as f:
         f.write(json.dumps(data, indent=2))
 
     s = zerorpc.Server(Listener(api))
@@ -154,7 +157,7 @@ def main(position=None):
         try:
             api.main_loop()
         except Exception as e:
-            logger.exception('Error in main loop %s, restarting at location: %s', e, api.get_position())
+            logger.exception('Error in main loop %s, restarting at location: %s', e, api._posf)
             # restart after sleep
             sleep(30)
             try:

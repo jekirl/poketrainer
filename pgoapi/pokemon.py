@@ -1,4 +1,11 @@
+from __future__ import absolute_import
+
+import json
 from math import sqrt
+
+from pgoapi.game_master import GAME_MASTER
+
+POKEMON_NAMES = json.load(open("pokemon.en.json"))
 
 
 class Pokemon:
@@ -28,7 +35,7 @@ class Pokemon:
         }
     ]
 
-    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None, player_level=0,
+    def __init__(self, pokemon_data, player_level=0,
                  score_method="CP", score_settings=dict()):
         self.pokemon_data = pokemon_data
         self.stamina = pokemon_data.get('stamina', 0)
@@ -49,31 +56,31 @@ class Pokemon:
         self.additional_cp_multiplier = pokemon_data.get('additional_cp_multiplier', 0.0)
         self.nickname = pokemon_data.get('nickname', "").encode('utf8')
         self.iv = self.get_iv_percentage()
-        self.pokemon_type = pokemon_names.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore')
-        self.pokemon_additional_data = additional_data
+        self.pokemon_type = POKEMON_NAMES.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore')
         self.iv_normalized = -1.0
         self.max_cp = -1.0
         self.max_cp_absolute = -1.0
         self.cpm_total = self.cp_multiplier + self.additional_cp_multiplier
         self.level_wild = self.get_level_by_cpm(self.cp_multiplier)
         self.level = self.get_level_by_cpm(self.cpm_total)
-        if additional_data is not None:
-            # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
-            attack = float(additional_data.BaseAttack)
-            defense = float(additional_data.BaseDefense)
-            stamina = float(additional_data.BaseStamina)
-            worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.cpm_total, 2)) / 10
-            perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.cpm_total, 2)) / 10
-            if perfect_iv_cp - worst_iv_cp > 0:
-                self.iv_normalized = 100 * (self.cp - worst_iv_cp) / (perfect_iv_cp - worst_iv_cp)
-            self.max_cp = ((attack + self.individual_attack) *
-                           sqrt(defense + self.individual_defense) *
-                           sqrt(stamina + self.individual_stamina) *
-                           pow(self.get_cpm_by_level(player_level + 1.5), 2)) / 10
-            self.max_cp_absolute = ((attack + self.individual_attack) *
-                                    sqrt(defense + self.individual_defense) *
-                                    sqrt(stamina + self.individual_stamina) *
-                                    pow(self.get_cpm_by_level(40), 2)) / 10
+        additional_data = GAME_MASTER[self.pokemon_id]
+        self.family_id = additional_data.FamilyId
+        # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
+        attack = float(additional_data.BaseAttack)
+        defense = float(additional_data.BaseDefense)
+        stamina = float(additional_data.BaseStamina)
+        worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.cpm_total, 2)) / 10
+        perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.cpm_total, 2)) / 10
+        if perfect_iv_cp - worst_iv_cp > 0:
+            self.iv_normalized = 100 * (self.cp - worst_iv_cp) / (perfect_iv_cp - worst_iv_cp)
+        self.max_cp = ((attack + self.individual_attack) *
+                       sqrt(defense + self.individual_defense) *
+                       sqrt(stamina + self.individual_stamina) *
+                       pow(self.get_cpm_by_level(player_level + 1.5), 2)) / 10
+        self.max_cp_absolute = ((attack + self.individual_attack) *
+                                sqrt(defense + self.individual_defense) *
+                                sqrt(stamina + self.individual_stamina) *
+                                pow(self.get_cpm_by_level(40), 2)) / 10
         self.score = 0.0
         if score_method == "CP":
             self.score = self.cp
