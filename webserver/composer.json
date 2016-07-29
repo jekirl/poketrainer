@@ -1,0 +1,6 @@
+{
+    "require": {
+        "rikudou/getp": "^1.0",
+        "rikudou/redirect": "^1.0"
+    }
+}
