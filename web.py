@@ -7,6 +7,7 @@ from collections import defaultdict
 from datetime import datetime
 import re
 from pgoapi.poke_utils import *
+from pgoapi.inventory import *
 import tempfile
 import zerorpc
 import os
@@ -44,7 +45,9 @@ def inventory(username):
         pokemons = []
         candy = defaultdict(int)
         last_caught_timestamp = 0
+        inventory_items = Inventory(items)
         player = {}
+        inventory = {}
         for item in items:
             item = item['inventory_item_data']
             pokemon = item.get("pokemon_data",{})
@@ -64,11 +67,16 @@ def inventory(username):
         # add candy back into pokemon json
         for pokemon in pokemons:
             pokemon['candy'] = candy[pokemon['family_id']]
+        inventory['poke_balls'] = inventory_items.poke_balls
+        inventory['ultra_balls'] = inventory_items.ultra_balls
+        inventory['total'] = inventory_items.item_count()
         player['level_xp'] = player.get('experience',0)-player.get('prev_level_xp',0)
         player['hourly_exp'] = data.get("hourly_exp",0)
         player['goal_xp'] = player.get('next_level_xp',0)-player.get('prev_level_xp',0)
         player['username'] = username
-        return render_template('pokemon.html', pokemons=pokemons, player=player, items=items, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, last_caught_timestamp=last_caught_timestamp)
+        player['max_item_storage'] = data['GET_PLAYER']['player_data']['max_item_storage']
+        player['max_pokemon_storage'] = data['GET_PLAYER']['player_data']['max_pokemon_storage']
+        return render_template('pokemon.html', pokemons=pokemons, player=player, inventory=inventory, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, last_caught_timestamp=last_caught_timestamp)
 
 @app.route("/<username>/transfer/<p_id>")
 def transfer(username, p_id):
