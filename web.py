@@ -2,6 +2,7 @@
 from flask import Flask, render_template
 import json
 import csv
+import argparse
 from math import floor
 from collections import defaultdict
 import re
@@ -59,5 +60,29 @@ def inventory(username):
         player['goal_xp'] = player['next_level_xp']-player['prev_level_xp']
         return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
 
+def init_config():
+    parser = argparse.ArgumentParser()
+    config_file = "web_config.json"
+
+    # If config file exists, load variables from json
+    load = {}
+    if os.path.isfile(config_file):
+        with open(config_file) as data:
+            load.update(json.load(data))
+
+    # Read passed in Arguments
+    parser.add_argument("-s", "--hostname", help="Server hostname/IP")
+    parser.add_argument("-p", "--port", help="Server TCP port number")
+    parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
+    config = parser.parse_args()
+    # Passed in arguments shoud trump
+    for key,value in load.iteritems():
+      if key not in config.__dict__ or not config.__dict__[key]:
+        config.__dict__[key] = value
+
+    return config.__dict__
+
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0',debug=True)
+    config = init_config()
+    app.run(host=config["hostname"],port=config["port"],debug=config["debug"])
