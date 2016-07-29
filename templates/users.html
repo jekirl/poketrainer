@@ -37,9 +37,20 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-	{% for user in users %}
-		<p><a href="/{{user}}/pokemon">{{user}}</a></p>
-	{% endfor %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Username</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+        <tr>
+          <td><a href="/{{user}}/pokemon">{{user}}</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
