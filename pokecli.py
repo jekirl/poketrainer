@@ -162,11 +162,11 @@ def main(position=None):
         try:
             api.main_loop()
         except Exception as e:
-            log.exception('Error in main loop, restarting %s')
+            log.exception('Error in main loop %s, restarting at location: %s', e, api.get_position())
             # restart after sleep
             sleep(30)
             try:
-                main(api.get_position())
+                main(api._posf)
             except:
                 pass
 

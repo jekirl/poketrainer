@@ -439,7 +439,7 @@ class PGoApi:
         result = res.pop('result', -1)
         if result == 1 and res:
             items = defaultdict(int)
-            for item in res['items_awarded']:
+            for item in res.get('items_awarded',[]):
                 items[item['item_id']] += item['item_count']
             reward = 'XP +' + str(res['experience_awarded'])
             for item_id, amount in items.iteritems():
