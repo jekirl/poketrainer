@@ -48,6 +48,8 @@ optional arguments:
     * `KEEP_POKEMON_IDS` IDs of pokemon you want the bot to hold regardless of IV/CP
      * `KEEP_POKEMON_MAX_COUNT` default 9999. If you want to keep a certain type of pokemon but you accidently run into a nest? Don't worry this will make sure you only keep X amount of pokemon specified in `KEEP_POKEMON_IDS`
     * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
+    * `CAPTURE`
+     * `MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY` mininum number of failed capture attempts before trying to use a Razz Berry (default: 1)
     * `EGG_INCUBATION`
      * `ENABLE` enables automatic use of incubators (default: true)
      * `USE_DISPOSABLE_INCUBATORS` enables use of disposable (3-times use) incubators (default: false)
@@ -61,6 +63,7 @@ optional arguments:
      * `FARM_IGNORE_POKEBALL_COUNT`: `Boolean`, Whether to include this ball in counting. Same goes for `GREATBALL`, `ULTRABALL`, and `MASTERBALL`. Masterball is ignored by default.
      * `FARM_OVERRIDE_STEP_SIZE`: `Integer`, When it goes into farming mode, the bot assumes this step size to potentially speed up resource gathering. _This might lead to softbans._ Setting to `-1` disables this feature. Disabled by default for safety.
      * If `EXPERIMENTAL` OR `CATCH_POKEMON` are false, this configuration will disable itself.
+
 
 ## Requirements
  * Run `pip install -r requirements.txt`
