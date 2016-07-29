@@ -4,6 +4,7 @@ import json
 import csv
 from math import floor
 from collections import defaultdict
+from datetime import datetime
 import re
 from pgoapi.poke_utils import *
 app = Flask(__name__, template_folder="templates")
@@ -37,6 +38,7 @@ def inventory(username):
         items = data['GET_INVENTORY']['inventory_delta']['inventory_items']
         pokemons = []
         candy = defaultdict(int)
+        last_caught_timestamp = 0
         player = {}
         for item in items:
             item = item['inventory_item_data']
@@ -46,6 +48,8 @@ def inventory(username):
                 pokemon.update(pokemon_details[str(pokemon['pokemon_id'])])
                 pokemon['iv'] = pokemonIVPercentage(pokemon)
                 pokemons.append(pokemon)
+                if pokemon['creation_time_ms'] > last_caught_timestamp:
+                    last_caught_timestamp = pokemon['creation_time_ms']
             if 'player_stats' in item:
                 player = item['player_stats']
             if "pokemon_family" in item:
@@ -57,7 +61,7 @@ def inventory(username):
             pokemon['candy'] = candy[pokemon['family_id']]
         player['level_xp'] = player['experience']-player['prev_level_xp']
         player['goal_xp'] = player['next_level_xp']-player['prev_level_xp']
-        return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
+        return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, last_caught_timestamp=last_caught_timestamp)
 
 # filter epoch to readable date like: {{ pokemon["creation_time_ms"]|epochToDate }}
 @app.template_filter('epochToDate')
