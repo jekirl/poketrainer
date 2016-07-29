@@ -2,6 +2,7 @@
 pgoapi - Pokemon Go API
 Copyright (c) 2016 tjado <https://github.com/tejado>
 Modifications Copyright (c) 2016 j-e-k <https://github.com/j-e-k>
+Modifications Copyright (c) 2016 Brad Smith <https://github.com/infinitewarp>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,34 +24,38 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 
 Author: tjado <https://github.com/tejado>
 Modifications by: j-e-k <https://github.com/j-e-k>
+Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
 from __future__ import absolute_import
 
 import json
 import logging
-import os.path
-import pickle
 import random
 from collections import defaultdict
 from itertools import chain, imap
-from Queue import *
-from time import time, sleep
+from time import sleep, time
 
 from expiringdict import ExpiringDict
 
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException
+from pgoapi.game_master import PokemonData
+from pgoapi.inventory import Inventory as Player_Inventory
+from pgoapi.location import (distance_in_meters, filtered_forts,
+                             get_increments, get_neighbors, get_route)
 from pgoapi.player import Player as Player
 from pgoapi.player_stats import PlayerStats as PlayerStats
-from pgoapi.inventory import Inventory as Player_Inventory
-from pgoapi.location import *
-from pgoapi.poke_utils import *
+from pgoapi.poke_utils import (create_capture_probability, get_inventory_data,
+                               get_item_name, get_pokemon_by_long_id,
+                               parse_game_master)
+from pgoapi.pokemon import Pokemon
 from pgoapi.protos.POGOProtos import Enums_pb2
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.rpc_api import RpcApi
+
 from .utilities import f2i
 
 logger = logging.getLogger(__name__)
@@ -153,11 +158,13 @@ class PGoApi:
 
         # Sanity checking
         self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon  # Experimental, and we needn't do this if we're farming anyway
-        if (self.FARM_ITEMS_ENABLED
-            and self.FARM_IGNORE_POKEBALL_COUNT
-            and self.FARM_IGNORE_GREATBALL_COUNT
-            and self.FARM_IGNORE_ULTRABALL_COUNT
-            and self.FARM_IGNORE_MASTERBALL_COUNT):
+        if (
+            self.FARM_ITEMS_ENABLED and
+            self.FARM_IGNORE_POKEBALL_COUNT and
+            self.FARM_IGNORE_GREATBALL_COUNT and
+            self.FARM_IGNORE_ULTRABALL_COUNT and
+            self.FARM_IGNORE_MASTERBALL_COUNT
+        ):
             self.FARM_ITEMS_ENABLED = False
             self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
         elif self.FARM_ITEMS_ENABLED and not (self.POKEBALL_FARM_THRESHOLD < self.POKEBALL_CONTINUE_THRESHOLD):
@@ -186,7 +193,7 @@ class PGoApi:
         response = None
         try:
             response = request.request(api_endpoint, self._req_method_list, player_position)
-        except ServerBusyOrOfflineException as e:
+        except ServerBusyOrOfflineException:
             self.log.info('Server seems to be busy or offline - try again!')
 
         # cleanup after call execution
@@ -372,7 +379,6 @@ class PGoApi:
         for step_data in route_data['steps']:
             step = (step_data['lat'], step_data['long'])
             step_increments = get_increments(self._posf, step, step_size)
-            total_fort_distance_traveled = 0
 
             for i, next_point in enumerate(step_increments):
                 distance_to_point = distance_in_meters(self._posf, next_point)
@@ -478,8 +484,9 @@ class PGoApi:
 
     def walk_to_fort(self, fort_data, directly=False):
         fort = fort_data[0]
-        self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", fort['latitude'],
-                      fort['longitude'])
+        self.log.info(
+            "Walking to fort at  http://maps.google.com/maps?q=%s,%s",
+            fort['latitude'], fort['longitude'])
         self.walk_to((fort['latitude'], fort['longitude']), directly=directly)
         self.fort_search_pgoapi(fort, self.get_position(), fort_data[1])
         if 'lure_info' in fort:
@@ -530,7 +537,7 @@ class PGoApi:
 
     def nearby_map_objects(self):
         position = self.get_position()
-        neighbors = getNeighbors(self._posf)
+        neighbors = get_neighbors(self._posf)
         return self.get_map_objects(latitude=position[0], longitude=position[1],
                                     since_timestamp_ms=[0] * len(neighbors),
                                     cell_id=neighbors).call()
@@ -579,8 +586,11 @@ class PGoApi:
         for inventory_item in inventory_items:
             if "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
-                if item['item_id'] in self.MIN_ITEMS and "count" in item and item['count'] > self.MIN_ITEMS[
-                    item['item_id']]:
+                if (
+                    item['item_id'] in self.MIN_ITEMS and
+                    "count" in item and
+                    item['count'] > self.MIN_ITEMS[item['item_id']]
+                ):
                     recycle_count = item['count'] - self.MIN_ITEMS[item['item_id']]
                     item_count += item['count'] - recycle_count
                     self.log.info("Recycling Item_ID {0}, item count {1}".format(item['item_id'], recycle_count))
@@ -656,8 +666,8 @@ class PGoApi:
                 "KEEP_POKEMON_MAX_COUNT", 9999)):
             return False
         elif self.RELEASE_DUPLICATES and (
-                            self.pokemon_lvl(best_pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(
-                        pokemon) and self.pokemon_lvl(pokemon) < self.RELEASE_DUPLICATES_MAX_LV):
+                self.pokemon_lvl(best_pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(pokemon) and
+                self.pokemon_lvl(pokemon) < self.RELEASE_DUPLICATES_MAX_LV):
             return True
         # release defined throwaway pokemons  but make sure we have kept at least 1 (dont throw away all of them)
         elif pokemon.pokemon_id in self.throw_pokemon_ids:
@@ -717,11 +727,12 @@ class PGoApi:
             return False
 
     def is_pokemon_eligible_for_evolution(self, pokemon):
-        return self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None),
-                                                -1) > self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None) \
-               and pokemon.pokemon_id not in self.keep_pokemon_ids \
-               and not pokemon.is_favorite \
-               and pokemon.pokemon_id in self.POKEMON_EVOLUTION
+        candy_have = self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None), -1)
+        candy_needed = self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None)
+        return candy_have > candy_needed and \
+            pokemon.pokemon_id not in self.keep_pokemon_ids \
+            and not pokemon.is_favorite \
+            and pokemon.pokemon_id in self.POKEMON_EVOLUTION
 
     def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:
