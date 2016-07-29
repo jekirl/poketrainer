@@ -398,7 +398,7 @@ class PGoApi:
 
                 gevent.sleep(1)
                 while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
-                    sleep(1)
+                    gevent.sleep(1)
                     catch_attempt += 1
                 catch_attempt = 0
 
@@ -439,7 +439,7 @@ class PGoApi:
         result = res.pop('result', -1)
         if result == 1 and res:
             items = defaultdict(int)
-            for item in res['items_awarded']:
+            for item in res.get('items_awarded',[]):
                 items[item['item_id']] += item['item_count']
             reward = 'XP +' + str(res['experience_awarded'])
             for item_id, amount in items.iteritems():
@@ -535,7 +535,7 @@ class PGoApi:
             target = pokemon_distance
             self.log.debug("Catching pokemon: : %s, distance: %f meters", target[0], target[1])
             catches_successful &= self.encounter_pokemon(target[0])
-            sleep(random.randrange(4, 8))
+            gevent.sleep(random.randrange(4, 8))
         return catches_successful
 
     def nearby_map_objects(self):
@@ -584,9 +584,9 @@ class PGoApi:
                     break
             ret = r
             # Sleep between catch attempts
-            sleep(3)
+            gevent.sleep(3)
         # Sleep after the catch (the pokemon animation time)
-        sleep(4)
+        gevent.sleep(4)
         return ret
 
     def cleanup_inventory(self, inventory_items=None):
@@ -611,7 +611,7 @@ class PGoApi:
                     else:
                         self.log.info("Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']),
                                                                                 response_code))
-                    sleep(2)
+                    gevent.sleep(2)
                 elif "count" in item:
                     item_count += item['count']
         if item_count > 0:
@@ -645,7 +645,7 @@ class PGoApi:
         else:
             self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
             self.log.info("Failed to release Pokemon %s", pokemon)
-        sleep(3)
+        gevent.sleep(3)
 
     def get_pokemon_stats(self, inventory_items=None):
         if not inventory_items:
@@ -735,7 +735,7 @@ class PGoApi:
             self.log.info("Evolving pokemon: %s", pokemon)
             evo_res = self.evolve_pokemon(pokemon_id=pokemon.id).call()['responses']['EVOLVE_POKEMON']
             status = evo_res.get('result', -1)
-            sleep(3)
+            gevent.sleep(3)
             if status == 1:
                 evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}), self.pokemon_names,
                                           self.game_master.get(str(pokemon.pokemon_id), PokemonData()),
@@ -859,15 +859,23 @@ class PGoApi:
         if not self.EGG_INCUBATION_ENABLED:
             return
         if self.player_stats.km_walked > 0:
+            incubator_start_km_walked = self.player_stats.km_walked
+
             for incubator in self.inventory.incubators_busy:
-                incubator_egg_distance = incubator['target_km_walked'] - incubator['start_km_walked']
-                incubator_distance_done = self.player_stats.km_walked - incubator['start_km_walked']
+                if 'start_km_walked' in incubator:
+                    incubator_start_km_walked = incubator['start_km_walked']
+
+                incubator_egg_distance = incubator['target_km_walked'] - incubator_start_km_walked
+                incubator_distance_done = self.player_stats.km_walked - incubator_start_km_walked
                 if incubator_distance_done > incubator_egg_distance:
                     self.attempt_finish_incubation()
                     break
             for incubator in self.inventory.incubators_busy:
-                incubator_egg_distance = incubator['target_km_walked'] - incubator['start_km_walked']
-                incubator_distance_done = self.player_stats.km_walked - incubator['start_km_walked']
+                if 'start_km_walked' in incubator:
+                    incubator_start_km_walked = incubator['start_km_walked']
+
+                incubator_egg_distance = incubator['target_km_walked'] - incubator_start_km_walked
+                incubator_distance_done = self.player_stats.km_walked - incubator_start_km_walked
                 self.log.info('Incubating %skm egg, %skm done', incubator_egg_distance,
                               round(incubator_distance_done, 2))
         for incubator in self.inventory.incubators_available:
@@ -890,7 +898,7 @@ class PGoApi:
         incubate_res = self.use_item_egg_incubator(item_id=incubator['id'], pokemon_id=egg['id']).call()['responses'][
             'USE_ITEM_EGG_INCUBATOR']
         status = incubate_res.get('result', -1)
-        sleep(3)
+        gevent.sleep(3)
         if status == 1:
             self.log.info("Incubation started with %skm egg !", egg['egg_km_walked_target'])
             self.update_player_inventory()
@@ -905,7 +913,7 @@ class PGoApi:
         self.log.info("Checking for hatched eggs")
         hatch_res = self.get_hatched_eggs().call()['responses']['GET_HATCHED_EGGS']
         status = hatch_res.get('success', -1)
-        sleep(3)
+        gevent.sleep(3)
         if status == 1:
             self.update_player_inventory()
             i = 0
@@ -984,7 +992,7 @@ class PGoApi:
                 self.spin_near_fort()
             # if catching fails 10 times, maybe you are sofbanned.
             while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
-                sleep(4)
+                gevent.sleep(4)
                 catch_attempt += 1
                 pass
             if catch_attempt > self.max_catch_attempts:
