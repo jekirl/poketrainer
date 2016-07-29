@@ -1,10 +1,15 @@
 from time import time
 
+import six
 import pyproj
 import s2sphere
 from geopy.distance import VincentyDistance, vincenty
 from geopy.geocoders import GoogleV3
 from gmaps.directions import Directions
+
+if six.PY3:
+  from past.builtins import cmp, map
+  from functools import cmp_to_key
 
 g = pyproj.Geod(ellps='WGS84')
 geolocator = GoogleV3()
@@ -83,7 +88,10 @@ def filtered_forts(starting_location, origin, forts, proximity, visited_forts={}
                                                 proximity=proximity),
                    map(lambda x: (x, distance_in_meters(origin, (x['latitude'], x['longitude']))), forts))
 
-    sorted_forts = sorted(forts, lambda x, y: cmp(x[1], y[1]), reverse=reverse)
+    kcmp = lambda x, y: cmp(x[1], y[1])
+    if six.PY3:
+        kcmp = cmp_to_key(kcmp)
+    sorted_forts = sorted(forts, key=kcmp, reverse=reverse)
     return sorted_forts
 
 
