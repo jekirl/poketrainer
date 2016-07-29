@@ -59,8 +59,8 @@ def inventory(username):
         # add candy back into pokemon json
         for pokemon in pokemons:
             pokemon['candy'] = candy[pokemon['family_id']]
-        player['level_xp'] = player['experience']-player['prev_level_xp']
-        player['goal_xp'] = player['next_level_xp']-player['prev_level_xp']
+        player['level_xp'] = player['experience']-player.get("prev_level_xp",0)
+        player['goal_xp'] = player['next_level_xp']-player.get("prev_level_xp",0)
         return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, last_caught_timestamp=last_caught_timestamp)
 
 # filter epoch to readable date like: {{ pokemon["creation_time_ms"]|epochToDate }}
