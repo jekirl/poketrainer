@@ -126,8 +126,7 @@ class PGoApi:
             .get("RELEASE_DUPLICATES_SCALAR", 1.0) # when comparing two pokemon's lvl, multiply larger by this
 
         self.SCORE_METHOD = config.get("POKEMON_CLEANUP", {}).get("SCORE_METHOD", "CP")
-        self.SCORE_WEIGHT_IV = config.get("POKEMON_CLEANUP", {}).get("SCORE_METHOD_FANCY", {}).get("WEIGHT_IV", "CP")
-        self.SCORE_WEIGHT_LVL = config.get("POKEMON_CLEANUP", {}).get("SCORE_METHOD_FANCY", {}).get("WEIGHT_LVL", "CP")
+        self.SCORE_SETTINGS = config.get("POKEMON_CLEANUP", {}).get("SCORE_METHOD_" + self.SCORE_METHOD, {})
 
         self.EGG_INCUBATION_ENABLED = config.get("EGG_INCUBATION", {}).get("ENABLE", True)
         self.USE_DISPOSABLE_INCUBATORS = config.get("EGG_INCUBATION", {}).get("USE_DISPOSABLE_INCUBATORS", False)
@@ -293,7 +292,8 @@ class PGoApi:
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
             self.log.info("Player Inventory after cleanup: %s", self.inventory)
             if self.LIST_POKEMON_BEFORE_CLEANUP:
-                self.log.info(get_inventory_data(res, self.pokemon_names, self.game_master, self.player_stats.level))
+                self.log.info(get_inventory_data(res, self.pokemon_names, self.game_master,
+                                                 self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS))
             self.incubate_eggs()
             self.attempt_evolve(self.inventory.inventory_items)
             self.cleanup_pokemon(self.inventory.inventory_items)
@@ -605,7 +605,7 @@ class PGoApi:
                 pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
                 pokemon = Pokemon(pokemon_data, self.pokemon_names,
                                   self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()),
-                                  self.player_stats.level)
+                                  self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS)
 
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
@@ -640,15 +640,15 @@ class PGoApi:
         for pokemons in caught_pokemon.values():
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
                 # highest scoring pokemon first
-                sorted_pokemons = sorted(pokemons, key=self.pokemon_score, reverse=True)
+                sorted_pokemons = sorted(pokemons, key=lambda x: (x.score, x.cp), reverse=True)
                 pokemons_keep_counter = 0
                 pokemons_keep_iv_counter = 0
                 for pokemon in sorted_pokemons:
                     eligible, keep_iv = self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0],
                                                                               pokemons_keep_counter,
                                                                               pokemons_keep_iv_counter)
-                    if (eligible and pokemons_keep_counter > self.MIN_SIMILAR_POKEMON)\
-                            or pokemons_keep_counter >= self.MAX_SIMILAR_POKEMON:
+                    # MIN_SIMILAR_POKEMON should be respected in the is_eligible function, check it here anyway
+                    if eligible and pokemons_keep_counter >= self.MIN_SIMILAR_POKEMON:
                         self.do_release_pokemon(pokemon)
                         continue
                     else:
@@ -658,8 +658,14 @@ class PGoApi:
 
     def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon=Pokemon(),
                                          pokemons_keep_counter=0, pokemons_keep_iv_counter=0):
-        # never release favorites and other defined pokemons
-        if pokemon.is_favorite or pokemon.pokemon_id in self.keep_pokemon_ids:
+        # never release favorites
+        if pokemon.is_favorite:
+            return False, False
+        # dont keep more than MAX_SIMILAR_POKEMON
+        elif pokemons_keep_counter >= self.MAX_SIMILAR_POKEMON:
+            return True, False
+        # keep defined pokemons
+        elif pokemon.pokemon_id in self.keep_pokemon_ids:
             return False, False
         # release defined throwaway pokemons, but make sure we have kept at least 1 (dont throw away all of them)
         elif pokemon.pokemon_id in self.throw_pokemon_ids and pokemons_keep_counter >= self.MIN_SIMILAR_POKEMON:
@@ -675,7 +681,7 @@ class PGoApi:
         # keep high-iv pokemons based on config values
         elif pokemon.iv_normalized > self.KEEP_IV_OVER \
                 and pokemons_keep_iv_counter < self.MAX_POKEMON_HIGH_IV \
-                and pokemon.cp > (best_pokemon.cp * self.KEEP_IV_WITH_PERCENT_CP / 100):
+                and pokemon.cp > (best_pokemon.cp * self.KEEP_IV_ONLY_WITH_PERCENT_CP / 100):
             return False, True
         # keep high-cp pokemons
         elif pokemon.cp > self.KEEP_CP_OVER:
@@ -685,19 +691,6 @@ class PGoApi:
             return True, False
         # if we haven't found a reason, keep it! (probably not at MIN_SIMILAR yet)
         return False, False
-
-    def pokemon_score(self, pokemon):
-        if self.SCORE_METHOD == "CP":
-            return pokemon.cp
-        elif self.SCORE_METHOD == "IV":
-            return pokemon.iv_normalized
-        elif self.SCORE_METHOD == "CP*IV":
-            return pokemon.cp * pokemon.iv_normalized
-        elif self.SCORE_METHOD == "CP+IV":
-            return pokemon.cp + pokemon.iv_normalized
-        elif self.SCORE_METHOD == "FANCY":
-            return (pokemon.iv / 100.0 * self.SCORE_WEIGHT_IV) + \
-                   (pokemon.level / (self.player_stats.level+1.5) * self.SCORE_WEIGHT_LVL)
 
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:
@@ -722,7 +715,7 @@ class PGoApi:
             if status == 1:
                 evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}), self.pokemon_names,
                                           self.game_master.get(str(pokemon.pokemon_id), PokemonData()),
-                                          self.player_stats.level)
+                                          self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS)
                 # I don' think we need additional stats for evolved pokemon. Since we do not do anything with it.
                 # evolved_pokemon.pokemon_additional_data = self.game_master.get(pokemon.pokemon_id, PokemonData())
                 self.log.info("Evolved to %s", evolved_pokemon)

@@ -6,23 +6,6 @@
       "password": "password",
       "location": "University of Southern California, Los Angeles, CA",
       "GMAPS_API_KEY": "some api key here",
-      "_info": "copy values from the default section below this to make individual changes, example:",
-      "BEHAVIOR": {
-        "STEP_SIZE": 50
-      }
-    },
-    {
-      "auth_service": "ptc",
-      "username": "someusername",
-      "password": "password",
-      "location": "University of Southern California, Los Angeles, CA",
-      "BEHAVIOR": {
-        "USE_GOOGLE": false
-      }
-    }
-  ],
-  "defaults": {
-      "_info": "change values for all accounts here or copy them to the accounts section",
       "BEHAVIOR": {
         "USE_GOOGLE": true,
         "STEP_SIZE": 100,
@@ -92,5 +75,19 @@
         "LIST_POKEMON_BEFORE_CLEANUP": true,
         "LIST_INVENTORY_BEFORE_CLEANUP": true
       }
+    },
+    {
+      "auth_service": "ptc",
+      "username": "someusername",
+      "password": "password",
+      "location": "University of Southern California, Los Angeles, CA",
+      "BEHAVIOR": {
+        "USE_GOOGLE": false
+      }
+    }
+  ],
+  "defaults": {
+      "_info": "copy values to this section to use them for all accounts",
+      "_info2": "account settings will always override defaults",
   }
 }
