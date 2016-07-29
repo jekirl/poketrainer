@@ -61,7 +61,7 @@ def inventory(username):
             pokemon['candy'] = candy[pokemon['family_id']]
         player['level_xp'] = player['experience']-player.get("prev_level_xp",0)
         player['goal_xp'] = player['next_level_xp']-player.get("prev_level_xp",0)
-        return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, last_caught_timestamp=last_caught_timestamp)
+        return render_template('pokemon.html', pokemons=pokemons, player=player, items=items, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, last_caught_timestamp=last_caught_timestamp)
 
 # filter epoch to readable date like: {{ pokemon["creation_time_ms"]|epochToDate }}
 @app.template_filter('epochToDate')
