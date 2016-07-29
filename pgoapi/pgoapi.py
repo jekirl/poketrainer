@@ -356,7 +356,7 @@ class PGoApi:
                               reward, fort['latitude'], fort['longitude'])
                 self.visited_forts[fort['id']] = fort
             else:
-                self.log.info("Couldn't spin this fort. No items?")
+                self.log.info("Couldn't spin this fort. No items awarded?")
                 return False
         elif result == 4:
             self.log.debug("For spinned but Your inventory is full : %s", res)
