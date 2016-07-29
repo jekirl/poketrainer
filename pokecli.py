@@ -104,7 +104,7 @@ def init_config():
     return config.__dict__
 
 
-def main():
+def main(position=None):
     # log settings
     # log format
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
@@ -124,7 +124,10 @@ def main():
         logging.getLogger("pgoapi").setLevel(logging.DEBUG)
         logging.getLogger("rpc_api").setLevel(logging.DEBUG)
 
-    position = get_pos_by_name(config["location"])
+
+    if not position:
+        position = get_pos_by_name(config["location"])
+
 
     # instantiate pgoapi
     pokemon_names = json.load(open("pokemon.en.json"))
@@ -163,12 +166,9 @@ def main():
             # restart after sleep
             sleep(30)
             try:
-                main()
+                main(api.get_position())
             except:
                 pass
 
 if __name__ == '__main__':
-    try:
-        main()
-    except:
-        pass
+    main()
