@@ -48,6 +48,8 @@ Below the accounts you can change options in the `default` section. If you need 
      * Setting this to 500 means avoid a fort for 500 seconds before returning, (Should be higher than 300 to have any effect). This will let the bot explore a bigger area.
    * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
    * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
+* `CAPTURE`
+   * `MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY` minimum number of failed capture attempts before trying to use a Razz Berry (default: 3)
 * `EGG_INCUBATION`
    * `ENABLE` enables automatic use of incubators (default: true)
    * `USE_DISPOSABLE_INCUBATORS` enables use of disposable (3-times use) incubators (default: false)
@@ -56,6 +58,7 @@ Below the accounts you can change options in the `default` section. If you need 
    * `KEEP_POKEMON_NAMES` Names of pokemon you want the bot to hold regardless of IV/CP
    * `THROW_POKEMON_NAMES` Names of pokemon you want the bot to throw away regardless of IV/CP
      * Note: `MIN_SIMILAR_POKEMON` will still be kept for all pokemon types
+   * `KEEP_POKEMON_MAX_COUNT` default 9999. If you want to keep a certain type of pokemon but you accidently run into a nest? Don't worry this will make sure you only keep X amount of pokemon specified in `KEEP_POKEMON_IDS`
    * `RELEASE_METHOD` = "CLASSIC"
      * `KEEP_CP_OVER` Never transfer any pokemon above this CP, Setting this to 0 will never transfer anything
      * `KEEP_IV_OVER` is the minimum pokemon IV that you want to keep (high-iv pokemons)
@@ -76,6 +79,7 @@ Below the accounts you can change options in the `default` section. If you need 
    * If `EXPERIMENTAL` OR `CATCH_POKEMON` are false, this configuration will disable itself.
 
 There are more options, check the current config.json.example, many are self-explanatory.
+
 
 ## Requirements
  * Run `pip install -r requirements.txt`
