@@ -235,9 +235,7 @@ class PGoApi:
             else:
                 self._req_method_list.append(RequestType.Value(name))
                 self.log.debug("Adding '%s' to RPC request", name)
-
             return self
-
         if func.upper() in RequestType.keys():
             return function
         else:
@@ -263,7 +261,9 @@ class PGoApi:
         if 'GET_INVENTORY' in res['responses']:
             self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
         return res
-
+    def get_player_inventory(self, as_json=True):
+        return self.inventory.to_json()
+        
     def heartbeat(self):
         # making a standard call to update position, etc
         self.get_player()
@@ -630,7 +630,8 @@ class PGoApi:
         if as_json:
             return json.dumps(caught_pokemon, default=lambda p: p.__dict__) #reduce the data sent?
         return caught_pokemon
-
+    def get_player_info(self, as_json=True):
+        return self.player.to_json()
     def do_release_pokemon_by_id(self, p_id):
         self.release_pokemon(pokemon_id=int(p_id))
         release_res = self.call()['responses']['RELEASE_POKEMON']

@@ -30,9 +30,11 @@
 </head>
 <body>
   {% set navigation_bar = [
-    ("/%s/status"%player['username'], 'status', 'Status'),
-    ("/%s/inventory"%player['username'], 'inventory', 'Inventory'),
-    ("/%s/pokemon"%player['username'], 'pokemon', 'Pokémon')
+    ("/%s/status"%username, 'status', 'Status'),
+    ("/%s/inventory"%username, 'inventory', 'Inventory'),
+    ("/%s/pokemon"%username, 'pokemon', 'Pokémon'),
+    ("/%s/eggs"%username, 'eggs', 'Eggs'),
+    ("/%s/journal"%username, 'journal', 'Journal')
   ] -%}
   {% set active_page = active_page|default('status') -%}
 

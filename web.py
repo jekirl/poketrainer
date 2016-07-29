@@ -13,6 +13,7 @@ from flask_socketio import SocketIO
 
 app = Flask(__name__, template_folder="templates")
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
+app.debug = True
 
 pokemon_names = json.load(open("pokemon.en.json"))
 pokemon_details = {}
@@ -83,8 +84,26 @@ def status(username):
         player['level_xp'] = player.get('experience',0)-player.get('prev_level_xp',0)
         player['hourly_exp'] = data.get("hourly_exp",0)
         player['goal_xp'] = player.get('next_level_xp',0)-player.get('prev_level_xp',0)
-        player['username'] = username
-        return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
+        return render_template('status.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, username = username)
+@app.route("/<username>/pokemon")
+def pokemon(username):
+    s = get_socket(username)
+    try:
+        pokemons = json.loads(s.getCaughtPokemons())
+    except ValueError, e:
+        print "Not valid Json"
+
+    return render_template('pokemon.html', pokemons=pokemons, username = username)
+
+@app.route("/<username>/inventory")
+def inventory(username):
+    s = get_socket(username)
+    try:
+        inventory = json.loads(s.getInventory())
+    except ValueError, e:
+        print "Not valid Json"
+
+    return render_template('inventory.html', inventory=json.dumps(inventory, indent=2), username = username)
 
 @app.route("/<username>/transfer/<p_id>")
 def transfer(username, p_id):

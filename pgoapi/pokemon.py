@@ -165,4 +165,4 @@ class Pokemon:
         return self.pokemon_id > 0
 
     def to_json(self):
-        return json.dumps(self, default=lambda o: o.__dict__, indent=2)
+        return json.dumps(self, default=lambda o: o.__dict__)
