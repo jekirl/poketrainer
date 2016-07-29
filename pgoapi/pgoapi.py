@@ -56,7 +56,6 @@ from .utilities import f2i
 
 logger = logging.getLogger(__name__)
 
-
 class PGoApi:
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
 
@@ -615,7 +614,10 @@ class PGoApi:
             self.log.info("Inventory has {0}/{1} items".format(item_count, self.player.max_item_storage))
         return self.update_player_inventory()
 
-    def get_caught_pokemons(self, inventory_items):
+    def get_caught_pokemons(self, inventory_items=None, as_json=False):
+        if not inventory_items:
+            inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
+                'inventory_items']
         caught_pokemon = defaultdict(list)
         for inventory_item in inventory_items:
             if "pokemon_data" in inventory_item['inventory_item_data'] and not inventory_item['inventory_item_data']['pokemon_data'].get("is_egg", False):
@@ -625,6 +627,8 @@ class PGoApi:
 
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
+        if as_json:
+            return json.dumps(caught_pokemon, default=lambda p: p.__dict__) #reduce the data sent?
         return caught_pokemon
 
     def do_release_pokemon_by_id(self, p_id):

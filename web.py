@@ -32,10 +32,24 @@ with open ("GAME_ATTACKS_v0_1.tsv") as tsv:
     reader = csv.DictReader(tsv, delimiter='\t')
     for row in reader:
         attacks[int(row["Num"])] = row["Move"]
+def get_api_rpc(username):
+    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+    sock_port = 0
+    with open(desc_file) as f:
+        data = f.read()
+        data = json.loads(data.encode() if len(data) > 0 else '{}')
+        if username not in data:
+            print("There is no bot running with the input username!")
+            return None
+        sock_port = int(data[username])
 
+    c = zerorpc.Client()
+    c.connect("tcp://127.0.0.1:%i"%sock_port)
+    return c
 
-@app.route("/<username>/pokemon")
-def inventory(username):
+@app.route("/<username>")
+@app.route("/<username>/status")
+def status(username):
     c = get_api_rpc(username)
     if c is None:
         return("There is no bot running with the input username!")
@@ -72,22 +86,6 @@ def inventory(username):
         player['username'] = username
         return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
 
-
-def get_api_rpc(username):
-    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
-    sock_port = 0
-    with open(desc_file) as f:
-        data = f.read()
-        data = json.loads(data.encode() if len(data) > 0 else '{}')
-        if username not in data:
-            print("There is no bot running with the input username!")
-            return None
-        sock_port = int(data[username])
-
-    c = zerorpc.Client()
-    c.connect("tcp://127.0.0.1:%i"%sock_port)
-    return c
-
 @app.route("/<username>/transfer/<p_id>")
 def transfer(username, p_id):
     c = get_api_rpc(username)
@@ -96,5 +94,6 @@ def transfer(username, p_id):
     else:
         flash("Failed!")
     return redirect(url_for('inventory', username = username))
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0',debug=True)
