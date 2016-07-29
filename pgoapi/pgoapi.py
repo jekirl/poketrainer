@@ -706,7 +706,7 @@ class PGoApi:
         elif pokemon.iv_normalized > self.KEEP_IV_OVER \
                 and kept_pokemon_of_type_high_iv < self.MAX_POKEMON_HIGH_IV \
                 and pokemon.cp > (best_pokemon.cp * self.KEEP_IV_ONLY_WITH_PERCENT_CP / 100):
-            return False, True
+            return True, True
         # keep high-cp pokemons
         elif pokemon.cp > self.KEEP_CP_OVER:
             return False, False
