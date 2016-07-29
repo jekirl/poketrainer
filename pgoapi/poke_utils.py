@@ -1,9 +1,10 @@
 from __future__ import absolute_import
 import os
-from pgoapi.pokemon import Pokemon
-from pgoapi.game_master import PokemonData
+from pgoapi.pokemon import Pokemon, POKEMON_NAMES
+from pgoapi.game_master import PokemonData, GAME_MASTER
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Enum_Items
 import csv
+import re
 
 
 def get_item_name(s_item_id):
@@ -13,22 +14,6 @@ def get_item_name(s_item_id):
             return item.name.replace('ITEM_', '', 1)
     return 'Unknown'
 
-def parse_game_master():
-    line_count = 0
-    game_master = {}
-    with open("GAME_MASTER_POKEMON_v0_2.tsv") as tsvfile:
-        tsvreader = csv.reader(tsvfile, delimiter="\t")
-        attributes = []
-        for line in tsvreader:
-            if line_count == 0:
-                attributes = line
-                line_count += 1
-                continue
-            pokemon_data = PokemonData()
-            for x in range(0, len(line)):
-                setattr(pokemon_data, attributes[x], line[x])
-            game_master[int(line[0])] = pokemon_data
-    return game_master
 
 
 def pokemonIVPercentage(pokemon):
@@ -36,13 +21,11 @@ def pokemonIVPercentage(pokemon):
         'individual_defense', 0) + 0.0) / 45.0) * 100.0
 
 
-def get_inventory_data(res, poke_names, game_master, player_level, score_method="CP", score_settings=dict()):
+def get_inventory_data(res, player_level, score_method="CP", score_settings=dict()):
     inventory_delta = res['responses']['GET_INVENTORY'].get('inventory_delta', {})
     inventory_items = inventory_delta.get('inventory_items', [])
-    pokemons = sorted(map(lambda x: Pokemon(x['pokemon_data'], poke_names,
-                                            game_master.get(x['pokemon_data'].get('pokemon_id', 0), PokemonData()),
-                                            player_level, score_method, score_settings),
-                          filter(lambda x: 'pokemon_data' in x,
+    pokemons = sorted(map(lambda x: Pokemon(x['pokemon_data'], player_level, score_method, score_settings),
+                          filter(lambda x: 'pokemon_data' in x and not x['pokemon_data'].get("is_egg", False),
                           map(lambda x: x.get('inventory_item_data', {}), inventory_items))),
                       key=lambda x: x.score, reverse=True)
     inventory_items_pokemon_list = filter(lambda x: not x.is_egg, pokemons)
@@ -58,11 +41,11 @@ def create_capture_probability(capture_probability):
         return dict(zip(capture_balls, capture_rate))
 
 
-def get_pokemon_by_long_id(pokemon_id, res, poke_names):
+def get_pokemon_by_long_id(pokemon_id, res):
     for inventory_item in res:
         pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
         if not pokemon_data.get('is_egg', False) and pokemon_data.get('id', 'NA') == pokemon_id:
-            return Pokemon(pokemon_data, poke_names)
+            return Pokemon(pokemon_data, POKEMON_NAMES)
     return None
 
 DISK_ENCOUNTER = {0: "UNKNOWN",
