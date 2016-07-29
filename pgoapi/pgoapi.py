@@ -583,19 +583,21 @@ class PGoApi:
                     item['item_id']]:
                     recycle_count = item['count'] - self.MIN_ITEMS[item['item_id']]
                     item_count += item['count'] - recycle_count
-                    self.log.info("Recycling Item_ID {0}, item count {1}".format(item['item_id'], recycle_count))
+                    self.log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
                     res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()['responses'][
                         'RECYCLE_INVENTORY_ITEM']
                     response_code = res['result']
                     if response_code == 1:
-                        self.log.info("Recycled Item %s, New Count: %s", item['item_id'], res.get('new_count', 0))
+                        self.log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
+                                      item['item_id']), res.get('new_count', 0)))
                     else:
-                        self.log.info("Failed to recycle Item %s, Code: %s", item['item_id'], response_code)
+                        self.log.info("Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']),
+                                                                                response_code))
                     sleep(2)
                 elif "count" in item:
                     item_count += item['count']
         if item_count > 0:
-            self.log.info('Intentory has %s/%s items', item_count, self.player.max_item_storage)
+            self.log.info("Inventory has {0}/{1} items".format(item_count, self.player.max_item_storage))
         return self.update_player_inventory()
 
     def get_caught_pokemons(self, inventory_items):
