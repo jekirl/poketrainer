@@ -9,7 +9,6 @@ import argparse
 
 from pgoapi.poke_utils import *
 from pgoapi.utilities import *
-from pgoapi.game_master import PokemonData, GAME_MASTER
 from pgoapi.pokemon import Pokemon
 from flask_socketio import SocketIO
 import tempfile
@@ -137,10 +136,9 @@ def inventory(username):
         # add candy back into pokemon json
         pokemons = []
         for pokemon in pokemonsData:
-            pkmn = Pokemon(pokemon, player['level'], options['DEFINE_POKEMON_LV'])            
-            family_id = re.match("HoloPokemonFamilyId.V([0-9]*).*", pkmn.pokemon_additional_data.FamilyId).group(1)
-            pkmn.candy = candy[family_id]
-            setMaxCP(pkmn, tcmpVals[int(player['level']*2 + 1)], GAME_MASTER)
+            pkmn = Pokemon(pokemon, player['level'], options['DEFINE_POKEMON_LV'])
+            pkmn.candy = candy[pkmn.family_id]
+            setMaxCP(pkmn, tcmpVals[int(player['level']*2 + 1)])
             pokemons.append(pkmn)           
         pokemons = sorted(pokemons, lambda x,y: cmp(x.iv, y.iv),reverse=True)             
         player['username'] = data['GET_PLAYER']['player_data']['username']
