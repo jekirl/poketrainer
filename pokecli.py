@@ -130,8 +130,7 @@ def main(position=None):
 
 
     # instantiate pgoapi
-    pokemon_names = json.load(open("pokemon.en.json"))
-    api = PGoApi(config, pokemon_names)
+    api = PGoApi(config)
 
     # provide player position on the earth
     api.set_position(*position)
@@ -142,10 +141,12 @@ def main(position=None):
     s.bind(("", 0)) #let the kernel find a free port
     sock_port = s.getsockname()[1]
     s.close()
-    with open(desc_file,'w+') as f:
+    data = None
+    with open(desc_file,'r+') as f:
         data = f.read()
         data = json.loads(data.encode() if len(data) > 0 else '{}')
         data[config["username"]] = sock_port
+    with open(desc_file, "w+") as f:
         f.write(json.dumps(data,indent=2))
 
     s = zerorpc.Server(Listener(api))
@@ -162,7 +163,7 @@ def main(position=None):
         try:
             api.main_loop()
         except Exception as e:
-            log.exception('Error in main loop %s, restarting at location: %s', e, api.get_position())
+            log.exception('Error in main loop %s, restarting at location: %s', e, api._posf)
             # restart after sleep
             sleep(30)
             try:
