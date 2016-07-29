@@ -56,29 +56,106 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-sm-3 col-md-2 sidebar">
-        <div class="panel panel-default">
-          <div class="panel-body">
-            Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}/{{player['max_pokemon_storage']}}<br> Item Count: {{inventory['total']}}/{{player['max_item_storage']}}<br>
-          </div>
-          <div class="container-fluid">
-            Level XP: {{player["level_xp"]}} / {{player["goal_xp"]}}
-            <div class="progress">
-              <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["experience"] / player["next_level_xp"] * 100)|int }}%;">
-                {{ (player["level_xp"] / player["goal_xp"] * 100)|int }}%
-              </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Stats</h3>
+                  </div>
+                  <div class="panel-body">
+                    <span>Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}/{{player['max_pokemon_storage']}}<br></span>
+                  </div>
+                  <div class="container-fluid">
+                    <span>Level XP: {{player["level_xp"]}} / {{player["goal_xp"]}}</span>
+                    <div class="progress">
+                      <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["experience"] / player["next_level_xp"] * 100)|int }}%;">
+                        <span>{{ (player["level_xp"] / player["goal_xp"] * 100)|int }}%</span>
+                      </div>
+                    </div>
+                    <span>Unique Pokemon: {{player["unique_pokedex_entries"]}} / 151</span>
+                    <div class="progress">
+                      <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["unique_pokedex_entries"] / 151 * 100)|int }}%;">
+                        <span>{{ (player["unique_pokedex_entries"] / 151 * 100)|int }}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
             </div>
-            Unique Pokemon: {{player["unique_pokedex_entries"]}} / 151
-            <div class="progress">
-              <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["unique_pokedex_entries"] / 151 * 100)|int }}%;">
-                {{ (player["unique_pokedex_entries"] / 151 * 100)|int }}%
-              </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Items ({{inventory['total']}}/{{player['max_item_storage']}})</h3>
+                  </div>
+
+                    <ul class="list-group">
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['poke_balls']}}</span>
+                        <img src="/static/items/1.png" style="height:18px;padding-right:5px;"/>Poké balls
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['great_balls']}}</span>
+                        <img src="/static/items/2.png" style="height:18px;padding-right:5px;"/>Great balls
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['ultra_balls']}}</span>
+                        <img src="/static/items/3.png" style="height:18px;padding-right:5px;"/>Ultra balls
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['master_balls']}}</span>
+                        <img src="/static/items/4.png" style="height:18px;padding-right:5px;"/>Master balls
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['razz_berries']}}</span>
+                        <img src="/static/items/701.png" style="height:18px;padding-right:5px;"/>Razz Berry
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['lucky_eggs']}}</span>
+                        <img src="/static/items/301.png" style="height:18px;padding-right:5px;"/>Lucky Eggs
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['potion']}}</span>
+                        <img src="/static/items/101.png" style="height:18px;padding-right:5px;"/>Potion
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['super_potion']}}</span>
+                        <img src="/static/items/102.png" style="height:18px;padding-right:5px;"/>Super Potion
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['hyper_potion']}}</span>
+                        <img src="/static/items/103.png" style="height:18px;padding-right:5px;"/>Hyper Potion
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['max_potion']}}</span>
+                        <img src="/static/items/104.png" style="height:18px;padding-right:5px;"/>Max Potion
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['revive']}}</span>
+                        <img src="/static/items/201.png" style="height:18px;padding-right:5px;"/>Revive
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['max_revive']}}</span>
+                        <img src="/static/items/202.png" style="height:18px;padding-right:5px;"/>Max Revive
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['incenses']}}</span>
+                        <img src="/static/items/401.png" style="height:18px;padding-right:5px;"/>Incense
+                      </li>
+                      <li class="list-group-item">
+                        <span class="badge">{{inventory['lures']}}</span>
+                        <img src="/static/items/501.png" style="height:18px;padding-right:5px;"/>Lure Module
+                      </li>
+                      
+                    </ul>
+
+                </div>
             </div>
-          </div>
         </div>
       </div>
       <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
         <div id="overlay" class="map">
-          <iframe id="map" src="http://maps.google.com/maps?q={{latlng}}&z=15&output=embed" width="100%" height="800" frameborder="0" style="border:0"></iframe>
+          <iframe id="map" src="http://maps.google.com/maps?q={{latlng}}&z=15&output=embed" width="100%" height="600px" frameborder="0" style="border:0"></iframe>
         </div>
         <h2>Pokemon</h2>
         <div class="table-responsive">
