@@ -57,10 +57,14 @@ def get_player_data(username):
 @app.route("/")
 def users():
     users = []
-   
-    for file in os.listdir("data_dumps"):
-        if file.endswith(".json"):
-            user_data = get_player_data(os.path.splitext(file)[0])
+
+    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+    with open(desc_file) as f:
+        live_users = f.read()
+        live_users = json.loads(live_users.encode() if len(live_users) > 0 else '{}')
+
+        for username in live_users:
+            user_data = get_player_data(username)
             users.append(user_data)
 
     return render_template('users.html', users=users)
