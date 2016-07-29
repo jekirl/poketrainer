@@ -27,6 +27,7 @@ Modifications by: j-e-k <https://github.com/j-e-k>
 
 from __future__ import absolute_import
 
+import six
 import json
 import logging
 import os.path
@@ -34,11 +35,10 @@ import pickle
 import random
 import gevent
 from collections import defaultdict
-from itertools import chain, imap
-from Queue import *
+from itertools import chain
 from time import time, sleep
 
-from expiringdict import ExpiringDict
+from cachetools import TTLCache
 
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
@@ -53,6 +53,13 @@ from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.rpc_api import RpcApi
 from .utilities import f2i
+
+from builtins import bytes, chr
+if six.PY3:
+    from builtins import map as imap 
+    from past.builtins import basestring
+elif six.PY2:
+    from itertools import imap
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +144,7 @@ class PGoApi:
                                                                                 -1)  # should the step size be overriden when looking for more inventory, -1 to disable
         # OVERRIDE STEP SIZE could be softbannable. No data to suggest either way.
 
-        self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
+        self.visited_forts = TTLCache(maxsize=120, ttl=config.get("SKIP_VISITED_FORT_DURATION", 600))
         self.spin_all_forts = config.get("SPIN_ALL_FORTS", False)
         self.keep_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
         self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
@@ -270,24 +277,24 @@ class PGoApi:
         if not res or res.get("direction", -1) == 102:
             self.log.error("There were a problem responses for api call: %s. Restarting!!!", res)
             raise AuthException("Token probably expired?")
-        self.log.debug('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2)))
+        self.log.debug('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2, default=lambda obj: obj.decode('utf8'))))
 
         if 'GET_PLAYER' in res['responses']:
             self.player = Player(res['responses'].get('GET_PLAYER', {}).get('player_data', {}))
-            self.log.info("Player Info: %s, Pokemon Caught in this run: %s", self.player, self.pokemon_caught)
+            self.log.info("Player Info: {0}, Pokemon Caught in this run: {1}".format(self.player, self.pokemon_caught))
 
         if 'GET_INVENTORY' in res['responses']:
             with open("data_dumps/%s.json" % self.config['username'], "w") as f:
                 res['responses']['lat'] = self._posf[0]
                 res['responses']['lng'] = self._posf[1]
                 res['responses']['hourly_exp'] = self.hourly_exp(self.player_stats.experience)
-                f.write(json.dumps(res['responses'], indent=2))
+                f.write(json.dumps(res['responses'], indent=2, default=lambda obj: obj.decode('utf8')))
 
             self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
             for inventory_item in self.inventory.inventory_items:
                 if "player_stats" in inventory_item['inventory_item_data']:
                     self.player_stats = PlayerStats(inventory_item['inventory_item_data']['player_stats'])
-                    self.log.info("Player Stats: %s", self.player_stats)
+                    self.log.info("Player Stats: {}".format(self.player_stats))
                     self.hourly_exp(self.player_stats.experience)
             if self.LIST_INVENTORY_BEFORE_CLEANUP:
                 self.log.info("Player Items Before Cleanup: %s", self.inventory)
@@ -732,7 +739,7 @@ class PGoApi:
 
     def is_pokemon_eligible_for_evolution(self, pokemon):
         return self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None),
-                                                -1) > self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None) \
+                                                -1) > self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, 0) \
                and pokemon.pokemon_id not in self.keep_pokemon_ids \
                and not pokemon.is_favorite \
                and pokemon.pokemon_id in self.POKEMON_EVOLUTION

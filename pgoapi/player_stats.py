@@ -23,7 +23,7 @@ class PlayerStats:
                                                                               self.experience,
                                                                               self.next_level_xp,
                                                                               self.unique_pokedex_entries,
-                                                                              self.km_walked).encode('utf-8', 'ignore')
+                                                                              self.km_walked)
 
     def __repr__(self):
         return self.__str__()
