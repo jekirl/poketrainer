@@ -47,10 +47,10 @@ from pgoapi.location import getNeighbors
 from google.protobuf.internal import encoder
 from geopy.geocoders import GoogleV3
 from s2sphere import CellId, LatLng
+from six import iteritems
 
 log = logging.getLogger(__name__)
 from threading import Thread
-from Queue import Queue
 
 def get_pos_by_name(location_name):
     geolocator = GoogleV3()
@@ -79,7 +79,7 @@ def init_config():
     config = parser.parse_args()
     load = load['accounts'][config.__dict__['config_index']]
     # Passed in arguments shoud trump
-    for key,value in load.iteritems():
+    for key,value in iteritems(load):
         if key not in config.__dict__ or not config.__dict__[key]:
             config.__dict__[key] = value
     if config.auth_service not in ['ptc', 'google']:
@@ -152,7 +152,4 @@ def main():
                 pass
 
 if __name__ == '__main__':
-    try:
-        main()
-    except:
-        pass
+    main()
