@@ -16,7 +16,7 @@ class SettingsModel extends Model {
 
     "GMAPS_API_KEY" => "Google Maps API key (only needed if using Google for directions)",
 
-    "BEHAVIOR.USE_GOOGLE" => "Use Google for directions",
+    "BEHAVIOR.USE_GOOGLE" => "Use Google for directions?",
     "BEHAVIOR.STEP_SIZE" => "How many meters per second should the bot walk?",
     "BEHAVIOR.EXPERIMENTAL" => "Allow experimental features?",
     "BEHAVIOR.SKIP_VISITED_FORT_DURATION" => "Avoid a PokéStop for a given number of seconds. This allows bot to explore bigger area.",
@@ -75,7 +75,7 @@ class SettingsModel extends Model {
       ],
     ],
     "username" => "text",
-    "password" => "text",
+    "password" => "password",
     "location" => "text",
 
     "GMAPS_API_KEY" => "text",
