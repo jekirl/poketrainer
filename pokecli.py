@@ -29,13 +29,17 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
 import argparse
+import collections
 import json
 import logging
 import os
+import socket
 from time import sleep
 
+import gevent
+import zerorpc
 from geopy.geocoders import GoogleV3
-
+from listener import Listener
 from pgoapi import PGoApi
 
 logger = logging.getLogger(__name__)
@@ -49,6 +53,18 @@ def get_pos_by_name(location_name):
     logger.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
 
     return (loc.latitude, loc.longitude, loc.altitude)
+
+
+def dict_merge(dct, merge_dct):
+    for k, v in merge_dct.iteritems():
+        if (
+            k in dct and isinstance(dct[k], dict) and
+            isinstance(merge_dct[k], collections.Mapping)
+        ):
+            dict_merge(dct[k], merge_dct[k])
+        else:
+            dct[k] = merge_dct[k]
+    return dct
 
 
 def init_config():
@@ -68,7 +84,9 @@ def init_config():
     parser.add_argument("-l", "--location", help="Location", required=required("location"))
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
     config = parser.parse_args()
-    load = load['accounts'][config.__dict__['config_index']]
+    defaults = load.get('defaults', {})
+    account = load['accounts'][config.__dict__['config_index']]
+    load = dict_merge(defaults, account)
     # Passed in arguments shoud trump
     for key, value in load.iteritems():
         if key not in config.__dict__ or not config.__dict__[key]:
@@ -80,7 +98,7 @@ def init_config():
     return config.__dict__
 
 
-def main():
+def main(position=None):
     # log settings
     # log format
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
@@ -100,7 +118,8 @@ def main():
         logging.getLogger("pgoapi").setLevel(logging.DEBUG)
         logging.getLogger("rpc_api").setLevel(logging.DEBUG)
 
-    position = get_pos_by_name(config["location"])
+    if not position:
+        position = get_pos_by_name(config["location"])
 
     # instantiate pgoapi
     pokemon_names = json.load(open("pokemon.en.json"))
@@ -108,6 +127,22 @@ def main():
 
     # provide player position on the earth
     api.set_position(*position)
+
+    desc_file = os.path(os.path.dirname(os.path.realpath(__file__)), ".listeners")
+    sock_port = 0
+    s = socket.socket()
+    s.bind(("", 0))  # let the kernel find a free port
+    sock_port = s.getsockname()[1]
+    s.close()
+    with open(desc_file, 'w+') as f:
+        data = f.read()
+        data = json.loads(data.encode() if len(data) > 0 else '{}')
+        data[config["username"]] = sock_port
+        f.write(json.dumps(data, indent=2))
+
+    s = zerorpc.Server(Listener(api))
+    s.bind("tcp://127.0.0.1:%i" % sock_port) # the free port should still be the same
+    gevent.spawn(s.run)
 
     # retry login every 30 seconds if any errors
     while not api.login(config["auth_service"], config["username"], config["password"]):
@@ -118,17 +153,14 @@ def main():
     while True:
         try:
             api.main_loop()
-        except Exception:
-            logger.exception('Error in main loop, restarting %s')
+        except Exception as e:
+            logger.exception('Error in main loop %s, restarting at location: %s', e, api.get_position())
             # restart after sleep
             sleep(30)
             try:
-                main()
+                main(api._posf)
             except:
                 pass
 
 if __name__ == '__main__':
-    try:
-        main()
-    except:
-        pass
+    main()

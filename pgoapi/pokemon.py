@@ -28,7 +28,8 @@ class Pokemon:
         }
     ]
 
-    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None, player_level=0):
+    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None, player_level=0,
+                 score_method="CP", score_settings=dict()):
         self.pokemon_data = pokemon_data
         self.stamina = pokemon_data.get('stamina', 0)
         self.favorite = pokemon_data.get('favorite', -1)
@@ -73,6 +74,18 @@ class Pokemon:
                                     sqrt(defense + self.individual_defense) *
                                     sqrt(stamina + self.individual_stamina) *
                                     pow(self.get_cpm_by_level(40), 2)) / 10
+        self.score = 0.0
+        if score_method == "CP":
+            self.score = self.cp
+        elif score_method == "IV":
+            self.score = self.iv_normalized
+        elif score_method == "CP*IV":
+            self.score = self.cp * self.iv_normalized
+        elif score_method == "CP+IV":
+            self.score = self.cp + self.iv_normalized
+        elif score_method == "FANCY":
+            self.score = (self.iv_normalized / 100.0 * score_settings.get("WEIGHT_IV", 0.5)) + \
+                         (self.level / (player_level + 1.5) * score_settings.get("WEIGHT_LVL", 0.5))
 
     def __str__(self):
         nickname = ""
@@ -81,21 +94,23 @@ class Pokemon:
             nickname = "Nickname: " + self.nickname + ", "
 
         if self.max_cp > 0:
-            return "{0}Type: {1} CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, " \
-                   "LvlWild: {5:.1f}, MaxCP: {6:.0f}, MaxCPAbs: {7:.0f}, IV-Norm.: {8:.0f}".format(nickname,
-                                                                                                   self.pokemon_type,
-                                                                                                   self.cp, self.iv,
-                                                                                                   self.level,
-                                                                                                   self.level_wild,
-                                                                                                   self.max_cp,
-                                                                                                   self.max_cp_absolute,
-                                                                                                   self.iv_normalized)
+            str_ = "{0}Type: {1} CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, " \
+                   "LvlWild: {5:.1f}, MaxCP: {6:.0f}, Score: {7}, IV-Norm.: {8:.0f}"
+            return str_.format(nickname,
+                               self.pokemon_type,
+                               self.cp, self.iv,
+                               self.level,
+                               self.level_wild,
+                               self.max_cp,
+                               self.score,
+                               self.iv_normalized)
         else:
-            return "{0}Type: {1}, CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, LvlWild: {5:.1f}".format(nickname,
-                                                                                               self.pokemon_type,
-                                                                                               self.cp, self.iv,
-                                                                                               self.level,
-                                                                                               self.level_wild)
+            str_ = "{0}Type: {1}, CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, LvlWild: {5:.1f}"
+            return str_.format(nickname,
+                               self.pokemon_type,
+                               self.cp, self.iv,
+                               self.level,
+                               self.level_wild)
 
     def __repr__(self):
         return self.__str__()

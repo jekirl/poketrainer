@@ -1,14 +1,18 @@
 # DISCLAIMER: This is jank
 import csv
 import json
+import os
 import re
 from collections import defaultdict
 
-from flask import Flask, render_template
+from flask import Flask, flash, redirect, render_template, url_for
 
 from pgoapi.poke_utils import pokemon_iv_percentage
 
+import zerorpc
+
 app = Flask(__name__, template_folder="templates")
+app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 
 pokemon_names = json.load(open("pokemon.en.json"))
 pokemon_details = {}
@@ -61,7 +65,29 @@ def inventory(username):
         player['level_xp'] = player.get('experience', 0) - player.get('prev_level_xp', 0)
         player['hourly_exp'] = data.get("hourly_exp", 0)
         player['goal_xp'] = player.get('next_level_xp', 0) - player.get('prev_level_xp', 0)
+        player['username'] = username
         return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
+
+
+@app.route("/<username>/transfer/<p_id>")
+def transfer(username, p_id):
+    desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
+    sock_port = 0
+    with open(desc_file) as f:
+        data = f.read()
+        data = json.loads(data.encode() if len(data) > 0 else '{}')
+        if username not in data:
+            flash("There is not such username!")
+            return redirect(url_for('inventory', username=username))  # will also fail?
+        sock_port = int(data[username])
+
+    c = zerorpc.Client()
+    c.connect("tcp://127.0.0.1:%i" % sock_port)
+    if c.releasePokemonById(p_id) == 1:
+        flash("Released")
+    else:
+        flash("Failed!")
+    return redirect(url_for('inventory', username=username))
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)

@@ -5,31 +5,64 @@
       "username": "test@gmail.com",
       "password": "password",
       "location": "University of Southern California, Los Angeles, CA",
-      "USE_GOOGLE": true,
       "GMAPS_API_KEY": "some api key here",
-      "KEEP_CP_OVER": 500,
-      "KEEP_IV_OVER": 50,
-      "STEP_SIZE": 100,
-      "EXPERIMENTAL": false,
-      "SKIP_VISITED_FORT_DURATION": 600,
-      "SPIN_ALL_FORTS": true,
-      "STAY_WITHIN_PROXIMITY": 9999,
-      "AUTO_USE_LUCKY_EGG": false,
+      "BEHAVIOR": {
+        "USE_GOOGLE": true,
+        "STEP_SIZE": 100,
+        "WANDER_STEPS": 0,
+        "EXPERIMENTAL": false,
+        "SKIP_VISITED_FORT_DURATION": 600,
+        "SPIN_ALL_FORTS": true,
+        "STAY_WITHIN_PROXIMITY": 9999,
+        "AUTO_USE_LUCKY_EGG": false
+      },
+      "CAPTURE": {
+        "CATCH_POKEMON": true,
+        "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 3,
+        "MAX_CATCH_ATTEMPTS": 10
+      },
       "EGG_INCUBATION": {
         "ENABLE": true,
         "USE_DISPOSABLE_INCUBATORS": false,
         "BIG_EGGS_FIRST": true
       },
+      "POKEMON_EVOLUTION": {
+        "PIDGEY": 12,
+        "WEEDLE": 12
+      },
+      "POKEMON_CLEANUP": {
+        "MIN_SIMILAR_POKEMON": 1,
+        "MAX_SIMILAR_POKEMON": 999,
+        "KEEP_POKEMON_NAMES": ["MEWTWO"],
+        "THROW_POKEMON_NAMES": ["PIDGEY"],
+        "RELEASE_METHOD": "CLASSIC",
+        "RELEASE_METHOD_CLASSIC": {
+          "KEEP_CP_OVER": 500,
+          "KEEP_IV_OVER": 50,
+          "KEEP_IV_ONLY_WITH_PERCENT_CP": 20,
+          "MAX_POKEMON_HIGH_IV": 999
+        },
+        "RELEASE_METHOD_DUPLICATES": {
+          "RELEASE_DUPLICATES_MAX_SCORE": 1000,
+          "RELEASE_DUPLICATES_SCALAR": 0.9
+        },
+        "SCORE_METHOD": "CP",
+        "SCORE_METHOD_FANCY": {
+          "WEIGHT_IV": 0.5,
+          "WEIGHT_LVL": 0.5
+        }
+      },
       "MIN_ITEMS": {
-        "ITEM_POTION": 10,
-        "ITEM_SUPER_POTION": 10,
+        "ITEM_POTION": 5,
+        "ITEM_SUPER_POTION": 5,
         "ITEM_HYPER_POTION": 10,
         "ITEM_MAX_POTION": 20,
-        "ITEM_BLUK_BERRY": 10,
-        "ITEM_NANAB_BERRY": 10,
-        "ITEM_REVIVE": 10,
-        "ITEM_MAX_REVIVE": 10,
-        "ITEM_RAZZ_BERRY": 10
+        "ITEM_POKE_BALL": 100,
+        "ITEM_GREAT_BALL": 50,
+        "ITEM_ULTRA_BALL": 30,
+        "ITEM_RAZZ_BERRY": 10,
+        "ITEM_REVIVE": 5,
+        "ITEM_MAX_REVIVE": 10
       },
       "NEEDY_ITEM_FARMING": {
         "ENABLE": false,
@@ -41,28 +74,23 @@
         "FARM_IGNORE_MASTERBALL_COUNT": true,
         "FARM_OVERRIDE_STEP_SIZE": -1
       },
-      "POKEMON_EVOLUTION": {
-        "PIDGEY": 12,
-        "WEEDLE":12
-      },
-      "MIN_SIMILAR_POKEMON": 1,
-      "KEEP_POKEMON_NAMES": ["MEWTWO"],
-      "THROW_POKEMON_NAMES": ["PIDGEY"],
-      "LIST_POKEMON_BEFORE_CLEANUP": true,
-      "LIST_INVENTORY_BEFORE_CLEANUP": true,
-      "MAX_CATCH_ATTEMPTS": 10,
-      "RELEASE_DUPLICATES": false,
-      "RELEASE_DUPLICATES_MAX_LV": 1000,
-      "RELEASE_DUPLICATES_SCALER": 0.9,
-      "DEFINE_POKEMON_LV": "CP"
+      "CONSOLE_OUTPUT": {
+        "LIST_POKEMON_BEFORE_CLEANUP": true,
+        "LIST_INVENTORY_BEFORE_CLEANUP": true
+      }
     },
     {
       "auth_service": "ptc",
       "username": "someusername",
       "password": "password",
       "location": "University of Southern California, Los Angeles, CA",
-      "USE_GOOGLE": false,
-      "MIN_KEEP_IV": 70
+      "BEHAVIOR": {
+        "USE_GOOGLE": false
+      }
     }
-  ]
+  ],
+  "defaults": {
+      "_info": "copy values to this section to use them for all accounts",
+      "_info2": "account settings will always override defaults",
+  }
 }

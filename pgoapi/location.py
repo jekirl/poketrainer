@@ -40,8 +40,8 @@ def get_route(start, end, use_google=False, gmaps_api_key="", walk_to_all_forts=
             'steps': final_steps
         }
     else:
-        total_distance = distance_in_meters(start, end)
-        step_increments = get_increments(start, end, step_size)
+        total_distance = distance_in_meters(start, destination)
+        step_increments = get_increments(start, destination, step_size)
         final_steps = []
         previous_step = step_increments[0]
         for step in step_increments[1:]:
@@ -60,6 +60,7 @@ def get_route(start, end, use_google=False, gmaps_api_key="", walk_to_all_forts=
 
 # step_size corresponds to how many meters between each step we want
 def get_increments(start, end, step_size=200):
+    print start,end
     # def get_increments(start,end,step_size=3):
     g = pyproj.Geod(ellps='WGS84')
     (startlat, startlong, _) = start
