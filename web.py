@@ -56,17 +56,14 @@ def get_player_data(username):
 
 @app.route("/")
 def users():
-   import glob
-   data_files = glob.glob("data_dumps/*.json")
-   users = []
+    users = []
    
-   for file_path in data_files:
-       match = re.search('\/([^\.]+)\.', file_path)
-       if match:
-           user_data = get_player_data(match.group()[1:-1])
-           users.append(user_data)
+    for file in os.listdir("data_dumps"):
+        if file.endswith(".json"):
+            user_data = get_player_data(os.path.splitext(file)[0])
+            users.append(user_data)
 
-   return render_template('users.html', users=users)
+    return render_template('users.html', users=users)
 
 @app.route("/<username>/pokemon")
 def inventory(username):
