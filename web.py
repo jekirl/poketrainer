@@ -4,6 +4,7 @@ import json
 import csv
 from math import floor
 from collections import defaultdict
+from datetime import datetime
 import re
 from pgoapi.poke_utils import *
 import tempfile
@@ -42,6 +43,7 @@ def inventory(username):
         items = data['GET_INVENTORY']['inventory_delta']['inventory_items']
         pokemons = []
         candy = defaultdict(int)
+        last_caught_timestamp = 0
         player = {}
         for item in items:
             item = item['inventory_item_data']
@@ -51,6 +53,8 @@ def inventory(username):
                 pokemon.update(pokemon_details[str(pokemon['pokemon_id'])])
                 pokemon['iv'] = pokemonIVPercentage(pokemon)
                 pokemons.append(pokemon)
+                if pokemon['creation_time_ms'] > last_caught_timestamp:
+                    last_caught_timestamp = pokemon['creation_time_ms']
             if 'player_stats' in item:
                 player = item['player_stats']
             if "pokemon_family" in item:
@@ -64,7 +68,7 @@ def inventory(username):
         player['hourly_exp'] = data.get("hourly_exp",0)
         player['goal_xp'] = player.get('next_level_xp',0)-player.get('prev_level_xp',0)
         player['username'] = username
-        return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
+        return render_template('pokemon.html', pokemons=pokemons, player=player, items=items, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, last_caught_timestamp=last_caught_timestamp)
 
 @app.route("/<username>/transfer/<p_id>")
 def transfer(username, p_id):
@@ -85,6 +89,11 @@ def transfer(username, p_id):
     else:
         flash("Failed!")
     return redirect(url_for('inventory', username = username))
+
+# filter epoch to readable date like: {{ pokemon["creation_time_ms"]|epochToDate }}
+@app.template_filter('epochToDate')
+def _jinja2_filter_datetime(pokeEpochTime, fmt=None):
+    return datetime.fromtimestamp(pokeEpochTime/1000).strftime('%Y-%m-%d %H:%M:%S')    
     
 if __name__ == "__main__":
     app.run(host='0.0.0.0',debug=True)
