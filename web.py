@@ -32,6 +32,27 @@ with open ("GAME_ATTACKS_v0_1.tsv") as tsv:
     for row in reader:
         attacks[int(row["Num"])] = row["Move"]
 
+def get_player_data(username):
+    player = {}
+    with open("data_dumps/%s.json"%username) as f:
+        data = f.read()
+        data = json.loads(data.encode())
+
+        items = data['GET_INVENTORY']['inventory_delta']['inventory_items']
+
+        for item in items:
+            item = item['inventory_item_data']
+            if 'player_stats' in item:
+                player = item['player_stats']
+
+        # add candy back into pokemon json
+        player['level_xp'] = player.get('experience',0)-player.get('prev_level_xp',0)
+        player['hourly_exp'] = data.get("hourly_exp",0)
+        player['goal_xp'] = player.get('next_level_xp',0)-player.get('prev_level_xp',0)
+        player['username'] = username
+
+    return player
+
 @app.route("/")
 def users():
    import glob
@@ -41,7 +62,8 @@ def users():
    for file_path in data_files:
        match = re.search('\/([^\.]+)\.', file_path)
        if match:
-           users.append(match.group()[1:-1])
+           user_data = get_player_data(match.group()[1:-1])
+           users.append(user_data)
 
    return render_template('users.html', users=users)
 
