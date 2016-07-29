@@ -59,5 +59,9 @@ def inventory(username):
         player['goal_xp'] = player['next_level_xp']-player['prev_level_xp']
         return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
 
+@app.template_filter('epochToDate')
+def _jinja2_filter_datetime(pokeEpochTime, fmt=None):
+    return datetime.fromtimestamp(pokeEpochTime/1000).strftime('%Y-%m-%d %H:%M:%S')     
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0',debug=True)
