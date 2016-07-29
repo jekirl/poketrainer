@@ -157,7 +157,7 @@ class PGoApi:
         self.spin_all_forts = config.get("BEHAVIOR", {}).get("SPIN_ALL_FORTS", False)
         self.STAY_WITHIN_PROXIMITY = config.get("BEHAVIOR", {}).get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
         self.game_master = parse_game_master()
-        self.should_catch_pokemon = config.get("BEHAVIOR", {}).get("CATCH_POKEMON", True)
+        self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True)
         self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
 
         # Sanity checking
