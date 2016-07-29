@@ -48,20 +48,20 @@ def all_in(candidates, sequence):
             return False
     return True
 
-def take_closest(my_number, my_list):
+def takeClosest(myNumber, myList):
     """
-    Assumes my_list is sorted. Returns closest value to my_number.
+    Assumes myList is sorted. Returns closest value to myNumber.
 
     If two numbers are equally close, return the smallest number.
     """
-    pos = bisect_left(my_list, my_number)
+    pos = bisect_left(myList, myNumber)
     if pos == 0:
-        return my_list[0]
-    if pos == len(my_list):
-        return my_list[-1]
-    before = my_list[pos - 1]
-    after = my_list[pos]
-    if after - my_number < my_number - before:
+        return myList[0]
+    if pos == len(myList):
+        return myList[-1]
+    before = myList[pos - 1]
+    after = myList[pos]
+    if after - myNumber < myNumber - before:
        return after
     else:
        return before

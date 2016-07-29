@@ -11,7 +11,7 @@ import re
 
 POKEMON_NAMES = json.load(open("pokemon.en.json"))
 pokemon_lvls = {}
-tcpm_vals = []
+tcmpVals = []
 with open ("PoGoPokeLvl.tsv") as tsv: #data gathered from here: https://www.reddit.com/r/TheSilphRoad/comments/4sa4p5/stardust_costs_increase_every_4_power_ups/
     reader = csv.DictReader(tsv, delimiter='\t')
     for row in reader:
@@ -22,17 +22,17 @@ with open ("PoGoPokeLvl.tsv") as tsv: #data gathered from here: https://www.redd
             "PowerUpResult": float(row["Delta(TCpM^2)"]),
             "TCPMDif": float(row["TCPM Difference"])
         }
-        tcpm_vals.append(float(row["TotalCpMultiplier"]))
+        tcmpVals.append(float(row["TotalCpMultiplier"]))
 
-def set_max_cp(pokemon, max_tcpm):
-    poke_game_data = GAME_MASTER.get(pokemon.pokemon_id, PokemonData())
-    if int(poke_game_data.PkMn) == 0 or not all_in(['cp', 'cp_multiplier'], pokemon.pokemon_data):
+def setMaxCP(pokemon, maxTCPM):
+    pokeGameData = GAME_MASTER.get(pokemon.pokemon_id, PokemonData())
+    if int(pokeGameData.PkMn) == 0 or not all_in(['cp', 'cp_multiplier'], pokemon.pokemon_data):
         return
 
-    candy_to_evolve = int(poke_game_data.CandyToEvolve)
+    candyToEvolve = int(pokeGameData.CandyToEvolve)
 
-    pokemon.candy_needed_to_max_evolve = pokemon_lvls[max_tcpm]['CandySoFar'] - pokemon_lvls[pokemon.cpm_total]['CandySoFar'] + candy_to_evolve
-    pokemon.dust_needed_to_max_evolve = pokemon_lvls[max_tcpm]['DustSoFar'] - pokemon_lvls[pokemon.cpm_total]['DustSoFar']
+    pokemon.candyNeededToMaxEvolve = pokemon_lvls[maxTCPM]['CandySoFar'] - pokemon_lvls[pokemon.cpm_total]['CandySoFar'] + candyToEvolve
+    pokemon.dustNeededToMaxEvolve = pokemon_lvls[maxTCPM]['DustSoFar'] - pokemon_lvls[pokemon.cpm_total]['DustSoFar']
 
     i = 0
     if pokemon.pokemon_id == 133: #is an Eevee
@@ -43,26 +43,26 @@ def set_max_cp(pokemon, max_tcpm):
         else: #Rainer or Vaporean is the default
             i = 1
     else:
-        while GAME_MASTER.get(pokemon.pokemon_id + i + 1, PokemonData()).FamilyId == poke_game_data.FamilyId and candy_to_evolve > 0:
-            candy_to_evolve = int(GAME_MASTER.get(pokemon.pokemon_id + i + 1, PokemonData()).CandyToEvolve)
-            pokemon.candy_needed_to_max_evolve += candy_to_evolve
+        while GAME_MASTER.get(pokemon.pokemon_id + i + 1, PokemonData()).FamilyId == pokeGameData.FamilyId and candyToEvolve > 0:
+            candyToEvolve = int(GAME_MASTER.get(pokemon.pokemon_id + i + 1, PokemonData()).CandyToEvolve)
+            pokemon.candyNeededToMaxEvolve += candyToEvolve
             i+=1
 
     if(i == 0):
-        pokemon.max_evolve_cp = calc_cp(pokemon.pokemon_data, max_tcpm, poke_game_data)
+        pokemon.maxEvolveCP = calcCP(pokemon.pokemon_data, maxTCPM, pokeGameData)
     else:
-        evolved_poke_data = GAME_MASTER.get(pokemon.pokemon_id + i , PokemonData())
-        pokemon.max_evolve_cp = calc_cp(pokemon.pokemon_data, max_tcpm, evolved_poke_data)
+        evolvedPokeData = GAME_MASTER.get(pokemon.pokemon_id + i , PokemonData())
+        pokemon.maxEvolveCP = calcCP(pokemon.pokemon_data, maxTCPM, evolvedPokeData)
 
     pokeLvl = pokemon_lvls[pokemon.cpm_total]['PokemonLvl']
-    pokemon.power_up_result = calc_cp(pokemon.pokemon_data, tcpm_vals[pokeLvl], poke_game_data) - pokemon.cp
+    pokemon.PowerUpResult = calcCP(pokemon.pokemon_data, tcmpVals[pokeLvl], pokeGameData) - pokemon.cp
 
 #TCPM = CPM + ACPM
 #Stamina =  (BaseStamina + IndividualStamina) * TCPM
 #Attack = (BaseAttack + IndividualAttack) * TCPM
 #Defense = (BaseDefense + IndividualDefense) * TCPM
 #CP = MAX(10, FLOOR(Stamina0.5 * Attack * Def0.5 / 10))
-def calc_acpm(pokemon, pokemon_details):
+def calcACPM(pokemon, pokemon_details):
     if not all_in(['cp', 'cp_multiplier'], pokemon.pokemon_data):
         return 0    
 
@@ -72,7 +72,7 @@ def calc_acpm(pokemon, pokemon_details):
     cpm = pokemon.cp_multiplier
     return max(0, sqrt(sqrt( (100*pow(pokemon.cp, 2)) / ( pow((baseAttk + pokemon.individual_attack), 2) * (baseDef + pokemon.individual_defense) * (baseStamina + pokemon.individual_stamina)  ) )) - cpm)
 
-def calc_cp(pokemon, tcpm, pokemon_details):
+def calcCP(pokemon, tcpm, pokemon_details):
     baseAttk = int(pokemon_details.BaseAttack)
     baseDef = int(pokemon_details.BaseDefense)
     baseStamina = int(pokemon_details.BaseStamina)
@@ -83,8 +83,8 @@ def calc_cp(pokemon, tcpm, pokemon_details):
 
     return int(max(10, floor(sqrt(stamina) * attk * sqrt(defense) / 10)))
 
-def get_tcpm(tcpm):
-    return take_closest(tcpm, tcpm_vals)
+def getTCPM(tcpm):
+    return takeClosest(tcpm, tcmpVals)
 
 def get_item_name(s_item_id):
     available_items = Enum_Items.ItemId.DESCRIPTOR.values_by_number.items()
