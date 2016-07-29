@@ -59,7 +59,6 @@ def get_route(start, end, use_google=False, GMAPS_API_KEY="", walk_to_all_forts=
 
 # step_size corresponds to how many meters between each step we want
 def get_increments(start, end, step_size=200):
-    print start,end
     # def get_increments(start,end,step_size=3):
     g = pyproj.Geod(ellps='WGS84')
     (startlat, startlong, _) = start
