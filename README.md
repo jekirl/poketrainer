@@ -26,7 +26,7 @@ optional arguments:
 
 ### Web UI
  * Run python web.py to get a webservice to show you player information, this can be seen at:
-  * http://127.0.0.1:5000/YOUR_USERNAME_HERE/pokemon
+  * http://127.0.0.1:5000
   * Only 1 needs to run regardless of how many bots you are running
 
 ----
