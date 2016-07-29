@@ -1,10 +1,9 @@
 from __future__ import absolute_import
-
 from math import sqrt
-import json
+from pgoapi.poke_utils import calc_acpm, calc_cp, get_tcpm, POKEMON_NAMES
+from pgoapi.utilities import *
 from pgoapi.game_master import PokemonData, GAME_MASTER
 
-POKEMON_NAMES = json.load(open("pokemon.en.json"))
 class Pokemon:
     # Used for calculating the pokemon level
     # source http://pokemongo.gamepress.gg/cp-multiplier
@@ -35,6 +34,7 @@ class Pokemon:
     def __init__(self, pokemon_data, player_level=0,
                  score_method="CP", score_settings=dict()):
         self.pokemon_data = pokemon_data
+        self.creation_time_ms = pokemon_data.get('creation_time_ms', 0)
         self.stamina = pokemon_data.get('stamina', 0)
         self.favorite = pokemon_data.get('favorite', -1)
         self.is_favorite = self.favorite != -1
@@ -54,14 +54,37 @@ class Pokemon:
         self.nickname = pokemon_data.get('nickname', "").encode('utf8')
         self.iv = self.get_iv_percentage()
         self.pokemon_type = POKEMON_NAMES.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore')
+
+        ##### Vals Used in Web.py #######################
+        if self.nickname is not "":
+            self.name = self.nickname
+        else:
+            self.name = self.pokemon_type
+        self.candy = 0
+        self.move_1 = pokemon_data.get('move_1', 0)
+        self.move_2 = pokemon_data.get('move_2', 0)
+
+        #Max Evolve based on ur lvl vals and Power Up
+        self.candy_needed_to_max_evolve = 0
+        self.dust_needed_to_max_evolve = 0
+        self.max_evolve_cp = 0
+        self.power_up_result = 0
+
         self.iv_normalized = -1.0
         self.max_cp = -1.0
         self.max_cp_absolute = -1.0
-        self.cpm_total = self.cp_multiplier + self.additional_cp_multiplier
-        self.level_wild = self.get_level_by_cpm(self.cp_multiplier)
-        self.level = self.get_level_by_cpm(self.cpm_total)
         additional_data = GAME_MASTER[self.pokemon_id]
         self.family_id = additional_data.FamilyId
+
+        #ACPM, TCPM, Rating
+        if 'additional_cp_multiplier' not in pokemon_data:
+            self.additional_cp_multiplier = calc_acpm(self, additional_data)
+
+        #helps with rounding errors
+        self.cpm_total = get_tcpm(self.cp_multiplier + self.additional_cp_multiplier)
+        self.level_wild = self.get_level_by_cpm(self.cp_multiplier)
+        self.level = self.get_level_by_cpm(self.cpm_total)
+
         # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
         attack = float(additional_data.BaseAttack)
         defense = float(additional_data.BaseDefense)
@@ -69,15 +92,10 @@ class Pokemon:
         worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.cpm_total, 2)) / 10
         perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.cpm_total, 2)) / 10
         if perfect_iv_cp - worst_iv_cp > 0:
-            self.iv_normalized = 100 * (self.cp - worst_iv_cp) / (perfect_iv_cp - worst_iv_cp)
-        self.max_cp = ((attack + self.individual_attack) *
-                       sqrt(defense + self.individual_defense) *
-                       sqrt(stamina + self.individual_stamina) *
-                       pow(self.get_cpm_by_level(player_level+1.5), 2)) / 10
-        self.max_cp_absolute = ((attack + self.individual_attack) *
-                       sqrt(defense + self.individual_defense) *
-                       sqrt(stamina + self.individual_stamina) *
-                       pow(self.get_cpm_by_level(40), 2)) / 10
+            self.iv_normalized = 100 * (self.cp - worst_iv_cp) / (perfect_iv_cp - worst_iv_cp)        
+
+        self.max_cp = calc_cp(self.pokemon_data, self.get_cpm_by_level(player_level+1.5),additional_data)
+        self.max_cp_absolute = calc_cp(self.pokemon_data, self.get_cpm_by_level(40),additional_data)
         self.score = 0.0
         if score_method == "CP":
             self.score = self.cp
