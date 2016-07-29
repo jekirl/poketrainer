@@ -56,15 +56,26 @@ def setMaxCP(pokemon, maxTCPM):
         pokemon['PowerUpResult'] = 0
         return
 
-    pokemon['candyNeeded'] = pokemon_lvls[maxTCPM]['CandySoFar'] - pokemon_lvls[pokemon['tcpm']]['CandySoFar'] + pokemon_details[str(pokemon['pokemon_id'])]['CandyToEvolve']
+    candyToEvolve = pokemon_details[str(pokemon['pokemon_id'])]['CandyToEvolve']
+
+    pokemon['candyNeeded'] = pokemon_lvls[maxTCPM]['CandySoFar'] - pokemon_lvls[pokemon['tcpm']]['CandySoFar'] + candyToEvolve
     pokemon['dustNeeded'] = pokemon_lvls[maxTCPM]['DustSoFar'] - pokemon_lvls[pokemon['tcpm']]['DustSoFar']
 
     family_id = pokemon_details[str(pokemon['pokemon_id'])]['family_id']
     maxPokeId = pokemon['pokemon_id']
     i = 0
     
-    while pokemon_details[str(pokemon['pokemon_id'] + i + 1)]['family_id'] == family_id:
-        pokemon['candyNeeded'] += pokemon_details[str(pokemon['pokemon_id'] + i + 1)]['CandyToEvolve']
+    if pokemon['pokemon_id'] == 133 and 'nickname' in pokemon: #is an Eevee
+        if pokemon['nickname'] is 'Sparky':
+            i = 2
+        elif pokemon['nickname'] is 'Pyro': 
+            i = 3
+        else: #Rainer or Vaporean is the default
+            i = 1
+    else:
+        while pokemon_details[str(pokemon['pokemon_id'] + i + 1)]['family_id'] == family_id and candyToEvolve > 0:
+            candyToEvolve = pokemon_details[str(pokemon['pokemon_id'] + i + 1)]['CandyToEvolve']
+            pokemon['candyNeeded'] += candyToEvolve
         i+=1
 
     if(i == 0):
