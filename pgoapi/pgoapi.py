@@ -117,7 +117,7 @@ class PGoApi:
         self.KEEP_IV_ONLY_WITH_PERCENT_CP = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD_CLASSIC", {})\
             .get("KEEP_IV_ONLY_WITH_PERCENT_CP", 0)  # Minimum CP (percentage of strongest pokemon) for a pokemon to keep because of the KEEP_IV_OVER
         self.MAX_POKEMON_HIGH_IV = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD_CLASSIC", {})\
-            .get("MAX_POKEMON_HIGH_IV", 0)  # Maximum nr of Pokemon to keep because of the KEEP_IV_OVER value
+            .get("MAX_POKEMON_HIGH_IV", 999)  # Maximum nr of Pokemon to keep because of the KEEP_IV_OVER value
 
         self.RELEASE_DUPLICATES_MAX_SCORE = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD_DUPLICATES", {})\
             .get("RELEASE_DUPLICATES_MAX_SCORE", 0) # only release duplicates up to this lvl

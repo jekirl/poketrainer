@@ -66,10 +66,6 @@ class Pokemon:
         attack = float(additional_data.BaseAttack)
         defense = float(additional_data.BaseDefense)
         stamina = float(additional_data.BaseStamina)
-        worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.cpm_total, 2)) / 10
-        perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.cpm_total, 2)) / 10
-        if perfect_iv_cp - worst_iv_cp > 0:
-            self.iv_normalized = 100 * (self.cp - worst_iv_cp) / (perfect_iv_cp - worst_iv_cp)
         self.max_cp = ((attack + self.individual_attack) *
                        sqrt(defense + self.individual_defense) *
                        sqrt(stamina + self.individual_stamina) *
@@ -78,6 +74,11 @@ class Pokemon:
                        sqrt(defense + self.individual_defense) *
                        sqrt(stamina + self.individual_stamina) *
                        pow(self.get_cpm_by_level(40), 2)) / 10
+        # calculating these for level 40 to get more accurate values
+        worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.get_cpm_by_level(40), 2)) / 10
+        perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.get_cpm_by_level(40), 2)) / 10
+        if perfect_iv_cp - worst_iv_cp > 0:
+                self.iv_normalized = 100 * (self.max_cp_absolute - worst_iv_cp) / (perfect_iv_cp - worst_iv_cp)
         self.score = 0.0
         if score_method == "CP":
             self.score = self.cp
