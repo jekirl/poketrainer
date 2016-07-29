@@ -439,9 +439,9 @@ class PGoApi:
         result = res.pop('result', -1)
         if result == 1 and res:
             items = defaultdict(int)
-            for item in res['items_awarded']:
+            for item in res.get('items_awarded', []):
                 items[item['item_id']] += item['item_count']
-            reward = 'XP +' + str(res['experience_awarded'])
+            reward = 'XP +' + str(res.get('experience_awarded', 'NA'))
             for item_id, amount in items.iteritems():
                 reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
             self.log.debug("Fort spinned: %s", res)
