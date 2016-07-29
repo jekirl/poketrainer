@@ -121,13 +121,13 @@ def inventory(username):
         latlng = c.current_location()
         latlng = "%f,%f" % (latlng[0],latlng[1])
         items = data['GET_INVENTORY']['inventory_delta']['inventory_items']
-        pokemonsData = []
+        pokemons_data = []
         candy = defaultdict(int)
         for item in items:
             item = item['inventory_item_data']
             pokemon = item.get("pokemon_data",{})
             if "pokemon_id" in pokemon:
-                pokemonsData.append(pokemon)
+                pokemons_data.append(pokemon)
             if 'player_stats' in item:
                 player = item['player_stats']
             if "pokemon_family" in item:
@@ -135,10 +135,10 @@ def inventory(username):
                 candy[filled_family] += item['pokemon_family'].get("candy",0)
         # add candy back into pokemon json
         pokemons = []
-        for pokemon in pokemonsData:
+        for pokemon in pokemons_data:
             pkmn = Pokemon(pokemon, player['level'], options['DEFINE_POKEMON_LV'])
             pkmn.candy = candy[pkmn.family_id]
-            setMaxCP(pkmn, tcmpVals[int(player['level']*2 + 1)])
+            set_max_cp(pkmn, tcpm_vals[int(player['level']*2 + 1)])
             pokemons.append(pkmn)           
         pokemons = sorted(pokemons, lambda x,y: cmp(x.iv, y.iv),reverse=True)             
         player['username'] = data['GET_PLAYER']['player_data']['username']

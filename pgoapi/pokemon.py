@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from math import sqrt
-from pgoapi.poke_utils import calcACPM, calcCP, getTCPM, POKEMON_NAMES
+from pgoapi.poke_utils import calc_acpm, calc_cp, get_tcpm, POKEMON_NAMES
 from pgoapi.utilities import *
 from pgoapi.game_master import PokemonData, GAME_MASTER
 
@@ -65,10 +65,10 @@ class Pokemon:
         self.move_2 = pokemon_data.get('move_2', 0)
 
         #Max Evolve based on ur lvl vals and Power Up
-        self.candyNeededToMaxEvolve = 0
-        self.dustNeededToMaxEvolve = 0
-        self.maxEvolveCP = 0
-        self.PowerUpResult = 0
+        self.candy_needed_to_max_evolve = 0
+        self.dust_needed_to_max_evolve = 0
+        self.max_evolve_cp = 0
+        self.power_up_result = 0
 
         self.iv_normalized = -1.0
         self.max_cp = -1.0
@@ -78,10 +78,10 @@ class Pokemon:
 
         #ACPM, TCPM, Rating
         if 'additional_cp_multiplier' not in pokemon_data:
-            self.additional_cp_multiplier = calcACPM(self, additional_data)
+            self.additional_cp_multiplier = calc_acpm(self, additional_data)
 
         #helps with rounding errors
-        self.cpm_total = getTCPM(self.cp_multiplier + self.additional_cp_multiplier)
+        self.cpm_total = get_tcpm(self.cp_multiplier + self.additional_cp_multiplier)
         self.level_wild = self.get_level_by_cpm(self.cp_multiplier)
         self.level = self.get_level_by_cpm(self.cpm_total)
 
@@ -94,8 +94,8 @@ class Pokemon:
         if perfect_iv_cp - worst_iv_cp > 0:
             self.iv_normalized = 100 * (self.cp - worst_iv_cp) / (perfect_iv_cp - worst_iv_cp)        
 
-        self.max_cp = calcCP(self.pokemon_data, self.get_cpm_by_level(player_level+1.5),additional_data)
-        self.max_cp_absolute = calcCP(self.pokemon_data, self.get_cpm_by_level(40),additional_data)
+        self.max_cp = calc_cp(self.pokemon_data, self.get_cpm_by_level(player_level+1.5),additional_data)
+        self.max_cp_absolute = calc_cp(self.pokemon_data, self.get_cpm_by_level(40),additional_data)
         self.score = 0.0
         if score_method == "CP":
             self.score = self.cp
