@@ -87,7 +87,7 @@ def status(username):
         return render_template('status.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, username = username)
 @app.route("/<username>/pokemon")
 def pokemon(username):
-    s = get_socket(username)
+    s = get_api_rpc(username)
     try:
         pokemons = json.loads(s.getCaughtPokemons())
     except ValueError, e:
@@ -97,7 +97,7 @@ def pokemon(username):
 
 @app.route("/<username>/inventory")
 def inventory(username):
-    s = get_socket(username)
+    s = get_api_rpc(username)
     try:
         inventory = json.loads(s.getInventory())
     except ValueError, e:
