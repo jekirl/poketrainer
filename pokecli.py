@@ -104,7 +104,7 @@ def init_config():
     return config.__dict__
 
 
-def main():
+def main(position=None):
     # log settings
     # log format
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
@@ -124,7 +124,10 @@ def main():
         logging.getLogger("pgoapi").setLevel(logging.DEBUG)
         logging.getLogger("rpc_api").setLevel(logging.DEBUG)
 
-    position = get_pos_by_name(config["location"])
+
+    if not position:
+        position = get_pos_by_name(config["location"])
+
 
     # instantiate pgoapi
     pokemon_names = json.load(open("pokemon.en.json"))
@@ -139,10 +142,12 @@ def main():
     s.bind(("", 0)) #let the kernel find a free port
     sock_port = s.getsockname()[1]
     s.close()
-    with open(desc_file,'w+') as f:
+    data = None
+    with open(desc_file,'r+') as f:
         data = f.read()
         data = json.loads(data.encode() if len(data) > 0 else '{}')
         data[config["username"]] = sock_port
+    with open(desc_file, "w+") as f:
         f.write(json.dumps(data,indent=2))
 
     s = zerorpc.Server(Listener(api))
@@ -159,16 +164,13 @@ def main():
         try:
             api.main_loop()
         except Exception as e:
-            log.exception('Error in main loop, restarting %s')
+            log.exception('Error in main loop %s, restarting at location: %s', e, api.get_position())
             # restart after sleep
             sleep(30)
             try:
-                main()
+                main(api._posf)
             except:
                 pass
 
 if __name__ == '__main__':
-    try:
-        main()
-    except:
-        pass
+    main()
