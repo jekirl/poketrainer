@@ -77,8 +77,8 @@ class PGoApi:
         self._firstRun = True
         self._last_egg_use_time = 0
         self._farm_mode_triggered = False
-        self._orig_step_size = config.get("STEP_SIZE", 200)
-        self.wander_steps = config.get("WANDER_STEPS", None)
+        self._orig_step_size = config.get("BEHAVIOR", {}).get("STEP_SIZE", 200)
+        self.wander_steps = config.get("BEHAVIOR", {}).get("WANDER_STEPS", 0)
 
         self.pokemon_caught = 0
         self.player = Player({})
@@ -101,19 +101,33 @@ class PGoApi:
             self.POKEMON_EVOLUTION[getattr(Enums_pb2, k)] = v
             self.POKEMON_EVOLUTION_FAMILY[getattr(Enums_pb2, k)] = getattr(Enums_pb2, "FAMILY_" + k)
 
-        self.experimental = config.get("EXPERIMENTAL", False)
+        self.experimental = config.get("BEHAVIOR", {}).get("EXPERIMENTAL", False)
 
         self.STEP_SIZE = self._orig_step_size
 
-        self.KEEP_IV_OVER = config.get("KEEP_IV_OVER", 0)  # release anything under this
-        self.KEEP_CP_OVER = config.get("KEEP_CP_OVER", 0)  # release anything under this
+        self.MIN_SIMILAR_POKEMON = config.get("POKEMON_CLEANUP", {}).get("MIN_SIMILAR_POKEMON", 1)  # Keep atleast one of everything.
+        self.MAX_SIMILAR_POKEMON = config.get("POKEMON_CLEANUP", {}).get("MAX_SIMILAR_POKEMON", 999)  # Stop keeping them at some amount
+        self.keep_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("POKEMON_CLEANUP", {}).get("KEEP_POKEMON_NAMES", []))
+        self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("POKEMON_CLEANUP", {}).get("THROW_POKEMON_NAMES", []))
 
-        self.MIN_SIMILAR_POKEMON = config.get("MIN_SIMILAR_POKEMON", 1)  # Keep atleast one of everything.
-        self.STAY_WITHIN_PROXIMITY = config.get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
+        self.RELEASE_METHOD = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD", "CLASSIC")
 
-        self.LIST_POKEMON_BEFORE_CLEANUP = config.get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
-        self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("LIST_INVENTORY_BEFORE_CLEANUP",
-                                                        True)  # list inventory in console
+        self.KEEP_CP_OVER = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD_CLASSIC", {})\
+            .get("KEEP_CP_OVER", 0)  # release anything under this
+        self.KEEP_IV_OVER = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD_CLASSIC", {})\
+            .get("KEEP_IV_OVER", 0)  # release anything under this
+        self.KEEP_IV_ONLY_WITH_PERCENT_CP = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD_CLASSIC", {})\
+            .get("KEEP_IV_ONLY_WITH_PERCENT_CP", 0)  # Minimum CP (percentage of strongest pokemon) for a pokemon to keep because of the KEEP_IV_OVER
+        self.MAX_POKEMON_HIGH_IV = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD_CLASSIC", {})\
+            .get("MAX_POKEMON_HIGH_IV", 0)  # Maximum nr of Pokemon to keep because of the KEEP_IV_OVER value
+
+        self.RELEASE_DUPLICATES_MAX_SCORE = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD_DUPLICATES", {})\
+            .get("RELEASE_DUPLICATES_MAX_SCORE", 0) # only release duplicates up to this lvl
+        self.RELEASE_DUPLICATES_SCALAR = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD_DUPLICATES", {})\
+            .get("RELEASE_DUPLICATES_SCALAR", 1.0) # when comparing two pokemon's lvl, multiply larger by this
+
+        self.SCORE_METHOD = config.get("POKEMON_CLEANUP", {}).get("SCORE_METHOD", "CP")
+        self.SCORE_SETTINGS = config.get("POKEMON_CLEANUP", {}).get("SCORE_METHOD_" + self.SCORE_METHOD, {})
 
         self.EGG_INCUBATION_ENABLED = config.get("EGG_INCUBATION", {}).get("ENABLE", True)
         self.USE_DISPOSABLE_INCUBATORS = config.get("EGG_INCUBATION", {}).get("USE_DISPOSABLE_INCUBATORS", False)
@@ -135,22 +149,16 @@ class PGoApi:
                                                                                      True)  # ignore masterballs in the continue tally
         self.FARM_OVERRIDE_STEP_SIZE = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_OVERRIDE_STEP_SIZE",
                                                                                 -1)  # should the step size be overriden when looking for more inventory, -1 to disable
-        # OVERRIDE STEP SIZE could be softbannable. No data to suggest either way.
 
-        self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("SKIP_VISITED_FORT_DURATION", 600))
-        self.spin_all_forts = config.get("SPIN_ALL_FORTS", False)
-        self.keep_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
-        self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
-        self.max_catch_attempts = config.get("MAX_CATCH_ATTEMPTS", 10)
+        self.LIST_POKEMON_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
+        self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
+
+        self.visited_forts = ExpiringDict(max_len=120, max_age_seconds=config.get("BEHAVIOR", {}).get("SKIP_VISITED_FORT_DURATION", 600))
+        self.spin_all_forts = config.get("BEHAVIOR", {}).get("SPIN_ALL_FORTS", False)
+        self.STAY_WITHIN_PROXIMITY = config.get("BEHAVIOR", {}).get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
         self.game_master = parse_game_master()
-        self.should_catch_pokemon = config.get("CATCH_POKEMON", True)
-        self.RELEASE_DUPLICATES = config.get("RELEASE_DUPLICATES", False)
-        self.RELEASE_DUPLICATES_MAX_LV = config.get("RELEASE_DUPLICATES_MAX_LV",
-                                                    0)  # only release duplicates up to this lvl
-        self.RELEASE_DUPLICATES_SCALER = config.get("RELEAES_DUPLICATES_SCALER",
-                                                    1.0)  # when comparing two pokemon's lvl, multiply larger by this
-        self.DEFINE_POKEMON_LV = config.get("DEFINE_POKEMON_LV",
-                                            "CP")  # define a pokemon's lvl, options are CP, IV, CP*IV, CP+IV
+        self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True)
+        self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
 
         # Sanity checking
         self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon  # Experimental, and we needn't do this if we're farming anyway
@@ -294,7 +302,8 @@ class PGoApi:
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
             self.log.info("Player Inventory after cleanup: %s", self.inventory)
             if self.LIST_POKEMON_BEFORE_CLEANUP:
-                self.log.info(get_inventory_data(res, self.pokemon_names, self.game_master, self.player_stats.level))
+                self.log.info(get_inventory_data(res, self.pokemon_names, self.game_master,
+                                                 self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS))
             self.incubate_eggs()
             self.attempt_evolve(self.inventory.inventory_items)
             self.cleanup_pokemon(self.inventory.inventory_items)
@@ -330,8 +339,8 @@ class PGoApi:
         return res
 
     def use_lucky_egg(self):
-        if self.config.get("AUTO_USE_LUCKY_EGG",
-                           False) and self.inventory.has_lucky_egg() and time() - self._last_egg_use_time > 30 * 60:
+        if self.config.get("BEHAVIOR", {}).get("AUTO_USE_LUCKY_EGG", False) and \
+                self.inventory.has_lucky_egg() and time() - self._last_egg_use_time > 30 * 60:
             self.use_item_xp_boost(item_id=Inventory.ITEM_LUCKY_EGG)
             response = self.call()
             result = response.get('responses', {}).get('USE_ITEM_XP_BOOST', {}).get('result', -1)
@@ -352,7 +361,7 @@ class PGoApi:
     def walk_to(self, loc, waypoints=[], directly=False):  # location in floats of course...
         # If we are going directly we don't want to follow a google maps
         # walkable route.
-        use_google = self.config.get("USE_GOOGLE", False)
+        use_google = self.config.get("BEHAVIOR", {}).get("USE_GOOGLE", False)
 
         if directly is True:
             use_google = False
@@ -389,7 +398,7 @@ class PGoApi:
 
                 gevent.sleep(1)
                 while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
-                    sleep(1)
+                    gevent.sleep(1)
                     catch_attempt += 1
                 catch_attempt = 0
 
@@ -409,7 +418,7 @@ class PGoApi:
             self.log.info('Nearest fort distance is %s', nearest_fort_dis)
 
             # Fort is close enough to change our route and walk to
-            if self.wander_steps:
+            if self.wander_steps > 0:
                 if nearest_fort_dis > 40.00 and nearest_fort_dis <= self.wander_steps:
                     self.walk_to_fort(destinations[0], directly=True)
 
@@ -430,7 +439,7 @@ class PGoApi:
         result = res.pop('result', -1)
         if result == 1 and res:
             items = defaultdict(int)
-            for item in res['items_awarded']:
+            for item in res.get('items_awarded',[]):
                 items[item['item_id']] += item['item_count']
             reward = 'XP +' + str(res['experience_awarded'])
             for item_id, amount in items.iteritems():
@@ -526,7 +535,7 @@ class PGoApi:
             target = pokemon_distance
             self.log.debug("Catching pokemon: : %s, distance: %f meters", target[0], target[1])
             catches_successful &= self.encounter_pokemon(target[0])
-            sleep(random.randrange(4, 8))
+            gevent.sleep(random.randrange(4, 8))
         return catches_successful
 
     def nearby_map_objects(self):
@@ -575,9 +584,9 @@ class PGoApi:
                     break
             ret = r
             # Sleep between catch attempts
-            sleep(3)
+            gevent.sleep(3)
         # Sleep after the catch (the pokemon animation time)
-        sleep(4)
+        gevent.sleep(4)
         return ret
 
     def cleanup_inventory(self, inventory_items=None):
@@ -602,7 +611,7 @@ class PGoApi:
                     else:
                         self.log.info("Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']),
                                                                                 response_code))
-                    sleep(2)
+                    gevent.sleep(2)
                 elif "count" in item:
                     item_count += item['count']
         if item_count > 0:
@@ -617,7 +626,7 @@ class PGoApi:
                 pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
                 pokemon = Pokemon(pokemon_data, self.pokemon_names,
                                   self.game_master.get(pokemon_data.get('pokemon_id', 0), PokemonData()),
-                                  self.player_stats.level)
+                                  self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS)
 
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
@@ -636,7 +645,7 @@ class PGoApi:
         else:
             self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
             self.log.info("Failed to release Pokemon %s", pokemon)
-        sleep(3)
+        gevent.sleep(3)
 
     def get_pokemon_stats(self, inventory_items=None):
         if not inventory_items:
@@ -654,44 +663,58 @@ class PGoApi:
         caught_pokemon = self.get_caught_pokemons(inventory_items)
         for pokemons in caught_pokemon.values():
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
-                # highest lvl pokemon first
-                sorted_pokemons = sorted(pokemons, key=self.pokemon_lvl, reverse=True)
-                kept_pokemon_of_type = 1
-                for pokemon in sorted_pokemons[self.MIN_SIMILAR_POKEMON:]:
-                    if self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0], kept_pokemon_of_type):
+                # highest scoring pokemon first
+                sorted_pokemons = sorted(pokemons, key=lambda x: (x.score, x.cp), reverse=True)
+                kept_pokemon_of_type = 0
+                kept_pokemon_of_type_high_iv = 0
+                for pokemon in sorted_pokemons:
+                    eligible, high_iv = self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0],
+                                                                              kept_pokemon_of_type,
+                                                                              kept_pokemon_of_type_high_iv)
+                    # MIN_SIMILAR_POKEMON should be respected in the is_eligible function, check it here anyway
+                    if eligible and kept_pokemon_of_type >= self.MIN_SIMILAR_POKEMON:
                         self.do_release_pokemon(pokemon)
+                        continue
                     else:
                         kept_pokemon_of_type += 1
+                        if high_iv:
+                            kept_pokemon_of_type_high_iv += 1
 
-    def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon, kept_pokemon_of_type):
-        # never release favorites and other defined pokemons
-        if pokemon.is_favorite or (
-                pokemon.pokemon_id in self.keep_pokemon_ids and kept_pokemon_of_type <= self.config.get(
-                "KEEP_POKEMON_MAX_COUNT", 9999)):
-            return False
-        elif self.RELEASE_DUPLICATES and (
-                            self.pokemon_lvl(best_pokemon) * self.RELEASE_DUPLICATES_SCALER > self.pokemon_lvl(
-                        pokemon) and self.pokemon_lvl(pokemon) < self.RELEASE_DUPLICATES_MAX_LV):
-            return True
-        # release defined throwaway pokemons  but make sure we have kept at least 1 (dont throw away all of them)
-        elif pokemon.pokemon_id in self.throw_pokemon_ids:
-            return True
+    def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon=Pokemon(),
+                                         kept_pokemon_of_type=0, kept_pokemon_of_type_high_iv=0):
+        # never release favorites
+        if pokemon.is_favorite:
+            return False, False
+        # dont keep more than MAX_SIMILAR_POKEMON
+        elif kept_pokemon_of_type >= self.MAX_SIMILAR_POKEMON:
+            return True, False
+        # keep defined pokemons
+        elif pokemon.pokemon_id in self.keep_pokemon_ids:
+            return False, False
+        # release defined throwaway pokemons, but make sure we have kept at least 1 (dont throw away all of them)
+        elif pokemon.pokemon_id in self.throw_pokemon_ids and kept_pokemon_of_type >= self.MIN_SIMILAR_POKEMON:
+            return True, False
+        # release duplicates if applicable
+        elif self.RELEASE_METHOD == "DUPLICATES":
+            if (best_pokemon.score * self.RELEASE_DUPLICATES_SCALAR > pokemon.score and
+                    pokemon.score < self.RELEASE_DUPLICATES_MAX_SCORE) and \
+                            kept_pokemon_of_type >= self.MIN_SIMILAR_POKEMON:
+                return True, False
+            else:
+                return False, False
+        # keep high-iv pokemons based on config values
+        elif pokemon.iv_normalized > self.KEEP_IV_OVER \
+                and kept_pokemon_of_type_high_iv < self.MAX_POKEMON_HIGH_IV \
+                and pokemon.cp > (best_pokemon.cp * self.KEEP_IV_ONLY_WITH_PERCENT_CP / 100):
+            return True, True
         # keep high-cp pokemons
-        elif pokemon.cp > self.KEEP_CP_OVER or pokemon.iv > self.KEEP_IV_OVER:
-            return False
-        # if we haven't found a reason to keep it, transfer it
-        else:
-            return True
-
-    def pokemon_lvl(self, pokemon):
-        if self.DEFINE_POKEMON_LV == "CP":
-            return pokemon.cp
-        elif self.DEFINE_POKEMON_LV == "IV":
-            return pokemon.iv
-        elif self.DEFINE_POKEMON_LV == "CP*IV":
-            return pokemon.cp * pokemon.iv
-        elif self.DEFINE_POKEMON_LV == "CP+IV":
-            return pokemon.cp + pokemon.iv
+        elif pokemon.cp > self.KEEP_CP_OVER:
+            return False, False
+        # release all other pokemons
+        elif kept_pokemon_of_type >= self.MIN_SIMILAR_POKEMON:
+            return True, False
+        # if we haven't found a reason, keep it! (probably not at MIN_SIMILAR yet)
+        return False, False
 
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:
@@ -712,11 +735,11 @@ class PGoApi:
             self.log.info("Evolving pokemon: %s", pokemon)
             evo_res = self.evolve_pokemon(pokemon_id=pokemon.id).call()['responses']['EVOLVE_POKEMON']
             status = evo_res.get('result', -1)
-            sleep(3)
+            gevent.sleep(3)
             if status == 1:
                 evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}), self.pokemon_names,
                                           self.game_master.get(str(pokemon.pokemon_id), PokemonData()),
-                                          self.player_stats.level)
+                                          self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS)
                 # I don' think we need additional stats for evolved pokemon. Since we do not do anything with it.
                 # evolved_pokemon.pokemon_additional_data = self.game_master.get(pokemon.pokemon_id, PokemonData())
                 self.log.info("Evolved to %s", evolved_pokemon)
@@ -867,7 +890,7 @@ class PGoApi:
         incubate_res = self.use_item_egg_incubator(item_id=incubator['id'], pokemon_id=egg['id']).call()['responses'][
             'USE_ITEM_EGG_INCUBATOR']
         status = incubate_res.get('result', -1)
-        sleep(3)
+        gevent.sleep(3)
         if status == 1:
             self.log.info("Incubation started with %skm egg !", egg['egg_km_walked_target'])
             self.update_player_inventory()
@@ -882,7 +905,7 @@ class PGoApi:
         self.log.info("Checking for hatched eggs")
         hatch_res = self.get_hatched_eggs().call()['responses']['GET_HATCHED_EGGS']
         status = hatch_res.get('success', -1)
-        sleep(3)
+        gevent.sleep(3)
         if status == 1:
             self.update_player_inventory()
             i = 0
@@ -961,7 +984,7 @@ class PGoApi:
                 self.spin_near_fort()
             # if catching fails 10 times, maybe you are sofbanned.
             while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
-                sleep(4)
+                gevent.sleep(4)
                 catch_attempt += 1
                 pass
             if catch_attempt > self.max_catch_attempts:

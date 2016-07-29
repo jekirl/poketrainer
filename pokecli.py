@@ -29,6 +29,7 @@ Modifications by: j-e-k <https://github.com/j-e-k>
 import os
 import re
 import json
+import collections
 import struct
 import logging
 import requests
@@ -52,6 +53,7 @@ log = logging.getLogger(__name__)
 from threading import Thread
 from Queue import Queue
 
+
 def get_pos_by_name(location_name):
     geolocator = GoogleV3()
     loc = geolocator.geocode(location_name)
@@ -60,6 +62,17 @@ def get_pos_by_name(location_name):
     log.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
 
     return (loc.latitude, loc.longitude, loc.altitude)
+
+
+def dict_merge(dct, merge_dct):
+    for k, v in merge_dct.iteritems():
+        if (k in dct and isinstance(dct[k], dict)
+                and isinstance(merge_dct[k], collections.Mapping)):
+            dict_merge(dct[k], merge_dct[k])
+        else:
+            dct[k] = merge_dct[k]
+    return dct
+
 
 def init_config():
     parser = argparse.ArgumentParser()
@@ -77,7 +90,9 @@ def init_config():
     parser.add_argument("-l", "--location", help="Location", required=required("location"))
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
     config = parser.parse_args()
-    load = load['accounts'][config.__dict__['config_index']]
+    defaults = load.get('defaults', {})
+    account = load['accounts'][config.__dict__['config_index']]
+    load = dict_merge(defaults, account)
     # Passed in arguments shoud trump
     for key,value in load.iteritems():
         if key not in config.__dict__ or not config.__dict__[key]:
@@ -88,7 +103,8 @@ def init_config():
 
     return config.__dict__
 
-def main():
+
+def main(position=None):
     # log settings
     # log format
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
@@ -108,7 +124,10 @@ def main():
         logging.getLogger("pgoapi").setLevel(logging.DEBUG)
         logging.getLogger("rpc_api").setLevel(logging.DEBUG)
 
-    position = get_pos_by_name(config["location"])
+
+    if not position:
+        position = get_pos_by_name(config["location"])
+
 
     # instantiate pgoapi
     pokemon_names = json.load(open("pokemon.en.json"))
@@ -143,16 +162,13 @@ def main():
         try:
             api.main_loop()
         except Exception as e:
-            log.exception('Error in main loop, restarting %s')
+            log.exception('Error in main loop %s, restarting at location: %s', e, api.get_position())
             # restart after sleep
             sleep(30)
             try:
-                main()
+                main(api._posf)
             except:
                 pass
 
 if __name__ == '__main__':
-    try:
-        main()
-    except:
-        pass
+    main()
