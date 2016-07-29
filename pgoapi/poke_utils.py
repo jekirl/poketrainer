@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import os
-from pgoapi.pokemon import Pokemon, POKEMON_NAMES
+import json
 from pgoapi.game_master import PokemonData, GAME_MASTER
 from pgoapi.utilities import *
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Enum_Items
@@ -9,6 +9,7 @@ from collections import defaultdict
 import csv
 import re
 
+POKEMON_NAMES = json.load(open("pokemon.en.json"))
 pokemon_lvls = {}
 tcmpVals = []
 with open ("PoGoPokeLvl.tsv") as tsv: #data gathered from here: https://www.reddit.com/r/TheSilphRoad/comments/4sa4p5/stardust_costs_increase_every_4_power_ups/
@@ -23,8 +24,8 @@ with open ("PoGoPokeLvl.tsv") as tsv: #data gathered from here: https://www.redd
         }
         tcmpVals.append(float(row["TotalCpMultiplier"]))
 
-def setMaxCP(pokemon, maxTCPM, game_master):
-    pokeGameData = game_master.get(pokemon.pokemon_id, PokemonData())
+def setMaxCP(pokemon, maxTCPM):
+    pokeGameData = GAME_MASTER.get(pokemon.pokemon_id, PokemonData())
     if int(pokeGameData.PkMn) == 0 or not all_in(['cp', 'cp_multiplier'], pokemon.pokemon_data):
         return
 
@@ -42,15 +43,15 @@ def setMaxCP(pokemon, maxTCPM, game_master):
         else: #Rainer or Vaporean is the default
             i = 1
     else:
-        while game_master.get(pokemon.pokemon_id + i + 1, PokemonData()).FamilyId == pokeGameData.FamilyId and candyToEvolve > 0:
-            candyToEvolve = int(game_master.get(pokemon.pokemon_id + i + 1, PokemonData()).CandyToEvolve)
+        while GAME_MASTER.get(pokemon.pokemon_id + i + 1, PokemonData()).FamilyId == pokeGameData.FamilyId and candyToEvolve > 0:
+            candyToEvolve = int(GAME_MASTER.get(pokemon.pokemon_id + i + 1, PokemonData()).CandyToEvolve)
             pokemon.candyNeededToMaxEvolve += candyToEvolve
             i+=1
 
     if(i == 0):
         pokemon.maxEvolveCP = calcCP(pokemon.pokemon_data, maxTCPM, pokeGameData)
     else:
-        evolvedPokeData = game_master.get(pokemon.pokemon_id + i , PokemonData())
+        evolvedPokeData = GAME_MASTER.get(pokemon.pokemon_id + i , PokemonData())
         pokemon.maxEvolveCP = calcCP(pokemon.pokemon_data, maxTCPM, evolvedPokeData)
 
     pokeLvl = pokemon_lvls[pokemon.cpm_total]['PokemonLvl']

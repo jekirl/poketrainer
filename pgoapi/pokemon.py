@@ -1,11 +1,9 @@
 from __future__ import absolute_import
 from math import sqrt
-import json
-from pgoapi.poke_utils import calcACPM, calcCP, getTCPM
+from pgoapi.poke_utils import calcACPM, calcCP, getTCPM, POKEMON_NAMES
 from pgoapi.utilities import *
 from pgoapi.game_master import PokemonData, GAME_MASTER
 
-POKEMON_NAMES = json.load(open("pokemon.en.json"))
 class Pokemon:
     # Used for calculating the pokemon level
     # source http://pokemongo.gamepress.gg/cp-multiplier
@@ -66,26 +64,27 @@ class Pokemon:
         self.move_1 = pokemon_data.get('move_1', 0)
         self.move_2 = pokemon_data.get('move_2', 0)
 
-        #ACPM, TCPM, Rating
-        if 'additional_cp_multiplier' not in pokemon_data and additional_data is not None:
-            self.additional_cp_multiplier = calcACPM(self, additional_data)
-
         #Max Evolve based on ur lvl vals and Power Up
         self.candyNeededToMaxEvolve = 0
         self.dustNeededToMaxEvolve = 0
         self.maxEvolveCP = 0
         self.PowerUpResult = 0
 
-        self.pokemon_additional_data = additional_data
         self.iv_normalized = -1.0
         self.max_cp = -1.0
         self.max_cp_absolute = -1.0
+        additional_data = GAME_MASTER[self.pokemon_id]
+        self.family_id = additional_data.FamilyId
+
+        #ACPM, TCPM, Rating
+        if 'additional_cp_multiplier' not in pokemon_data:
+            self.additional_cp_multiplier = calcACPM(self, additional_data)
+
         #helps with rounding errors
         self.cpm_total = getTCPM(self.cp_multiplier + self.additional_cp_multiplier)
         self.level_wild = self.get_level_by_cpm(self.cp_multiplier)
         self.level = self.get_level_by_cpm(self.cpm_total)
-        additional_data = GAME_MASTER[self.pokemon_id]
-        self.family_id = additional_data.FamilyId
+
         # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
         attack = float(additional_data.BaseAttack)
         defense = float(additional_data.BaseDefense)

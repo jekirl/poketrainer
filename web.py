@@ -9,6 +9,7 @@ import argparse
 
 from pgoapi.poke_utils import *
 from pgoapi.utilities import *
+from pgoapi.game_master import PokemonData, GAME_MASTER
 from pgoapi.pokemon import Pokemon
 from flask_socketio import SocketIO
 import tempfile
@@ -18,9 +19,7 @@ import os
 app = Flask(__name__, template_folder="templates")
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 
-pokemon_names = json.load(open("pokemon.en.json"))
 options = {}
-game_master = parse_game_master()
 attacks = {}
 with open ("GAME_ATTACKS_v0_1.tsv") as tsv:
     reader = csv.DictReader(tsv, delimiter='\t')
@@ -55,7 +54,7 @@ def setColumnsToIgnore(columnsToIgnore):
     options['ignore_#'] = ''
     options['ignore_name'] = ''
     options['ignore_lvl'] = ''
-    options['ignore_rating'] = ''
+    options['ignore_score'] = ''
     options['ignore_IV'] = ''
     options['ignore_CP'] = ''
     options['ignore_max_CP'] = ''
@@ -79,8 +78,8 @@ def setColumnsToIgnore(columnsToIgnore):
             options['ignore_name'] = 'display: none;'
         elif column.lower() == 'lvl':
             options['ignore_lvl'] = 'display: none;'
-        elif column.lower() == 'rating':
-            options['ignore_rating'] = 'display: none;'
+        elif column.lower() == 'score':
+            options['ignore_score'] = 'display: none;'
         elif column.lower() == 'iv':
             options['ignore_IV'] = 'display: none;'
         elif column.lower() == 'cp':
@@ -138,12 +137,10 @@ def inventory(username):
         # add candy back into pokemon json
         pokemons = []
         for pokemon in pokemonsData:
-            test = game_master.get(pokemon['pokemon_id'], PokemonData())
-            pkmn = Pokemon(pokemon, pokemon_names, test, player['level'], options['DEFINE_POKEMON_LV'])
-
+            pkmn = Pokemon(pokemon, player['level'], options['DEFINE_POKEMON_LV'])            
             family_id = re.match("HoloPokemonFamilyId.V([0-9]*).*", pkmn.pokemon_additional_data.FamilyId).group(1)
             pkmn.candy = candy[family_id]
-            setMaxCP(pkmn, tcmpVals[int(player['level']*2 + 1)], game_master)
+            setMaxCP(pkmn, tcmpVals[int(player['level']*2 + 1)], GAME_MASTER)
             pokemons.append(pkmn)           
         pokemons = sorted(pokemons, lambda x,y: cmp(x.iv, y.iv),reverse=True)             
         player['username'] = data['GET_PLAYER']['player_data']['username']
