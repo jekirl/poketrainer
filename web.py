@@ -5,11 +5,9 @@ import os
 import re
 from collections import defaultdict
 
-from flask import Flask, flash, redirect, render_template, url_for
-
-from pgoapi.poke_utils import pokemon_iv_percentage
-
 import zerorpc
+from flask import Flask, flash, redirect, render_template, url_for
+from pgoapi.poke_utils import pokemon_iv_percentage
 
 app = Flask(__name__, template_folder="templates")
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
@@ -36,11 +34,15 @@ with open("GAME_ATTACKS_v0_1.tsv") as tsv:
 
 @app.route("/<username>/pokemon")
 def inventory(username):
+    c = get_api_rpc(username)
+    if c is None:
+        return("There is no bot running with the input username!")
     with open("data_dumps/%s.json" % username) as f:
         data = f.read()
         data = json.loads(data.encode())
         currency = data['GET_PLAYER']['player_data']['currencies'][1]['amount']
-        latlng = "%f,%f" % (data["lat"], data["lng"])
+        latlng = c.current_location()
+        latlng = "%f,%f" % (latlng[0], latlng[1])
         items = data['GET_INVENTORY']['inventory_delta']['inventory_items']
         pokemons = []
         candy = defaultdict(int)
@@ -69,25 +71,29 @@ def inventory(username):
         return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
 
 
-@app.route("/<username>/transfer/<p_id>")
-def transfer(username, p_id):
+def get_api_rpc(username):
     desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
     sock_port = 0
     with open(desc_file) as f:
         data = f.read()
         data = json.loads(data.encode() if len(data) > 0 else '{}')
         if username not in data:
-            flash("There is not such username!")
-            return redirect(url_for('inventory', username=username))  # will also fail?
+            print("There is no bot running with the input username!")
+            return None
         sock_port = int(data[username])
 
     c = zerorpc.Client()
     c.connect("tcp://127.0.0.1:%i" % sock_port)
-    if c.releasePokemonById(p_id) == 1:
+    return c
+
+
+@app.route("/<username>/transfer/<p_id>")
+def transfer(username, p_id):
+    c = get_api_rpc(username)
+    if c and c.release_pokemon_by_id(p_id) == 1:
         flash("Released")
     else:
         flash("Failed!")
     return redirect(url_for('inventory', username=username))
-
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
