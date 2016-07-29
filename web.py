@@ -4,8 +4,10 @@ import json
 import csv
 from math import floor
 from collections import defaultdict
+from datetime import datetime
 import re
 from pgoapi.poke_utils import *
+from pgoapi.inventory import *
 import tempfile
 import zerorpc
 import os
@@ -33,7 +35,6 @@ with open ("GAME_ATTACKS_v0_1.tsv") as tsv:
     for row in reader:
         attacks[int(row["Num"])] = row["Move"]
 
-
 @app.route("/<username>/pokemon")
 def inventory(username):
     c = get_api_rpc(username)
@@ -48,7 +49,10 @@ def inventory(username):
         items = data['GET_INVENTORY']['inventory_delta']['inventory_items']
         pokemons = []
         candy = defaultdict(int)
+        last_caught_timestamp = 0
+        inventory_items = Inventory(items)
         player = {}
+        inventory = {}
         for item in items:
             item = item['inventory_item_data']
             pokemon = item.get("pokemon_data",{})
@@ -57,6 +61,8 @@ def inventory(username):
                 pokemon.update(pokemon_details[str(pokemon['pokemon_id'])])
                 pokemon['iv'] = pokemonIVPercentage(pokemon)
                 pokemons.append(pokemon)
+                if pokemon['creation_time_ms'] > last_caught_timestamp:
+                    last_caught_timestamp = pokemon['creation_time_ms']
             if 'player_stats' in item:
                 player = item['player_stats']
             if "pokemon_family" in item:
@@ -66,12 +72,28 @@ def inventory(username):
         # add candy back into pokemon json
         for pokemon in pokemons:
             pokemon['candy'] = candy[pokemon['family_id']]
+        inventory['poke_balls'] = inventory_items.poke_balls
+        inventory['ultra_balls'] = inventory_items.ultra_balls
+        inventory['great_balls'] = inventory_items.great_balls
+        inventory['master_balls'] = inventory_items.master_balls
+        inventory['potion'] = inventory_items.potion
+        inventory['hyper_potion'] = inventory_items.hyper_potion
+        inventory['super_potion'] = inventory_items.super_potion
+        inventory['max_potion'] = inventory_items.max_potion
+        inventory['lucky_eggs'] = inventory_items.great_balls
+        inventory['razz_berries'] = inventory_items.great_balls
+        inventory['revive'] = inventory_items.great_balls
+        inventory['max_revive'] = inventory_items.great_balls
+        inventory['incenses'] = inventory_items.great_balls
+        inventory['lures'] = inventory_items.great_balls
+        inventory['total'] = inventory_items.item_count()
         player['level_xp'] = player.get('experience',0)-player.get('prev_level_xp',0)
         player['hourly_exp'] = data.get("hourly_exp",0)
         player['goal_xp'] = player.get('next_level_xp',0)-player.get('prev_level_xp',0)
         player['username'] = username
-        return render_template('pokemon.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks)
-
+        player['max_item_storage'] = data['GET_PLAYER']['player_data']['max_item_storage']
+        player['max_pokemon_storage'] = data['GET_PLAYER']['player_data']['max_pokemon_storage']
+        return render_template('pokemon.html', pokemons=pokemons, player=player, inventory=inventory, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, last_caught_timestamp=last_caught_timestamp)
 
 def get_api_rpc(username):
     desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
@@ -96,5 +118,11 @@ def transfer(username, p_id):
     else:
         flash("Failed!")
     return redirect(url_for('inventory', username = username))
+
+# filter epoch to readable date like: {{ pokemon["creation_time_ms"]|epochToDate }}
+@app.template_filter('epochToDate')
+def _jinja2_filter_datetime(pokeEpochTime, fmt=None):
+    return datetime.fromtimestamp(pokeEpochTime/1000).strftime('%Y-%m-%d %H:%M:%S')    
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0',debug=True)

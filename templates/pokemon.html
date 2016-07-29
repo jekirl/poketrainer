@@ -39,7 +39,8 @@
   <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
       <div class="navbar-header">
-        <a class="navbar-brand" href="#">Where am i now?</a>
+        <a class="navbar-brand" href="#">Where am I now?</a>
+        <a class="navbar-brand" href="#">Last time pokemon caught: {{ last_caught_timestamp|epochToDate }}</a>
       </div>
     </div>
   </nav>
@@ -57,7 +58,7 @@
       <div class="col-sm-3 col-md-2 sidebar">
         <div class="panel panel-default">
           <div class="panel-body">
-            Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
+            Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}/{{player['max_pokemon_storage']}}<br> Item Count: {{inventory['total']}}/{{player['max_item_storage']}}<br>
           </div>
           <div class="container-fluid">
             Level XP: {{player["level_xp"]}} / {{player["goal_xp"]}}
@@ -99,7 +100,7 @@
             </thead>
             {% for pokemon in pokemons %}
             <tr id="{{pokemon['id']}}">
-              <td data-order="{{ pokemon["creation_time_ms"] }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon[
+              <td data-order="{{ pokemon["creation_time_ms"] }}" title="Caught: {{ pokemon["creation_time_ms"]|epochToDate }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon[
                   'pokemon_id']) }}></td>
               <td>{{pokemon["name"]}}</td>
               <td data-order="{{pokemon["nickname"]}}">{{pokemon["nickname"]}}</td>

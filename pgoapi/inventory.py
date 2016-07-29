@@ -18,6 +18,10 @@ class Inventory:
         self.max_potion = 0
         self.lucky_eggs = 0
         self.razz_berries = 0
+        self.revive = 0
+        self.max_revive = 0
+        self.incenses = 0
+        self.lures = 0
 
         self.pokemon_candy = defaultdict()
         self.eggs_available = []
@@ -50,6 +54,14 @@ class Inventory:
                 self.lucky_eggs = item_count
             elif item_id == Inventory_Enum.ITEM_RAZZ_BERRY:
                 self.razz_berries = item_count
+            elif item_id == Inventory_Enum.ITEM_REVIVE:
+                self.revive = item_count
+            elif item_id == Inventory_Enum.ITEM_MAX_REVIVE:
+                self.max_revive = item_count
+            elif item_id == Inventory_Enum.ITEM_INCENSE_ORDINARY:
+                self.incenses = item_count
+            elif item_id == Inventory_Enum.ITEM_TROY_DISK:
+                self.lures = item_count
             pokemon_family = inventory_item['inventory_item_data'].get('pokemon_family', {})
             self.pokemon_candy[pokemon_family.get('family_id', -1)] = pokemon_family.get('candy', -1)
             pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
@@ -145,6 +157,9 @@ class Inventory:
         self.razz_berries -= 1
         return Inventory_Enum.ITEM_RAZZ_BERRY
 
+    def item_count(self):
+        return self.ultra_balls + self.great_balls + self.poke_balls + self.master_balls + self.potion + self.hyper_potion + self.super_potion + self.max_potion + self.lucky_eggs + self.razz_berries + self.revive + self.max_revive + self.incenses + self.lures
+    
     def __str__(self):
         return "PokeBalls: {0}, GreatBalls: {1}, MasterBalls: {2}, UltraBalls: {3} \n " \
                "Potion: {4}, Super Potion: {5}, Max Potion {6}, Hyper Potion {7}, Lucky Eggs {8}, Razz Berries {9}".format(self.poke_balls,
