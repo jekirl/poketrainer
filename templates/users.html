@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Pokemon Bot</title>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="http://getbootstrap.com/examples/dashboard/dashboard.css">
+  <style>
+    .scrolloff {
+        pointer-events: none;
+    }
+    table.dataTable thead .sorting, table.dataTable thead .sorting_asc, table.dataTable thead .sorting_desc, table.dataTable thead .sorting_asc_disabled, table.dataTable thead .sorting_desc_disabled {
+        background-repeat: no-repeat;
+        background-position: center right;
+    }
+    table thead .sorting_asc {
+        background-image: url("https://cdn.datatables.net/1.10.12/images/sort_asc.png");
+    }
+    table thead .sorting_desc {
+        background-image: url("https://cdn.datatables.net/1.10.12/images/sort_desc.png");
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">Where am i now?</a>
+      </div>
+    </div>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+	{% for user in users %}
+		<p><a href="/{{user}}/pokemon">{{user}}</a></p>
+	{% endfor %}
+    </div>
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+
+  <script>
+      $(document).ready(function () {
+        $('#map').addClass('scrolloff');
+
+        $('#overlay').on("mouseup",function(){
+            $('#map').addClass('scrolloff');
+        });
+        $('#overlay').on("click",function(){
+            $('#map').removeClass('scrolloff');
+        });
+
+        $("#map").mouseleave(function () {
+            $('#map').addClass('scrolloff');
+        });
+        $('#poke-table').dataTable({
+          order: [[ 0, "desc" ]],
+          searching: false,
+          paging: false
+        });
+    });
+    </script>
+</body>
+
+</html

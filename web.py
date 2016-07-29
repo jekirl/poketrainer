@@ -32,6 +32,19 @@ with open ("GAME_ATTACKS_v0_1.tsv") as tsv:
     for row in reader:
         attacks[int(row["Num"])] = row["Move"]
 
+@app.route("/")
+def users():
+   import glob
+   data_files = glob.glob("data_dumps/*.json")
+   users = []
+   
+   for file_path in data_files:
+       match = re.search('\/([^\.]+)\.', file_path)
+       if match:
+           users.append(match.group()[1:-1])
+
+   return render_template('users.html', users=users)
+
 @app.route("/<username>/pokemon")
 def inventory(username):
     with open("data_dumps/%s.json"%username) as f:
