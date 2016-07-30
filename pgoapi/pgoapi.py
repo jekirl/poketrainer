@@ -304,7 +304,7 @@ class PGoApi:
             # move to snipe location
             self.set_position(lat, lng, 0.0)
             if not self.send_update_pos():
-                return
+                return False
 
             self.log.debug("Teleported to sniping location %f, %f", lat, lng)
 
@@ -324,6 +324,7 @@ class PGoApi:
                 return self.encounter_pokemon(pokemon_rarity_and_dist[0][0], new_loc=(curr_lat, curr_lng))
             else:
                 self.log.info("No nearby pokemon. Can't snipe!")
+                return False
             
         finally:
             self.set_position(curr_lat, curr_lng, 0.0)

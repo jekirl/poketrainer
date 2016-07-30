@@ -6,7 +6,7 @@ import re
 from collections import defaultdict
 
 import zerorpc
-from flask import Flask, flash, redirect, render_template, url_for
+from flask import Flask, flash, redirect, render_template, url_for, jsonify
 
 from pgoapi.poke_utils import pokemon_iv_percentage
 
@@ -137,14 +137,15 @@ def snipe(username, latlng):
             lat = float(l[0])
             lng = float(l[1])
     except:
-        flash("Error parsing coordinates.")
-        return redirect(url_for('inventory', username = username))
+        return jsonify(status=1, result='Error parsing coordinates.')
 
     if c.snipe_pokemon(lat, lng):
-        flash("Sniped!")
+        msg = "Sniped!"
+        status = 0
     else:
-        flash("Failed sniping!")
-    return redirect(url_for('inventory', username = username))
+        msg = "Failed sniping!"
+        status = 1
+    return jsonify(status=status, result=msg)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
