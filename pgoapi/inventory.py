@@ -17,6 +17,10 @@ class Inventory:
         self.max_potion = 0
         self.lucky_eggs = 0
         self.razz_berries = 0
+        self.revive = 0
+        self.max_revive = 0
+        self.incenses = 0
+        self.lures = 0
 
         self.pokemon_candy = defaultdict()
         self.eggs_available = []
@@ -49,6 +53,14 @@ class Inventory:
                 self.lucky_eggs = item_count
             elif item_id == Inventory_Enum.ITEM_RAZZ_BERRY:
                 self.razz_berries = item_count
+            elif item_id == Inventory_Enum.ITEM_REVIVE:
+                self.revive = item_count
+            elif item_id == Inventory_Enum.ITEM_MAX_REVIVE:
+                self.max_revive = item_count
+            elif item_id == Inventory_Enum.ITEM_INCENSE_ORDINARY:
+                self.incenses = item_count
+            elif item_id == Inventory_Enum.ITEM_TROY_DISK:
+                self.lures = item_count
             pokemon_family = inventory_item['inventory_item_data'].get('pokemon_family', {})
             self.pokemon_candy[pokemon_family.get('family_id', -1)] = pokemon_family.get('candy', -1)
             pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
