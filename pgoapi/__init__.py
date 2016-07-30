@@ -15,9 +15,9 @@ except:
 if (not protobuf_exist) or (int(protobuf_version[:1]) < 3):
     raise PleaseInstallProtobufVersion3()
 
-from pgoapi.pgoapi import PGoApi
-from pgoapi.rpc_api import RpcApi
-from pgoapi.auth import Auth
+from pgoapi.pgoapi import PGoApi  # noqa
+from pgoapi.rpc_api import RpcApi  # noqa
+from pgoapi.auth import Auth  # noqa
 
 try:
     import requests.packages.urllib3

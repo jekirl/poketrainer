@@ -91,6 +91,6 @@
   ],
   "defaults": {
       "_info": "copy values to this section to use them for all accounts",
-      "_info2": "account settings will always override defaults",
+      "_info2": "account settings will always override defaults"
   }
 }

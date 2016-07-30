@@ -1,5 +1,7 @@
 import csv
 import re
+
+
 class PokemonData:
     def __init__(self):
         self.PkMn = 0
@@ -29,13 +31,16 @@ class PokemonData:
         self.WeightStdDev = 0.0
         self.FamilyId = 0.0
         self.CandyToEvolve = 0.0
+
+
 GAME_MASTER = {}
+
 with open("GAME_MASTER_POKEMON_v0_2.tsv") as tsvfile:
     tsvreader = csv.DictReader(tsvfile, delimiter='\t')
     attributes = []
     for row in tsvreader:
-        row["FamilyId"] = re.match("HoloPokemonFamilyId.V([0-9]*).*",row["FamilyId"]).group(1)
+        row["FamilyId"] = re.match("HoloPokemonFamilyId.V([0-9]*).*", row["FamilyId"]).group(1)
         pokemon_data = PokemonData()
-        for (k,v) in row.iteritems():
+        for (k, v) in row.iteritems():
             setattr(pokemon_data, k, v)
         GAME_MASTER[int(row["PkMn"])] = pokemon_data

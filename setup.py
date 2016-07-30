@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 import os
-from setuptools import setup, find_packages
+
 from pip.req import parse_requirements
+from setuptools import find_packages, setup
 
 setup_dir = os.path.dirname(os.path.realpath(__file__))
 path_req = os.path.join(setup_dir, 'requirements.txt')
@@ -17,4 +18,4 @@ setup(name='pgoapi',
       url='https://github.com/tejado/pgoapi',
       packages=find_packages(),
       install_requires=reqs,
-     )
+      )
