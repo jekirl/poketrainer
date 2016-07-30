@@ -209,6 +209,7 @@ class PGoApi:
 
     def call(self):
         self.cond_lock()
+        gevent.sleep(config.get("EXTRA_WAIT", 0.2))
         try:
             if not self._req_method_list.get(id(gevent.getcurrent()),[]):
                 return False
