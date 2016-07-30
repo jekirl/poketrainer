@@ -6,7 +6,7 @@ import re
 from collections import defaultdict
 
 import zerorpc
-from flask import Flask, flash, redirect, render_template, url_for
+from flask import Flask, flash, redirect, render_template, url_for, request, jsonify
 
 from pgoapi.poke_utils import pokemon_iv_percentage
 
@@ -90,6 +90,36 @@ def status(username):
         return render_template('status.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, username=username)
 
 
+@app.route('/api/inventory/<username>', methods=['GET'])
+def get_inventory(username):
+    s = get_api_rpc(username)
+    try:
+        inventory = json.loads(s.get_inventory())
+    except ValueError:
+        # FIXME Use logger instead of print statements!
+        print "Not valid Json"
+    return jsonify(inventory)
+
+@app.route('/api/player/<username>', methods=['GET'])
+def get_player(username):
+    s = get_api_rpc(username)
+    try:
+        player = json.loads(s.get_player_info())
+    except ValueError:
+        # FIXME Use logger instead of print statements!
+        print "Not valid Json"
+    return jsonify(player)
+    
+@app.route('/api/pokemon/<username>', methods=['GET'])
+def get_pokemon(username):
+    s = get_api_rpc(username)
+    try:
+        player = json.loads(s.get_caught_pokemons())
+    except ValueError:
+        # FIXME Use logger instead of print statements!
+        print "Not valid Json"
+    return jsonify(player)
+        
 @app.route("/<username>/pokemon")
 def pokemon(username):
     s = get_api_rpc(username)
