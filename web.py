@@ -35,10 +35,6 @@ with open("GAME_ATTACKS_v0_1.tsv") as tsv:
     for row in reader:
         attacks[int(row["Num"])] = row["Move"]
 
-    c = zerorpc.Client()
-    c.connect("tcp://127.0.0.1:%i"%sock_port)
-    return c
-
 
 def get_player_data(username):
     player = {}
@@ -60,29 +56,6 @@ def get_player_data(username):
         player['username'] = username
 
     return player
-
-def init_config():
-    parser = argparse.ArgumentParser()
-    config_file = "config.json"
-
-    # If config file exists, load variables from json
-    load = {}
-    if os.path.isfile(config_file):
-        with open(config_file) as data:
-            load.update(json.load(data))
-
-    # Read passed in Arguments
-    required = lambda x: not x in load['accounts'][0].keys()
-    parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
-    config = parser.parse_args()
-    load = load['accounts'][config.__dict__['config_index']]
-    # Passed in arguments shoud trump
-    for key,value in load.iteritems():
-        if key not in config.__dict__ or not config.__dict__[key]:
-            config.__dict__[key] = value
-
-    return config.__dict__
-config = init_config()
 
 def setColumnsToIgnore(columnsToIgnore):
     options['ignore_recent'] = ''
