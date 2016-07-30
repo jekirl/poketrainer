@@ -11,6 +11,9 @@
 
 ----
 
+[![Build Status](https://travis-ci.org/infinitewarp/poketrainer.svg?branch=travis)](https://travis-ci.org/infinitewarp/poketrainer)
+
+
  #### Rename `config.json.example` to `config.json`
 ```
 usage: python pokecli.py [-h] [-i CONFIG_INDEX] [-l LOCATION] [-d]
