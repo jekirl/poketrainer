@@ -525,7 +525,7 @@ class PGoApi:
         if self.should_catch_pokemon is False:
             return False
 
-        map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
+        map_cells = self.nearby_map_objects()['responses'].get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         pokemons = PGoApi.flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
 
         # catch first pokemon:
