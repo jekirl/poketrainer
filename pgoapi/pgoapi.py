@@ -37,8 +37,8 @@ from itertools import chain, imap
 from time import time
 
 import gevent
-from gevent.coros import BoundedSemaphore
 from expiringdict import ExpiringDict
+from gevent.coros import BoundedSemaphore
 
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
@@ -50,12 +50,12 @@ from pgoapi.player import Player as Player
 from pgoapi.player_stats import PlayerStats as PlayerStats
 from pgoapi.poke_utils import (create_capture_probability, get_inventory_data,
                                get_item_name, get_pokemon_by_long_id)
+from pgoapi.pokedex import pokedex
 from pgoapi.pokemon import POKEMON_NAMES, Pokemon
 from pgoapi.protos.POGOProtos import Enums_pb2
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.rpc_api import RpcApi
-from pgoapi.pokedex import pokedex
 
 from .utilities import f2i
 
@@ -210,7 +210,7 @@ class PGoApi:
     def call(self):
         self.cond_lock()
         try:
-            if not self._req_method_list.get(id(gevent.getcurrent()),[]):
+            if not self._req_method_list.get(id(gevent.getcurrent()), []):
                 return False
 
             if self._auth_provider is None or not self._auth_provider.is_login():
@@ -264,7 +264,7 @@ class PGoApi:
     def __getattr__(self, func):
         def function(**kwargs):
 
-            if not self._req_method_list.get(id(gevent.getcurrent()),[]):
+            if not self._req_method_list.get(id(gevent.getcurrent()), []):
                 self.log.debug('Create new request...')
                 self._req_method_list[id(gevent.getcurrent())] = []
 
@@ -314,18 +314,21 @@ class PGoApi:
 
             # catch first pokemon:
             origin = (self._posf[0], self._posf[1])
-            pokemon_rarity_and_dist = [(pokemon, pokedex.getRarityById(pokemon['pokemon_id']), distance_in_meters(origin, (pokemon['latitude'], pokemon['longitude']))) for
-                                 pokemon
-                                 in pokemons]
+            pokemon_rarity_and_dist = [
+                (
+                    pokemon, pokedex.get_rarity_by_id(pokemon['pokemon_id']),
+                    distance_in_meters(origin, (pokemon['latitude'], pokemon['longitude']))
+                )
+                for pokemon in pokemons]
             pokemon_rarity_and_dist.sort(key=lambda x: x[1], reverse=True)
 
             if pokemon_rarity_and_dist:
-                self.log.info("Rarest pokemon: : %s", POKEMON_NAMES[ str(pokemon_rarity_and_dist[0][0]['pokemon_id']) ])
+                self.log.info("Rarest pokemon: : %s", POKEMON_NAMES[str(pokemon_rarity_and_dist[0][0]['pokemon_id'])])
                 return self.encounter_pokemon(pokemon_rarity_and_dist[0][0], new_loc=(curr_lat, curr_lng))
             else:
                 self.log.info("No nearby pokemon. Can't snipe!")
                 return False
-            
+
         finally:
             self.set_position(curr_lat, curr_lng, 0.0)
             self.send_update_pos()
