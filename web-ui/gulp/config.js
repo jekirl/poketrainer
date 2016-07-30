@@ -17,12 +17,11 @@ module.exports = (function () {
 		distPath + "/assets"
     ];
 
-
     var debug = true;
     var live = false;
     if( typeof(argv.profile) !== "undefined"){
         live = (argv.profile.toLowerCase() === "live" || argv.profile.toLowerCase() === "production");
-        debug = (argv.profile.toLowerCase() === "debug") || mockups;
+        debug = (argv.profile.toLowerCase() === "debug");
     }
     
     var baseUrl = '/';
@@ -36,7 +35,6 @@ module.exports = (function () {
 
 	return {
 		projectName: projectName,
-
         environment: {
             debug: debug,
             live: live

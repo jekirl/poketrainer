@@ -96,3 +96,4 @@ data_dumps/*.json
 .idea
 .listeners
 web-ui/vendor
+web-ui/node_modules
