@@ -792,11 +792,11 @@ class PGoApi:
                           POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
             resp = self.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0],
                                        player_longitude=position[1]).call()['responses']['DISK_ENCOUNTER']
-            pokemon = Pokemon(resp.get('pokemon_data', {}))
             result = resp.get('result', -1)
-            capture_probability = create_capture_probability(resp.get('capture_probability', {}))
-            self.log.debug("Attempt Encounter: %s", json.dumps(resp, indent=4, sort_keys=True))
-            if result == 1:
+            if result == 1 and 'pokemon_data' in resp and 'capture_probability' in resp:
+                pokemon = Pokemon(resp.get('pokemon_data', {}))
+                capture_probability = create_capture_probability(resp.get('capture_probability', {}))
+                self.log.debug("Attempt Encounter: %s", json.dumps(resp, indent=4, sort_keys=True))
                 return self.do_catch_pokemon(encounter_id, fort_id, capture_probability, pokemon)
             elif result == 5:
                 self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
