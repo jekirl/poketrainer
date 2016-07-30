@@ -338,7 +338,7 @@ class PGoApi:
                         self.STEP_SIZE = self.FARM_OVERRIDE_STEP_SIZE
                         self.log.info("Player has changed speed to %s", self.STEP_SIZE)
                 elif self.POKEBALL_CONTINUE_THRESHOLD <= pokeball_count and self._farm_mode_triggered:
-                    self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True) # Restore catch pokemon setting from config file
+                    self.should_catch_pokemon = self.config.get("CAPTURE", {}).get("CATCH_POKEMON", True) # Restore catch pokemon setting from config file
                     self._farm_mode_triggered = False
                     self.log.info("Player has %s Pokeballs, continuing to catch more!", pokeball_count)
                     if self.FARM_OVERRIDE_STEP_SIZE != -1:
@@ -851,25 +851,26 @@ class PGoApi:
             spawn_point_id = pokemon_data['spawn_point_id']
             # begin encounter_id
             position = self.get_position()
-            self.log.info("Trying initiate catching Pokemon: %s", Pokemon(pokemon_data))
+            pokemon = Pokemon(pokemon_data)
+            self.log.info("Trying initiate catching Pokemon: %s", pokemon)
             encounter = self.encounter(encounter_id=encounter_id,
                                        spawn_point_id=spawn_point_id,
                                        player_latitude=position[0],
                                        player_longitude=position[1]).call()['responses']['ENCOUNTER']
             self.log.debug("Attempting to Start Encounter: %s", encounter)
-            pokemon = Pokemon(encounter.get('wild_pokemon', {}).get('pokemon_data', {}))
             result = encounter.get('status', -1)
-            capture_probability = create_capture_probability(encounter.get('capture_probability', {}))
-            self.log.debug("Attempt Encounter Capture Probability: %s", json.dumps(encounter, indent=4, sort_keys=True))
-            if result == 1:
+            if result == 1 and 'wild_pokemon' in encounter and 'capture_probability' in encounter:
+                pokemon = Pokemon(encounter.get('wild_pokemon', {}).get('pokemon_data', {}))
+                capture_probability = create_capture_probability(encounter.get('capture_probability', {}))
+                self.log.debug("Attempt Encounter Capture Probability: %s", json.dumps(encounter, indent=4, sort_keys=True))
                 return self.do_catch_pokemon(encounter_id, spawn_point_id, capture_probability, pokemon)
             elif result == 7:
-                self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try", pokemon)
+                self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try", pokemon.pokemon_type)
                 self.cleanup_pokemon()
                 if not retry:
                     return self.encounter_pokemon(pokemon_data, retry=True)
             else:
-                self.log.info("Could not start encounter for pokemon: %s", pokemon)
+                self.log.info("Could not start encounter for pokemon: %s", pokemon.pokemon_type)
             return False
         except Exception as e:
             self.log.error("Error in pokemon encounter %s", e)
