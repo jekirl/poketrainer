@@ -124,14 +124,13 @@ Put them in config. Type exactly as the name appears
 
 ### What's working:
 What's working:
- * A lot of things. Check out the example config to see some of the features. Catching Lured pokemon, regular pokemon, multiple kinds of navigation (google maps, walking, driving, customized speed), a web ui, auto transfers, auto evolves, auto power ups, auto egg incubation, inventory managament, multiple account botting. And much more, README to be updated soon
-
----
+ * A lot of things. Check out the example config to see some of the features. Catching Lured pokemon, regular pokemon, multiple kinds of navigation (google maps, walking, driving, customized speed), a web ui, auto transfers, auto evolves, auto power ups, auto egg incubation, inventory managament, multiple account botting. And much more, README to be updated soon.
+ 
+----
 
 ### Join slack channel:
   To ask question  related  to api and general help, join Pokemon Go Reverse Engineering Slack team.
  * To join, get a invite from [here](https://shielded-earth-81203.herokuapp.com/) , join team via the email you recieve and then signin [here](https://pkre.slack.com).
-
 
 ## Credits
 * [tejado](https://github.com/tejado) for the base of this
