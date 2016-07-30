@@ -263,7 +263,7 @@ class PGoApi:
         return res
     def get_player_inventory(self, as_json=True):
         return self.inventory.to_json()
-        
+
     def heartbeat(self):
         # making a standard call to update position, etc
         self.get_player()
@@ -685,6 +685,10 @@ class PGoApi:
         # never release favorites
         if pokemon.is_favorite:
             return False, False
+        if pokemon.cp > self.KEEP_CP_OVER:
+            return False, False
+        if pokemon.iv > self.KEEP_IV_OVER:
+            return False, False
         # dont keep more than MAX_SIMILAR_POKEMON
         elif kept_pokemon_of_type >= self.MAX_SIMILAR_POKEMON:
             return True, False
@@ -708,8 +712,6 @@ class PGoApi:
                 and pokemon.cp > (best_pokemon.cp * self.KEEP_IV_ONLY_WITH_PERCENT_CP / 100):
             return True, True
         # keep high-cp pokemons
-        elif pokemon.cp > self.KEEP_CP_OVER:
-            return False, False
         # release all other pokemons
         elif kept_pokemon_of_type >= self.MIN_SIMILAR_POKEMON:
             return True, False
