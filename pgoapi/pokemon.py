@@ -1,7 +1,10 @@
-
+from var_dump import var_dump
 class Pokemon:
-    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), additional_data=None):
+    def __init__(self, pokemon_data=dict(), pokemon_names=dict(), pokemon_moves=dict(), additional_data=None):
         self.pokemon_data = pokemon_data
+        self.pokemon_names = pokemon_names
+        self.pokemon_moves = pokemon_moves
+
         self.stamina = 0
         self.pokemon_id = 0
         self.cp = 0
@@ -21,11 +24,12 @@ class Pokemon:
         self.favorite = -1
         self.is_favorite = False
         self.iv = 0.0
-        self.parse_values()
-        self.pokemon_type = pokemon_names.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore')
-        self.pokemon_additional_data = additional_data
 
-    def parse_values(self):
+        self.parse_values(pokemon_data, pokemon_names, pokemon_moves, additional_data)
+
+        self.pokemon_type = self.pokemon_names.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore')
+
+    def parse_values(self, pokemon_data=dict(), pokemon_names=dict(), pokemon_moves=dict(), additional_data=None):
         self.stamina = self.pokemon_data.get('stamina', 0)
         self.favorite = self.pokemon_data.get('favorite', -1)
         self.is_favorite = self.favorite != -1
@@ -42,11 +46,16 @@ class Pokemon:
         self.individual_stamina = self.pokemon_data.get('individual_stamina', 0)
         self.cp_multiplier = self.pokemon_data.get('cp_multiplier', 0.0)
         self.additional_cp_multiplier = self.pokemon_data.get('additional_cp_multiplier', 0.0)
-        self.nickname = self.pokemon_data.get('nickname', "").encode('utf8')
         self.iv = self.get_iv_percentage()
 
+        if self.pokemon_data.get('nickname', "") != "":
+            self.nickname = self.pokemon_data.get('nickname', "").encode('utf8')
+        else:
+            self.nickname = "\'" + pokemon_names.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore') + "\'"
+
+
     def __str__(self):
-        return "Nickname: {0}, Type: {1}, CP: {2}, IV: {3}".format(self.nickname, self.pokemon_type, self.cp, self.iv)
+        return "{0}, {1}, {2}, {3}".format(self.nickname, self.pokemon_type, self.cp, self.iv)
 
     def __repr__(self):
         return self.__str__()
