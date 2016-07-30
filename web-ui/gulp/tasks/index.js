@@ -12,7 +12,7 @@ function compileIndex() {
 	var jsPath = config.scriptsDist;
 	var indexPath = config.index.src;
 
-	var cssStream = gulp.src([path.join(cssPath, "/*.css"), '!' + cssPath + '/epay*.css'], { read: false });
+	var cssStream = gulp.src([path.join(cssPath, "/*.css")], { read: false });
 	var jsStream = null;
 
 	if (config.environment.debug) {
@@ -53,6 +53,7 @@ function compileIndex() {
 			{
 				ignorePath: [
 					distPath,
+					distPath.replace("./", ""),
 					'src'
 				]
 			}
