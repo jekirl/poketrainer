@@ -247,6 +247,13 @@ class PGoApi:
             raise AttributeError
 
     def hourly_exp(self, exp):
+        # This check is to prevent a bug with the exp not always coming in corretly on the first response
+        # (it often comes in as 0 initially, thereby messing up the whole XP/hour stat)
+        # This still works fine on a brand new trainer with no XP, just that the XP/hour calculation
+        # will be delayed until they earn their first XP.
+        if exp <= 0:
+            return
+
         if self.exp_start is None:
             self.exp_start = exp
         self.exp_current = exp
@@ -256,7 +263,7 @@ class PGoApi:
         exp_earned = float(self.exp_current - self.exp_start)
         exp_hour = float(exp_earned / run_time_hours)
 
-        self.log.info("=== Exp/Hour: %s ===", round(exp_hour, 2))
+        self.log.info("=== Running Time (hours): %s, Exp/Hour: %s ===", round(run_time_hours, 2), round(exp_hour))
 
         return exp_hour
 
@@ -331,7 +338,7 @@ class PGoApi:
                         self.STEP_SIZE = self.FARM_OVERRIDE_STEP_SIZE
                         self.log.info("Player has changed speed to %s", self.STEP_SIZE)
                 elif self.POKEBALL_CONTINUE_THRESHOLD <= pokeball_count and self._farm_mode_triggered:
-                    self.should_catch_pokemon = True
+                    self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True) # Restore catch pokemon setting from config file
                     self._farm_mode_triggered = False
                     self.log.info("Player has %s Pokeballs, continuing to catch more!", pokeball_count)
                     if self.FARM_OVERRIDE_STEP_SIZE != -1:
@@ -494,7 +501,7 @@ class PGoApi:
             fort['latitude'], fort['longitude'])
         self.walk_to((fort['latitude'], fort['longitude']), directly=directly)
         self.fort_search_pgoapi(fort, self.get_position(), fort_data[1])
-        if 'lure_info' in fort:
+        if 'lure_info' in fort and self.should_catch_pokemon:
             self.disk_encounter_pokemon(fort['lure_info'])
 
     def spin_near_fort(self):
