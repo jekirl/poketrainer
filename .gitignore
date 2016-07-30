@@ -95,3 +95,4 @@ config.json
 data_dumps/*.json
 .idea
 .listeners
+web-ui/vendor
