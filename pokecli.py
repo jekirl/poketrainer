@@ -76,15 +76,15 @@ def init_config():
         if key not in config.__dict__ or not config.__dict__[key]:
             config.__dict__[key] = value
     if config.auth_service not in ['ptc', 'google']:
-      log.error("Invalid Auth service specified! ('ptc' or 'google')")
-      return None
+        log.error("Invalid Auth service specified! ('ptc' or 'google')")
+        return None
 
     return config.__dict__
 
 def main():
     # log settings
     # log format
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+    logging.basicConfig(level=logging.INFO, format='\t %(message)s')
     # log level for http request class
     logging.getLogger("requests").setLevel(logging.WARNING)
     # log level for main pgoapi class
@@ -105,15 +105,16 @@ def main():
 
     # instantiate pgoapi
     pokemon_names = json.load(open("pokemon.en.json"))
-    api = PGoApi(config, pokemon_names)
+    pokemon_moves = json.load(open("moves.en.json"))
+    api = PGoApi(config, pokemon_names, pokemon_moves)
 
     # provide player position on the earth
     api.set_position(*position)
 
     # retry login every 30 seconds if any errors
     while not api.login(config["auth_service"], config["username"], config["password"]):
-        log.error('Retrying Login in 30 seconds')
-        sleep(30)
+        log.error('Retrying Login in 60 seconds')
+        sleep(60)
 
     # main loop
     while True:
@@ -122,7 +123,7 @@ def main():
         except Exception as e:
             log.exception('Error in main loop, restarting %s')
             # restart after sleep
-            sleep(30)
+            sleep(10)
             main()
 
 if __name__ == '__main__':
