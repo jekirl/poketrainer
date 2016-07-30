@@ -2,6 +2,7 @@
 pgoapi - Pokemon Go API
 Copyright (c) 2016 tjado <https://github.com/tejado>
 Modifications Copyright (c) 2016 j-e-k <https://github.com/j-e-k>
+Modifications Copyright (c) 2016 Brad Smith <https://github.com/infinitewarp>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,38 +24,41 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 
 Author: tjado <https://github.com/tejado>
 Modifications by: j-e-k <https://github.com/j-e-k>
+Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
 from __future__ import absolute_import
 
 import json
 import logging
-import os.path
-import pickle
 import random
-import gevent
 from collections import defaultdict
 from itertools import chain, imap
-from Queue import *
-from time import time, sleep
+from time import time
 
+import gevent
 from expiringdict import ExpiringDict
 
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException
+from pgoapi.inventory import Inventory as Player_Inventory
+from pgoapi.location import (distance_in_meters, filtered_forts,
+                             get_increments, get_neighbors, get_route)
 from pgoapi.player import Player as Player
 from pgoapi.player_stats import PlayerStats as PlayerStats
-from pgoapi.inventory import Inventory as Player_Inventory
-from pgoapi.location import *
-from pgoapi.poke_utils import *
+from pgoapi.poke_utils import (create_capture_probability, get_inventory_data,
+                               get_item_name, get_pokemon_by_long_id)
+from pgoapi.pokemon import POKEMON_NAMES, Pokemon
 from pgoapi.protos.POGOProtos import Enums_pb2
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.rpc_api import RpcApi
+
 from .utilities import f2i
 
 logger = logging.getLogger(__name__)
+
 
 class PGoApi:
     API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
@@ -83,7 +87,6 @@ class PGoApi:
         self.player = Player({})
         self.player_stats = PlayerStats({})
         self.inventory = Player_Inventory([])
-
 
         self.start_time = time()
         self.exp_start = None
@@ -159,11 +162,13 @@ class PGoApi:
 
         # Sanity checking
         self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon  # Experimental, and we needn't do this if we're farming anyway
-        if (self.FARM_ITEMS_ENABLED
-            and self.FARM_IGNORE_POKEBALL_COUNT
-            and self.FARM_IGNORE_GREATBALL_COUNT
-            and self.FARM_IGNORE_ULTRABALL_COUNT
-            and self.FARM_IGNORE_MASTERBALL_COUNT):
+        if (
+            self.FARM_ITEMS_ENABLED and
+            self.FARM_IGNORE_POKEBALL_COUNT and
+            self.FARM_IGNORE_GREATBALL_COUNT and
+            self.FARM_IGNORE_ULTRABALL_COUNT and
+            self.FARM_IGNORE_MASTERBALL_COUNT
+        ):
             self.FARM_ITEMS_ENABLED = False
             self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
         elif self.FARM_ITEMS_ENABLED and not (self.POKEBALL_FARM_THRESHOLD < self.POKEBALL_CONTINUE_THRESHOLD):
@@ -192,7 +197,7 @@ class PGoApi:
         response = None
         try:
             response = request.request(api_endpoint, self._req_method_list, player_position)
-        except ServerBusyOrOfflineException as e:
+        except ServerBusyOrOfflineException:
             self.log.info('Server seems to be busy or offline - try again!')
 
         # cleanup after call execution
@@ -261,9 +266,10 @@ class PGoApi:
         if 'GET_INVENTORY' in res['responses']:
             self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
         return res
+
     def get_player_inventory(self, as_json=True):
         return self.inventory.to_json()
-        
+
     def heartbeat(self):
         # making a standard call to update position, etc
         self.get_player()
@@ -378,7 +384,6 @@ class PGoApi:
         for step_data in route_data['steps']:
             step = (step_data['lat'], step_data['long'])
             step_increments = get_increments(self._posf, step, step_size)
-            total_fort_distance_traveled = 0
 
             for i, next_point in enumerate(step_increments):
                 distance_to_point = distance_in_meters(self._posf, next_point)
@@ -435,7 +440,7 @@ class PGoApi:
         result = res.pop('result', -1)
         if result == 1 and res:
             items = defaultdict(int)
-            for item in res.get('items_awarded',[]):
+            for item in res.get('items_awarded', []):
                 items[item['item_id']] += item['item_count']
             reward = 'XP +' + str(res['experience_awarded'])
             for item_id, amount in items.iteritems():
@@ -484,8 +489,9 @@ class PGoApi:
 
     def walk_to_fort(self, fort_data, directly=False):
         fort = fort_data[0]
-        self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", fort['latitude'],
-                      fort['longitude'])
+        self.log.info(
+            "Walking to fort at  http://maps.google.com/maps?q=%s,%s",
+            fort['latitude'], fort['longitude'])
         self.walk_to((fort['latitude'], fort['longitude']), directly=directly)
         self.fort_search_pgoapi(fort, self.get_position(), fort_data[1])
         if 'lure_info' in fort:
@@ -536,7 +542,7 @@ class PGoApi:
 
     def nearby_map_objects(self):
         position = self.get_position()
-        neighbors = getNeighbors(self._posf)
+        neighbors = get_neighbors(self._posf)
         return self.get_map_objects(latitude=position[0], longitude=position[1],
                                     since_timestamp_ms=[0] * len(neighbors),
                                     cell_id=neighbors).call()
@@ -593,8 +599,11 @@ class PGoApi:
         for inventory_item in inventory_items:
             if "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
-                if item['item_id'] in self.MIN_ITEMS and "count" in item and item['count'] > self.MIN_ITEMS[
-                    item['item_id']]:
+                if (
+                    item['item_id'] in self.MIN_ITEMS and
+                    "count" in item and
+                    item['count'] > self.MIN_ITEMS[item['item_id']]
+                ):
                     recycle_count = item['count'] - self.MIN_ITEMS[item['item_id']]
                     item_count += item['count'] - recycle_count
                     self.log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
@@ -628,10 +637,12 @@ class PGoApi:
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
         if as_json:
-            return json.dumps(caught_pokemon, default=lambda p: p.__dict__) #reduce the data sent?
+            return json.dumps(caught_pokemon, default=lambda p: p.__dict__)  # reduce the data sent?
         return caught_pokemon
+
     def get_player_info(self, as_json=True):
         return self.player.to_json()
+
     def do_release_pokemon_by_id(self, p_id):
         self.release_pokemon(pokemon_id=int(p_id))
         release_res = self.call()['responses']['RELEASE_POKEMON']
@@ -643,7 +654,7 @@ class PGoApi:
         if self.do_release_pokemon_by_id(pokemon.id):
             self.log.info("Successfully Released Pokemon %s", pokemon)
         else:
-            self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)
+            # self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)  # FIXME release_res is not in scope!
             self.log.info("Failed to release Pokemon %s", pokemon)
         gevent.sleep(3)
 
@@ -698,7 +709,7 @@ class PGoApi:
         elif self.RELEASE_METHOD == "DUPLICATES" and best_pokemon:
             if (best_pokemon.score * self.RELEASE_DUPLICATES_SCALAR > pokemon.score and
                     pokemon.score < self.RELEASE_DUPLICATES_MAX_SCORE) and \
-                            kept_pokemon_of_type >= self.MIN_SIMILAR_POKEMON:
+                    kept_pokemon_of_type >= self.MIN_SIMILAR_POKEMON:
                 return True, False
             else:
                 return False, False
@@ -753,11 +764,12 @@ class PGoApi:
             return False
 
     def is_pokemon_eligible_for_evolution(self, pokemon):
-        return self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None),
-                                                -1) > self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None) \
-               and pokemon.pokemon_id not in self.keep_pokemon_ids \
-               and not pokemon.is_favorite \
-               and pokemon.pokemon_id in self.POKEMON_EVOLUTION
+        candy_have = self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None), -1)
+        candy_needed = self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None)
+        return candy_have > candy_needed and \
+            pokemon.pokemon_id not in self.keep_pokemon_ids \
+            and not pokemon.is_favorite \
+            and pokemon.pokemon_id in self.POKEMON_EVOLUTION
 
     def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:

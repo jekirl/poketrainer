@@ -1,10 +1,15 @@
 from __future__ import absolute_import
 
-from math import sqrt
 import json
-from pgoapi.game_master import PokemonData, GAME_MASTER
+from math import sqrt
 
+from pgoapi.game_master import GAME_MASTER
+
+
+# TODO wrap this with some error handling?
 POKEMON_NAMES = json.load(open("pokemon.en.json"))
+
+
 class Pokemon:
     # Used for calculating the pokemon level
     # source http://pokemongo.gamepress.gg/cp-multiplier
@@ -16,19 +21,19 @@ class Pokemon:
         },
         {
             'max_level': 10,
-            'cpm_sqrt_increase_per_level': 0.009426125*2
+            'cpm_sqrt_increase_per_level': 0.009426125 * 2,
         },
         {
             'max_level': 20,
-            'cpm_sqrt_increase_per_level': 0.008919026*2
+            'cpm_sqrt_increase_per_level': 0.008919026 * 2,
         },
         {
             'max_level': 30,
-            'cpm_sqrt_increase_per_level': 0.008924906*2
+            'cpm_sqrt_increase_per_level': 0.008924906 * 2,
         },
         {
             'max_level': 40,
-            'cpm_sqrt_increase_per_level': 0.004459461*2
+            'cpm_sqrt_increase_per_level': 0.004459461 * 2,
         }
     ]
 
@@ -54,6 +59,7 @@ class Pokemon:
         self.nickname = pokemon_data.get('nickname', "").encode('utf8')
         self.iv = self.get_iv_percentage()
         self.pokemon_type = POKEMON_NAMES.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore')
+
         self.iv_normalized = -1.0
         self.max_cp = -1.0
         self.max_cp_absolute = -1.0
@@ -62,6 +68,7 @@ class Pokemon:
         self.level = self.get_level_by_cpm(self.cpm_total)
         additional_data = GAME_MASTER[self.pokemon_id]
         self.family_id = additional_data.FamilyId
+
         # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
         attack = float(additional_data.BaseAttack)
         defense = float(additional_data.BaseDefense)
@@ -69,11 +76,11 @@ class Pokemon:
         self.max_cp = ((attack + self.individual_attack) *
                        sqrt(defense + self.individual_defense) *
                        sqrt(stamina + self.individual_stamina) *
-                       pow(self.get_cpm_by_level(player_level+1.5), 2)) / 10
+                       pow(self.get_cpm_by_level(player_level + 1.5), 2)) / 10
         self.max_cp_absolute = ((attack + self.individual_attack) *
-                       sqrt(defense + self.individual_defense) *
-                       sqrt(stamina + self.individual_stamina) *
-                       pow(self.get_cpm_by_level(40), 2)) / 10
+                                sqrt(defense + self.individual_defense) *
+                                sqrt(stamina + self.individual_stamina) *
+                                pow(self.get_cpm_by_level(40), 2)) / 10
         # calculating these for level 40 to get more accurate values
         worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.get_cpm_by_level(40), 2)) / 10
         perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.get_cpm_by_level(40), 2)) / 10
@@ -90,7 +97,7 @@ class Pokemon:
             self.score = self.cp + self.iv_normalized
         elif score_method == "FANCY":
             self.score = (self.iv_normalized / 100.0 * score_settings.get("WEIGHT_IV", 0.5)) + \
-                   (self.level / (player_level+1.5) * score_settings.get("WEIGHT_LVL", 0.5))
+                         (self.level / (player_level + 1.5) * score_settings.get("WEIGHT_LVL", 0.5))
 
     def __str__(self):
         nickname = ""
@@ -99,21 +106,23 @@ class Pokemon:
             nickname = "Nickname: " + self.nickname + ", "
 
         if self.max_cp > 0:
-            return "{0}Type: {1} CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, " \
-                   "LvlWild: {5:.1f}, MaxCP: {6:.0f}, Score: {7}, IV-Norm.: {8:.0f}".format(nickname,
-                                                                                                   self.pokemon_type,
-                                                                                                   self.cp, self.iv,
-                                                                                                   self.level,
-                                                                                                   self.level_wild,
-                                                                                                   self.max_cp,
-                                                                                                   self.score,
-                                                                                                   self.iv_normalized)
+            str_ = "{0}Type: {1} CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, " \
+                   "LvlWild: {5:.1f}, MaxCP: {6:.0f}, Score: {7}, IV-Norm.: {8:.0f}"
+            return str_.format(nickname,
+                               self.pokemon_type,
+                               self.cp, self.iv,
+                               self.level,
+                               self.level_wild,
+                               self.max_cp,
+                               self.score,
+                               self.iv_normalized)
         else:
-            return "{0}Type: {1}, CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, LvlWild: {5:.1f}".format(nickname,
-                                                                                                self.pokemon_type,
-                                                                                                self.cp, self.iv,
-                                                                                                self.level,
-                                                                                                self.level_wild)
+            str_ = "{0}Type: {1}, CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, LvlWild: {5:.1f}"
+            return str_.format(nickname,
+                               self.pokemon_type,
+                               self.cp, self.iv,
+                               self.level,
+                               self.level_wild)
 
     def __repr__(self):
         return self.__str__()
