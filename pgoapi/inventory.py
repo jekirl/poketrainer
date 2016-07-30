@@ -1,7 +1,6 @@
 from __future__ import absolute_import
-
+import json
 from collections import defaultdict
-
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory_Enum
 
 
@@ -146,17 +145,21 @@ class Inventory:
         return Inventory_Enum.ITEM_RAZZ_BERRY
 
     def __str__(self):
-        return "PokeBalls: {0}, GreatBalls: {1}, MasterBalls: {2}, UltraBalls: {3} \n " \
-               "Potion: {4}, Super Potion: {5}, Max Potion {6}, Hyper Potion {7}, Lucky Eggs {8}, Razz Berries {9}".format(self.poke_balls,
-                                                                                        self.great_balls,
-                                                                                        self.master_balls,
-                                                                                        self.ultra_balls,
-                                                                                        self.potion,
-                                                                                        self.super_potion,
-                                                                                        self.max_potion,
-                                                                                        self.hyper_potion,
-                                                                                        self.lucky_eggs,
-                                                                                        self.razz_berries)
+        str_ = "PokeBalls: {0}, GreatBalls: {1}, MasterBalls: {2}, UltraBalls: {3} \n " \
+               "Potion: {4}, Super Potion: {5}, Max Potion {6}, Hyper Potion {7}, Lucky Eggs {8}, Razz Berries {9}"
+        return str_.format(self.poke_balls,
+                           self.great_balls,
+                           self.master_balls,
+                           self.ultra_balls,
+                           self.potion,
+                           self.super_potion,
+                           self.max_potion,
+                           self.hyper_potion,
+                           self.lucky_eggs,
+                           self.razz_berries)
 
     def __repr__(self):
         return self.__str__()
+
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__)

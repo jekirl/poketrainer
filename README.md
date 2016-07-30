@@ -26,7 +26,11 @@ optional arguments:
 
 ### Web UI
  * Run python web.py to get a webservice to show you player information, this can be seen at:
+<<<<<<< HEAD
   * http://127.0.0.1:5000
+=======
+  * http://127.0.0.1:5000/YOUR_USERNAME_HERE
+>>>>>>> upstream/develop
   * Only 1 needs to run regardless of how many bots you are running
 
 ----
@@ -90,6 +94,23 @@ There are more options, check the current config.json.example, many are self-exp
  * geopy (only for pokecli demo)
  * s2sphere (only for pokecli demo)
 
+### keeping the code clean
+If you make changes to the Python code, please use [tox](https://tox.readthedocs.io/)
+to run [flake8](http://flake8.pycqa.org/) and [isort](https://github.com/timothycrosley/isort)
+checks against the code. If you see any errors, please fix them before opening a
+pull request.
+
+To run tox, just install the package and run the `tox` command from the root
+directory of the project. tox will automatically install `flake8` and `isort`
+packages into a virtual environment as needed when it runs.
+```
+pip install tox
+tox
+```
+
+If you are not updating the Python code, you do not need to install or use tox.
+
+
 ### pokecli with Docker (optional)
 Build and run container:
 
@@ -112,16 +133,17 @@ What's working:
 ---
 
 ### Join slack channel:
-  To ask question  related  to api and general help, join Pokemon Go Reverse Engineering Slack team. 
+  To ask question  related  to api and general help, join Pokemon Go Reverse Engineering Slack team.
  * To join, get a invite from [here](https://shielded-earth-81203.herokuapp.com/) , join team via the email you recieve and then signin [here](https://pkre.slack.com).
 
 
 ## Credits
 * [tejado](https://github.com/tejado) for the base of this
-* [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR  
-* [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos  
+* [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR
+* [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos
 * [AHAAAAAAA](https://github.com/AHAAAAAAA/PokemonGo-Map) for parts of the s2sphere stuff
 * [beeedy](https://github.com/beeedy) for ability to transfer duplicate pokemon
+* [infinitewarp](https://github.com/infinitewarp) for introducing tox and cleaning up the code
 * And to anyone on the pokemongodev slack channel <3
 
 >>>>>>> super sketch but yolo

@@ -1,3 +1,5 @@
+import json
+
 
 class Player:
     def __init__(self, player_data):
@@ -26,3 +28,5 @@ class Player:
     def __repr__(self):
         return self.__str__()
 
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__)
