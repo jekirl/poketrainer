@@ -19,12 +19,12 @@ class PlayerStats:
         self.level = self.player_stats.get('level', 0)
 
     def __str__(self):
-        return "Level: {0}, XP: {1}/{2}, Pokedex: {3}, km walked: {4}".format(self.level,
-                                                                              self.experience,
-                                                                              self.next_level_xp,
-                                                                              self.unique_pokedex_entries,
-                                                                              self.km_walked).encode('utf-8', 'ignore')
+        return "Level: {0}, XP: {1}/{2}, Pokedex: {3}, km walked: {4:.2f}".format(self.level,
+                                                                                  self.experience,
+                                                                                  self.next_level_xp,
+                                                                                  self.unique_pokedex_entries,
+                                                                                  self.km_walked).encode('utf-8',
+                                                                                                         'ignore')
 
     def __repr__(self):
         return self.__str__()
-

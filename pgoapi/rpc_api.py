@@ -1,6 +1,7 @@
 """
 pgoapi - Pokemon Go API
 Copyright (c) 2016 tjado <https://github.com/tejado>
+Modifications Copyright (c) 2016 Brad Smith <https://github.com/infinitewarp>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +22,7 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 
 Author: tjado <https://github.com/tejado>
+Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
 from __future__ import absolute_import
@@ -30,12 +32,14 @@ import subprocess
 from importlib import import_module
 
 import requests
-from pgoapi.protos.POGOProtos.Networking.Envelopes_pb2 import RequestEnvelope
-from pgoapi.protos.POGOProtos.Networking.Envelopes_pb2 import ResponseEnvelope
-from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
+from google.protobuf.message import DecodeError
 
-from pgoapi.exceptions import NotLoggedInException, ServerBusyOrOfflineException
+from pgoapi.exceptions import (NotLoggedInException,
+                               ServerBusyOrOfflineException)
 from pgoapi.protobuf_to_dict import protobuf_to_dict
+from pgoapi.protos.POGOProtos.Networking.Envelopes_pb2 import (RequestEnvelope,
+                                                               ResponseEnvelope)
+from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.utilities import to_camel_case
 
 
@@ -75,7 +79,7 @@ class RpcApi:
         request_proto_serialized = request_proto_plain.SerializeToString()
         try:
             http_response = self._session.post(endpoint, data=request_proto_serialized)
-        except requests.exceptions.ConnectionError as e:
+        except requests.exceptions.ConnectionError:
             raise ServerBusyOrOfflineException
 
         return http_response
@@ -186,7 +190,7 @@ class RpcApi:
         response_proto = ResponseEnvelope()
         try:
             response_proto.ParseFromString(response_raw.content)
-        except google.protobuf.message.DecodeError as e:
+        except DecodeError as e:
             self.log.warning('Could not parse response: %s', str(e))
             return False
 
@@ -230,7 +234,7 @@ class RpcApi:
             subresponse_return = None
             try:
                 subresponse_extension = self.get_class(proto_classname)()
-            except Exception as e:
+            except Exception:
                 subresponse_extension = None
                 error = 'Protobuf definition for {} not found'.format(proto_classname)
                 subresponse_return = error
