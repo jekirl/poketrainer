@@ -129,7 +129,7 @@ class Inventory:
             self.master_balls -= 1
 
     def __str__(self):
-        return "PokeBalls: {0}, GreatBalls: {1}, MasterBalls: {2}, UltraBalls: {3} \n " \
+        return "PokeBalls: {0}, GreatBalls: {1}, MasterBalls: {2}, UltraBalls: {3} " \
                "Potion: {4}, Super Potion: {5}, Max Potion {6}, Hyper Potion {7}, Lucky Eggs {8}".format(self.poke_balls,
                                                                                         self.great_balls,
                                                                                         self.master_balls,

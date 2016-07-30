@@ -36,6 +36,23 @@ def pokemonIVPercentage(pokemon):
         'individual_defense', 0) + 0.0) / 45.0) * 100.0
 
 
+def pokemonDataList(pokemon):
+    #Family ID, Pokemon #, Pokemon Name, Is Fave,CP Level, iATK, iDEF, iSTA, IV%, HP
+    data_pokemon_str = str(pokemon.pokemon_additional_data.FamilyId[21:][:4]) + "," #Family ID
+    data_pokemon_str += str(pokemon.pokemon_id) + ',' #Pokemon Number
+    data_pokemon_str += str(pokemon.pokemon_type) + ',' #Pokemon Name
+    data_pokemon_str += str(pokemon.is_favorite) + ',' #Is Favorite
+    data_pokemon_str += str(pokemon.cp) + ',' #CP Level
+    data_pokemon_str += str(pokemon.individual_attack) + ',' #ATK
+    data_pokemon_str += str(pokemon.individual_defense) + ',' #DEF
+    data_pokemon_str += str(pokemon.individual_stamina) + ',' #STA
+    data_pokemon_str += str(pokemon.iv) + ',' #IV
+    data_pokemon_str += str(pokemon.stamina) #HP
+    data_pokemon_str += '\n'
+
+    return data_pokemon_str
+
+
 def get_inventory_data(res, poke_names):
     inventory_delta = res['responses']['GET_INVENTORY'].get('inventory_delta', {})
     inventory_items = inventory_delta.get('inventory_items', [])
@@ -67,3 +84,35 @@ DISK_ENCOUNTER = {0: "UNKNOWN",
                   2: "NOT_AVAILABLE",
                   3: "NOT_IN_RANGE",
                   4: "ENCOUNTER_ALREADY_FINISHED"}
+
+
+def get_inventory_candy(res, poke_names):
+    inventory_delta = res['responses']['GET_INVENTORY'].get('inventory_delta', {})
+    inventory_items = inventory_delta.get('inventory_items', [])
+    inventory_items_dict_list = map(lambda x: x.get('inventory_item_data', {}), inventory_items)
+    inventory_items_family_list = filter(lambda x: 'pokemon_family' in x, inventory_items_dict_list)
+
+    return (os.linesep.join(map(lambda x: "{0},{1},{2}".format(
+        x['pokemon_family']['family_id'],
+        poke_names[str(x['pokemon_family']['family_id'])].encode('ascii', 'ignore'),
+        x['pokemon_family']['candy']), inventory_items_family_list)))
+
+def write_data_files(data_items, data_player, data_pokemon, data_candies):
+    #self.log.info("[Data]\t\t- Writing Data Files...")
+    file = open("exports/items.csv", "w")
+    file.write(data_items)
+    file.close()
+
+    file = open("exports/player.csv", "w")
+    file.write(data_player)
+    file.close()
+
+    file = open("exports/pkmn.csv", "w")
+    file.write("Family,Pokedex,Name,Favorite,CP,ATK,DEF,STA,IV,HP\n")
+    file.write(data_pokemon)
+    file.close()
+
+    file = open("exports/candy.csv", "w")
+    file.write("Family,Pokemon,Candy\n")
+    file.write(data_candies)
+    file.close()
