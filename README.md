@@ -90,6 +90,23 @@ There are more options, check the current config.json.example, many are self-exp
  * geopy (only for pokecli demo)
  * s2sphere (only for pokecli demo)
 
+### keeping the code clean
+If you make changes to the Python code, please use [tox](https://tox.readthedocs.io/)
+to run [flake8](http://flake8.pycqa.org/) and [isort](https://github.com/timothycrosley/isort)
+checks against the code. If you see any errors, please fix them before opening a
+pull request.
+
+To run tox, just install the package and run the `tox` command from the root
+directory of the project. tox will automatically install `flake8` and `isort`
+packages into a virtual environment as needed when it runs.
+```
+pip install tox
+tox
+```
+
+If you are not updating the Python code, you do not need to install or use tox.
+
+
 ### pokecli with Docker (optional)
 Build and run container:
 
@@ -118,10 +135,11 @@ What's working:
 
 ## Credits
 * [tejado](https://github.com/tejado) for the base of this
-* [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR  
-* [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos  
+* [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR
+* [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos
 * [AHAAAAAAA](https://github.com/AHAAAAAAA/PokemonGo-Map) for parts of the s2sphere stuff
 * [beeedy](https://github.com/beeedy) for ability to transfer duplicate pokemon
+* [infinitewarp](https://github.com/infinitewarp) for introducing tox and cleaning up the code
 * And to anyone on the pokemongodev slack channel <3
 
 >>>>>>> super sketch but yolo

@@ -1,10 +1,9 @@
 from __future__ import absolute_import
+
 import os
-from pgoapi.pokemon import Pokemon, POKEMON_NAMES
-from pgoapi.game_master import PokemonData, GAME_MASTER
+
+from pgoapi.pokemon import Pokemon
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Enum_Items
-import csv
-import re
 
 
 def get_item_name(s_item_id):
@@ -15,8 +14,7 @@ def get_item_name(s_item_id):
     return 'Unknown'
 
 
-
-def pokemonIVPercentage(pokemon):
+def pokemon_iv_percentage(pokemon):
     return ((pokemon.get('individual_attack', 0) + pokemon.get('individual_stamina', 0) + pokemon.get(
         'individual_defense', 0) + 0.0) / 45.0) * 100.0
 
