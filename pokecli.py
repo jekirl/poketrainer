@@ -89,7 +89,7 @@ def init_config():
     account = load['accounts'][config.__dict__['config_index']]
     load = dict_merge(defaults, account)
     # Passed in arguments shoud trump
-    for key,value in iteritems(load):
+    for key, value in iteritems(load):
         if key not in config.__dict__ or not config.__dict__[key]:
             config.__dict__[key] = value
     if config.auth_service not in ['ptc', 'google']:

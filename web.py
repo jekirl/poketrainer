@@ -6,7 +6,7 @@ import re
 from collections import defaultdict
 
 import zerorpc
-from flask import Flask, flash, redirect, render_template, url_for, jsonify
+from flask import Flask, flash, jsonify, redirect, render_template, url_for
 
 from pgoapi.poke_utils import pokemon_iv_percentage
 
@@ -122,6 +122,7 @@ def transfer(username, p_id):
     else:
         flash("Failed!")
     return redirect(url_for('inventory', username=username))
+
 
 @app.route("/<username>/snipe/<latlng>")
 def snipe(username, latlng):
