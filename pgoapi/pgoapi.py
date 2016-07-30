@@ -574,8 +574,8 @@ class PGoApi:
                     self.log.info("Could not feed the Pokemon. (%s)", r)
 
             pokeball = self.inventory.take_next_ball(capture_probability)
-            self.log.info("Attempting catch with ball type {0}  at {1:.2f} % chance. Try Number: {2}".format(pokeball,
-                          item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
+            self.log.info("Attempting catch with {0} at {1:.2f}% chance. Try Number: {2}".format(get_item_name(
+                          pokeball), item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
             r = self.catch_pokemon(
                 normalized_reticle_size=1.950,
                 pokeball=pokeball,
