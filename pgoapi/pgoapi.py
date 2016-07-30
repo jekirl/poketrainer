@@ -379,7 +379,7 @@ class PGoApi:
         total_distance_traveled = 0
         total_distance = route_data['total_distance']
         self.log.info('===============================================')
-        self.log.info('Total trip distance will be: %s', total_distance)
+        self.log.info("Total trip distance will be: {0:.2f} meters".format(total_distance))
 
         for step_data in route_data['steps']:
             step = (step_data['lat'], step_data['long'])
@@ -416,7 +416,7 @@ class PGoApi:
         if destinations:
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
-            self.log.info('Nearest fort distance is %s', nearest_fort_dis)
+            self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
 
             # Fort is close enough to change our route and walk to
             if self.wander_steps > 0:
