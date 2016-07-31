@@ -16,7 +16,7 @@
         "STAY_WITHIN_PROXIMITY": 9999,
         "AUTO_USE_LUCKY_EGG": false
         "EXTRA_WAIT" : 0.2,
-        "SLEEP_MULT" : 1.0,
+        "SLEEP_MULT" : 1.0
       },
       "CAPTURE": {
         "CATCH_POKEMON": true,
