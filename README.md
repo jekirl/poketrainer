@@ -86,12 +86,17 @@ There are more options, check the current config.json.example, many are self-exp
 
 ## Requirements
  * Run `pip install -r requirements.txt`
- * Python 2
+ * Python 2.7 or 3.5
  * requests
  * protobuf
  * gpsoauth
  * geopy (only for pokecli demo)
  * s2sphere (only for pokecli demo)
+
+### Python 2 vs 3
+
+Although this project was originally built for Python 2.7, we have recently added support for Python 3.5. However, our tools that allow `web.py` to talk with `pokecli.py` currently require them to run on the *same version* of Python. So, if you choose to use Python 3 for one of them, you must use it for both of them (and vice versa for Python 2).
+
 
 ### keeping the code clean
 If you make changes to the Python code, please use [tox](https://tox.readthedocs.io/)
@@ -128,7 +133,7 @@ Put them in config. Type exactly as the name appears
 ### What's working:
 What's working:
  * A lot of things. Check out the example config to see some of the features. Catching Lured pokemon, regular pokemon, multiple kinds of navigation (google maps, walking, driving, customized speed), a web ui, auto transfers, auto evolves, auto power ups, auto egg incubation, inventory managament, multiple account botting. And much more, README to be updated soon.
- 
+
 ----
 
 ### Join slack channel:
