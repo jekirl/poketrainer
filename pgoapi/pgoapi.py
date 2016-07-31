@@ -423,10 +423,11 @@ class PGoApi:
             if self.LIST_POKEMON_BEFORE_CLEANUP:
                 self.log.info(get_inventory_data(res, self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS))
             self.incubate_eggs()
-            self.attempt_evolve(self.inventory.inventory_items)
-            self.cleanup_pokemon(self.inventory.inventory_items)
             # Auto-use lucky-egg if applicable
             self.use_lucky_egg()
+            self.attempt_evolve(self.inventory.inventory_items)
+            self.cleanup_pokemon(self.inventory.inventory_items)
+
 
             # Farm precon
             if self.FARM_ITEMS_ENABLED:
