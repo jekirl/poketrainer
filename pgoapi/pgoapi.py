@@ -93,7 +93,7 @@ class PGoApi:
         pokeball_percent = config.get("CAPTURE", {}).get("USE_POKEBALL_IF_PERCENT", 15)
         greatball_percent = config.get("CAPTURE", {}).get("USE_GREATBALL_IF_PERCENT", 15)
         ultraball_percent = config.get("CAPTURE", {}).get("USE_ULTRABALL_IF_PERCENT", 15)
-        use_masterball = config.get("CAPTURE", {}).get("USE_MASTERBALL", false)
+        use_masterball = config.get("CAPTURE", {}).get("USE_MASTERBALL")
         self.percentages = [pokeball_percent, greatball_percent, ultraball_percent, use_masterball]
 
         self.pokemon_caught = 0
@@ -793,6 +793,22 @@ class PGoApi:
         else:
             # self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)  # FIXME release_res is not in scope!
             self.log.info("Failed to release Pokemon %s", pokemon)
+        self.gsleep(1.0)
+        
+    def do_evolve_pokemon_by_id(self, p_id):
+        self.evolve_pokemon(pokemon_id=int(p_id))
+        self.gsleep(0.2)
+        evolve_res = self.call()['responses']['EVOLVE_POKEMON']
+        status = evolve_res.get('result', -1)
+        return status
+
+    def do_evolve_pokemon(self, pokemon):
+        self.log.info("Evolving pokemon: %s", pokemon)
+        if self.do_evolve_pokemon_by_id(pokemon.id):
+            self.log.info("Successfully Evolved Pokemon %s", pokemon)
+        else:
+            # self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)  # FIXME release_res is not in scope!
+            self.log.info("Failed to evolve Pokemon %s", pokemon)
         self.gsleep(1.0)
 
     def get_pokemon_stats(self, inventory_items=None):

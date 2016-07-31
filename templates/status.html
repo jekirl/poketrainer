@@ -53,6 +53,7 @@
             <th>Move 1</th>
             <th>Move 2</th>
             <th>Transfer</th>
+            <th>Evolve</th>
           </thead>
           {% for pokemon in pokemons %}
           <tr id="{{pokemon['id']}}">
@@ -70,6 +71,7 @@
             <td>{{attacks[pokemon["move_1"]]}}</td>
             <td>{{attacks[pokemon["move_2"]]}}</td>
             <td><a href="{{ url_for('transfer', username = username, p_id = pokemon['id'])}}">Transfer</a></td>
+            <td><a href="{{ url_for('evolve', username = username, p_id = pokemon['id'])}}">Evolve</a></td>
           </tr>
           {% endfor %}
         </table>
