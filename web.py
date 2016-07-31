@@ -1,14 +1,20 @@
 # DISCLAIMER: This is jank
+from __future__ import print_function
+
 import csv
 import json
 import os
 import re
 from collections import defaultdict
 
+import six
 import zerorpc
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
 
 from pgoapi.poke_utils import pokemon_iv_percentage
+
+if six.PY3:
+    from past.builtins import cmp
 
 app = Flask(__name__, template_folder="templates")
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
@@ -97,7 +103,7 @@ def pokemon(username):
         pokemons = json.loads(s.get_caught_pokemons())
     except ValueError:
         # FIXME Use logger instead of print statements!
-        print "Not valid Json"
+        print("Not valid Json")
 
     return render_template('pokemon.html', pokemons=pokemons, username=username)
 
@@ -109,7 +115,7 @@ def inventory(username):
         inventory = json.loads(s.get_inventory())
     except ValueError:
         # FIXME Use logger instead of print statements!
-        print "Not valid Json"
+        print("Not valid Json")
 
     return render_template('inventory.html', inventory=json.dumps(inventory, indent=2), username=username)
 

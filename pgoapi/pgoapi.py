@@ -37,9 +37,9 @@ from time import time
 
 import gevent
 import six
+from cachetools import TTLCache
 from gevent.coros import BoundedSemaphore
 
-from cachetools import TTLCache
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException
