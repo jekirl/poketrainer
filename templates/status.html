@@ -4,37 +4,74 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-sm-3 col-md-2 sidebar">
-      <div class="panel panel-default">
-        <div class="panel-body">
-          Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
-        </div>
-        <div class="container-fluid">
-          Level XP: {{player["level_xp"]}} / {{player["goal_xp"]}}
-          <div class="progress">
-            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["experience"] / player["next_level_xp"] * 100)|int }}%;">
-              {{ (player["level_xp"] / player["goal_xp"] * 100)|int }}%
+        <div class="panel panel-default">
+            <div class="panel-body">
+              Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
             </div>
-          </div>
-          Unique Pokemon: {{player["unique_pokedex_entries"]}} / 151
-          <div class="progress">
-            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["unique_pokedex_entries"] / 151 * 100)|int }}%;">
-              {{ (player["unique_pokedex_entries"] / 151 * 100)|int }}%
+            <div class="container-fluid">
+                Level XP: {{player["level_xp"]}} / {{player["goal_xp"]}}
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["experience"] / player["next_level_xp"] * 100)|int }}%;">
+                      {{ (player["level_xp"] / player["goal_xp"] * 100)|int }}%
+                    </div>
+                </div>
+                    Unique Pokemon: {{player["unique_pokedex_entries"]}} / 151
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["unique_pokedex_entries"] / 151 * 100)|int }}%;">
+                      {{ (player["unique_pokedex_entries"] / 151 * 100)|int }}%
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="snipe-coords" placeholder="Coords ...">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" id="poke-snipe" data-url="{{ url_for('snipe', username = username, latlng = '')}}">Snipe!</button>
+                    </span>
+                </div>
+                <br>
             </div>
-          </div>
-          <div class="input-group">
-            <input type="text" class="form-control" id="snipe-coords" placeholder="Coords ...">
-            <span class="input-group-btn">
-              <button class="btn btn-default" type="button" id="poke-snipe" data-url="{{ url_for('snipe', username = username, latlng = '')}}">Snipe!</button>
-            </span>
-          </div>
-          <br />
         </div>
       </div>
-    </div>
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
       <div style="display: none;" class="alert" role="alert" id="alert-box"></div>
       <div id="overlay" class="map">
-        <iframe id="map" src="http://maps.google.com/maps?q={{latlng}}&z=15&output=embed" width="100%" height="800" frameborder="0" style="border:0"></iframe>
+        <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key={{gmaps_api_key}}"></script>
+        <script type="text/javascript">
+            // When the window has finished loading create our google map below
+            google.maps.event.addDomListener(window, 'load', init);
+
+            function init() {
+                // Basic options for a simple Google Map
+                // For more options see: https://developers.google.com/maps/documentation/javascript/reference#MapOptions
+                var mapOptions = {
+                    // How zoomed in you want the map to start at (always required)
+                    zoom: 15,
+
+                    // The latitude and longitude to center the map (always required)
+                    center: new google.maps.LatLng({{latlng}}), // New York
+
+                    // How you would like to style the map.
+                    // This is where you would paste any style found on Snazzy Maps.
+                    styles: [{"featureType":"all","elementType":"geometry","stylers":[{"color":"#c1fcb8"},{"weight":"1.00"}]},{"featureType":"all","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"all","elementType":"labels.text.fill","stylers":[{"gamma":0.01},{"lightness":20}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"saturation":-31},{"lightness":-33},{"weight":2},{"gamma":0.8}]},{"featureType":"all","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"geometry","stylers":[{"hue":"#ff0000"},{"visibility":"off"}]},{"featureType":"administrative","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"landscape","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"poi","elementType":"all","stylers":[{"color":"#e0ffd3"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"saturation":20}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"lightness":20},{"saturation":-20}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"visibility":"on"},{"color":"#41ff82"}]},{"featureType":"road","elementType":"all","stylers":[{"weight":"2.00"}]},{"featureType":"road","elementType":"geometry","stylers":[{"lightness":"-20"},{"saturation":"-67"},{"gamma":"1.32"},{"color":"#57aa9f"},{"weight":"2.00"},{"visibility":"simplified"}]},{"featureType":"road","elementType":"geometry.fill","stylers":[{"visibility":"on"},{"weight":"2.00"}]},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"saturation":25},{"lightness":25},{"weight":"1.00"},{"color":"#f1ff8a"},{"visibility":"on"}]},{"featureType":"road","elementType":"labels","stylers":[{"weight":"2.12"},{"visibility":"off"}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"visibility":"on"},{"color":"#4c98a8"}]},{"featureType":"road.highway","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"road.arterial","elementType":"geometry.fill","stylers":[{"color":"#4c98a8"},{"weight":"2.63"}]},{"featureType":"road.arterial","elementType":"geometry.stroke","stylers":[{"color":"#f1ff8a"}]},{"featureType":"transit","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"geometry","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"labels","stylers":[{"visibility":"off"}]},{"featureType":"transit.line","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"transit.station","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"all","stylers":[{"lightness":-20},{"color":"#1b89d9"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#1b87d9"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"off"}]}]
+                };
+
+                // Get the HTML DOM element that will contain your map
+                // We are using a div with id="map" seen below in the <body>
+                var mapElement = document.getElementById('map');
+
+                // Create the Google Map using our element and options defined above
+                var map = new google.maps.Map(mapElement, mapOptions);
+
+                // Let's also add a marker while we're at it
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng({{latlng}}),
+                    map: map,
+                    title: 'Snazzy!'
+                });
+            }
+        </script>
+       <div id="map"></div>
+        <!--<iframe id="map" src="http://maps.google.com/maps?q={{latlng}}&z=15&output=embed" width="100%" height="800" frameborder="0" style="border:0"></iframe>-->
+        <!--<iframe id="map" src="https://pokevision.com/#/@{{latlng}}" width="100%" height="800" frameborder="0" style="border:0"></iframe>-->
       </div>
       <h2>Pokemon</h2>
       <div class="table-responsive">
