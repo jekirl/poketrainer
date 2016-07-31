@@ -45,7 +45,7 @@ from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException
 from pgoapi.inventory import Inventory as Player_Inventory
 from pgoapi.location import (distance_in_meters, filtered_forts,
-                             get_increments, get_neighbors, get_route)
+                             get_neighbors, get_route)
 from pgoapi.player import Player as Player
 from pgoapi.player_stats import PlayerStats as PlayerStats
 from pgoapi.poke_utils import (create_capture_probability, get_inventory_data,
@@ -496,28 +496,29 @@ class PGoApi:
         total_distance = route_data['total_distance']
         self.log.info('===============================================')
         self.log.info("Total trip distance will be: {0:.2f} meters".format(total_distance))
+    	print(route_data)
+        #self.gsleep(60)
+        for i, next_point in enumerate(route_data.get("steps", [])):
+            #print(next_point['lat'])
+            #print(next_point['long'])
+            #self.gsleep(60)
+            distance_to_point = distance_in_meters(self._posf, (next_point['lat'],next_point['long']))
+            total_distance_traveled += distance_to_point
+            #travel_link = '%s%s,%s' % (base_travel_link, next_point['lat'], next_point['long'])
+            #self.log.info("Travel Link: %s", travel_link)
+            self.set_position(next_point['lat'], next_point['long'], 0.0)
+            self.heartbeat()
 
-        for step_data in route_data['steps']:
-            step = (step_data['lat'], step_data['long'])
-            step_increments = get_increments(self._posf, step, step_size)
+            if directly is False:
+                if self.experimental and self.spin_all_forts:
+                    self.spin_nearest_fort()
 
-            for i, next_point in enumerate(step_increments):
-                distance_to_point = distance_in_meters(self._posf, next_point)
-                total_distance_traveled += distance_to_point
-                travel_link = '%s%s,%s' % (base_travel_link, next_point[0], next_point[1])
-                self.log.info("Travel Link: %s", travel_link)
-                self.set_position(*next_point)
-                self.heartbeat()
 
-                if directly is False:
-                    if self.experimental and self.spin_all_forts:
-                        self.spin_nearest_fort()
+            while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
+                self.gsleep(1)
+                catch_attempt += 1
+            catch_attempt = 0
 
-                # self.gsleep(1)
-                while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
-                    self.gsleep(1)
-                    catch_attempt += 1
-                catch_attempt = 0
 
             self.log.info('Traveled %.2f meters of %.2f of the trip', total_distance_traveled, total_distance)
         self.log.info('===============================================')
