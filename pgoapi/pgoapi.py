@@ -590,8 +590,7 @@ class PGoApi:
         res = self.nearby_map_objects()
         map_cells = res['responses'].get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts,
-                                      self.experimental)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Or server error')
@@ -623,8 +622,7 @@ class PGoApi:
         res = self.nearby_map_objects()
         map_cells = res['responses'].get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts,
-                                      self.experimental)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Returning back to origin')
