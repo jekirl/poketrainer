@@ -678,7 +678,7 @@ class PGoApi:
         if not capture_probability:
             capture_probability = {}
         # Max 4 attempts to catch pokemon
-        while catch_status != 1 and self.inventory.can_attempt_catch() and catch_attempts < 11:
+        while catch_status != 1 and self.inventory.can_attempt_catch() and catch_attempts <= self.max_catch_attempts:
             item_capture_mult = 1.0
 
             # Try to use a berry to increase the chance of catching the pokemon when we have failed enough attempts
