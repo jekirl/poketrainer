@@ -101,12 +101,17 @@ class PGoApi:
         self.player_stats = PlayerStats({})
         self.inventory = Player_Inventory(self.percentages, [])
 
+        self._last_got_map_objects = 0
+        self._map_objects_rate_limit = 5.0
+        self.map_objects = {}
+        self.encountered_pokemons = TTLCache(maxsize=120, ttl=self._map_objects_rate_limit * 2)
+
         self.start_time = time()
         self.exp_start = None
         self.exp_current = None
         self.sem = BoundedSemaphore(1)
         self.persist_lock = False
-        self.sleep_mult = self.config.get("SLEEP_MULT", 1.0)
+        self.sleep_mult = self.config.get("SLEEP_MULT", 1.5)
         self.MIN_ITEMS = {}
         for k, v in config.get("MIN_ITEMS", {}).items():
             self.MIN_ITEMS[getattr(Inventory, k)] = v
@@ -223,7 +228,7 @@ class PGoApi:
 
     def call(self):
         self.cond_lock()
-        self.gsleep(self.config.get("EXTRA_WAIT", 0.2))
+        self.gsleep(self.config.get("EXTRA_WAIT", 0.3))
         try:
             if not self._req_method_list.get(id(gevent.getcurrent()), []):
                 return False
@@ -576,6 +581,10 @@ class PGoApi:
             self.log.debug("Could not spin fort -  fort not in range %s", res)
             self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Not in Range %s", fort['latitude'],
                           fort['longitude'], fort_distance)
+        elif result == 3:
+            self.log.debug("Could not spin fort -  still on cooldown %s", res)
+            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Still on cooldown", fort['latitude'],
+                          fort['longitude'])
         else:
             self.log.debug("Could not spin fort %s", res)
             self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Error id: %s", fort['latitude'],
@@ -587,8 +596,7 @@ class PGoApi:
         res = self.nearby_map_objects()
         map_cells = res['responses'].get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts,
-                                      self.experimental)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Or server error')
@@ -620,8 +628,7 @@ class PGoApi:
         res = self.nearby_map_objects()
         map_cells = res['responses'].get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts,
-                                      self.experimental)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Returning back to origin')
@@ -639,6 +646,7 @@ class PGoApi:
 
         map_cells = self.nearby_map_objects()['responses'].get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         pokemons = PGoApi.flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
+        pokemons = filter(lambda p: (p['encounter_id'] not in self.encountered_pokemons), pokemons)
 
         # catch first pokemon:
         origin = (self._posf[0], self._posf[1])
@@ -660,12 +668,15 @@ class PGoApi:
         return catches_successful
 
     def nearby_map_objects(self):
-        position = self.get_position()
-        neighbors = get_neighbors(self._posf)
-        self.gsleep(1.0)
-        return self.get_map_objects(latitude=position[0], longitude=position[1],
-                                    since_timestamp_ms=[0] * len(neighbors),
-                                    cell_id=neighbors).call()
+        if time() - self._last_got_map_objects > self._map_objects_rate_limit:
+            position = self.get_position()
+            neighbors = get_neighbors(self._posf)
+            gevent.sleep(1.0)
+            self.map_objects = self.get_map_objects(latitude=position[0], longitude=position[1],
+                                since_timestamp_ms=[0] * len(neighbors),
+                                cell_id=neighbors).call()
+            self._last_got_map_objects = time()
+        return self.map_objects
 
     def attempt_catch(self, encounter_id, spawn_point_id, capture_probability=None):
         catch_status = -1
@@ -674,7 +685,7 @@ class PGoApi:
         if not capture_probability:
             capture_probability = {}
         # Max 4 attempts to catch pokemon
-        while catch_status != 1 and self.inventory.can_attempt_catch() and catch_attempts < 11:
+        while catch_status != 1 and self.inventory.can_attempt_catch() and catch_attempts <= self.max_catch_attempts:
             item_capture_mult = 1.0
 
             # Try to use a berry to increase the chance of catching the pokemon when we have failed enough attempts
@@ -996,6 +1007,7 @@ class PGoApi:
                     self.send_update_pos()
                     # self.gsleep(2)
 
+                self.encountered_pokemons[encounter_id] = pokemon_data
                 return self.do_catch_pokemon(encounter_id, spawn_point_id, capture_probability, pokemon)
             elif result == 7:
                 self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try", pokemon.pokemon_type)
@@ -1003,7 +1015,7 @@ class PGoApi:
                 if not retry:
                     return self.encounter_pokemon(pokemon_data, retry=True, new_loc=new_loc)
             else:
-                self.log.info("Could not start encounter for pokemon: %s", pokemon.pokemon_type)
+                self.log.info("Could not start encounter for pokemon: %s, status %s", pokemon.pokemon_type, result)
             return False
         except Exception as e:
             self.log.error("Error in pokemon encounter %s", e)
