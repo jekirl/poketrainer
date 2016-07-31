@@ -574,7 +574,7 @@ class PGoApi:
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts,
                                       self.experimental)
         if not destinations:
-            self.log.info("No fort to walk to! %s", res)
+            self.log.debug("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Or server error')
             self.walk_back_to_origin()
             return False
