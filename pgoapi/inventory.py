@@ -68,7 +68,7 @@ class Inventory:
         self.poke_balls -= 1
 
     def take_greatball(self):
-        self.poke_balls -= 1
+        self.great_balls -= 1
 
     def take_masterball(self):
         self.master_balls -= 1
