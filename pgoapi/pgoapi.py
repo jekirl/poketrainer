@@ -106,7 +106,7 @@ class PGoApi:
         self.exp_current = None
         self.sem = BoundedSemaphore(1)
         self.persist_lock = False
-        self.sleep_mult = self.config.get("SLEEP_MULT", 1.0)
+        self.sleep_mult = self.config.get("SLEEP_MULT", 1.5)
         self.MIN_ITEMS = {}
         for k, v in config.get("MIN_ITEMS", {}).items():
             self.MIN_ITEMS[getattr(Inventory, k)] = v
