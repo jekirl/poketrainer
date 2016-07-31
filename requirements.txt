@@ -7,6 +7,8 @@ pyproj==1.9.5.1
 python-gmaps==0.3.1
 Flask==0.11.1
 Jinja2==2.7.1
-expiringdict==1.1.3
-zerorpc==0.5.2
 Flask-SocketIO==2.6
+cachetools==1.1.6
+six==1.10.0
+# zerorpc==0.5.2  # 0.5.2 does not support python3!
+-e git+git://github.com/0rpc/zerorpc-python.git@python3.4#egg=zerorpc

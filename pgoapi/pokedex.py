@@ -1,7 +1,8 @@
 import inspect
+import six
 
-## Credit: https://github.com/earshel/PokeyPySnipe/blob/master/pogo/pokedex.py
 
+# Credit: https://github.com/earshel/PokeyPySnipe/blob/master/pogo/pokedex.py
 class Pokedex(dict):
 
     # Enum pokemonIds
@@ -161,11 +162,14 @@ class Pokedex(dict):
     rarity = {}
     evolves = {}
 
-    def __init__(self):
-        super(dict, self).__init__(self)
+    def __init__(self, *args, **kwargs):
+        if six.PY3:
+            self.update(*args, **kwargs)
+        else:
+            super(dict, self).__init__(self, args, kwargs)
 
         # Some reflection, based on uppercase consts.
-        attributes = inspect.getmembers(Pokedex, lambda attr :not(inspect.isroutine(attr)))
+        attributes = inspect.getmembers(Pokedex, lambda attr: not(inspect.isroutine(attr)))
         for attr in attributes:
             if attr[0].isupper():
                 self[attr[1]] = attr[0]
@@ -251,12 +255,12 @@ class Pokedex(dict):
             self.MEWTWO: 0, self.MEW: 0
         }
 
-    def getRarityByName(self, name):
+    def get_rarity_by_name(self, name):
         return self.RarityById(self[name])
 
-    def getRarityById(self, pokemonId):
+    def get_rarity_by_id(self, pokemon_id):
         for rarity in self.rarity:
-            if pokemonId in self.rarity[rarity]:
+            if pokemon_id in self.rarity[rarity]:
                 return rarity
 
 

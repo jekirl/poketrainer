@@ -1,6 +1,8 @@
 import csv
 import re
 
+from six import iteritems
+
 
 class PokemonData:
     def __init__(self):
@@ -41,6 +43,6 @@ with open("GAME_MASTER_POKEMON_v0_2.tsv") as tsvfile:
     for row in tsvreader:
         row["FamilyId"] = re.match("HoloPokemonFamilyId.V([0-9]*).*", row["FamilyId"]).group(1)
         pokemon_data = PokemonData()
-        for (k, v) in row.iteritems():
+        for (k, v) in iteritems(row):
             setattr(pokemon_data, k, v)
         GAME_MASTER[int(row["PkMn"])] = pokemon_data

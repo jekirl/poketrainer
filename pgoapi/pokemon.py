@@ -109,7 +109,7 @@ class Pokemon:
             str_ = "{0}Type: {1} CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, " \
                    "LvlWild: {5:.1f}, MaxCP: {6:.0f}, Score: {7}, IV-Norm.: {8:.0f}"
             return str_.format(nickname,
-                               self.pokemon_type,
+                               self.pokemon_type.decode('utf8'),
                                self.cp, self.iv,
                                self.level,
                                self.level_wild,

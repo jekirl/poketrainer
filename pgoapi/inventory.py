@@ -75,6 +75,7 @@ class Inventory:
 
     def take_ultraball(self):
         self.ultra_balls -= 1
+
     def best_ball(self):
         if self.master_balls:
             return Inventory_Enum.ITEM_MASTER_BALL
@@ -84,19 +85,20 @@ class Inventory:
             return Inventory_Enum.ITEM_GREAT_BALL
         else:
             return Inventory_Enum.ITEM_POKE_BALL
-#FIXME make not bad, this should be configurable
+
+    # FIXME make not bad, this should be configurable
     def take_next_ball(self, capture_probability):
         if self.can_attempt_catch():
-            if capture_probability.get(Inventory_Enum.ITEM_POKE_BALL,0) > 0.15 and self.poke_balls:
+            if capture_probability.get(Inventory_Enum.ITEM_POKE_BALL, 0) > 0.15 and self.poke_balls:
                 self.take_pokeball()
                 return Inventory_Enum.ITEM_POKE_BALL
-            elif capture_probability.get(Inventory_Enum.ITEM_GREAT_BALL,0) > 0.15 and self.great_balls:
+            elif capture_probability.get(Inventory_Enum.ITEM_GREAT_BALL, 0) > 0.15 and self.great_balls:
                 self.take_greatball()
                 return Inventory_Enum.ITEM_GREAT_BALL
-            elif capture_probability.get(Inventory_Enum.ITEM_ULTRA_BALL,0) > 0.15 and self.ultra_balls:
+            elif capture_probability.get(Inventory_Enum.ITEM_ULTRA_BALL, 0) > 0.15 and self.ultra_balls:
                 self.take_ultraball()
                 return Inventory_Enum.ITEM_ULTRA_BALL
-            elif capture_probability.get(Inventory_Enum.ITEM_MASTER_BALL,0) > 0.15 and self.master_balls:
+            elif capture_probability.get(Inventory_Enum.ITEM_MASTER_BALL, 0) > 0.15 and self.master_balls:
                 self.take_masterball()
                 return Inventory_Enum.ITEM_MASTER_BALL
             else:

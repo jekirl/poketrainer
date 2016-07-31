@@ -1,3 +1,6 @@
+from __future__ import print_function
+
+
 class Listener(object):
     def __init__(self, api):
         self.api = api
@@ -7,7 +10,7 @@ class Listener(object):
 
     def current_location(self):
         # FIXME use logger instead of print statements!
-        print self.api._posf
+        print(self.api._posf)
         return self.api._posf
 
     def get_caught_pokemons(self):
@@ -21,6 +24,6 @@ class Listener(object):
 
     def snipe_pokemon(self, lat, lng):
         return self.api.snipe_pokemon(float(lat), float(lng))
-        
+
     def ping(self):
         return "pong"
