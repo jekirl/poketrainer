@@ -75,39 +75,36 @@ class Inventory:
 
     def take_ultraball(self):
         self.ultra_balls -= 1
-
-    def take_next_ball(self, capture_priority=None):
-        if not capture_priority:
-            capture_priority = {1: 35.0, 2: 45.0, 3: 55.0}
-        priority = Inventory.__get_ball_priority(capture_priority)
-        if self.can_attempt_catch() and priority <= Inventory_Enum.ITEM_MASTER_BALL:
-            if priority <= Inventory_Enum.ITEM_POKE_BALL and self.poke_balls > 0:
+    def best_ball(self):
+        if self.master_balls:
+            return Inventory_Enum.ITEM_MASTER_BALL
+        elif self.ultra_balls:
+            return Inventory_Enum.ITEM_ULTRA_BALL
+        elif self.great_balls:
+            return Inventory_Enum.ITEM_GREAT_BALL
+        else:
+            return Inventory_Enum.ITEM_POKE_BALL
+#FIXME make not bad, this should be configurable
+    def take_next_ball(self, capture_probability):
+        if self.can_attempt_catch():
+            if capture_probability.get(Inventory_Enum.ITEM_POKE_BALL,0) > 0.15 and self.poke_balls:
                 self.take_pokeball()
                 return Inventory_Enum.ITEM_POKE_BALL
-            if priority <= Inventory_Enum.ITEM_GREAT_BALL and self.great_balls > 0:
+            elif capture_probability.get(Inventory_Enum.ITEM_GREAT_BALL,0) > 0.15 and self.great_balls:
                 self.take_greatball()
                 return Inventory_Enum.ITEM_GREAT_BALL
-            if priority <= Inventory_Enum.ITEM_ULTRA_BALL and self.ultra_balls > 0:
+            elif capture_probability.get(Inventory_Enum.ITEM_ULTRA_BALL,0) > 0.15 and self.ultra_balls:
                 self.take_ultraball()
                 return Inventory_Enum.ITEM_ULTRA_BALL
-            if priority <= Inventory_Enum.ITEM_MASTER_BALL and self.master_balls > 0:
+            elif capture_probability.get(Inventory_Enum.ITEM_MASTER_BALL,0) > 0.15 and self.master_balls:
                 self.take_masterball()
                 return Inventory_Enum.ITEM_MASTER_BALL
             else:
-                return self.take_next_ball()
+                best_ball = self.best_ball()
+                self.take_ball(self.best_ball())
+                return best_ball
         else:
             return -1
-
-    @staticmethod
-    def __get_ball_priority(capture_priority):
-        if capture_priority.get(Inventory_Enum.ITEM_POKE_BALL, 0.0) > 0.30:
-            return Inventory_Enum.ITEM_POKE_BALL
-        if capture_priority.get(Inventory_Enum.ITEM_GREAT_BALL, 0.0) > 0.30:
-            return Inventory_Enum.ITEM_GREAT_BALL
-        if capture_priority.get(Inventory_Enum.ITEM_ULTRA_BALL, 0.0) > 0.30:
-            return Inventory_Enum.ITEM_ULTRA_BALL
-        else:
-            return Inventory_Enum.ITEM_MASTER_BALL
 
     def take_ball(self, ball_id):
         if ball_id == Inventory_Enum.ITEM_POKE_BALL:
