@@ -93,7 +93,7 @@ class PGoApi:
         pokeball_percent = config.get("CAPTURE", {}).get("USE_POKEBALL_IF_PERCENT", 15)
         greatball_percent = config.get("CAPTURE", {}).get("USE_GREATBALL_IF_PERCENT", 15)
         ultraball_percent = config.get("CAPTURE", {}).get("USE_ULTRABALL_IF_PERCENT", 15)
-        use_masterball = config.get("CAPTURE", {}).get("USE_MASTERBALL", false)
+        use_masterball = config.get("CAPTURE", {}).get("USE_MASTERBALL", False)
         self.percentages = [pokeball_percent, greatball_percent, ultraball_percent, use_masterball]
 
         self.pokemon_caught = 0
@@ -178,7 +178,6 @@ class PGoApi:
         self.STAY_WITHIN_PROXIMITY = config.get("BEHAVIOR", {}).get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
         self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True)
         self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
-
 
         # Sanity checking
         self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon  # Experimental, and we needn't do this if we're farming anyway
@@ -432,7 +431,6 @@ class PGoApi:
             self.use_lucky_egg()
             self.attempt_evolve(self.inventory.inventory_items)
             self.cleanup_pokemon(self.inventory.inventory_items)
-
 
             # Farm precon
             if self.FARM_ITEMS_ENABLED:

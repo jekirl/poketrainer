@@ -81,7 +81,7 @@ class Inventory:
         self.ultra_balls -= 1
 
     def best_ball(self):
-        if self.use_masterball == true and self.master_balls:
+        if self.use_masterball and self.master_balls:
             return Inventory_Enum.ITEM_MASTER_BALL
         elif self.ultra_balls:
             return Inventory_Enum.ITEM_ULTRA_BALL
