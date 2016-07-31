@@ -48,7 +48,7 @@ class AuthPtc(Auth):
 
     def login(self, username, password):
 
-        self.log.info('Login for: %s', username)
+        self.log.info('[LOGIN]\t- Login for: %s', username)
 
         head = {'User-Agent': 'niantic'}
         r = self._session.get(self.PTC_LOGIN_URL, headers=head)
@@ -68,9 +68,9 @@ class AuthPtc(Auth):
             ticket = re.sub('.*ticket=', '', r1.history[0].headers['Location'])
         except Exception as e:
             try:
-                self.log.error('Could not retrieve token: %s', r1.json()['errors'][0])
+                self.log.error('[LOGIN]\t- Could not retrieve token: %s', r1.json()['errors'][0])
             except Exception as e:
-                self.log.error('Could not retrieve token! (%s)', str(e))
+                self.log.error('[LOGIN]\t- Could not retrieve token! (%s)', str(e))
             return False
 
         data1 = {
@@ -90,7 +90,7 @@ class AuthPtc(Auth):
             self.log.debug('PTC Session Token: %s', access_token[:25])
             self._auth_token = access_token
         else:
-            self.log.info('Seems not to be a PTC Session Token... login failed :(')
+            self.log.info('[LOGIN]\t- Seems not to be a PTC Session Token... login failed :(')
             return False
 
         self._login = True

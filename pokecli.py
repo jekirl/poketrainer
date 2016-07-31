@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 """
 pgoapi - Pokemon Go API
 Copyright (c) 2016 tjado <https://github.com/tejado>
@@ -51,19 +53,17 @@ logger = logging.getLogger(__name__)
 def get_pos_by_name(location_name):
     geolocator = GoogleV3()
     loc = geolocator.geocode(location_name)
-
-    logger.info('Your given location: %s', loc.address.encode('utf-8'))
-    logger.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
+    logger.info('[LOGIN]\t- Your given location: %s', loc.address.encode('utf-8'))
+    logger.info('[LOGIN]\t- lat/long/alt: %s %s %s', loc.latitude, loc.longitude,
+                loc.altitude)
 
     return (loc.latitude, loc.longitude, loc.altitude)
 
 
 def dict_merge(dct, merge_dct):
-    for k, v in iteritems(merge_dct):
-        if (
-            k in dct and isinstance(dct[k], dict) and
-            isinstance(merge_dct[k], collections.Mapping)
-        ):
+    for (k, v) in iteritems(merge_dct):
+        if k in dct and isinstance(dct[k], dict) \
+            and isinstance(merge_dct[k], collections.Mapping):
             dict_merge(dct[k], merge_dct[k])
         else:
             dct[k] = merge_dct[k]
@@ -72,66 +72,87 @@ def dict_merge(dct, merge_dct):
 
 def init_config():
     parser = argparse.ArgumentParser()
-    config_file = "config.json"
+    config_file = 'config.json'
 
     # If config file exists, load variables from json
+
     load = {}
     if os.path.isfile(config_file):
         with open(config_file) as data:
             load.update(json.load(data))
 
     # Read passed in Arguments
-    parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
-    parser.add_argument("-l", "--location", help="Location")
-    parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
+
+    parser.add_argument('-i', '--config_index',
+                        help='Index of account in config.json',
+                        default=0, type=int)
+    parser.add_argument('-l', '--location', help='Location')
+    parser.add_argument('-d', '--debug', help='Debug Mode',
+                        action='store_true', default=False)
     config = parser.parse_args()
     defaults = load.get('defaults', {})
     account = load['accounts'][config.__dict__['config_index']]
     load = dict_merge(defaults, account)
+
     # Passed in arguments shoud trump
-    for key, value in iteritems(load):
+
+    for (key, value) in iteritems(load):
         if key not in config.__dict__ or not config.__dict__[key]:
             config.__dict__[key] = value
     if config.auth_service not in ['ptc', 'google']:
-        logger.error("Invalid Auth service specified! ('ptc' or 'google')")
+        logger.error("Invalid Auth service specified! ('ptc' or 'google')"
+                     )
         return None
 
     return config.__dict__
 
 
 def main(position=None):
+
     # log settings
     # log format
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+    # logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+
+    logging.basicConfig(level=logging.INFO, format='\t%(message)s')
+
     # log level for http request class
-    logging.getLogger("requests").setLevel(logging.WARNING)
+
+    logging.getLogger('requests').setLevel(logging.WARNING)
+
     # log level for main pgoapi class
-    logging.getLogger("pgoapi").setLevel(logging.INFO)
+
+    logging.getLogger('pgoapi').setLevel(logging.INFO)
+
     # log level for internal pgoapi class
-    logging.getLogger("rpc_api").setLevel(logging.INFO)
+
+    logging.getLogger('rpc_api').setLevel(logging.INFO)
 
     config = init_config()
     if not config:
         return
 
-    if config["debug"]:
-        logging.getLogger("requests").setLevel(logging.DEBUG)
-        logging.getLogger("pgoapi").setLevel(logging.DEBUG)
-        logging.getLogger("rpc_api").setLevel(logging.DEBUG)
+    if config['debug']:
+        logging.getLogger('requests').setLevel(logging.DEBUG)
+        logging.getLogger('pgoapi').setLevel(logging.DEBUG)
+        logging.getLogger('rpc_api').setLevel(logging.DEBUG)
 
     if not position:
-        position = get_pos_by_name(config["location"])
+        position = get_pos_by_name(config['location'])
 
     # instantiate pgoapi
+
     api = PGoApi(config)
 
     # provide player position on the earth
+
     api.set_position(*position)
 
-    desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
+    desc_file = \
+        os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                     '.listeners')
     sock_port = 0
     s = socket.socket()
-    s.bind(("", 0))  # let the kernel find a free port
+    s.bind(('', 0))  # let the kernel find a free port
     sock_port = s.getsockname()[1]
     s.close()
     data = {}
@@ -140,29 +161,36 @@ def main(position=None):
         with open(desc_file, 'r+') as f:
             data = f.read()
             if PY2:
-                data = json.loads(data.encode() if len(data) > 0 else '{}')
+                data = json.loads((data.encode() if len(data)
+                                  > 0 else '{}'))
             else:
-                data = json.loads(data if len(data) > 0 else '{}')
-    data[config["username"]] = sock_port
-    with open(desc_file, "w+") as f:
+                data = json.loads((data if len(data) > 0 else '{}'))
+    data[config['username']] = sock_port
+    with open(desc_file, 'w+') as f:
         f.write(json.dumps(data, indent=2))
 
     s = zerorpc.Server(Listener(api))
-    s.bind("tcp://127.0.0.1:%i" % sock_port) # the free port should still be the same
+    s.bind('tcp://127.0.0.1:%i' % sock_port)  # the free port should still be the same
     gevent.spawn(s.run)
 
     # retry login every 30 seconds if any errors
-    while not api.login(config["auth_service"], config["username"], config["password"]):
+
+    while not api.login(config['auth_service'], config['username'],
+                        config['password']):
         logger.error('Retrying Login in 30 seconds')
         sleep(30)
 
     # main loop
+
     while True:
         try:
             api.main_loop()
-        except Exception as e:
-            logger.exception('Error in main loop %s, restarting at location: %s', e, api._posf)
+        except Exception, e:
+            logger.exception('Error in main loop %s, restarting at location: %s'
+                             , e, api._posf)
+
             # restart after sleep
+
             sleep(30)
             try:
                 main(api._posf)
@@ -170,6 +198,7 @@ def main(position=None):
                 raise
             except:
                 pass
+
 
 if __name__ == '__main__':
     main()

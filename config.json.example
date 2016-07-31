@@ -78,7 +78,9 @@
       },
       "CONSOLE_OUTPUT": {
         "LIST_POKEMON_BEFORE_CLEANUP": true,
-        "LIST_INVENTORY_BEFORE_CLEANUP": true
+        "LIST_INVENTORY_BEFORE_CLEANUP": true,
+        "HEARTBEAT_DETAIL": "detailed",
+        "PRETTY_LOCATIONS": true
       }
     },
     {

@@ -33,18 +33,18 @@ class Inventory:
                 self.potion = item_count
             elif item_id == Inventory_Enum.ITEM_SUPER_POTION:
                 self.super_potion = item_count
-            elif item_id == Inventory_Enum.ITEM_MAX_POTION:
-                self.max_potion = item_count
             elif item_id == Inventory_Enum.ITEM_HYPER_POTION:
                 self.hyper_potion = item_count
+            elif item_id == Inventory_Enum.ITEM_MAX_POTION:
+                self.max_potion = item_count
             elif item_id == Inventory_Enum.ITEM_POKE_BALL:
                 self.poke_balls = item_count
             elif item_id == Inventory_Enum.ITEM_GREAT_BALL:
                 self.great_balls = item_count
-            elif item_id == Inventory_Enum.ITEM_MASTER_BALL:
-                self.master_balls = item_count
             elif item_id == Inventory_Enum.ITEM_ULTRA_BALL:
                 self.ultra_balls = item_count
+            elif item_id == Inventory_Enum.ITEM_MASTER_BALL:
+                self.master_balls = item_count
             elif item_id == Inventory_Enum.ITEM_LUCKY_EGG:
                 self.lucky_eggs = item_count
             elif item_id == Inventory_Enum.ITEM_RAZZ_BERRY:
