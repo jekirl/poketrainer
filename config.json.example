@@ -21,7 +21,11 @@
       "CAPTURE": {
         "CATCH_POKEMON": true,
         "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 3,
-        "MAX_CATCH_ATTEMPTS": 10
+        "MAX_CATCH_ATTEMPTS": 10,
+        "use_pokeball_at": 15,
+        "use_greatball_at": 15,
+        "use_ultraball_at": 15,
+        "use_masterball_at": 0
       },
       "EGG_INCUBATION": {
         "ENABLE": true,

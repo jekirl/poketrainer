@@ -5,7 +5,7 @@ from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory_Enum
 
 
 class Inventory:
-    def __init__(self, inventory_items):
+    def __init__(self, percentages, inventory_items):
         self.inventory_items = inventory_items
         self.ultra_balls = 0
         self.great_balls = 0
@@ -17,6 +17,10 @@ class Inventory:
         self.max_potion = 0
         self.lucky_eggs = 0
         self.razz_berries = 0
+        self.pokeball_percent = (percentages[0] / 100)
+        self.greatball_percent = (percentages[1] / 100)
+        self.ultraball_percent = (percentages[2] / 100)
+        self.masterball_percent = (percentages[3] / 100)
 
         self.pokemon_candy = defaultdict()
         self.eggs_available = []
@@ -77,7 +81,7 @@ class Inventory:
         self.ultra_balls -= 1
 
     def best_ball(self):
-        if self.master_balls:
+        if self.masterball_percent > 0 and self.master_balls:
             return Inventory_Enum.ITEM_MASTER_BALL
         elif self.ultra_balls:
             return Inventory_Enum.ITEM_ULTRA_BALL
@@ -89,18 +93,15 @@ class Inventory:
     # FIXME make not bad, this should be configurable
     def take_next_ball(self, capture_probability):
         if self.can_attempt_catch():
-            if capture_probability.get(Inventory_Enum.ITEM_POKE_BALL, 0) > 0.15 and self.poke_balls:
+            if capture_probability.get(Inventory_Enum.ITEM_POKE_BALL, 0) > self.pokeball_percent and self.poke_balls:
                 self.take_pokeball()
                 return Inventory_Enum.ITEM_POKE_BALL
-            elif capture_probability.get(Inventory_Enum.ITEM_GREAT_BALL, 0) > 0.15 and self.great_balls:
+            elif capture_probability.get(Inventory_Enum.ITEM_GREAT_BALL, 0) > self.greatball_percent and self.great_balls:
                 self.take_greatball()
                 return Inventory_Enum.ITEM_GREAT_BALL
-            elif capture_probability.get(Inventory_Enum.ITEM_ULTRA_BALL, 0) > 0.15 and self.ultra_balls:
+            elif capture_probability.get(Inventory_Enum.ITEM_ULTRA_BALL, 0) > self.ultraball_percent and self.ultra_balls:
                 self.take_ultraball()
                 return Inventory_Enum.ITEM_ULTRA_BALL
-            elif capture_probability.get(Inventory_Enum.ITEM_MASTER_BALL, 0) > 0.15 and self.master_balls:
-                self.take_masterball()
-                return Inventory_Enum.ITEM_MASTER_BALL
             else:
                 best_ball = self.best_ball()
                 self.take_ball(self.best_ball())
