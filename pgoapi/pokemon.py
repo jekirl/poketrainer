@@ -2,15 +2,19 @@ from __future__ import absolute_import
 
 import json
 from math import sqrt
+from os import path
 
 from pgoapi.game_master import GAME_MASTER
 
 
-# TODO wrap this with some error handling?
-POKEMON_NAMES = json.load(open("pokemon.en.json"))
+POKEMON_NAMES = {}
+
+_names_file_path = path.join(path.dirname(path.dirname(__file__)), "pokemon.en.json")
+with open(_names_file_path) as jsonfile:
+    POKEMON_NAMES.update(json.load(jsonfile))
 
 
-class Pokemon:
+class Pokemon(object):
     # Used for calculating the pokemon level
     # source http://pokemongo.gamepress.gg/cp-multiplier
     CPM_calculation_increments = [
@@ -66,13 +70,13 @@ class Pokemon:
         self.cpm_total = self.cp_multiplier + self.additional_cp_multiplier
         self.level_wild = self.get_level_by_cpm(self.cp_multiplier)
         self.level = self.get_level_by_cpm(self.cpm_total)
-        additional_data = GAME_MASTER[self.pokemon_id]
-        self.family_id = additional_data.FamilyId
+        additional_data = GAME_MASTER.get(self.pokemon_id)
+        self.family_id = additional_data.FamilyId if additional_data else None
 
         # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
-        attack = float(additional_data.BaseAttack)
-        defense = float(additional_data.BaseDefense)
-        stamina = float(additional_data.BaseStamina)
+        attack = float(additional_data.BaseAttack) if additional_data else 0.0
+        defense = float(additional_data.BaseDefense) if additional_data else 0.0
+        stamina = float(additional_data.BaseStamina) if additional_data else 0.0
         self.max_cp = ((attack + self.individual_attack) *
                        sqrt(defense + self.individual_defense) *
                        sqrt(stamina + self.individual_stamina) *
