@@ -665,9 +665,10 @@ class PGoApi:
             position = self.get_position()
             neighbors = get_neighbors(self._posf)
             gevent.sleep(1.0)
-            self.map_objects = self.get_map_objects(latitude=position[0], longitude=position[1],
-                                since_timestamp_ms=[0] * len(neighbors),
-                                cell_id=neighbors).call()
+            self.map_objects = self.get_map_objects(
+                latitude=position[0], longitude=position[1],
+                since_timestamp_ms=[0] * len(neighbors),
+                cell_id=neighbors).call()
             self._last_got_map_objects = time()
         return self.map_objects
 
