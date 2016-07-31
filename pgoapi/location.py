@@ -8,8 +8,7 @@ from geopy.geocoders import GoogleV3
 from gmaps.directions import Directions
 
 if six.PY3:
-    from functools import cmp_to_key
-    from past.builtins import cmp, map
+    from past.builtins import map
 
 g = pyproj.Geod(ellps='WGS84')
 geolocator = GoogleV3()
@@ -88,11 +87,7 @@ def filtered_forts(starting_location, origin, forts, proximity, visited_forts={}
                                                 proximity=proximity),
                    map(lambda x: (x, distance_in_meters(origin, (x['latitude'], x['longitude']))), forts))
 
-    def kcmp(x, y):
-        return cmp(x[1], y[1])
-    if six.PY3:
-        kcmp = cmp_to_key(kcmp)
-    sorted_forts = sorted(forts, key=kcmp, reverse=reverse)
+    sorted_forts = sorted(forts, key=lambda x: x[1], reverse=reverse)
     return sorted_forts
 
 

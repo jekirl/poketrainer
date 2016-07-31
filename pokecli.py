@@ -40,7 +40,7 @@ from time import sleep
 import gevent
 import zerorpc
 from geopy.geocoders import GoogleV3
-from six import iteritems
+from six import PY2, iteritems
 
 from listener import Listener
 from pgoapi import PGoApi
@@ -59,7 +59,7 @@ def get_pos_by_name(location_name):
 
 
 def dict_merge(dct, merge_dct):
-    for k, v in merge_dct.iteritems():
+    for k, v in iteritems(merge_dct):
         if (
             k in dct and isinstance(dct[k], dict) and
             isinstance(merge_dct[k], collections.Mapping)
@@ -139,7 +139,10 @@ def main(position=None):
     if os.path.isfile(desc_file):
         with open(desc_file, 'r+') as f:
             data = f.read()
-            data = json.loads(data.encode() if len(data) > 0 else '{}')
+            if PY2:
+                data = json.loads(data.encode() if len(data) > 0 else '{}')
+            else:
+                data = json.loads(data if len(data) > 0 else '{}')
     data[config["username"]] = sock_port
     with open(desc_file, "w+") as f:
         f.write(json.dumps(data, indent=2))

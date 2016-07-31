@@ -1,4 +1,5 @@
 import inspect
+import six
 
 
 # Credit: https://github.com/earshel/PokeyPySnipe/blob/master/pogo/pokedex.py
@@ -161,8 +162,11 @@ class Pokedex(dict):
     rarity = {}
     evolves = {}
 
-    def __init__(self):
-        super(dict, self).__init__(self)
+    def __init__(self, *args, **kwargs):
+        if six.PY3:
+            self.update(*args, **kwargs)
+        else:
+            super(dict, self).__init__(self, args, kwargs)
 
         # Some reflection, based on uppercase consts.
         attributes = inspect.getmembers(Pokedex, lambda attr: not(inspect.isroutine(attr)))

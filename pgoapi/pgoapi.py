@@ -555,7 +555,7 @@ class PGoApi:
             for item in res.get('items_awarded', []):
                 items[item['item_id']] += item['item_count']
             reward = 'XP +' + str(res['experience_awarded'])
-            for item_id, amount in items.iteritems():
+            for item_id, amount in six.iteritems(items):
                 reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
             self.log.debug("Fort spinned: %s", res)
             self.log.info("Fort Spinned, %s (http://maps.google.com/maps?q=%s,%s)",
