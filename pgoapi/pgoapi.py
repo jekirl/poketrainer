@@ -90,11 +90,11 @@ class PGoApi:
         self._farm_mode_triggered = False
         self._orig_step_size = config.get("BEHAVIOR", {}).get("STEP_SIZE", 200)
         self.wander_steps = config.get("BEHAVIOR", {}).get("WANDER_STEPS", 0)
-        pokeball_percent = config.get("CAPTURE", {}).get("use_pokeball_at", 15)
-        greatball_percent = config.get("CAPTURE", {}).get("use_greatball_at", 15)
-        ultraball_percent = config.get("CAPTURE", {}).get("use_ultraball_at", 15)
-        masterball_percent = config.get("CAPTURE", {}).get("use_masterball_at", 0)
-        self.percentages = [pokeball_percent, greatball_percent, ultraball_percent, masterball_percent]
+        pokeball_percent = config.get("CAPTURE", {}).get("USE_POKEBALL_IF_PERCENT", 15)
+        greatball_percent = config.get("CAPTURE", {}).get("USE_GREATBALL_IF_PERCENT", 15)
+        ultraball_percent = config.get("CAPTURE", {}).get("USE_ULTRABALL_IF_PERCENT", 15)
+        use_masterball = config.get("CAPTURE", {}).get("USE_MASTERBALL", false)
+        self.percentages = [pokeball_percent, greatball_percent, ultraball_percent, use_masterball]
 
         self.pokemon_caught = 0
         self.player = Player({})

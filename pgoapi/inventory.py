@@ -20,7 +20,7 @@ class Inventory:
         self.pokeball_percent = (percentages[0] / 100)
         self.greatball_percent = (percentages[1] / 100)
         self.ultraball_percent = (percentages[2] / 100)
-        self.masterball_percent = (percentages[3] / 100)
+        self.use_masterball = (percentages[3])
 
         self.pokemon_candy = defaultdict()
         self.eggs_available = []
@@ -81,7 +81,7 @@ class Inventory:
         self.ultra_balls -= 1
 
     def best_ball(self):
-        if self.masterball_percent > 0 and self.master_balls:
+        if self.use_masterball == true and self.master_balls:
             return Inventory_Enum.ITEM_MASTER_BALL
         elif self.ultra_balls:
             return Inventory_Enum.ITEM_ULTRA_BALL

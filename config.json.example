@@ -22,10 +22,10 @@
         "CATCH_POKEMON": true,
         "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 3,
         "MAX_CATCH_ATTEMPTS": 10,
-        "use_pokeball_at": 15,
-        "use_greatball_at": 15,
-        "use_ultraball_at": 15,
-        "use_masterball_at": 0
+        "USE_POKEBALL_IF_PERCENT": 15,
+        "USE_GREATBALL_IF_PERCENT": 15,
+        "USE_ULTRABALL_IF_PERCENT": 15,
+        "USE_MASTERBALL": false
       },
       "EGG_INCUBATION": {
         "ENABLE": true,
