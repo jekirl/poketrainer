@@ -90,11 +90,16 @@ class PGoApi:
         self._farm_mode_triggered = False
         self._orig_step_size = config.get("BEHAVIOR", {}).get("STEP_SIZE", 200)
         self.wander_steps = config.get("BEHAVIOR", {}).get("WANDER_STEPS", 0)
+        pokeball_percent = config.get("CAPTURE", {}).get("USE_POKEBALL_IF_PERCENT", 15)
+        greatball_percent = config.get("CAPTURE", {}).get("USE_GREATBALL_IF_PERCENT", 15)
+        ultraball_percent = config.get("CAPTURE", {}).get("USE_ULTRABALL_IF_PERCENT", 15)
+        use_masterball = config.get("CAPTURE", {}).get("USE_MASTERBALL", false)
+        self.percentages = [pokeball_percent, greatball_percent, ultraball_percent, use_masterball]
 
         self.pokemon_caught = 0
         self.player = Player({})
         self.player_stats = PlayerStats({})
-        self.inventory = Player_Inventory([])
+        self.inventory = Player_Inventory(self.percentages, [])
 
         self._last_got_map_objects = 0
         self._map_objects_rate_limit = 5.0
@@ -173,6 +178,7 @@ class PGoApi:
         self.STAY_WITHIN_PROXIMITY = config.get("BEHAVIOR", {}).get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
         self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True)
         self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
+
 
         # Sanity checking
         self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon  # Experimental, and we needn't do this if we're farming anyway
@@ -378,7 +384,7 @@ class PGoApi:
         self.gsleep(0.2)
         res = self.call()
         if 'GET_INVENTORY' in res['responses']:
-            self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
+            self.inventory = Player_Inventory(self.percentages, res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
         return res
 
     def get_player_inventory(self, as_json=True):
@@ -409,7 +415,7 @@ class PGoApi:
                 res['responses']['hourly_exp'] = self.hourly_exp(self.player_stats.experience)
                 f.write(json.dumps(res['responses'], indent=2, default=lambda obj: obj.decode('utf8')))
 
-            self.inventory = Player_Inventory(res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
+            self.inventory = Player_Inventory(self.percentages, res['responses']['GET_INVENTORY']['inventory_delta']['inventory_items'])
             for inventory_item in self.inventory.inventory_items:
                 if "player_stats" in inventory_item['inventory_item_data']:
                     self.player_stats = PlayerStats(inventory_item['inventory_item_data']['player_stats'])
@@ -422,10 +428,11 @@ class PGoApi:
             if self.LIST_POKEMON_BEFORE_CLEANUP:
                 self.log.info(get_inventory_data(res, self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS))
             self.incubate_eggs()
-            self.attempt_evolve(self.inventory.inventory_items)
-            self.cleanup_pokemon(self.inventory.inventory_items)
             # Auto-use lucky-egg if applicable
             self.use_lucky_egg()
+            self.attempt_evolve(self.inventory.inventory_items)
+            self.cleanup_pokemon(self.inventory.inventory_items)
+
 
             # Farm precon
             if self.FARM_ITEMS_ENABLED:
@@ -868,7 +875,7 @@ class PGoApi:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
                 'inventory_items']
         caught_pokemon = self.get_caught_pokemons(inventory_items)
-        self.inventory = Player_Inventory(inventory_items)
+        self.inventory = Player_Inventory(self.percentages, inventory_items)
         for pokemons in caught_pokemon.values():
             if len(pokemons) > self.MIN_SIMILAR_POKEMON:
                 pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
@@ -903,7 +910,7 @@ class PGoApi:
     def is_pokemon_eligible_for_evolution(self, pokemon):
         candy_have = self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None), -1)
         candy_needed = self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None)
-        return candy_needed and candy_have > candy_needed and \
+        return candy_have > candy_needed and \
             pokemon.pokemon_id not in self.keep_pokemon_ids \
             and not pokemon.is_favorite \
             and pokemon.pokemon_id in self.POKEMON_EVOLUTION
