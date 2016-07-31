@@ -3,7 +3,7 @@ protobuf>=3.0.0a3
 requests==2.10.0
 s2sphere==0.2.4
 gpsoauth==0.3.0
-pyproj==1.9.5.1
+#pyproj==1.9.5.1
 python-gmaps==0.3.1
 Flask==0.11.1
 Jinja2==2.7.1

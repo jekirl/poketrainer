@@ -1,6 +1,6 @@
 from time import time
 
-import pyproj
+#import pyproj
 import s2sphere
 import six
 from geopy.distance import VincentyDistance, vincenty
@@ -10,7 +10,7 @@ from gmaps.directions import Directions
 if six.PY3:
     from past.builtins import map
 
-g = pyproj.Geod(ellps='WGS84')
+#g = pyproj.Geod(ellps='WGS84')
 geolocator = GoogleV3()
 
 
@@ -63,6 +63,7 @@ def get_route(start, end, use_google=False, gmaps_api_key="", walk_to_all_forts=
 
 
 # step_size corresponds to how many meters between each step we want
+"""
 def get_increments(start, end, step_size=200):
     # def get_increments(start,end,step_size=3):
     g = pyproj.Geod(ellps='WGS84')
@@ -75,7 +76,7 @@ def get_increments(start, end, step_size=200):
     # npts doesn't include start/end points, so append
     lonlats.append((endlong, endlat))
     return [(l[1], l[0], 0) for l in lonlats]  # reorder to be lat,long instead of long,lat
-
+"""
 
 def distance_in_meters(p1, p2):
     return vincenty(p1, p2).meters
