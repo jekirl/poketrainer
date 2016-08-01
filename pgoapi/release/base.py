@@ -34,7 +34,7 @@ class ReleaseMethodFactory(object):
 
         for section in sections:
             cfg.update(config.get(section, {}))
-        return klass(config)
+        return klass(cfg)
 
 
 class ReleaseMethod(object):
