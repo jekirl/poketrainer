@@ -1,5 +1,5 @@
-﻿import csv
-from utilities import take_closest
+import csv
+from .utilities import take_closest
 
 
 class PokemonLvlData:
@@ -16,7 +16,10 @@ class PokemonLvlData:
 
 POKEMON_LVL_DATA = {}
 TCPM_VALS = []
-with open ("PoGoPokeLvl.tsv") as tsv: #data gathered from here: https://www.reddit.com/r/TheSilphRoad/comments/4sa4p5/stardust_costs_increase_every_4_power_ups/
+
+# data gathered from here:
+# https://www.reddit.com/r/TheSilphRoad/comments/4sa4p5/stardust_costs_increase_every_4_power_ups/
+with open("PoGoPokeLvl.tsv") as tsv:
     reader = csv.DictReader(tsv, delimiter='\t')
     for row in reader:
         pokemon_lvl_data = PokemonLvlData()
@@ -32,6 +35,7 @@ with open ("PoGoPokeLvl.tsv") as tsv: #data gathered from here: https://www.redd
 
         POKEMON_LVL_DATA[pokemon_lvl_data.total_cp_multiplier] = pokemon_lvl_data
         TCPM_VALS.append(pokemon_lvl_data.total_cp_multiplier)
+
 
 def get_tcpm(tcpm):
     return take_closest(tcpm, TCPM_VALS)

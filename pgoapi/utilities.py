@@ -25,8 +25,8 @@ Author: tjado <https://github.com/tejado>
 Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
-from bisect import bisect_left
 import struct
+from bisect import bisect_left
 
 
 def f2i(float):
@@ -49,11 +49,13 @@ def to_camel_case(value):
     c = camelcase()
     return "".join(next(c)(x) if x else '_' for x in value.split("_"))
 
+
 def all_in(candidates, sequence):
     for element in candidates:
         if element not in sequence:
             return False
     return True
+
 
 def take_closest(my_number, my_list):
     """
@@ -69,6 +71,6 @@ def take_closest(my_number, my_list):
     before = my_list[pos - 1]
     after = my_list[pos]
     if after - my_number < my_number - before:
-       return after
+        return after
     else:
-       return before
+        return before

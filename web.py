@@ -1,20 +1,18 @@
-﻿# DISCLAIMER: This is jank
+# DISCLAIMER: This is jank
 from __future__ import print_function
+
+import argparse
 import csv
 import json
 import os
-import re
 from collections import defaultdict
 
 import zerorpc
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
-from string import Formatter
-from pgoapi.poke_utils import pokemon_iv_percentage
 
-import argparse
+from pgoapi.poke_lvl_data import TCPM_VALS
 from pgoapi.pokemon import Pokemon
-from pgoapi.poke_lvl_data import *
-import pdb
+
 app = Flask(__name__, template_folder="templates")
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 app.debug = True
@@ -27,6 +25,7 @@ with open("GAME_ATTACKS_v0_1.tsv") as tsv:
     for row in reader:
         attacks[int(row["Num"])] = row["Move"]
 
+
 def init_config():
     parser = argparse.ArgumentParser()
     config_file = "config.json"
@@ -38,19 +37,21 @@ def init_config():
             load.update(json.load(data))
 
     # Read passed in Arguments
-    required = lambda x: not x in load['accounts'][0].keys()
+    def required(x):
+        return x not in load['accounts'][0].keys()
     parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
     config = parser.parse_args()
     load = load['accounts'][config.__dict__['config_index']]
     # Passed in arguments shoud trump
-    for key,value in load.iteritems():
+    for key, value in load.iteritems():
         if key not in config.__dict__ or not config.__dict__[key]:
             config.__dict__[key] = value
 
     return config.__dict__
 config = init_config()
 
-def setColumnsToIgnore(columnsToIgnore):
+
+def set_columns_to_ignore(columns_to_ignore):
     options['ignore_recent'] = ''
     options['ignore_#'] = ''
     options['ignore_name'] = ''
@@ -71,7 +72,7 @@ def setColumnsToIgnore(columnsToIgnore):
     options['ignore_move2'] = ''
     options['ignore_transfer'] = ''
 
-    for column in columnsToIgnore:
+    for column in columns_to_ignore:
         if column.lower() == 'recent':
             options['ignore_recent'] = 'display: none;'
         elif column.lower() == '#':
@@ -111,6 +112,7 @@ def setColumnsToIgnore(columnsToIgnore):
         elif column.lower() == 'transfer':
             options['ignore_transfer'] = 'display: none;'
 
+
 def get_api_rpc(username):
     desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
     sock_port = 0
@@ -133,9 +135,9 @@ def status(username):
     c = get_api_rpc(username)
     if c is None:
         return("There is no bot running with the input username!")
-    options['SCORE_METHOD'] = config.get('POKEMON_CLEANUP',{}).get("SCORE_METHOD", "CP")
+    options['SCORE_METHOD'] = config.get('POKEMON_CLEANUP', {}).get("SCORE_METHOD", "CP")
     options['IGNORE_COLUMNS'] = config.get("IGNORE_COLUMNS", [])
-    setColumnsToIgnore(options['IGNORE_COLUMNS'])
+    set_columns_to_ignore(options['IGNORE_COLUMNS'])
     player_json = json.loads(c.get_player_info())
     currency = player_json['player_data']['currencies'][1]['amount']
     latlng = c.current_location()
@@ -153,20 +155,21 @@ def status(username):
             player = item['player_stats']
         if "pokemon_family" in item:
             filled_family = str(item['pokemon_family']['family_id']).zfill(4)
-            candy[filled_family] += item['pokemon_family'].get("candy",0)
+            candy[filled_family] += item['pokemon_family'].get("candy", 0)
     # add candy back into pokemon json
     pokemons = []
     for pokemon in pokemons_data:
         pkmn = Pokemon(pokemon, player['level'], options['SCORE_METHOD'])
         pkmn.candy = candy[pkmn.family_id]
-        pkmn.set_max_cp(TCPM_VALS[int(player['level']*2 + 1)])
-        pkmn.score = format(pkmn.score, '.2f').rstrip('0').rstrip('.')  #makes the value more presentable to the user
-        pokemons.append(pkmn)                    
+        pkmn.set_max_cp(TCPM_VALS[int(player['level'] * 2 + 1)])
+        pkmn.score = format(pkmn.score, '.2f').rstrip('0').rstrip('.')  # makes the value more presentable to the user
+        pokemons.append(pkmn)
     player['username'] = player_json['player_data']['username']
-    player['level_xp'] = player.get('experience',0)-player.get('prev_level_xp',0)
-    player['hourly_exp'] = player.get("hourly_exp",0) #Not showing up in inv or player data
-    player['goal_xp'] = player.get('next_level_xp',0)-player.get('prev_level_xp',0)
+    player['level_xp'] = player.get('experience', 0) - player.get('prev_level_xp', 0)
+    player['hourly_exp'] = player.get("hourly_exp", 0)  # Not showing up in inv or player data
+    player['goal_xp'] = player.get('next_level_xp', 0) - player.get('prev_level_xp', 0)
     return render_template('status.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, username=username, options=options)
+
 
 @app.route("/<username>/pokemon")
 def pokemon(username):
