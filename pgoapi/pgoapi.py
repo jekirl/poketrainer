@@ -809,8 +809,8 @@ class PGoApi:
                 # sorting for CLASSIC method as default
                 sorted_pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
 
-                # Release method CUSTOM will set try_keep for each pokemon that qualifies
-                if self.RELEASE_METHOD == "CUSTOM":
+                # Release method ADVANCED will set try_keep for each pokemon that qualifies
+                if self.RELEASE_METHOD == "ADVANCED":
                     sorted_pokemons = sorted(sorted_pokemons, key=lambda x: (x.iv, x.cp), reverse=True)
                     iv_options = self.RELEASE_METHOD_CONF.get("BEST_IV", {})
                     keep = 0
@@ -854,18 +854,18 @@ class PGoApi:
         if pokemon.pokemon_id in self.throw_pokemon_ids:
             return True
         if self.RELEASE_METHOD == "DUPLICATES":
-            if best_pokemon.score * self.RELEASE_METHOD_CONF.get("RELEASE_DUPLICATES_SCALAR", 1.0) > pokemon.score and \
-                            pokemon.score < self.RELEASE_METHOD_CONF.get("RELEASE_DUPLICATES_MAX_SCORE", 0):
+            if best_pokemon.score * self.RELEASE_METHOD_CONF.get("RELEASE_DUPLICATES_SCALAR", 1.0) > pokemon.score \
+                    and pokemon.score < self.RELEASE_METHOD_CONF.get("RELEASE_DUPLICATES_MAX_SCORE", 0):
                 return True
             else:
                 return False
-        elif self.RELEASE_METHOD == "CUSTOM":
+        elif self.RELEASE_METHOD == "ADVANCED":
             if pokemon.level < self.RELEASE_METHOD_CONF.get("ALWAYS_RELEASE_BELOW_LEVEL", 0):
                 return True
             elif pokemon.try_keep:
                 return False
-            elif pokemon.cp > self.RELEASE_METHOD_CONF.get("ALWAYS_KEEP_CP_OVER", 500) or \
-                            pokemon.iv > self.RELEASE_METHOD_CONF.get("ALWAYS_KEEP_IV_OVER", 50):
+            elif pokemon.cp > self.RELEASE_METHOD_CONF.get("KEEP_CP_OVER", 500) \
+                    or pokemon.iv > self.RELEASE_METHOD_CONF.get("KEEP_IV_OVER", 50):
                 return False
             return True
         # CLASSIC fallback method

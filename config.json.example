@@ -46,25 +46,25 @@
           "KEEP_CP_OVER": 500,
           "KEEP_IV_OVER": 50
         },
-        "RELEASE_METHOD_CUSTOM": {
+        "RELEASE_METHOD_DUPLICATES": {
+          "RELEASE_DUPLICATES_MAX_SCORE": 1000,
+          "RELEASE_DUPLICATES_SCALAR": 0.9
+        },
+        "RELEASE_METHOD_ADVANCED": {
           "ALWAYS_RELEASE_BELOW_LEVEL": 0,
-          "ALWAYS_KEEP_CP_OVER": 1000,
-          "ALWAYS_KEEP_IV_OVER": 90,
+          "KEEP_CP_OVER": 1000,
+          "KEEP_IV_OVER": 90,
           "BEST_CP": {
             "MIN_AMOUNT": 1,
-            "KEEP_ADDITIONAL_SCALAR": 0.8,
+            "KEEP_ADDITIONAL_SCALAR": 1.0,
             "MAX_AMOUNT": 999
           },
           "BEST_IV": {
             "MIN_AMOUNT": 1,
-            "KEEP_ADDITIONAL_SCALAR": 0.8,
-            "MAX_AMOUNT": 9999,
+            "KEEP_ADDITIONAL_SCALAR": 1.0,
+            "MAX_AMOUNT": 999,
             "IGNORE_BELOW": 50
           }
-        },
-        "RELEASE_METHOD_DUPLICATES": {
-          "RELEASE_DUPLICATES_MAX_SCORE": 1000,
-          "RELEASE_DUPLICATES_SCALAR": 0.9
         },
         "SCORE_METHOD": "CP",
         "SCORE_METHOD_FANCY": {
