@@ -102,6 +102,7 @@ class Pokemon(object):
         elif score_method == "FANCY":
             self.score = (self.iv_normalized / 100.0 * score_settings.get("WEIGHT_IV", 0.5)) + \
                          (self.level / (player_level + 1.5) * score_settings.get("WEIGHT_LVL", 0.5))
+        self.try_keep = False
 
     def __str__(self):
         nickname = ""
