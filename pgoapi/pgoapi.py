@@ -436,9 +436,9 @@ class PGoApi:
                         self.log.info("[TRAINER]\t- Player Stats: {}".format(self.player_stats))
                     self.hourly_exp(self.player_stats.experience)
             if self.LIST_INVENTORY_BEFORE_CLEANUP:
-                self.log.info("[INVENTORY]\t- Backpack before cleaning up: %s", self.inventory)
+                self.log.info("[INVENTORY]- Backpack before cleaning up: %s", self.inventory)
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
-            self.log.info("[INVENTORY]\t- Backpack after cleaning up: %s", self.inventory)
+            self.log.info("[INVENTORY]- Backpack after cleaning up: %s", self.inventory)
             if self.LIST_POKEMON_BEFORE_CLEANUP:
                 self.log.info(get_inventory_data(res, self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS))
             self.incubate_eggs()
@@ -772,18 +772,18 @@ class PGoApi:
                 ):
                     recycle_count = item['count'] - self.MIN_ITEMS[item['item_id']]
                     item_count += item['count'] - recycle_count
-                    self.log.info("[INVENTORY]\t- Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
+                    self.log.info("[INVENTORY]- Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
                     self.gsleep(0.2)
                     res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()['responses'][
                         'RECYCLE_INVENTORY_ITEM']
                     response_code = res['result']
                     if response_code == 1:
                         if self.HEARTBEAT_DETAIL != "hidden":
-                            self.log.info("[INVENTORY]\t- {0}(s) recycled, got {1} left.".format(get_item_name( item['item_id']), res.get('new_count', 0)))
+                            self.log.info("[INVENTORY]- {0}(s) recycled, got {1} left.".format(get_item_name( item['item_id']), res.get('new_count', 0)))
                     else:
-                        self.log.debug("[INVENTORY]\t- Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']), response_code))
+                        self.log.debug("[INVENTORY]- Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']), response_code))
                         if self.HEARTBEAT_DETAIL != "hidden":
-                            self.log.info("[INVENTORY]\t- Couldn't recycle {0}".format(get_item_name(item['item_id'])))
+                            self.log.info("[INVENTORY]- Couldn't recycle {0}".format(get_item_name(item['item_id'])))
                     self.gsleep(1)
                 elif "count" in item:
                     item_count += item['count']
@@ -820,7 +820,7 @@ class PGoApi:
         return status
 
     def do_release_pokemon(self, pokemon):
-        self.log.info("[EDIT]Releasing pokemon: %s", pokemon)
+        self.log.info("[TRAINER]\t- Releasing pokemon: %s", pokemon)
         if self.do_release_pokemon_by_id(pokemon.id):
             self.log.info("[TRAINER]\t- Transferring %s to Professor Willow...", pokemon.pokemon_type)
             if self.HEARTBEAT_DETAIL != "hidden":
@@ -940,7 +940,7 @@ class PGoApi:
                 if not retry:
                     return self.disk_encounter_pokemon(lureinfo, retry=True)
             else:
-                self.log.debug("[EDIT]Could not start Disk (lure) encounter for pokemon: %s",
+                self.log.debug("Could not start Disk (lure) encounter for pokemon: %s",
                               POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
                 self.log.info("[POKESTOP]\t- A lured %s appeared, but Nurse Joy distracted me...",
                               POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
@@ -1055,7 +1055,7 @@ class PGoApi:
                 break
 
     def attempt_start_incubation(self, egg, incubator):
-        #self.log.info("[EDIT]Start incubating %skm egg", egg['egg_km_walked_target'])
+        #self.log.info("Start incubating %skm egg", egg['egg_km_walked_target'])
         self.gsleep(0.2)
         incubate_res = self.use_item_egg_incubator(item_id=incubator['id'], pokemon_id=egg['id']).call()['responses'][
             'USE_ITEM_EGG_INCUBATOR']
