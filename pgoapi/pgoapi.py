@@ -555,15 +555,18 @@ class PGoApi:
                                player_longitude=player_postion[1]).call()['responses']['FORT_SEARCH']
         result = res.pop('result', -1)
         if result == 1 and res:
-            items = defaultdict(int)
-            for item in res.get('items_awarded', []):
-                items[item['item_id']] += item['item_count']
-            reward = 'XP +' + str(res['experience_awarded'])
-            for item_id, amount in six.iteritems(items):
-                reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
-            self.log.debug("Fort spinned: %s", res)
-            self.log.info("Fort Spinned, %s (http://maps.google.com/maps?q=%s,%s)",
-                          reward, fort['latitude'], fort['longitude'])
+            self.log.info("Visiting fort... (http://maps.google.com/maps?q=%s,%s)", fort['latitude'], fort['longitude'])
+            if "items_awarded" in res:
+                items = defaultdict(int)
+                for item in res['items_awarded']:
+                    items[item['item_id']] += item['item_count']
+                reward = 'XP +' + str(res['experience_awarded'])
+                for item_id, amount in six.iteritems(items):
+                    reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
+                self.log.info("Fort spun, yielding: %s",
+                              reward)
+            else:
+                self.log.info("Fort spun, but did not yield any rewards. Possible soft ban?")
             self.visited_forts[fort['id']] = fort
         elif result == 4:
             self.log.debug("For spinned but Your inventory is full : %s", res)
