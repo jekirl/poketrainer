@@ -1,18 +1,6 @@
-<div class="navbar navbar-inverse navbar-fixed-top" role="navigation" ng-controller="NavigationController">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" ui-sref="public.users">PokeTrainer</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav navbar-right">
-                <li ng-class="{'active': isActiveState(item.State)}" ng-repeat="item in navigation"><a href="{{getUrl(item.State)}}">{{item.Label}}</a></li>
-            </ul>
-        </div>
-    </div>
-</div>
+<md-toolbar layout="row">
+    <md-button ng-click="toggleSidebar()" aria-label="..." hide-gt-sm>
+        <ng-md-icon icon="menu"></ng-md-icon>
+    </md-button>
+    <h3>PokéTrainer</h3>
+</md-toolbar>

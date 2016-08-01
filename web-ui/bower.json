@@ -23,7 +23,9 @@
     "jquery": "1.12.4",
     "angular-ui-router": "^0.3.1",
     "angular-resource": "^1.5.8",
-    "bootstrap": "3.3.7"
+    "bootstrap": "3.3.7",
+    "angular-material": "^1.0.9",
+    "angular-material-icons": "^0.7.1"
   },
   "devDependencies": {},
   "overrides": {}

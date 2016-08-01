@@ -37,8 +37,10 @@ angular.module('Poketrainer.State.Abstracts', [
         };
     })
 
-    .controller('HeaderController', function HeaderController($scope){
-
+    .controller('HeaderController', function HeaderController($scope, $mdSidenav){
+        $scope.toggleSidebar = function () {
+            $mdSidenav('left').toggle();
+        }
     })
 
 ;

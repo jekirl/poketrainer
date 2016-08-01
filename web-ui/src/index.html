@@ -12,14 +12,14 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon" />
 </head>
-<body>
-	<header id="header" ui-view="header"></header>
-	<div id="base" ui-view="base">
-		<div id="content" ui-view="content"></div>
-		<div id="menubar" class="menubar-inverse animate" ui-view="navigation"></div>
+<body layout="column">
+	<div ui-view="header"></div>
+	<div layout="row" flex>
+		<md-sidenav md-is-locked-open="$mdMedia('gt-sm')" class="md-whiteframe-4dp" ui-view="navigation" md-component-id="left"></md-sidenav>
+		<md-content id="content" style="background-color: lightgreen" ui-view="content" flex></md-content>
 	</div>
 
-    <!-- compiled CSS -->
+	<!-- compiled CSS -->
     <!-- inject:css --><!-- endinject -->
 
     <!-- compiled JavaScript -->

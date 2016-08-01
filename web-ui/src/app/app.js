@@ -14,13 +14,16 @@ angular.module('poketrainer', [
     
 
 	/** External Libs **/
-	'ui.router'
+	'ui.router',
+    'ngMaterial',
+    'ngMessages',
+    'ngMdIcons'
 
 	/** Internal Directives **/
 	
 ])
 
-	.config(function pokeTrainerConfig($urlRouterProvider, $locationProvider, $urlMatcherFactoryProvider) {
+	.config(function pokeTrainerConfig($urlRouterProvider, $locationProvider, $urlMatcherFactoryProvider, $mdThemingProvider) {
 		$locationProvider
 			.hashPrefix('!')
 			.html5Mode(true);
@@ -42,6 +45,11 @@ angular.module('poketrainer', [
 		.otherwise('/');
 
 		$urlMatcherFactoryProvider.strictMode(false);
+
+        $mdThemingProvider.theme('default')
+            .primaryPalette('blue')
+            .accentPalette('red');
+
 	})
 
 	.run(function pokeTrainerRun ($state) {

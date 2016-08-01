@@ -150,6 +150,11 @@ module.exports = (function () {
                 bowerPath + '/angular-resource/angular-resource.js',
                 bowerPath + '/angular-ui-router/release/angular-ui-router.js',
                 bowerPath + '/angular-google-maps/dist/angular-google-maps.js',
+                bowerPath + '/angular-animate/angular-animate.js',
+                bowerPath + '/angular-aria/angular-aria.js',
+                bowerPath + '/angular-messages/angular-messages.js',
+                bowerPath + '/angular-material/angular-material.js',
+                bowerPath + '/angular-material-icons/angular-material-icons.js',
 
                 assetsPath + "/js/plugins/*.js"
             ]
