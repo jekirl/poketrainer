@@ -151,6 +151,7 @@ What's working:
   To ask question  related  to api and general help, join Pokemon Go Reverse Engineering Slack team.
  * To join, get a invite from [here](https://shielded-earth-81203.herokuapp.com/) , join team via the email you recieve and then signin [here](https://pkre.slack.com).
 
+
 ## Credits
 * [tejado](https://github.com/tejado) for the base of this
 * [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR
