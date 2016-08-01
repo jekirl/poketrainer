@@ -1,5 +1,21 @@
-import copy
+import collections
 import importlib
+
+from six import iteritems
+
+
+def filtered_dict_merge(dct, merge_dct, filtered_key=None):
+    for k, v in iteritems(merge_dct):
+        if filtered_key and k == filtered_key:
+            continue
+        if (
+            k in dct and isinstance(dct[k], dict) and
+            isinstance(merge_dct[k], collections.Mapping)
+        ):
+            filtered_dict_merge(dct[k], merge_dct[k])
+        else:
+            dct[k] = merge_dct[k]
+    return dct
 
 
 class ReleaseMethodFactory(object):
@@ -29,12 +45,7 @@ class ReleaseMethodFactory(object):
 
     def loadReleaseMethod(self, modulename, config):
         klass = self.getKlass(modulename)
-        sections = klass.getConfigSections()
-        cfg = copy.deepcopy(config)
-
-        for section in sections:
-            cfg.update(config.get(section, {}))
-        return klass(cfg)
+        return klass(config)
 
 
 class ReleaseMethod(object):
@@ -51,18 +62,6 @@ class ReleaseMethod(object):
 
         """
         self.config = config
-
-    @staticmethod
-    def getConfigSections():
-        """this should return either a string for a subsection name in "POKEMON_CLEANUP" section of config or an array/tuple
-            of subsection names to apply in order to the base configs in POKEMON_CLEANUP this should effectively be a constant
-            for the module
-
-            Returns:
-                list|tuple:
-        """
-
-        raise NotImplemented("get configSections must be implemented")
 
     def getPokemonToRelease(self, pokemonId, pokemons):
         """Goes through the list of all pokemon of a given pokemonId and returns a list of pokemon to transfer
