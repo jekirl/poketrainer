@@ -10,10 +10,10 @@ class ReleaseMethod(base.ReleaseMethod):
 
     def processConfig(self, config):
         self.config = config
-        self.keep_pokemon_ids               = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
-        self.throw_pokemon_ids              = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
-        self.MAX_SIMILAR_POKEMON            = self.config.get('MAX_SIMILAR_POKEMON', 999)
-        self.MIN_SIMILAR_POKEMON            = self.config.get('MIN_SIMILAR_POKEMON', 1)
+        self.keep_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
+        self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
+        self.MAX_SIMILAR_POKEMON = self.config.get('MAX_SIMILAR_POKEMON', 999)
+        self.MIN_SIMILAR_POKEMON = self.config.get('MIN_SIMILAR_POKEMON', 1)
 
     def getPokemonToRelease(self, pokemonId, pokemons):
         pokemonToRelease = []
@@ -35,9 +35,7 @@ class ReleaseMethod(base.ReleaseMethod):
                     kept_pokemon_of_type += 1
         else:
             pokemonToKeep = pokemons
-
         return pokemonToRelease, pokemonToKeep
-
 
     def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon=None, kept_pokemon_of_type=0, kept_pokemon_of_type_high_iv=0):
         # never release favorites

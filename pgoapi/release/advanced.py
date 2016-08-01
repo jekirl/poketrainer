@@ -10,10 +10,10 @@ class ReleaseMethod(base.ReleaseMethod):
 
     def processConfig(self, config):
         self.config = config
-        self.keep_pokemon_ids               = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
-        self.throw_pokemon_ids              = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
-        self.MAX_SIMILAR_POKEMON            = self.config.get('MAX_SIMILAR_POKEMON', 999)
-        self.MIN_SIMILAR_POKEMON            = self.config.get('MIN_SIMILAR_POKEMON', 1)
+        self.keep_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
+        self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
+        self.MAX_SIMILAR_POKEMON = self.config.get('MAX_SIMILAR_POKEMON', 999)
+        self.MIN_SIMILAR_POKEMON = self.config.get('MIN_SIMILAR_POKEMON', 1)
 
     def getPokemonToRelease(self, pokemonId, pokemons):
         pokemonToRelease = []
@@ -31,8 +31,7 @@ class ReleaseMethod(base.ReleaseMethod):
                 if keep >= iv_options.get("MAX_AMOUNT", 999) or pokemon.iv < (
                         iv_options.get("IGNORE_BELOW", 0)):
                     break
-                if keep < iv_options.get("MIN_AMOUNT", 1) or pokemon.iv > (
-                            sorted_pokemons[0].iv * iv_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
+                if keep < iv_options.get("MIN_AMOUNT", 1) or pokemon.iv > (sorted_pokemons[0].iv * iv_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
                     sorted_pokemons[i].try_keep = True
                     keep += 1
             sorted_pokemons = sorted(sorted_pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
@@ -41,8 +40,7 @@ class ReleaseMethod(base.ReleaseMethod):
             for i, pokemon in enumerate(sorted_pokemons):
                 if keep >= cp_options.get("MAX_AMOUNT", 999):
                     break
-                if keep < cp_options.get("MIN_AMOUNT", 1) or pokemon.cp > (
-                            sorted_pokemons[0].cp * cp_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
+                if keep < cp_options.get("MIN_AMOUNT", 1) or pokemon.cp > (sorted_pokemons[0].cp * cp_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
                     sorted_pokemons[i].try_keep = True
                     keep += 1
 
@@ -56,9 +54,7 @@ class ReleaseMethod(base.ReleaseMethod):
                     kept_pokemon_of_type += 1
         else:
             pokemonToKeep = pokemons
-
         return pokemonToRelease, pokemonToKeep
-
 
     def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon=None, kept_pokemon_of_type=0, kept_pokemon_of_type_high_iv=0):
         # never release favorites

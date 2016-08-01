@@ -1,6 +1,7 @@
 import importlib
 import copy
 
+
 class ReleaseMethodFactory(object):
 
     def __init__(self, config):
@@ -25,7 +26,6 @@ class ReleaseMethodFactory(object):
 
     def getKlass(self, modulename):
         return getattr(importlib.import_module("pgoapi.release." + modulename.lower()), 'ReleaseMethod')
-
 
     def loadReleaseMethod(self, modulename, config):
         klass = self.getKlass(modulename)
@@ -75,5 +75,3 @@ class ReleaseMethod(object):
                 (list, list): first list is pokemon that are slated for transfer, second list is pokemon that are not to keep
         """
         raise NotImplemented("getPokemonToRelease() must be implemented in all transfer helpers")
-
-

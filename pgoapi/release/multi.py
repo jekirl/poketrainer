@@ -4,6 +4,7 @@ import copy
 from pgoapi.protos.POGOProtos import Enums_pb2
 logger = logging.getLogger(__name__)
 
+
 class ReleaseMethod(base.ReleaseMethod):
 
     @staticmethod
@@ -11,11 +12,11 @@ class ReleaseMethod(base.ReleaseMethod):
         return []
 
     def processConfig(self, config):
-        self.config                 = config
-        self.releaseMethodFactory   = base.ReleaseMethodFactory({})
-        self.baseConfig             = copy.deepcopy(config)
-        self.handlers               = {}
-        self.multiConfig            = config.get('RELEASE_METHOD_MULTI', {})
+        self.config = config
+        self.releaseMethodFactory = base.ReleaseMethodFactory({})
+        self.baseConfig = copy.deepcopy(config)
+        self.handlers = {}
+        self.multiConfig = config.get('RELEASE_METHOD_MULTI', {})
         self.DEFAULT_RELEASE_METHOD = self.multiConfig.get('MULTI_DEFAULT_RELEASE_METHOD', "CLASSIC")
 
         if 'RELEASE_METHOD_MULTI' in self.baseConfig:
@@ -43,12 +44,8 @@ class ReleaseMethod(base.ReleaseMethod):
             cfg.update(pokemonConfig)
             self.handlers[pokeId] = self.releaseMethodFactory.loadReleaseMethod(releaseMethod, cfg)
 
-
     def getPokemonToRelease(self, pokemonId, pokemons):
         if pokemonId in self.handlers:
             return self.handlers[pokemonId].getPokemonToRelease(pokemonId, pokemons)
         else:
             return self.defaultHandler.getPokemonToRelease(pokemonId, pokemons)
-
-
-
