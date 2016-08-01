@@ -1,19 +1,11 @@
 <md-card>
     <md-card-content>
         <h2>Bots</h2>
-        <table class="table">
-            <thead>
-            <tr>
-                <th>Id</th>
-                <th>Username</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="user in users">
-                <td>{{user.Id}}</td>
-                <td>{{user.Username}}</td>
-            </tr>
-            </tbody>
-        </table>
+        <md-list>
+            <md-list-item ng-repeat="user in users">
+                <p> {{ user.Username }} </p>
+                <md-progress-linear md-mode="determinate" ng-value="user.NextLevelPercentage"></md-progress-linear>
+            </md-list-item>
+        </md-list>
     </md-card-content>
 </md-card>

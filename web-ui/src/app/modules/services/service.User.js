@@ -5,11 +5,13 @@ angular.module('Poketrainer.Service.User', ['ngResource', 'Poketrainer.Service.C
                 return [
                     {
                         Id: 1,
-                        Username: 'user-1'
+                        Username: 'user-1',
+                        NextLevelPercentage: 81
                     },
                     {
                         Id: 2,
-                        Username: 'user-2'
+                        Username: 'user-2',
+                        NextLevelPercentage: 34
                     }
                 ]
             }
