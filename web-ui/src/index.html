@@ -13,7 +13,11 @@
 	<link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon" />
 </head>
 <body>
-    <div ui-view="container"></div>
+	<header id="header" ui-view="header"></header>
+	<div id="base" ui-view="base">
+		<div id="content" ui-view="content"></div>
+		<div id="menubar" class="menubar-inverse animate" ui-view="navigation"></div>
+	</div>
 
     <!-- compiled CSS -->
     <!-- inject:css --><!-- endinject -->

@@ -2,15 +2,19 @@ angular.module('poketrainer', [
 	'poketrainer.Module.Templates',
 
 	/** Internal Modules **/
-	
+
+	/** Internal Services **/
+	'Poketrainer.Service.Config',
+	'Poketrainer.Service.Navigation',
+	'Poketrainer.Service.User',
+
 	/** States/Routes **/
+	'Poketrainer.State.Abstracts',
+	'Poketrainer.State.Users',
     
 
 	/** External Libs **/
 	'ui.router'
-	
-    /** Internal Services **/
-	
 
 	/** Internal Directives **/
 	
