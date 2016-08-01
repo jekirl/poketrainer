@@ -819,7 +819,7 @@ class PGoApi:
                                 iv_options.get("IGNORE_BELOW", 0)):
                             break
                         if keep < iv_options.get("MIN_AMOUNT", 1) or pokemon.iv > (
-                                    sorted_pokemons[0].iv * iv_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
+                                sorted_pokemons[0].iv * iv_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
                             sorted_pokemons[i].try_keep = True
                             keep += 1
                     sorted_pokemons = sorted(sorted_pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
@@ -829,7 +829,7 @@ class PGoApi:
                         if keep >= cp_options.get("MAX_AMOUNT", 999):
                             break
                         if keep < cp_options.get("MIN_AMOUNT", 1) or pokemon.cp > (
-                                    sorted_pokemons[0].cp * cp_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
+                                sorted_pokemons[0].cp * cp_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
                             sorted_pokemons[i].try_keep = True
                             keep += 1
 
