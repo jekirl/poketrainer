@@ -12,6 +12,7 @@ from flask import Flask, flash, jsonify, redirect, render_template, url_for
 
 from pgoapi.poke_utils import pokemon_iv_percentage
 
+
 class ReverseProxied(object):
     def __init__(self, app):
         self.app = app
