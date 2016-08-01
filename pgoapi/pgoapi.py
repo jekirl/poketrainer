@@ -552,9 +552,12 @@ class PGoApi:
         res = self.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'],
                                fort_longitude=fort['longitude'],
                                player_latitude=player_postion[0],
-                               player_longitude=player_postion[1]).call()['responses']['FORT_SEARCH']
-        result = res.pop('result', -1)
-        if result == 1 and res:
+                               player_longitude=player_postion[1]).call()
+        result = -1
+        if res:
+            res = res.get('responses', {}).get('FORT_SEARCH', {})
+            result = res.pop('result', -1)
+        if result == 1:
             self.log.info("Visiting fort... (http://maps.google.com/maps?q=%s,%s)", fort['latitude'], fort['longitude'])
             if "items_awarded" in res:
                 items = defaultdict(int)
