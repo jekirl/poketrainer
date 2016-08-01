@@ -6,7 +6,7 @@
     <div class="col-sm-3 col-md-2 sidebar">
       <div class="panel panel-default">
         <div class="panel-body">
-          Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
+          {{player['username']}}<br> Level: {{player['level']}}<br> Exp: {{player['experience']}}<br> EXP/Hour: {{player['hourly_exp']|int}} <br> Stardust: {{currency}}<br> Pokemon Count: {{pokemons|length}}<br>
         </div>
         <div class="container-fluid">
           Level XP: {{player["level_xp"]}} / {{player["goal_xp"]}}
@@ -39,37 +39,48 @@
       <h2>Pokemon</h2>
       <div class="table-responsive">
         <table id="poke-table" class="table table-striped">
-          <thead>
-            <th>Recent</th>
-            <th>Name</th>
-            <th>Nickname</th>
-            <th>CP</th>
-            <th>IV</th>
-            <th>Candies</th>
-            <th>Stamina</th>
-            <th>Att IV</th>
-            <th>Sta IV</th>
-            <th>Def IV</th>
-            <th>Move 1</th>
-            <th>Move 2</th>
-            <th>Transfer</th>
+            <thead>
+            <th style="{{options["ignore_recent"]}}">Recent</th>
+            <th style="{{options["ignore_id"]}}">#</th>
+            <th style="{{options["ignore_name"]}}">Name</th>
+            <th style="{{options["ignore_lvl"]}}">Lvl</th>
+            <th style="{{options["ignore_score"]}}">Score</th>
+            <th style="{{options["ignore_IV"]}}">IV</th>
+            <th style="{{options["ignore_CP"]}}">CP</th>
+            <th style="{{options["ignore_max_CP"]}}">Max CP</th>
+            <th style="{{options["ignore_candies"]}}">Candies</th>
+            <th style="{{options["ignore_candy_needed"]}}">Candy Needed</th>
+            <th style="{{options["ignore_dust_needed"]}}">Dust Needed</th>
+            <th style="{{options["ignore_power_up"]}}">Power Up</th>
+            <th style="{{options["ignore_stamina"]}}">Stamina</th>
+            <th style="{{options["ignore_attkIV"]}}">Att IV</th>
+            <th style="{{options["ignore_staIV"]}}">Sta IV</th>
+            <th style="{{options["ignore_defIV"]}}">Def IV</th>
+            <th style="{{options["ignore_move1"]}}">Move 1</th>
+            <th style="{{options["ignore_move2"]}}">Move 2</th>
+            <th style="{{options["ignore_transfer"]}}">Transfer</th>
           </thead>
           {% for pokemon in pokemons %}
-          <tr id="{{pokemon['id']}}">
-            <td data-order="{{ pokemon["creation_time_ms"] }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon[
-                'pokemon_id']) }}></td>
-            <td>{{pokemon["name"]}}</td>
-            <td data-order="{{pokemon["nickname"]}}">{{pokemon["nickname"]}}</td>
-            <td data-order="{{pokemon["cp"]}}">CP: {{pokemon["cp"]}}</td>
-            <td data-order="{{pokemon["iv"]|round(1, 'floor')}}">IV: {{pokemon["iv"]|round(1, 'floor')}}%</td>
-            <td data-order="{{pokemon["candy"]}}">Candy: {{pokemon["candy"]}}</td>
-            <td data-order="{{pokemon["stamina"]}}">Stamina: {{pokemon["stamina"]}}</td>
-            <td data-order="{{pokemon["individual_attack"]}}">Att IV: {{pokemon["individual_attack"]}}</td>
-            <td data-order="{{pokemon["individual_stamina"]}}">Sta IV: {{pokemon["individual_stamina"]}}</td>
-            <td data-order="{{pokemon["individual_defense"]}}">Def IV: {{pokemon["individual_defense"]}}</td>
-            <td>{{attacks[pokemon["move_1"]]}}</td>
-            <td>{{attacks[pokemon["move_2"]]}}</td>
-            <td><a href="{{ url_for('transfer', username = username, p_id = pokemon['id'])}}">Transfer</a></td>
+          <tr id="{{pokemon.id}}">
+              <td style="{{options["ignore_recent"]}}" data-order="{{ pokemon.creation_time_ms }}"><img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon.pokemon_id) }}></td>
+              <td style="{{options["ignore_id"]}}" data-order="{{pokemon.pokemon_id}}">{{pokemon.pokemon_id}}</td>
+              <td style="{{options["ignore_name"]}}">{{pokemon.name}}</td>
+              <td style="{{options["ignore_lvl"]}}" data-order="{{pokemon.level}}">{{pokemon.level}}</td>
+              <td style="{{options["ignore_score"]}}" data-order="{{pokemon.score}}">{{pokemon.score}}</td>
+              <td style="{{options["ignore_IV"]}}" data-order="{{pokemon.iv|round(1, 'floor')}}">IV: {{pokemon.iv|round(1, 'floor')}}%</td>
+              <td style="{{options["ignore_CP"]}}" data-order="{{pokemon.cp}}">CP: {{pokemon.cp}}</td>
+              <td style="{{options["ignore_max_CP"]}}" data-order="{{pokemon.max_evolve_cp}}">CP: {{pokemon.max_evolve_cp}}</td>
+              <td style="{{options["ignore_candies"]}}" data-order="{{pokemon.candy}}">Candy: {{pokemon.candy}}</td>
+              <td style="{{options["ignore_candy_needed"]}}" data-order="{{pokemon.candy_needed_to_max_evolve}}">Candy: {{pokemon.candy_needed_to_max_evolve}}</td>
+              <td style="{{options["ignore_dust_needed"]}}" data-order="{{pokemon.dust_needed_to_max_evolve}}">Dust: {{pokemon.dust_needed_to_max_evolve}}</td>
+              <td style="{{options["ignore_power_up"]}}" data-order="{{pokemon.power_up_result}}">CP: {{pokemon.power_up_result}}</td>
+              <td style="{{options["ignore_stamina"]}}" data-order="{{pokemon.stamina}}">Stamina: {{pokemon.stamina}}</td>
+              <td style="{{options["ignore_attkIV"]}}" data-order="{{pokemon.individual_attack}}">Att IV: {{pokemon.individual_attack}}</td>
+              <td style="{{options["ignore_staIV"]}}" data-order="{{pokemon.individual_stamina}}">Sta IV: {{pokemon.individual_stamina}}</td>
+              <td style="{{options["ignore_defIV"]}}" data-order="{{pokemon.individual_defense}}">Def IV: {{pokemon.individual_defense}}</td>
+              <td style="{{options["ignore_move1"]}}">{{attacks[pokemon.move_1]}}</td>
+              <td style="{{options["ignore_move2"]}}">{{attacks[pokemon.move_2]}}</td>
+              <td style="{{options["ignore_transfer"]}}"><a href="{{ url_for('transfer', username = username, p_id = pokemon.id)}}">Transfer</a></td>
           </tr>
           {% endfor %}
         </table>

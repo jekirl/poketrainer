@@ -552,18 +552,24 @@ class PGoApi:
         res = self.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'],
                                fort_longitude=fort['longitude'],
                                player_latitude=player_postion[0],
-                               player_longitude=player_postion[1]).call()['responses']['FORT_SEARCH']
-        result = res.pop('result', -1)
-        if result == 1 and res:
-            items = defaultdict(int)
-            for item in res.get('items_awarded', []):
-                items[item['item_id']] += item['item_count']
-            reward = 'XP +' + str(res['experience_awarded'])
-            for item_id, amount in six.iteritems(items):
-                reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
-            self.log.debug("Fort spinned: %s", res)
-            self.log.info("Fort Spinned, %s (http://maps.google.com/maps?q=%s,%s)",
-                          reward, fort['latitude'], fort['longitude'])
+                               player_longitude=player_postion[1]).call()
+        result = -1
+        if res:
+            res = res.get('responses', {}).get('FORT_SEARCH', {})
+            result = res.pop('result', -1)
+        if result == 1:
+            self.log.info("Visiting fort... (http://maps.google.com/maps?q=%s,%s)", fort['latitude'], fort['longitude'])
+            if "items_awarded" in res:
+                items = defaultdict(int)
+                for item in res['items_awarded']:
+                    items[item['item_id']] += item['item_count']
+                reward = 'XP +' + str(res['experience_awarded'])
+                for item_id, amount in six.iteritems(items):
+                    reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
+                self.log.info("Fort spun, yielding: %s",
+                              reward)
+            else:
+                self.log.info("Fort spun, but did not yield any rewards. Possible soft ban?")
             self.visited_forts[fort['id']] = fort
         elif result == 4:
             self.log.debug("For spinned but Your inventory is full : %s", res)
@@ -819,7 +825,7 @@ class PGoApi:
                                 iv_options.get("IGNORE_BELOW", 0)):
                             break
                         if keep < iv_options.get("MIN_AMOUNT", 1) or pokemon.iv > (
-                                    sorted_pokemons[0].iv * iv_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
+                                sorted_pokemons[0].iv * iv_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
                             sorted_pokemons[i].try_keep = True
                             keep += 1
                     sorted_pokemons = sorted(sorted_pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
@@ -829,7 +835,7 @@ class PGoApi:
                         if keep >= cp_options.get("MAX_AMOUNT", 999):
                             break
                         if keep < cp_options.get("MIN_AMOUNT", 1) or pokemon.cp > (
-                                    sorted_pokemons[0].cp * cp_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
+                                sorted_pokemons[0].cp * cp_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
                             sorted_pokemons[i].try_keep = True
                             keep += 1
 
