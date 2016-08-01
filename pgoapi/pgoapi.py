@@ -55,6 +55,7 @@ from pgoapi.pokemon import POKEMON_NAMES, Pokemon
 from pgoapi.protos.POGOProtos import Enums_pb2
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
+from pgoapi.release.base import ReleaseMethodFactory
 from pgoapi.rpc_api import RpcApi
 
 from .utilities import f2i
@@ -810,74 +811,19 @@ class PGoApi:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
                 'inventory_items']
         caught_pokemon = self.get_caught_pokemons(inventory_items)
-        for pokemons in caught_pokemon.values():
-            if len(pokemons) > self.MIN_SIMILAR_POKEMON:
-                # sorting for CLASSIC method as default
-                sorted_pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
+        rhf = ReleaseMethodFactory(self.config)
+        releaseMethod = rhf.getReleaseMethod()
+        for pokemonId, pokemons in caught_pokemon.iteritems():
+            pokemonsToRelease, pokemonsToKeep = releaseMethod.getPokemonToRelease(pokemonId, pokemons)
 
-                # Release method ADVANCED will set try_keep for each pokemon that qualifies
-                if self.RELEASE_METHOD == "ADVANCED":
-                    sorted_pokemons = sorted(sorted_pokemons, key=lambda x: (x.iv, x.cp), reverse=True)
-                    iv_options = self.RELEASE_METHOD_CONF.get("BEST_IV", {})
-                    keep = 0
-                    for i, pokemon in enumerate(sorted_pokemons):
-                        if keep >= iv_options.get("MAX_AMOUNT", 999) or pokemon.iv < (
-                                iv_options.get("IGNORE_BELOW", 0)):
-                            break
-                        if keep < iv_options.get("MIN_AMOUNT", 1) or pokemon.iv > (
-                                sorted_pokemons[0].iv * iv_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
-                            sorted_pokemons[i].try_keep = True
-                            keep += 1
-                    sorted_pokemons = sorted(sorted_pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
-                    cp_options = self.RELEASE_METHOD_CONF.get("BEST_CP", {})
-                    keep = 0
-                    for i, pokemon in enumerate(sorted_pokemons):
-                        if keep >= cp_options.get("MAX_AMOUNT", 999):
-                            break
-                        if keep < cp_options.get("MIN_AMOUNT", 1) or pokemon.cp > (
-                                sorted_pokemons[0].cp * cp_options.get("KEEP_ADDITIONAL_SCALAR", 1.0)):
-                            sorted_pokemons[i].try_keep = True
-                            keep += 1
-
-                elif self.RELEASE_METHOD == "DUPLICATES":
-                    sorted_pokemons = sorted(sorted_pokemons, key=lambda x: (x.score, x.cp, x.iv), reverse=True)
-
-                kept_pokemon_of_type = self.MIN_SIMILAR_POKEMON
-                for pokemon in sorted_pokemons[self.MIN_SIMILAR_POKEMON:]:
-                    if self.is_pokemon_eligible_for_transfer(pokemon, sorted_pokemons[0], kept_pokemon_of_type):
-                        self.do_release_pokemon(pokemon)
-                    else:
-                        kept_pokemon_of_type += 1
-
-    def is_pokemon_eligible_for_transfer(self, pokemon, best_pokemon=None, kept_pokemon_of_type=0):
-        # never release favorites
-        if pokemon.is_favorite:
-            return False
-        # keep defined pokemon unless we are above MAX_SIMILAR_POKEMON
-        if pokemon.pokemon_id in self.keep_pokemon_ids and kept_pokemon_of_type <= self.MAX_SIMILAR_POKEMON:
-            return False
-        # release defined throwaway pokemons
-        if pokemon.pokemon_id in self.throw_pokemon_ids:
-            return True
-        if self.RELEASE_METHOD == "DUPLICATES":
-            if best_pokemon.score * self.RELEASE_METHOD_CONF.get("RELEASE_DUPLICATES_SCALAR", 1.0) > pokemon.score \
-                    and pokemon.score < self.RELEASE_METHOD_CONF.get("RELEASE_DUPLICATES_MAX_SCORE", 0):
-                return True
+            if self.config.get('POKEMON_CLEANUP', {}).get('TESTING_MODE', False):
+                for pokemon in pokemonsToRelease:
+                    self.log.info("(TESTING) Would release pokemon: %s", pokemon)
+                for pokemon in pokemonsToKeep:
+                    self.log.info("(TESTING) Would keep pokemon: %s", pokemon)
             else:
-                return False
-        elif self.RELEASE_METHOD == "ADVANCED":
-            if pokemon.level < self.RELEASE_METHOD_CONF.get("ALWAYS_RELEASE_BELOW_LEVEL", 0):
-                return True
-            elif pokemon.try_keep:
-                return False
-            elif pokemon.cp > self.RELEASE_METHOD_CONF.get("KEEP_CP_OVER", 500) \
-                    or pokemon.iv > self.RELEASE_METHOD_CONF.get("KEEP_IV_OVER", 50):
-                return False
-            return True
-        # CLASSIC fallback method
-        elif pokemon.cp > self.KEEP_CP_OVER or pokemon.iv > self.KEEP_IV_OVER:
-            return False
-        return True
+                for pokemon in pokemonsToRelease:
+                    self.do_release_pokemon(pokemon)
 
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:

@@ -58,6 +58,7 @@ Below the accounts you can change options in the `default` section. If you need 
    * `USE_DISPOSABLE_INCUBATORS` enables use of disposable (3-times use) incubators (default: false)
    * `BIG_EGGS_FIRST` incubate big eggs (most km) first (default: true)
 * `POKEMON_CLEANUP`
+   * `TESTING_MODE` Set this to true if you want to see what pokemon the configured release method would keep or release (no pokemon are harmed when this is on)
    * `KEEP_POKEMON_NAMES` Names of pokemon you want the bot to hold regardless of IV/CP
    * `THROW_POKEMON_NAMES` Names of pokemon you want the bot to throw away regardless of IV/CP
      * Note: `MIN_SIMILAR_POKEMON` will still be kept for all pokemon types

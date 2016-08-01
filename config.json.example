@@ -37,6 +37,7 @@
         "WEEDLE": 12
       },
       "POKEMON_CLEANUP": {
+        "TESTING_MODE": false,
         "MIN_SIMILAR_POKEMON": 1,
         "MAX_SIMILAR_POKEMON": 999,
         "KEEP_POKEMON_NAMES": ["MEWTWO"],
