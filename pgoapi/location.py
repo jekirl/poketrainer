@@ -2,9 +2,13 @@ from time import time
 
 import pyproj
 import s2sphere
+import six
 from geopy.distance import VincentyDistance, vincenty
 from geopy.geocoders import GoogleV3
 from gmaps.directions import Directions
+
+if six.PY3:
+    from past.builtins import map
 
 g = pyproj.Geod(ellps='WGS84')
 geolocator = GoogleV3()
@@ -77,30 +81,23 @@ def distance_in_meters(p1, p2):
     return vincenty(p1, p2).meters
 
 
-def filtered_forts(starting_location, origin, forts, proximity, visited_forts={}, experimental=False, reverse=False):
-    forts = filter(lambda f: is_active_pokestop(f[0], experimental=experimental,
-                                                visited_forts=visited_forts, starting_location=starting_location,
+def filtered_forts(starting_location, origin, forts, proximity, visited_forts={}, reverse=False):
+    forts = filter(lambda f: is_active_pokestop(f[0], visited_forts=visited_forts, starting_location=starting_location,
                                                 proximity=proximity),
                    map(lambda x: (x, distance_in_meters(origin, (x['latitude'], x['longitude']))), forts))
 
-    sorted_forts = sorted(forts, lambda x, y: cmp(x[1], y[1]), reverse=reverse)
+    sorted_forts = sorted(forts, key=lambda x: x[1], reverse=reverse)
     return sorted_forts
 
 
-def is_active_pokestop(fort, experimental, visited_forts, starting_location, proximity):
+def is_active_pokestop(fort, visited_forts, starting_location, proximity):
     is_active_fort = fort.get('type', None) == 1 and ("enabled" in fort or 'lure_info' in fort) and fort.get(
         'cooldown_complete_timestamp_ms', -1) < time() * 1000
-    if experimental and visited_forts:
-        if proximity and proximity > 0:
-            return is_active_fort and fort['id'] not in visited_forts and distance_in_meters(starting_location, (
-                fort['latitude'], fort['longitude'])) < proximity
-        else:
-            return is_active_fort and fort['id'] not in visited_forts
     if proximity and proximity > 0:
-        return is_active_fort and distance_in_meters(starting_location,
-                                                     (fort['latitude'], fort['longitude'])) < proximity
+        return is_active_fort and fort['id'] not in visited_forts and distance_in_meters(starting_location, (
+            fort['latitude'], fort['longitude'])) < proximity
     else:
-        return is_active_fort
+        return is_active_fort and fort['id'] not in visited_forts
 
 
 # from pokemongodev slack @erhan
