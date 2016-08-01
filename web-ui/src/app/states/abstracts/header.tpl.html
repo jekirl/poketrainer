@@ -1,9 +1,14 @@
-<md-toolbar layout="row" class="md-hue-2">
-    <md-button class="md-icon-button md-primary" ng-click="toggleSidebar()"  aria-label="Settings" hide-gt-sm>
-        <md-icon md-svg-icon="menu"></md-icon>
-    </md-button>
-    <h2>
-        <span>PokéTrainer</span>
-    </h2>
-    <span flex></span>
+<md-toolbar layout="row">
+    <div class="md-toolbar-tools">
+        <md-button class="md-icon-button" ng-click="toggleSidebar()" aria-label="Settings" hide-gt-sm>
+            <md-icon>menu</md-icon>
+        </md-button>
+        <h2>
+            <span>PokéTrainer</span>
+        </h2>
+        <span flex></span>
+        <md-button ui-sref="public.users()" class="md-raised" aria-label="Bots">
+            Bots Overview
+        </md-button>
+    </div>
 </md-toolbar>

@@ -23,7 +23,7 @@ angular.module('Poketrainer.State.Abstracts', [
         ;
     })
 
-    .controller('NavigationController', function NavigationController($scope, $state, Navigation){
+    .controller('NavigationController', function NavigationController($scope, $state, $stateParams, Navigation){
 
         $scope.navigation = Navigation.primary.get();
 
