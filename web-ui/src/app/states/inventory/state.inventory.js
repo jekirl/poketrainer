@@ -11,7 +11,12 @@ angular.module('Poketrainer.State.Inventory', [
         ;
     })
 
-    .controller('InventoryController', function StatusController($scope, $stateParams, Inventory) {
-        $scope.inventory = Inventory.get({ username: $stateParams.username });
+    .controller('InventoryController', function StatusController($scope, $stateParams, Inventory, $mdToast) {
+        $scope.isLoading = true;
+        $scope.inventory = Inventory.get({ username: $stateParams.username }, function getSuccess(){
+            $scope.isLoading = false;
+        }, function getError(){
+            $mdToast.showSimple('Awww, we failed to load your inventory :-( Check that web.py is still running, pleeeeease!');
+        });
     })
 ;

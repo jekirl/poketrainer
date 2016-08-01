@@ -12,6 +12,10 @@ angular.module('Poketrainer.State.Pokemons', [
     })
 
     .controller('PokemonsController', function PokemonsController($scope, $stateParams, Pokemon) {
-        $scope.pokemons = Pokemon.get({ username: $stateParams.username });
+        $scope.pokemons = Pokemon.get({ username: $stateParams.username }, function getSuccess(){
+            $scope.isLoading = false;
+        }, function getError(){
+            $mdToast.showSimple('Awww, we failed to load your pokémons :-( Check that web.py is still running, pleeeeease!');
+        });
     })
 ;
