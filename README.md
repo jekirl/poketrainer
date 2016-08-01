@@ -11,7 +11,7 @@
 
 ----
 
-[![Build Status](https://travis-ci.org/j-e-k/poketrainer.svg?branch=master)](https://travis-ci.org/infinitewarp/poketrainer)
+[![Build Status](https://travis-ci.org/j-e-k/poketrainer.svg?branch=develop)](https://travis-ci.org/infinitewarp/poketrainer)
 
 
  #### Rename `config.json.example` to `config.json`
@@ -58,6 +58,7 @@ Below the accounts you can change options in the `default` section. If you need 
    * `USE_DISPOSABLE_INCUBATORS` enables use of disposable (3-times use) incubators (default: false)
    * `BIG_EGGS_FIRST` incubate big eggs (most km) first (default: true)
 * `POKEMON_CLEANUP`
+   * `TESTING_MODE` Set this to true if you want to see what pokemon the configured release method would keep or release (no pokemon are harmed when this is on)
    * `KEEP_POKEMON_NAMES` Names of pokemon you want the bot to hold regardless of IV/CP
    * `THROW_POKEMON_NAMES` Names of pokemon you want the bot to throw away regardless of IV/CP
      * Note: `MIN_SIMILAR_POKEMON` will still be kept for all pokemon types
@@ -81,6 +82,14 @@ Below the accounts you can change options in the `default` section. If you need 
         * `KEEP_ADDITIONAL_SCALAR` The value of this config is multiplied by the highest IV pokemon of a type and only those pokemon that are less than the scaled score are transfered.
         * `MAX_AMOUNT` Maximum amount of pokemon to keep by IV
         * `IGNORE_BELOW` Pokemon with lover IV than this will be ignored by `MIN_AMOUNT` and `KEEP_ADDITIONAL_SCALAR`
+   * `RELEASE_METHOD` = "MULTI", this method allows you to define different RELEASE_METHODs and configs for on a per pokemon basis
+     * `MULTI_DEFAULT_RELEASE_METHOD` this is the default RELEASE_METHOD that will be used for pokemon that don't have an explicit override
+     * _default override config values for the release methods can be defined here, but will be overridden by values in specific pokemon configs_
+     * `POKEMON_CONFIGS` this is a mapping of pokemon name to configuration overrides for that pokemon
+       * `pokemon name` {
+         * `RELEASE_METHOD` this is required if the release method should be different from `MULTI_DEFAULT_RELEASE_METHOD`
+         * _See notes for the release method you have configured for any values that you can override here_
+         * _Further note for ADVANCED type config, if overriding `BEST_IV` or `BEST_CP` values, the whole dictionary of values will need to be in this override block as the entire dictionary will be overwritten_
    * `SCORE_METHOD`
      * A pokemon's score is an arbitrary and configurable parameter defines how to sort pokemon by best > worst to decide which one to keep first. Possible values are "CP", "IV", "CPxIV", or "CP+IV" or the special "FANCY" method.
      * The "FANCY" method uses the options a `WEIGHT_IV` and `WEIGHT_LVL` which give the ability to specifically set more weight on Lvl or IV. The formula is as follows: `(iv / 100.0 * SCORE_WEIGHT_IV) + level / (player_level+1.5) * SCORE_WEIGHT_LVL` where player_level+1.5 is the max level that pokemon can reach when fully powered up.
@@ -91,6 +100,9 @@ Below the accounts you can change options in the `default` section. If you need 
    * `FARM_IGNORE_POKEBALL_COUNT`: `Boolean`, Whether to include this ball in counting. Same goes for `GREATBALL`, `ULTRABALL`, and `MASTERBALL`. Masterball is ignored by default.
    * `FARM_OVERRIDE_STEP_SIZE`: `Integer`, When it goes into farming mode, the bot assumes this step size to potentially speed up resource gathering. _This might lead to softbans._ Setting to `-1` disables this feature. Disabled by default for safety.
    * If `EXPERIMENTAL` OR `CATCH_POKEMON` are false, this configuration will disable itself.
+* 'CONSOLE_OUTPUT'
+    * `HEARTBEAT_DETAIL` : "hidden" will hide repetitive messages, such as the heartbeat.Any other value, (such as "detailed") will allow them to be shown.
+    * `PRETTY_LOCATIONS` : Will convert co-ordinates, where possible, into addresses. This allows better manual tracking of the bot's location in a familiar area, but uses many more geolocation requests. You may easily go through your 2,500 API limit using this for a few hours.
 
 There are more options, check the current config.json.example, many are self-explanatory.
 
