@@ -136,14 +136,21 @@ If you are not updating the Python code, you do not need to install or use tox.
 
 ### pokecli with Docker (optional)
 Build and run container:
+```
+cd poketrainer/container
+docker build -t pokecli .
+docker run -ti --name poketrainer -v /path/to/poketrainer/config.json:/config.json -p 5000:5000 pokecli -i 0
+```
+The name option, poketrainer in the example, is arbirary. Multilple containers can be made using different names. -v maps the config file into the container. You can modify config.json and it will be reread when the container is started, no need to recreate the container or rebuild the image. -p maps the web interface to the external network, so you can check on the status of your training from a different machine. If you choose not to map the port, the ip address of the container can be found
+using `docker inspect poketrainer`.
 
-    docker build -t pokecli .
-    docker run pokecli
+The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`. 
 
-Optionally create an alias:
+You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.  	
 
-    alias pokecli='docker run pokecli'
 
+
+### Find out Item ID's
 For Chosing what Items to keep, get the names here, [AeonLucidProtos_ItemID](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Inventory/Item/ItemId.proto)
 For Choosing what pokemon to keep get the names here,[AeonLucidProtos_Pokemon](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Enums/PokemonId.proto)
 
