@@ -36,6 +36,11 @@ app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 app.debug = True
 
+@app.after_request
+def add_header(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
+
 options = {}
 attacks = {}
 
@@ -148,11 +153,28 @@ def get_api_rpc(username):
     return c
 
 
-@app.route('/api/inventory/<username>', methods=['GET'])
+@app.route('/api/player/<username>/inventory', methods=['GET'])
 def get_inventory(username):
     s = get_api_rpc(username)
     inventory = json.loads(s.get_inventory())
     return jsonify(inventory)
+
+@app.route("/api/player")
+def users():
+    users = []
+
+    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+    with open(desc_file) as f:
+        live_users = f.read()
+        live_users = json.loads(live_users.encode() if len(live_users) > 0 else '{}')
+
+        for username in live_users:
+            c = get_api_rpc(username)
+            if c is None:
+                continue
+            user = {'username': username}
+            users.append(user)
+    return jsonify(users)
 
 @app.route('/api/player/<username>', methods=['GET'])
 def get_player(username):
@@ -160,7 +182,7 @@ def get_player(username):
     player = json.loads(s.get_player_info())
     return jsonify(player)
 
-@app.route('/api/pokemon/<username>', methods=['GET'])
+@app.route('/api/player/<username>/pokemon', methods=['GET'])
 def get_pokemon(username):
     s = get_api_rpc(username)
     player = json.loads(s.get_caught_pokemons())
