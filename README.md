@@ -11,7 +11,7 @@
 
 ----
 
-[![Build Status](https://travis-ci.org/infinitewarp/poketrainer.svg?branch=travis)](https://travis-ci.org/infinitewarp/poketrainer)
+[![Build Status](https://travis-ci.org/j-e-k/poketrainer.svg?branch=master)](https://travis-ci.org/infinitewarp/poketrainer)
 
 
  #### Rename `config.json.example` to `config.json`
