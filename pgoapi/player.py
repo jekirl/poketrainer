@@ -1,3 +1,5 @@
+import json
+
 
 class Player:
     def __init__(self, player_data):
@@ -21,8 +23,10 @@ class Player:
     def __str__(self):
         currency_data = ",".join(
             map(lambda x: "{0}: {1}".format(x.get('name', 'NA'), x.get('amount', 'NA')), self.currencies))
-        return "{0}, Currencies: {1}".format(self.username, currency_data).encode('utf-8', 'ignore')
+        return "{0}, Currencies: {1}".format(self.username, currency_data)
 
     def __repr__(self):
         return self.__str__()
 
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__)

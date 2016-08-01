@@ -3,6 +3,7 @@
 pgoapi - Pokemon Go API
 Copyright (c) 2016 tjado <https://github.com/tejado>
 Modifications Copyright (c) 2016 j-e-k <https://github.com/j-e-k>
+Modifications Copyright (c) 2016 Brad Smith <https://github.com/infinitewarp>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,35 +25,50 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 
 Author: tjado <https://github.com/tejado>
 Modifications by: j-e-k <https://github.com/j-e-k>
+Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
-import os
-import re
-import json
-import struct
-import logging
-import requests
 import argparse
+import collections
+import json
+import logging
+import os
+import os.path
+import socket
 from time import sleep
-from pgoapi import PGoApi
-from pgoapi.utilities import f2i, h2f
-from pgoapi.location import getNeighbors
 
-from google.protobuf.internal import encoder
+import gevent
+import zerorpc
 from geopy.geocoders import GoogleV3
-from s2sphere import CellId, LatLng
+from six import PY2, iteritems
 
-log = logging.getLogger(__name__)
-from threading import Thread
-from Queue import Queue
+from listener import Listener
+from pgoapi import PGoApi
+
+logger = logging.getLogger(__name__)
+
+
 def get_pos_by_name(location_name):
     geolocator = GoogleV3()
     loc = geolocator.geocode(location_name)
 
-    log.info('Your given location: %s', loc.address.encode('utf-8'))
-    log.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
+    logger.info('Your given location: %s', loc.address.encode('utf-8'))
+    logger.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
 
     return (loc.latitude, loc.longitude, loc.altitude)
+
+
+def dict_merge(dct, merge_dct):
+    for k, v in iteritems(merge_dct):
+        if (
+            k in dct and isinstance(dct[k], dict) and
+            isinstance(merge_dct[k], collections.Mapping)
+        ):
+            dict_merge(dct[k], merge_dct[k])
+        else:
+            dct[k] = merge_dct[k]
+    return dct
+
 
 def init_config():
     parser = argparse.ArgumentParser()
@@ -65,23 +81,25 @@ def init_config():
             load.update(json.load(data))
 
     # Read passed in Arguments
-    required = lambda x: not x in load['accounts'][0].keys()
     parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
-    parser.add_argument("-l", "--location", help="Location", required=required("location"))
+    parser.add_argument("-l", "--location", help="Location")
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
     config = parser.parse_args()
-    load = load['accounts'][config.__dict__['config_index']]
+    defaults = load.get('defaults', {})
+    account = load['accounts'][config.__dict__['config_index']]
+    load = dict_merge(defaults, account)
     # Passed in arguments shoud trump
-    for key,value in load.iteritems():
+    for key, value in iteritems(load):
         if key not in config.__dict__ or not config.__dict__[key]:
             config.__dict__[key] = value
     if config.auth_service not in ['ptc', 'google']:
-      log.error("Invalid Auth service specified! ('ptc' or 'google')")
-      return None
+        logger.error("Invalid Auth service specified! ('ptc' or 'google')")
+        return None
 
     return config.__dict__
 
-def main():
+
+def main(position=None):
     # log settings
     # log format
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
@@ -101,18 +119,41 @@ def main():
         logging.getLogger("pgoapi").setLevel(logging.DEBUG)
         logging.getLogger("rpc_api").setLevel(logging.DEBUG)
 
-    position = get_pos_by_name(config["location"])
+    if not position:
+        position = get_pos_by_name(config["location"])
 
     # instantiate pgoapi
-    pokemon_names = json.load(open("pokemon.en.json"))
-    api = PGoApi(config, pokemon_names)
+    api = PGoApi(config)
 
     # provide player position on the earth
     api.set_position(*position)
 
+    desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
+    sock_port = 0
+    s = socket.socket()
+    s.bind(("", 0))  # let the kernel find a free port
+    sock_port = s.getsockname()[1]
+    s.close()
+    data = {}
+
+    if os.path.isfile(desc_file):
+        with open(desc_file, 'r+') as f:
+            data = f.read()
+            if PY2:
+                data = json.loads(data.encode() if len(data) > 0 else '{}')
+            else:
+                data = json.loads(data if len(data) > 0 else '{}')
+    data[config["username"]] = sock_port
+    with open(desc_file, "w+") as f:
+        f.write(json.dumps(data, indent=2))
+
+    s = zerorpc.Server(Listener(api))
+    s.bind("tcp://127.0.0.1:%i" % sock_port) # the free port should still be the same
+    gevent.spawn(s.run)
+
     # retry login every 30 seconds if any errors
     while not api.login(config["auth_service"], config["username"], config["password"]):
-        log.error('Retrying Login in 30 seconds')
+        logger.error('Retrying Login in 30 seconds')
         sleep(30)
 
     # main loop
@@ -120,10 +161,15 @@ def main():
         try:
             api.main_loop()
         except Exception as e:
-            log.exception('Error in main loop, restarting %s')
+            logger.exception('Error in main loop %s, restarting at location: %s', e, api._posf)
             # restart after sleep
             sleep(30)
-            main()
+            try:
+                main(api._posf)
+            except KeyboardInterrupt:
+                raise
+            except:
+                pass
 
 if __name__ == '__main__':
     main()
