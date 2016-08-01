@@ -3,7 +3,7 @@
         <h2>Bots</h2>
         <md-list>
             <md-list-item ng-repeat="user in users">
-                <p> {{ user.username }} </p>
+                <a ui-sref="public.status({username: user.username})">{{ user.username }} </a>
                 <md-progress-linear md-mode="determinate" ng-value="user.NextLevelPercentage"></md-progress-linear>
             </md-list-item>
         </md-list>

@@ -7,11 +7,16 @@ angular.module('poketrainer', [
 	'Poketrainer.Service.Config',
 	'Poketrainer.Service.Navigation',
 	'Poketrainer.Service.User',
+	'Poketrainer.Service.Inventory',
+	'Poketrainer.Service.Pokemon',
 
 	/** States/Routes **/
 	'Poketrainer.State.Abstracts',
+	'Poketrainer.State.Status',
 	'Poketrainer.State.Users',
-    
+	'Poketrainer.State.Pokemons',
+	'Poketrainer.State.Inventory',
+
 
 	/** External Libs **/
 	'ui.router',
@@ -23,9 +28,9 @@ angular.module('poketrainer', [
 ])
 
 	.config(function pokeTrainerConfig($urlRouterProvider, $locationProvider, $urlMatcherFactoryProvider, $mdThemingProvider, $mdIconProvider) {
-		$locationProvider
-			.hashPrefix('!')
-			.html5Mode(true);
+		//$locationProvider
+		//	.hashPrefix('!')
+		//	.html5Mode(false);
 
 		$urlRouterProvider.rule(function ($injector, $location) {
 			var path = $location.url().toLowerCase();
