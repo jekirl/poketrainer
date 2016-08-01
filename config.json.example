@@ -14,12 +14,18 @@
         "SKIP_VISITED_FORT_DURATION": 600,
         "SPIN_ALL_FORTS": true,
         "STAY_WITHIN_PROXIMITY": 9999,
-        "AUTO_USE_LUCKY_EGG": false
+        "AUTO_USE_LUCKY_EGG": false,
+        "EXTRA_WAIT" : 0.2,
+        "SLEEP_MULT" : 1.0
       },
       "CAPTURE": {
         "CATCH_POKEMON": true,
         "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 3,
-        "MAX_CATCH_ATTEMPTS": 10
+        "MAX_CATCH_ATTEMPTS": 10,
+        "USE_POKEBALL_IF_PERCENT": 15,
+        "USE_GREATBALL_IF_PERCENT": 15,
+        "USE_ULTRABALL_IF_PERCENT": 15,
+        "USE_MASTERBALL": false
       },
       "EGG_INCUBATION": {
         "ENABLE": true,
@@ -38,13 +44,27 @@
         "RELEASE_METHOD": "CLASSIC",
         "RELEASE_METHOD_CLASSIC": {
           "KEEP_CP_OVER": 500,
-          "KEEP_IV_OVER": 50,
-          "KEEP_IV_ONLY_WITH_PERCENT_CP": 20,
-          "MAX_POKEMON_HIGH_IV": 999
+          "KEEP_IV_OVER": 50
         },
         "RELEASE_METHOD_DUPLICATES": {
           "RELEASE_DUPLICATES_MAX_SCORE": 1000,
           "RELEASE_DUPLICATES_SCALAR": 0.9
+        },
+        "RELEASE_METHOD_ADVANCED": {
+          "ALWAYS_RELEASE_BELOW_LEVEL": 0,
+          "KEEP_CP_OVER": 1000,
+          "KEEP_IV_OVER": 90,
+          "BEST_CP": {
+            "MIN_AMOUNT": 1,
+            "KEEP_ADDITIONAL_SCALAR": 1.0,
+            "MAX_AMOUNT": 999
+          },
+          "BEST_IV": {
+            "MIN_AMOUNT": 1,
+            "KEEP_ADDITIONAL_SCALAR": 1.0,
+            "MAX_AMOUNT": 999,
+            "IGNORE_BELOW": 50
+          }
         },
         "SCORE_METHOD": "CP",
         "SCORE_METHOD_FANCY": {
