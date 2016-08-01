@@ -1,14 +1,19 @@
-<table class="table">
-    <thead>
-    <tr>
-        <th>Id</th>
-        <th>Username</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr ng-repeat="user in users">
-        <td>{{user.Id}}</td>
-        <td>{{user.Username}}</td>
-    </tr>
-    </tbody>
-</table>
+<md-card>
+    <md-card-content>
+        <h2>Bots</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Username</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="user in users">
+                <td>{{user.Id}}</td>
+                <td>{{user.Username}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </md-card-content>
+</md-card>

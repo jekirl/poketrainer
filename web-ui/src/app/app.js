@@ -16,14 +16,13 @@ angular.module('poketrainer', [
 	/** External Libs **/
 	'ui.router',
     'ngMaterial',
-    'ngMessages',
-    'ngMdIcons'
+    'ngMessages'
 
 	/** Internal Directives **/
 	
 ])
 
-	.config(function pokeTrainerConfig($urlRouterProvider, $locationProvider, $urlMatcherFactoryProvider, $mdThemingProvider) {
+	.config(function pokeTrainerConfig($urlRouterProvider, $locationProvider, $urlMatcherFactoryProvider, $mdThemingProvider, $mdIconProvider) {
 		$locationProvider
 			.hashPrefix('!')
 			.html5Mode(true);
