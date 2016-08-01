@@ -148,6 +148,24 @@ def get_api_rpc(username):
     return c
 
 
+@app.route('/api/inventory/<username>', methods=['GET'])
+def get_inventory(username):
+    s = get_api_rpc(username)
+    inventory = json.loads(s.get_inventory())
+    return jsonify(inventory)
+
+@app.route('/api/player/<username>', methods=['GET'])
+def get_player(username):
+    s = get_api_rpc(username)
+    player = json.loads(s.get_player_info())
+    return jsonify(player)
+
+@app.route('/api/pokemon/<username>', methods=['GET'])
+def get_pokemon(username):
+    s = get_api_rpc(username)
+    player = json.loads(s.get_caught_pokemons())
+    return jsonify(player)
+
 @app.route("/<username>")
 @app.route("/<username>/status")
 def status(username):
