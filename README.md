@@ -84,12 +84,11 @@ Below the accounts you can change options in the `default` section. If you need 
         * `IGNORE_BELOW` Pokemon with lover IV than this will be ignored by `MIN_AMOUNT` and `KEEP_ADDITIONAL_SCALAR`
    * `RELEASE_METHOD` = "MULTI", this method allows you to define different RELEASE_METHODs and configs for on a per pokemon basis
      * `MULTI_DEFAULT_RELEASE_METHOD` this is the default RELEASE_METHOD that will be used for pokemon that don't have an explicit override
-     * _default override config values for the release methods can be defined here, but will be overridden by values in specific pokemon configs_
+     * `RELEASE_METHOD_*` configuration blocks can be provided here to override the values that come from `POKEMON_CLEANUP` => `RELEASE_METHOD_*` as the default values for the specific pokemon release method configurations
      * `POKEMON_CONFIGS` this is a mapping of pokemon name to configuration overrides for that pokemon
-       * `pokemon name` {
-         * `RELEASE_METHOD` this is required if the release method should be different from `MULTI_DEFAULT_RELEASE_METHOD`
-         * _See notes for the release method you have configured for any values that you can override here_
-         * _Further note for ADVANCED type config, if overriding `BEST_IV` or `BEST_CP` values, the whole dictionary of values will need to be in this override block as the entire dictionary will be overwritten_
+       * `pokemon name` this is a pokemon name in the set of valid names for `KEEP_POKEMON_NAMES`
+         * `RELEASE_METHOD` this is required if the release method should be different from `MULTI_DEFAULT_RELEASE_METHOD` otherwise it will use default
+         * `RELEASE_METHOD_*` settings in these configuration blocks will override defaults for the this specific `pokemon name` 
    * `SCORE_METHOD`
      * A pokemon's score is an arbitrary and configurable parameter defines how to sort pokemon by best > worst to decide which one to keep first. Possible values are "CP", "IV", "CPxIV", or "CP+IV" or the special "FANCY" method.
      * The "FANCY" method uses the options a `WEIGHT_IV` and `WEIGHT_LVL` which give the ability to specifically set more weight on Lvl or IV. The formula is as follows: `(iv / 100.0 * SCORE_WEIGHT_IV) + level / (player_level+1.5) * SCORE_WEIGHT_LVL` where player_level+1.5 is the max level that pokemon can reach when fully powered up.
