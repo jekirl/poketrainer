@@ -100,6 +100,9 @@ Below the accounts you can change options in the `default` section. If you need 
    * `FARM_IGNORE_POKEBALL_COUNT`: `Boolean`, Whether to include this ball in counting. Same goes for `GREATBALL`, `ULTRABALL`, and `MASTERBALL`. Masterball is ignored by default.
    * `FARM_OVERRIDE_STEP_SIZE`: `Integer`, When it goes into farming mode, the bot assumes this step size to potentially speed up resource gathering. _This might lead to softbans._ Setting to `-1` disables this feature. Disabled by default for safety.
    * If `EXPERIMENTAL` OR `CATCH_POKEMON` are false, this configuration will disable itself.
+* 'CONSOLE_OUTPUT'
+    * `HEARTBEAT_DETAIL` : "hidden" will hide repetitive messages, such as the heartbeat.Any other value, (such as "detailed") will allow them to be shown.
+    * `PRETTY_LOCATIONS` : Will convert co-ordinates, where possible, into addresses. This allows better manual tracking of the bot's location in a familiar area, but uses many more geolocation requests. You may easily go through your 2,500 API limit using this for a few hours.
 
 There are more options, check the current config.json.example, many are self-explanatory.
 
