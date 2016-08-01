@@ -1,4 +1,5 @@
 import importlib
+import copy
 
 class ReleaseMethodFactory(object):
 
@@ -19,14 +20,21 @@ class ReleaseMethodFactory(object):
         """
         if not self._releaseHelper:
             releaseHelperName = self.config.get('POKEMON_CLEANUP', {}).get('RELEASE_METHOD', 'CLASSIC').lower()
-            klass = getattr(importlib.import_module("pgoapi.release." + releaseHelperName), 'ReleaseMethod')
-            sections = klass.getConfigSections()
-            config = self.config.get('POKEMON_CLEANUP', {}).copy()
-
-            for section in sections:
-                config.update(self.config.get('POKEMON_CLEANUP', {}).get(section, {}))
-            self._releaseHelper = klass(config)
+            self._releaseHelper = self.loadReleaseMethod(releaseHelperName, self.config.get('POKEMON_CLEANUP', {}))
         return self._releaseHelper
+
+    def getKlass(self, modulename):
+        return getattr(importlib.import_module("pgoapi.release." + modulename.lower()), 'ReleaseMethod')
+
+
+    def loadReleaseMethod(self, modulename, config):
+        klass = self.getKlass(modulename)
+        sections = klass.getConfigSections()
+        cfg = copy.deepcopy(config)
+
+        for section in sections:
+            cfg.update(config.get(section, {}))
+        return klass(config)
 
 
 class ReleaseMethod(object):

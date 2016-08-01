@@ -47,6 +47,26 @@
           "KEEP_CP_OVER": 500,
           "KEEP_IV_OVER": 50
         },
+        "RELEASE_METHOD_MULTI": {
+          "MULTI_DEFAULT_RELEASE_METHOD": "CLASSIC",
+          "POKEMON_CONFIGS": {
+            "PIDGEOTTO": {
+              "RELEASE_METHOD": "CLASSIC",
+              "KEEP_CP_OVER": 740,
+              "KEEP_IV_OVER": 80
+            },
+            "RATICATE": {
+              "KEEP_CP_OVER": 850
+            },
+            "PINSIR": {
+              "KEEP_CP_OVER": 1100
+            },
+            "EEVEE": {
+              "KEEP_CP_OVER": 650,
+              "KEEP_IV_OVER": 85
+            }
+          }
+        },
         "RELEASE_METHOD_DUPLICATES": {
           "RELEASE_DUPLICATES_MAX_SCORE": 1000,
           "RELEASE_DUPLICATES_SCALAR": 0.9

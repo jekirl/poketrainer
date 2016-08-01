@@ -79,6 +79,7 @@ class PGoApi:
         self._auth_provider = None
         self._api_endpoint = None
         self.config = config
+        self.releaseMethodFactory = ReleaseMethodFactory(self.config)
         self._position_lat = 0  # int cooords
         self._position_lng = 0
         self._position_alt = 0
@@ -811,8 +812,7 @@ class PGoApi:
             inventory_items = self.get_inventory().call()['responses']['GET_INVENTORY']['inventory_delta'][
                 'inventory_items']
         caught_pokemon = self.get_caught_pokemons(inventory_items)
-        rhf = ReleaseMethodFactory(self.config)
-        releaseMethod = rhf.getReleaseMethod()
+        releaseMethod = self.releaseMethodFactory.getReleaseMethod()
         for pokemonId, pokemons in caught_pokemon.iteritems():
             pokemonsToRelease, pokemonsToKeep = releaseMethod.getPokemonToRelease(pokemonId, pokemons)
 
