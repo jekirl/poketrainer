@@ -27,7 +27,7 @@ angular.module('poketrainer', [
 	
 ])
 
-	.config(function pokeTrainerConfig($urlRouterProvider, $locationProvider, $urlMatcherFactoryProvider, $mdThemingProvider, $mdIconProvider) {
+	.config(function pokeTrainerConfig($urlRouterProvider, $locationProvider, $urlMatcherFactoryProvider, $mdThemingProvider) {
 		//$locationProvider
 		//	.hashPrefix('!')
 		//	.html5Mode(false);

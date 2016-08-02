@@ -23,8 +23,7 @@ angular.module('Poketrainer.State.Abstracts', [
         ;
     })
 
-    .controller('NavigationController', function NavigationController($scope, $state, $stateParams, Navigation){
-
+    .controller('NavigationController', function NavigationController($scope, $state, $stateParams, $mdSidenav, Navigation){
         $scope.navigation = Navigation.primary.get();
 
         $scope.isActiveState = function isActiveState(stateName) {
@@ -37,7 +36,7 @@ angular.module('Poketrainer.State.Abstracts', [
         };
     })
 
-    .controller('HeaderController', function HeaderController($scope, $mdSidenav){
+    .controller('HeaderController', function HeaderController($scope, $state, $mdSidenav){
         $scope.toggleSidebar = function () {
             $mdSidenav('left').toggle();
         }

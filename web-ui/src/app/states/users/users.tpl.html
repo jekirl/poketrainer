@@ -1,8 +1,8 @@
-<div class="md-padding">
+<md-content id="content" class="container">
     <h1>Bots</h1>
     <md-list>
         <md-list-item ng-repeat="user in users">
             <a ui-sref="public.status({username: user.username})">{{ user.username }} </a>
         </md-list-item>
     </md-list>
-</div>
+</md-content>

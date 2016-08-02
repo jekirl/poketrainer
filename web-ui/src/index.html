@@ -15,8 +15,8 @@
 <body layout="column">
 	<div ui-view="header"></div>
 	<div layout="row" flex>
-		<md-sidenav md-is-locked-open="$mdMedia('gt-sm')" class="md-whiteframe-4dp" ui-view="navigation" md-component-id="left"></md-sidenav>
-		<md-content id="content" ui-view="content" flex></md-content>
+		<div ui-view="navigation"></div>
+		<div ui-view="content" flex></div>
 	</div>
 
 	<!-- compiled CSS -->
