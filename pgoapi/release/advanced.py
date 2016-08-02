@@ -4,10 +4,6 @@ from pgoapi.protos.POGOProtos import Enums_pb2
 
 class ReleaseMethod(base.ReleaseMethod):
 
-    @staticmethod
-    def getConfigSections():
-        return ("RELEASE_METHOD_CLASSIC", "RELEASE_METHOD_ADVANCED")
-
     def processConfig(self, config):
         self.config = config
         self.keep_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
@@ -25,7 +21,7 @@ class ReleaseMethod(base.ReleaseMethod):
 
             # Release method ADVANCED will set try_keep for each pokemon that qualifies
             sorted_pokemons = sorted(sorted_pokemons, key=lambda x: (x.iv, x.cp), reverse=True)
-            iv_options = self.config.get("BEST_IV", {})
+            iv_options = self.config.get('RELEASE_METHOD_ADVANCED', {}).get("BEST_IV", {})
             keep = 0
             for i, pokemon in enumerate(sorted_pokemons):
                 if keep >= iv_options.get("MAX_AMOUNT", 999) or pokemon.iv < (
@@ -35,7 +31,7 @@ class ReleaseMethod(base.ReleaseMethod):
                     sorted_pokemons[i].try_keep = True
                     keep += 1
             sorted_pokemons = sorted(sorted_pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
-            cp_options = self.config.get("BEST_CP", {})
+            cp_options = self.config.get('RELEASE_METHOD_ADVANCED', {}).get("BEST_CP", {})
             keep = 0
             for i, pokemon in enumerate(sorted_pokemons):
                 if keep >= cp_options.get("MAX_AMOUNT", 999):
@@ -66,11 +62,11 @@ class ReleaseMethod(base.ReleaseMethod):
         # release defined throwaway pokemons
         if pokemon.pokemon_id in self.throw_pokemon_ids:
             return True
-        if pokemon.level < self.config.get("ALWAYS_RELEASE_BELOW_LEVEL", 0):
+        if pokemon.level < self.config.get('RELEASE_METHOD_ADVANCED', {}).get("ALWAYS_RELEASE_BELOW_LEVEL", 0):
             return True
         elif pokemon.try_keep:
             return False
-        elif pokemon.cp > self.config.get("KEEP_CP_OVER", 500) \
-                or pokemon.iv > self.config.get("KEEP_IV_OVER", 50):
+        elif pokemon.cp > self.config.get('RELEASE_METHOD_ADVANCED', {}).get("KEEP_CP_OVER", 500) \
+                or pokemon.iv > self.config.get('RELEASE_METHOD_ADVANCED', {}).get("KEEP_IV_OVER", 50):
             return False
         return True
