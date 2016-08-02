@@ -92,7 +92,7 @@ Below the accounts you can change options in the `default` section. If you need 
      * `POKEMON_CONFIGS` this is a mapping of pokemon name to configuration overrides for that pokemon
        * `pokemon name` this is a pokemon name in the set of valid names for `KEEP_POKEMON_NAMES`
          * `RELEASE_METHOD` this is required if the release method should be different from `MULTI_DEFAULT_RELEASE_METHOD` otherwise it will use default
-         * `RELEASE_METHOD_*` settings in these configuration blocks will override defaults for the this specific `pokemon name` 
+         * `RELEASE_METHOD_*` settings in these configuration blocks will override defaults for the this specific `pokemon name`
    * `SCORE_METHOD`
      * A pokemon's score is an arbitrary and configurable parameter defines how to sort pokemon by best > worst to decide which one to keep first. Possible values are "CP", "IV", "CPxIV", or "CP+IV" or the special "FANCY" method.
      * The "FANCY" method uses the options a `WEIGHT_IV` and `WEIGHT_LVL` which give the ability to specifically set more weight on Lvl or IV. The formula is as follows: `(iv / 100.0 * SCORE_WEIGHT_IV) + level / (player_level+1.5) * SCORE_WEIGHT_LVL` where player_level+1.5 is the max level that pokemon can reach when fully powered up.
@@ -103,6 +103,10 @@ Below the accounts you can change options in the `default` section. If you need 
    * `FARM_IGNORE_POKEBALL_COUNT`: `Boolean`, Whether to include this ball in counting. Same goes for `GREATBALL`, `ULTRABALL`, and `MASTERBALL`. Masterball is ignored by default.
    * `FARM_OVERRIDE_STEP_SIZE`: `Integer`, When it goes into farming mode, the bot assumes this step size to potentially speed up resource gathering. _This might lead to softbans._ Setting to `-1` disables this feature. Disabled by default for safety.
    * If `EXPERIMENTAL` OR `CATCH_POKEMON` are false, this configuration will disable itself.
+
+* `CONSOLE_OUTPUT`
+    * `HEARTBEAT_DETAIL` : "hidden" will hide repetitive messages, such as the heartbeat.Any other value, (such as "detailed") will allow them to be shown.
+    * `PRETTY_LOCATIONS` : Will convert co-ordinates, where possible, into addresses. This allows better manual tracking of the bot's location in a familiar area, but uses many more geolocation requests.
 
 There are more options, check the current config.json.example, many are self-explanatory.
 
@@ -148,9 +152,9 @@ docker run -ti --name poketrainer -v /path/to/poketrainer/config.json:/config.js
 The name option, poketrainer in the example, is arbirary. Multilple containers can be made using different names. -v maps the config file into the container. You can modify config.json and it will be reread when the container is started, no need to recreate the container or rebuild the image. -p maps the web interface to the external network, so you can check on the status of your training from a different machine. If you choose not to map the port, the ip address of the container can be found
 using `docker inspect poketrainer`.
 
-The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`. 
+The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`.
 
-You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.  	
+You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.
 
 
 
