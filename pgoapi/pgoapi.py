@@ -1131,7 +1131,7 @@ class PGoApi:
             return False
 
         self.log.debug('Starting RPC login sequence (app simulation)')
-        self.log.info('[LOGIN]\t- Simulating Client Sequence)')
+        self.log.info('[LOGIN]\t- Simulating Client Sequence')
         # making a standard call, like it is also done by the client
         self.get_player()
         self.get_hatched_eggs()
@@ -1156,7 +1156,7 @@ class PGoApi:
             self._auth_provider.set_ticket(response['auth_ticket'].values())
 
         self.log.debug('Starting RPC login sequence (app simulation)')
-        self.log.info('[LOGIN]\t- Finished Simulating Client Sequence)')
+        self.log.info('[LOGIN]\t- Finished Simulating Client Sequence')
         self.log.info('[LOGIN]\t- Login process completed')
         if self.HEARTBEAT_DETAIL == "HIDDEN":
             if os.name == 'nt':
