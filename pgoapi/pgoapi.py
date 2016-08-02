@@ -755,7 +755,7 @@ class PGoApi:
                     self.gsleep(0.2)
                     res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()\
                         .get('responses', {}).get('RECYCLE_INVENTORY_ITEM', {})
-                    response_code = res['result']
+                    response_code = res.get('result', -1)
                     if response_code == 1:
                         self.log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
                                       item['item_id']), res.get('new_count', 0)))
