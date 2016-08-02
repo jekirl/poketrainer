@@ -4,10 +4,6 @@ from pgoapi.protos.POGOProtos import Enums_pb2
 
 class ReleaseMethod(base.ReleaseMethod):
 
-    @staticmethod
-    def getConfigSections():
-        return ("RELEASE_METHOD_CLASSIC", "RELEASE_METHOD_DUPLICATES")
-
     def processConfig(self, config):
         self.config = config
         self.keep_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
@@ -47,8 +43,8 @@ class ReleaseMethod(base.ReleaseMethod):
         # release defined throwaway pokemons
         if pokemon.pokemon_id in self.throw_pokemon_ids:
             return True
-        if best_pokemon.score * self.config.get("RELEASE_DUPLICATES_SCALAR", 1.0) > pokemon.score \
-                and pokemon.score < self.config.get("RELEASE_DUPLICATES_MAX_SCORE", 0):
+        if best_pokemon.score * self.config.get('RELEASE_METHOD_DUPLICATES', {}).get("RELEASE_DUPLICATES_SCALAR", 1.0) > pokemon.score \
+                and pokemon.score < self.config.get('RELEASE_METHOD_DUPLICATES', {}).get("RELEASE_DUPLICATES_MAX_SCORE", 0):
             return True
         else:
             return False

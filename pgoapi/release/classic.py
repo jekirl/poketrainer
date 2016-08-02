@@ -8,16 +8,12 @@ logger = logging.getLogger(__name__)
 
 class ReleaseMethod(base.ReleaseMethod):
 
-    @staticmethod
-    def getConfigSections():
-        return ("RELEASE_METHOD_CLASSIC", )
-
     def processConfig(self, config):
         self.config = config
         self.keep_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("KEEP_POKEMON_NAMES", []))
         self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
-        self.KEEP_CP_OVER = self.config.get('KEEP_CP_OVER', 0)
-        self.KEEP_IV_OVER = self.config.get('KEEP_IV_OVER', 0)
+        self.KEEP_CP_OVER = self.config.get('RELEASE_METHOD_CLASSIC', {}).get('KEEP_CP_OVER', 0)
+        self.KEEP_IV_OVER = self.config.get('RELEASE_METHOD_CLASSIC', {}).get('KEEP_IV_OVER', 0)
         self.MAX_SIMILAR_POKEMON = self.config.get('MAX_SIMILAR_POKEMON', 999)
         self.MIN_SIMILAR_POKEMON = self.config.get('MIN_SIMILAR_POKEMON', 1)
 
