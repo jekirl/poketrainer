@@ -6,28 +6,52 @@
     </ui-gmap-google-map>
     <div class="row">
         <div class="col-md-3 text-center">
-            <h3>Level XP: {{ user.player_stats.experience | number}}/{{ user.player_stats.next_level_xp | number}}</h3>
-            <span class="chart" easypiechart percent="user.xpPercent" options="expLvlOptions">
-                <span class="percent" ng-bind="user.xpPercent"></span>
-            </span>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Level XP:<br>{{ user.player_stats.experience | number}}/{{ user.player_stats.next_level_xp | number}}</h3>
+                </div>
+                <div class="panel-body">
+                    <span class="chart" easypiechart percent="user.xpPercent" options="expLvlOptions">
+                        <span class="percent" ng-bind="user.xpPercent"></span>
+                    </span>
+                </div>
+            </div>
         </div>
         <div class="col-md-3 text-center">
-            <h3>Unique Pokemon: {{ user.player_stats.player_stats.unique_pokedex_entries }}/151</h3>
-            <span class="chart" easypiechart percent="user.uniquePokedexPercent" options="uniquePokedexOptions">
-                <span class="percent" ng-bind="user.uniquePokedexPercent"></span>
-            </span>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Unique Pokemon:<br>{{ user.player_stats.player_stats.unique_pokedex_entries }}/151</h3>
+                </div>
+                <div class="panel-body">
+                    <span class="chart" easypiechart percent="user.uniquePokedexPercent" options="uniquePokedexOptions">
+                        <span class="percent" ng-bind="user.uniquePokedexPercent"></span>
+                    </span>
+                </div>
+            </div>
         </div>
         <div class="col-md-3 text-center">
-            <h3>Pokemon Bag: {{ user.pokemon.length }}/{{ user.max_pokemon_storage }}</h3>
-            <span class="chart" easypiechart percent="user.pokemonInvPercent" options="pokemonInvOptions">
-                <span class="percent" ng-bind="user.pokemonInvPercent"></span>
-            </span>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Pokemon Bag:<br>{{ user.pokemon.length }}/{{ user.max_pokemon_storage }}</h3>
+                </div>
+                <div class="panel-body">
+                    <span class="chart" easypiechart percent="user.pokemonInvPercent" options="pokemonInvOptions">
+                        <span class="percent" ng-bind="user.pokemonInvPercent"></span>
+                    </span>
+                </div>
+            </div>
         </div>
         <div class="col-md-3 text-center">
-            <h3>Item Bag: {{ user.current_item_storage }}/{{ user.max_item_storage }}</h3>
-            <span class="chart" easypiechart percent="user.itemsInvPercent" options="itemsInvOptions">
-                <span class="percent" ng-bind="user.itemsInvPercent"></span>
-            </span>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Item Bag: {{ user.current_item_storage }}/{{ user.max_item_storage }}</h3>
+                </div>
+                <div class="panel-body">
+                    <span class="chart" easypiechart percent="user.itemsInvPercent" options="itemsInvOptions">
+                        <span class="percent" ng-bind="user.itemsInvPercent"></span>
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
     <pre>{{user | json}}</pre>
