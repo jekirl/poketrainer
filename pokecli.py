@@ -120,7 +120,7 @@ def main(position=None):
         logging.getLogger("rpc_api").setLevel(logging.DEBUG)
 
     if not position:
-        if config["CONSOLE_OUTPUT"]["PRETTY_LOCATIONS"] == False:
+        if config["CONSOLE_OUTPUT"]["PRETTY_LOCATIONS"] is False:
             position_str = config["location"]
             # Could do with a better way of deciding how to split address
             position_split = position_str.split(', ')
