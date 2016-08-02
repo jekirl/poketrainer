@@ -1125,12 +1125,13 @@ class PGoApi:
             else:
                 self.spin_near_fort()
             # if catching fails 10 times, maybe you are sofbanned.
+            # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
             while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
                 # self.gsleep(4)
                 catch_attempt += 1
                 pass
             if catch_attempt > self.max_catch_attempts:
-                self.log.warn("Your account may be softbaned Or no Pokeballs. Failed to catch pokemon %s times",
+                self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times",
                               catch_attempt)
             catch_attempt = 0
 
