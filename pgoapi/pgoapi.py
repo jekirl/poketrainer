@@ -38,10 +38,9 @@ from time import time
 
 import gevent
 import six
-from geopy.geocoders import GoogleV3
 from cachetools import TTLCache
+from geopy.geocoders import GoogleV3
 from gevent.coros import BoundedSemaphore
-
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import (AuthException, ServerBusyOrOfflineException,
