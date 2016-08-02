@@ -180,6 +180,9 @@ def users():
 def get_player(username):
     s = get_api_rpc(username)
     player = json.loads(s.get_player_info())
+    latlng = s.current_location()
+    player['latitude'] = latlng[0]
+    player['longitude'] = latlng[1]
     return jsonify(player)
 
 @app.route('/api/player/<username>/pokemon', methods=['GET'])

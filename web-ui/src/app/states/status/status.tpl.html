@@ -1,4 +1,58 @@
-<div class="md-padding">
+<md-content class="md-padding">
     <h1>Status: {{user.username}}</h1>
+    <ui-gmap-google-map center='map.center' zoom='map.zoom'>
+        <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
+        </ui-gmap-marker>
+    </ui-gmap-google-map>
+    <div layout="row">
+        <md-card layout="column" flex>
+            <md-card-title>
+                <md-card-title-text class="text-center">
+                    <span class="md-subhead">Level XP: {{ user.level_xp }}/{{ user.goal_xp }}</span>
+                </md-card-title-text>
+            </md-card-title>
+            <md-card-content class="text-center">
+                <span class="chart" easypiechart percent="user.levelDingPercent" options="expLvlOptions">
+                    <span class="percent" ng-bind="user.levelDingPercent"></span>
+                </span>
+            </md-card-content>
+        </md-card>
+        <md-card layout="column" flex>
+            <md-card-title>
+                <md-card-title-text class="text-center">
+                    <span class="md-subhead">Unique Pokemon: {{ user.uniquePokedexEntries }}/151</span>
+                </md-card-title-text>
+            </md-card-title>
+            <md-card-content class="text-center">
+                <span class="chart" easypiechart percent="user.uniquePokedexPercent" options="uniquePokedexOptions">
+                    <span class="percent" ng-bind="user.uniquePokedexPercent"></span>
+                </span>
+            </md-card-content>
+        </md-card>
+        <md-card layout="column" flex>
+            <md-card-title>
+                <md-card-title-text class="text-center">
+                    <span class="md-subhead">Pokemon Bag: {{ user.current_pokemon_storage }}/{{ user.max_pokemon_storage }}</span>
+                </md-card-title-text>
+            </md-card-title>
+            <md-card-content class="text-center">
+                <span class="chart" easypiechart percent="user.pokemonInvPercent" options="pokemonInvOptions">
+                    <span class="percent" ng-bind="user.pokemonInvPercent"></span>
+                </span>
+            </md-card-content>
+        </md-card>
+        <md-card layout="column" flex>
+            <md-card-title>
+                <md-card-title-text class="text-center">
+                    <span class="md-subhead">Item Bag: {{ user.current_item_storage }}/{{ user.max_item_storage }}</span>
+                </md-card-title-text>
+            </md-card-title>
+            <md-card-content class="text-center">
+                <span class="chart" easypiechart percent="user.itemsInvPercent" options="itemsInvOptions">
+                    <span class="percent" ng-bind="user.itemsInvPercent"></span>
+                </span>
+            </md-card-content>
+        </md-card>
+    </div>
     <pre>{{user | json}}</pre>
-</div>
+</md-content>

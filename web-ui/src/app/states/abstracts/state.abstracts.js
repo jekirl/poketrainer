@@ -23,8 +23,11 @@ angular.module('Poketrainer.State.Abstracts', [
         ;
     })
 
-    .controller('NavigationController', function NavigationController($scope, $state, $stateParams, $mdSidenav, Navigation){
+    .controller('NavigationController', function NavigationController($rootScope, $scope, $state, $stateParams, $mdSidenav, Navigation){
         $scope.navigation = Navigation.primary.get();
+
+        $scope.params = $state.params;
+        $scope.state = $state.current.name;
 
         $scope.isActiveState = function isActiveState(stateName) {
             var currentStateName = $state.current.name;
@@ -34,9 +37,24 @@ angular.module('Poketrainer.State.Abstracts', [
         $scope.getUrl = function primaryNavGetUrl(state) {
             return $state.href(state);
         };
+
+        $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
+            $scope.navigation = Navigation.sidebar.get(toState.name);
+            $scope.state = toState.name;
+            $scope.params = toParams;
+        });
+
     })
 
-    .controller('HeaderController', function HeaderController($scope, $state, $mdSidenav){
+    .controller('HeaderController', function HeaderController($rootScope, $scope, $state, $mdSidenav, Navigation){
+        $scope.navigation = Navigation.primary.get();
+        $scope.state = $state.current.name;
+
+        $rootScope.$on('$stateChangeSuccess', function (event, toState, toParams, fromState, fromParams) {
+            $scope.navigation = Navigation.sidebar.get(toState.name);
+            $scope.state = toState.name;
+        });
+
         $scope.toggleSidebar = function () {
             $mdSidenav('left').toggle();
         }

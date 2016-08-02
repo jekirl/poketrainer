@@ -11,7 +11,12 @@ angular.module('Poketrainer.State.Pokemons', [
         ;
     })
 
+    .run(function (Navigation) {
+        Navigation.primary.register("Pokemons", "public.pokemons", 30, 'md md-event-available', 'public.pokemons');
+    })
+
     .controller('PokemonsController', function PokemonsController($scope, $stateParams, Pokemon) {
+        $scope.isLoading = true;
         $scope.pokemons = Pokemon.get({ username: $stateParams.username }, function getSuccess(){
             $scope.isLoading = false;
         }, function getError(){

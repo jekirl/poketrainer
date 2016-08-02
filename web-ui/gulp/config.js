@@ -7,6 +7,7 @@ module.exports = (function () {
     var projectPath = "./src";
     var vendorPath = "./vendor";
     var bowerPath = vendorPath + "/bower";
+    var npmPath = "./node_modules";
     var distPath = "./dist";
     var assetsPath = projectPath + "/assets";
     var assetsDistPath = distPath + "/assets";
@@ -53,6 +54,7 @@ module.exports = (function () {
         },
 
         bowerPath: bowerPath,
+        npmPath: npmPath,
 		distPath: distPath,
         cleanPaths: cleanPaths,
 
@@ -155,6 +157,13 @@ module.exports = (function () {
                 bowerPath + '/angular-messages/angular-messages.js',
                 bowerPath + '/angular-material/angular-material.js',
                 bowerPath + '/angular-material-icons/angular-material-icons.js',
+                bowerPath + '/lodash/dist/lodash.js',
+                bowerPath + '/angular-simple-logger/dist/angular-simple-logger.js',
+                bowerPath + '/angular-google-maps/dist/angular-google-maps.js',
+                bowerPath + '/jquery.easy-pie-chart/dist/angular.easypiechart.js',
+
+                npmPath + '/chart.js/dist/Chart.js',
+                bowerPath + '/angular-chart.js/dist/angular-chart.js',
 
                 assetsPath + "/js/plugins/*.js"
             ]

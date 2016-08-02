@@ -11,6 +11,11 @@ angular.module('Poketrainer.State.Inventory', [
         ;
     })
 
+    .run(function (Navigation) {
+        Navigation.primary.register("Inventory", "public.inventory", 30, 'md md-event-available', 'public.inventory');
+    })
+
+
     .controller('InventoryController', function StatusController($scope, $stateParams, Inventory, $mdToast) {
         $scope.isLoading = true;
         $scope.inventory = Inventory.get({ username: $stateParams.username }, function getSuccess(){

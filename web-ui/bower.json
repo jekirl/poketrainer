@@ -24,7 +24,12 @@
     "angular-ui-router": "^0.3.1",
     "angular-resource": "^1.5.8",
     "bootstrap": "3.3.7",
-    "angular-material": "^1.0.9"
+    "angular-material": "^1.0.9",
+    "angular-chart.js": "^1.0.0",
+    "angular-simple-logger": "^0.1.7",
+    "angular-google-maps": "^2.3.3",
+    "lodash": "^4.14.1",
+    "jquery.easy-pie-chart": "^2.1.6"
   },
   "devDependencies": {},
   "overrides": {}

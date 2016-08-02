@@ -1,10 +1,10 @@
 <md-toolbar layout="row">
     <div class="md-toolbar-tools">
-        <md-button class="md-icon-button" ng-click="toggleSidebar()" aria-label="Settings" hide-gt-sm>
+        <md-button ng-hide="state==='public.users'" class="md-icon-button" ng-click="toggleSidebar()" aria-label="Settings" hide-gt-sm>
             <md-icon>menu</md-icon>
         </md-button>
         <h2>
-            <span ng-click="closeSidebar()">PokéTrainer</span>
+            <span>PokéTrainer</span>
         </h2>
         <span flex></span>
         <md-button ui-sref="public.users()" class="md-raised" aria-label="Bots">
