@@ -116,7 +116,7 @@ class PGoApi:
         self.exp_current = None
         self.sem = BoundedSemaphore(1)
         self.persist_lock = False
-        self.sleep_mult = self.config.get("SLEEP_MULT", 1.5)
+        self.sleep_mult = self.config.get("BEHAVIOR", {}).get("SLEEP_MULT", 1.5)
         self.MIN_ITEMS = {}
         for k, v in config.get("MIN_ITEMS", {}).items():
             self.MIN_ITEMS[getattr(Inventory, k)] = v
@@ -226,7 +226,7 @@ class PGoApi:
 
     def call(self):
         self.cond_lock()
-        self.gsleep(self.config.get("EXTRA_WAIT", 0.3))
+        self.gsleep(self.config.get("BEHAVIOR", {}).get("EXTRA_WAIT", 0.3))
         try:
             if not self._req_method_list.get(id(gevent.getcurrent()), []):
                 return False
