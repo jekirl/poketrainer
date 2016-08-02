@@ -8,6 +8,9 @@ class Listener(object):
     def release_pokemon_by_id(self, p_id):
         return self.api.do_release_pokemon_by_id(p_id)
 
+    def evolve_pokemon_by_id(self, p_id):
+        return self.api.do_evolve_pokemon_by_id(p_id)
+
     def current_location(self):
         # FIXME use logger instead of print statements!
         print(self.api._posf)

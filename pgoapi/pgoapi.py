@@ -797,6 +797,21 @@ class PGoApi:
         status = release_res.get('result', -1)
         return status
 
+    def do_evolve_pokemon(self, pokemon):
+        self.log.info("Evolving pokemon: %s", pokemon)
+        if self.do_evolve_pokemon_by_id(pokemon.id):
+            self.log.info("Successfully Evolved Pokemon %s", pokemon)
+        else:
+            self.log.info("Failed to evolve Pokemon %s", pokemon)
+        self.gsleep(1.0)
+        
+    def do_evolve_pokemon_by_id(self, p_id):
+        self.evolve_pokemon(pokemon_id=int(p_id))
+        self.gsleep(0.2)
+        evolve_res = self.call().get('responses', {}).get('EVOLVE_POKEMON', {})
+        status = evolve_res.get('result', -1)
+        return status
+
     def do_release_pokemon(self, pokemon):
         self.log.info("Releasing pokemon: %s", pokemon)
         if self.do_release_pokemon_by_id(pokemon.id):
