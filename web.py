@@ -388,7 +388,7 @@ def init_web_config():
 
 def main():
     web_config = init_web_config()
-    app.run(host=web_config["hostname"], port=web_config["port"], debug=web_config["debug"])
+    app.run(host=web_config["hostname"], port=web_config["port"], debug=web_config["debug"], threaded=True)
 
 if __name__ == "__main__":
     main()
