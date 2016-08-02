@@ -1,6 +1,4 @@
-# DISCLAIMER: This is jank
 from __future__ import print_function
-
 import argparse
 import csv
 import json
@@ -224,6 +222,25 @@ def transfer(username, p_id):
     return redirect(url_for('inventory', username=username))
 
 
+def init_config():
+    parser = argparse.ArgumentParser()
+    config_file = "web_config.json"
+    # If config file exists, load variables from json
+    load = {}
+    if os.path.isfile(config_file):
+        with open(config_file) as data:
+            load.update(json.load(data))
+    # Read passed in Arguments
+    parser.add_argument("-s", "--hostname", help="Server hostname/IP", default="0.0.0.0")
+    parser.add_argument("-p", "--port", help="Server TCP port number", default=5000)
+    parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
+    config = parser.parse_args()
+    # Passed in arguments shoud trump
+    for key,value in load.iteritems():
+        if key not in config.__dict__ or not config.__dict__[key]:
+            config.__dict__[key] = value
+    return config.__dict__
+
 @app.route("/<username>/snipe/<latlng>")
 def snipe(username, latlng):
     c = get_api_rpc(username)
@@ -249,4 +266,5 @@ def snipe(username, latlng):
     return jsonify(status=status, result=msg)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
+    config = init_config()
+    app.run(host="datistry.com",port=3333,debug=False)
