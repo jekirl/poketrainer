@@ -1,6 +1,6 @@
 <md-content class="md-padding">
     <div class="page-header">
-        <h1>Status: {{ user.username }} <small>Level: {{ user.player_stats.level }}</small></h1>
+        <h1>Status: {{ user.username }} <small>Level: {{ user.player_stats.level }} | Stardust: {{ user.currencies[1].amount | number }}</small></h1>
     </div>
     <ui-gmap-google-map center='map.center' zoom='map.zoom'>
         <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
