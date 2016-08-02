@@ -168,12 +168,11 @@ class PGoApi:
                                                                                     False)  # ignore ultraballs in the continue tally
         self.FARM_IGNORE_MASTERBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_MASTERBALL_COUNT",
                                                                                      True)  # ignore masterballs in the continue tally
-        self.FARM_OVERRIDE_STEP_SIZE = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_OVERRIDE_STEP_SIZE",
-                                                                                -1)  # should the step size be overriden when looking for more inventory, -1 to disable
+        self.FARM_OVERRIDE_STEP_SIZE = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_OVERRIDE_STEP_SIZE", -1)  # should the step size be overriden when looking for more inventory, -1 to disable
         self.LIST_POKEMON_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
         self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
-        self.HEARTBEAT_DETAIL = config.get("CONSOLE_OUTPUT", {}).get("HEARTBEAT_DETAIL", "detailed") # Hide repetitve messages in the console when set to "hidden"
-        self.PRETTY_LOCATIONS = config.get("CONSOLE_OUTPUT", {}).get("PRETTY_LOCATIONS", False) # Uses more Geolocation requests but returns approximate addresses instead of co-ordinates
+        self.HEARTBEAT_DETAIL = config.get("CONSOLE_OUTPUT", {}).get("HEARTBEAT_DETAIL", "detailed")  # Hide repetitve messages in the console when set to "hidden"
+        self.PRETTY_LOCATIONS = config.get("CONSOLE_OUTPUT", {}).get("PRETTY_LOCATIONS", False)  # Uses more Geolocation requests but returns approximate addresses instead of co-ordinates
 
         self.visited_forts = TTLCache(maxsize=120, ttl=config.get("BEHAVIOR", {}).get("SKIP_VISITED_FORT_DURATION", 600))
         self.spin_all_forts = config.get("BEHAVIOR", {}).get("SPIN_ALL_FORTS", False)
@@ -326,7 +325,7 @@ class PGoApi:
     def snipe_pokemon(self, lat, lng):
         self.cond_lock(persist=True)
         try:
-            self.gsleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
+            self.gsleep(2) #  might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
             curr_lat = self._posf[0]
             curr_lng = self._posf[1]
 
@@ -467,7 +466,7 @@ class PGoApi:
                         if self.HEARTBEAT_DETAIL != "hidden":
                             self.log.info("[TRAINER]\t- Player has changed speed to %s", self.STEP_SIZE)
                 elif self.POKEBALL_CONTINUE_THRESHOLD <= pokeball_count and self._farm_mode_triggered:
-                    self.should_catch_pokemon = self.config.get("CAPTURE", {}).get("CATCH_POKEMON", True) # Restore catch pokemon setting from config file
+                    self.should_catch_pokemon = self.config.get("CAPTURE", {}).get("CATCH_POKEMON", True) #  Restore catch pokemon setting from config file
                     self._farm_mode_triggered = False
                     self.log.info("[TRAINER]\t- Player has %s Pokeballs, continuing to catch more!", pokeball_count)
                     if self.FARM_OVERRIDE_STEP_SIZE != -1:
@@ -782,7 +781,7 @@ class PGoApi:
                     response_code = res['result']
                     if response_code == 1:
                         if self.HEARTBEAT_DETAIL != "hidden":
-                            self.log.info("[INVENTORY]- {0}(s) recycled, got {1} left.".format(get_item_name( item['item_id']), res.get('new_count', 0)))
+                            self.log.info("[INVENTORY]- {0}(s) recycled, got {1} left.".format(get_item_name(item['item_id']), res.get('new_count', 0)))
                     else:
                         self.log.debug("[INVENTORY]- Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']), response_code))
                         if self.HEARTBEAT_DETAIL != "hidden":
