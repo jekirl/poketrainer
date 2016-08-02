@@ -1,6 +1,6 @@
 <md-content class="md-padding">
     <div class="page-header">
-        <h1>Status: {{ user.username }} <small>Level: {{ user.player_stats.level }} | Stardust: {{ user.currencies[1].amount | number }}</small></h1>
+        <h1>Status: {{ user.username }} <small>Level: {{ user.level }} | Stardust: {{ user.stardust | number }}</small></h1>
     </div>
     <ui-gmap-google-map center='map.center' zoom='map.zoom'>
         <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
@@ -10,7 +10,7 @@
         <div class="col-md-3 text-center">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Level XP:<br>{{ user.player_stats.experience | number}}/{{ user.player_stats.next_level_xp | number}}</h3>
+                    <h3 class="panel-title">Level XP:<br>{{ user.experience | number}}/{{ user.next_level_xp | number}}</h3>
                 </div>
                 <div class="panel-body">
                     <span class="chart" easypiechart percent="user.xpPercent" options="expLvlOptions">
@@ -22,7 +22,7 @@
         <div class="col-md-3 text-center">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Unique Pokemon:<br>{{ user.player_stats.player_stats.unique_pokedex_entries }}/151</h3>
+                    <h3 class="panel-title">Unique Pokemon:<br>{{ user.unique_pokedex_entries }}/151</h3>
                 </div>
                 <div class="panel-body">
                     <span class="chart" easypiechart percent="user.uniquePokedexPercent" options="uniquePokedexOptions">
@@ -34,7 +34,7 @@
         <div class="col-md-3 text-center">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Pokemon Bag:<br>{{ user.pokemon.length }}/{{ user.max_pokemon_storage }}</h3>
+                    <h3 class="panel-title">Pokemon Bag:<br>{{ user.pokemon.length }}/{{ user.pokemon_capacity }}</h3>
                 </div>
                 <div class="panel-body">
                     <span class="chart" easypiechart percent="user.pokemonInvPercent" options="pokemonInvOptions">
@@ -46,7 +46,7 @@
         <div class="col-md-3 text-center">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Item Bag:<br>{{ user.current_item_storage }}/{{ user.max_item_storage }}</h3>
+                    <h3 class="panel-title">Item Bag:<br>{{ user.current_item_storage }}/{{ user.item_capacity }}</h3>
                 </div>
                 <div class="panel-body">
                     <span class="chart" easypiechart percent="user.itemsInvPercent" options="itemsInvOptions">
@@ -55,6 +55,54 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="row m-t-16">
+        <div class="table-responsive col-md-12">
+        <table id="poke-table" class="table table-striped">
+            <thead>
+            <th>Recent</th>
+            <th>#</th>
+            <th>Name</th>
+            <th>Lvl</th>
+            <th>Score</th>
+            <th>IV</th>
+            <th>CP</th>
+            <th>Max CP</th>
+            <th>Candies</th>
+            <th>Candy Needed</th>
+            <th>Dust Needed</th>
+            <th>Power Up</th>
+            <th>Stamina</th>
+            <th>Att IV</th>
+            <th>Sta IV</th>
+            <th>Def IV</th>
+            <th>Move 1</th>
+            <th>Move 2</th>
+            <th>Transfer</th>
+          </thead>
+          <tr ng-repeat="pokemon in user.pokemon">
+              <td data-order="{{ pokemon.creation_time_ms }}"><md-tooltip md-direction="right">Caught:{{ pokemon.creation_time_ms | date : 'medium' }}</md-tooltip><img style="max-height: 50px;" ng-src="http://127.0.0.1:5000/static/pokemon/{{('000' + pokemon.pokemon_id).substr(-3)}}.png"></td>
+              <td data-order="{{pokemon.pokemon_id}}">{{pokemon.pokemon_id}}</td>
+              <td>{{pokemon.name}}</td>
+              <td data-order="{{pokemon.level}}">{{pokemon.level | number}}</td>
+              <td data-order="{{pokemon.score}}">{{pokemon.score | number}}</td>
+              <td data-order="{{pokemon.iv|number}}">IV: {{  pokemon.iv | number:0 }}%</td>
+              <td data-order="{{pokemon.cp}}">CP: {{ pokemon.cp | number}}</td>
+              <td data-order="{{pokemon.max_evolve_cp}}">CP: {{pokemon.max_evolve_cp | number}}</td>
+              <td data-order="{{pokemon.candy}}">Candy: {{pokemon.candy | number}}</td>
+              <td data-order="{{pokemon.candy_needed_to_max_evolve}}">Candy: {{pokemon.candy_needed_to_max_evolve | number}}</td>
+              <td data-order="{{pokemon.dust_needed_to_max_evolve}}">Dust: {{pokemon.dust_needed_to_max_evolve | number}}</td>
+              <td data-order="{{pokemon.power_up_result}}">CP: {{pokemon.power_up_result | number}}</td>
+              <td data-order="{{pokemon.stamina}}">Stamina: {{pokemon.stamina | number}}</td>
+              <td data-order="{{pokemon.individual_attack}}">Att IV: {{pokemon.individual_attack}}</td>
+              <td data-order="{{pokemon.individual_stamina}}">Sta IV: {{pokemon.individual_stamina}}</td>
+              <td data-order="{{pokemon.individual_defense}}">Def IV: {{pokemon.individual_defense}}</td>
+              <td>{{user.attacks[pokemon.move_1]}}</td>
+              <td>{{user.attacks[pokemon.move_2]}}</td>
+              <td><a ng-click="transfer(user.username,pokemon.id)">Transfer</a></td>
+          </tr>
+        </table>
+      </div>
     </div>
     <pre class="m-t-16">{{user | json}}</pre>
 </md-content>
