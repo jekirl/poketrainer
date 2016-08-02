@@ -38,3 +38,7 @@ class ServerBusyOrOfflineException(Exception):
 
 class PleaseInstallProtobufVersion3(Exception):
     pass
+
+
+class TooManyEmptyResponses(Exception):
+    pass
