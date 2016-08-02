@@ -276,7 +276,7 @@ class PGoApi:
         geolocator = GoogleV3()
         location = geolocator.geocode(str(lat) + ',' + str(lon))
         location_name = location.address.encode('utf-8')
-        if self.PRETTY_LOCATIONS == True:
+        if self.PRETTY_LOCATIONS:
             return location_name
         else:
             return str(lat) + ', ' + str(lon)
@@ -552,6 +552,11 @@ class PGoApi:
         self.log.info('[WALKING]\t- Heading back home.')
         self.walk_to(self._origPosF)
 
+    def walk_to_next_origin(self):
+        self.log.info('[WALKING]\t- Heading to a new location.')
+
+        self.walk_to()
+
     def spin_nearest_fort(self):
         map_cells = self.nearby_map_objects()['responses'].get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
@@ -577,7 +582,6 @@ class PGoApi:
             if self.HEARTBEAT_DETAIL != "hidden":
                 self.log.info('[STANDING]\t- No PokeStops nearby, better carry on!')
             self.log.debug('No forts within proximity, or server returned no map objects.')
-
 
     def fort_search_pgoapi(self, fort, player_postion, fort_distance):
         self.gsleep(0.2)
@@ -774,8 +778,7 @@ class PGoApi:
                     item_count += item['count'] - recycle_count
                     self.log.info("[INVENTORY]- Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
                     self.gsleep(0.2)
-                    res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()['responses'][
-                        'RECYCLE_INVENTORY_ITEM']
+                    res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()['responses']['RECYCLE_INVENTORY_ITEM']
                     response_code = res['result']
                     if response_code == 1:
                         if self.HEARTBEAT_DETAIL != "hidden":
@@ -889,13 +892,12 @@ class PGoApi:
             status = evo_res.get('result', -1)
             # self.gsleep(3)
             if status == 1:
-                evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}),
-                                          self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS)
+                evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}), self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS)
                 # I don' think we need additional stats for evolved pokemon. Since we do not do anything with it.
                 # evolved_pokemon.pokemon_additional_data = self.game_master.get(pokemon.pokemon_id, PokemonData())
                 self.log.info("[TRAINER]\t- Woah! %s evolved into %s!", pokemon.pokemon_type, evolved_pokemon.pokemon_type)
                 if self.HEARTBEAT_DETAIL != "hidden":
-                    self.log.info("[TRAINER]\t- %s!",evolved_pokemon)
+                    self.log.info("[TRAINER]\t- %s!", evolved_pokemon)
                 self.update_player_inventory()
                 return True
             else:
@@ -940,10 +942,8 @@ class PGoApi:
                 if not retry:
                     return self.disk_encounter_pokemon(lureinfo, retry=True)
             else:
-                self.log.debug("Could not start Disk (lure) encounter for pokemon: %s",
-                              POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
-                self.log.info("[POKESTOP]\t- A lured %s appeared, but Nurse Joy distracted me...",
-                              POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
+                self.log.debug("Could not start Disk (lure) encounter for pokemon: %s", POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
+                self.log.info("[POKESTOP]\t- A lured %s appeared, but Nurse Joy distracted me...", POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
         except Exception as e:
             self.log.error("Error in lure encounter %s", e)
             return False
@@ -1055,10 +1055,9 @@ class PGoApi:
                 break
 
     def attempt_start_incubation(self, egg, incubator):
-        #self.log.info("Start incubating %skm egg", egg['egg_km_walked_target'])
+        # self.log.info("Start incubating %skm egg", egg['egg_km_walked_target'])
         self.gsleep(0.2)
-        incubate_res = self.use_item_egg_incubator(item_id=incubator['id'], pokemon_id=egg['id']).call()['responses'][
-            'USE_ITEM_EGG_INCUBATOR']
+        incubate_res = self.use_item_egg_incubator(item_id=incubator['id'], pokemon_id=egg['id']).call()['responses']['USE_ITEM_EGG_INCUBATOR']
         status = incubate_res.get('result', -1)
         # self.gsleep(3)
         if status == 1:
