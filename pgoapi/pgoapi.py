@@ -176,6 +176,7 @@ class PGoApi:
         self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True)
         self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
 
+        self.new_forts = []
         self.cache_filename = './cache/cache ' + str(config["location"]) + str(self.STAY_WITHIN_PROXIMITY)
         self.all_cached_forts = []
         self.spinnable_cached_forts = []
