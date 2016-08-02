@@ -859,14 +859,10 @@ class PGoApi:
             pokemonsToRelease, pokemonsToKeep = releaseMethod.getPokemonToRelease(pokemonId, pokemons)
 
             if self.config.get('POKEMON_CLEANUP', {}).get('TESTING_MODE', False):
-                if len(pokemonsToRelease) > 0:
-                    self.log.info("[TRAINER]\t- [TESTING] Your settings would transfer:")
-                    for pokemon in pokemonsToRelease:
-                        self.log.info("[TRAINER]\t- [TESTING] %s", pokemon)
-                if len(pokemonsToKeep > 0):
-                    self.log.info("[TRAINER]\t- [TESTING] Your settings would keep:")
-                    for pokemon in pokemonsToKeep:
-                        self.log.info("[TRAINER]\t- [TESTING] %s", pokemon)
+                for pokemon in pokemonsToRelease:
+                    self.log.info("[TRAINER]\t- [TESTING] [TRANSFERRING] - %s", pokemon)
+                for pokemon in pokemonsToKeep:
+                    self.log.info("[TRAINER]\t- [TESTING] [KEEPING] - %s", pokemon)
             else:
                 for pokemon in pokemonsToRelease:
                     self.do_release_pokemon(pokemon)
