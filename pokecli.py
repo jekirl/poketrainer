@@ -120,7 +120,14 @@ def main(position=None):
         logging.getLogger("rpc_api").setLevel(logging.DEBUG)
 
     if not position:
-        position = get_pos_by_name(config["location"])
+        if config["CONSOLE_OUTPUT"]["PRETTY_LOCATIONS"] is False:
+            position_str = config["location"]
+            # Could do with a better way of deciding how to split address
+            position_split = position_str.split(', ')
+            logger.info('Your given location: %s', position_str)
+            position = (float(position_split[0]), float(position_split[1]), 0.0)
+        else:
+            position = get_pos_by_name(config["location"])
 
     # instantiate pgoapi
     api = PGoApi(config)
