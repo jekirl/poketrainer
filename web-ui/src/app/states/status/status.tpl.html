@@ -4,8 +4,8 @@
         <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
         </ui-gmap-marker>
     </ui-gmap-google-map>
-    <div layout="row">
-        <md-card layout="column" flex>
+    <div class="row">
+        <md-card class="col-md-3">
             <md-card-title>
                 <md-card-title-text class="text-center">
                     <span class="md-subhead">Level XP: {{ user.player_stats.experience | number}}/{{ user.player_stats.next_level_xp | number}}</span>
@@ -17,7 +17,7 @@
                 </span>
             </md-card-content>
         </md-card>
-        <md-card layout="column" flex>
+        <md-card class="col-md-3">
             <md-card-title>
                 <md-card-title-text class="text-center">
                     <span class="md-subhead">Unique Pokemon: {{ user.player_stats.player_stats.unique_pokedex_entries }}/151</span>
@@ -29,7 +29,7 @@
                 </span>
             </md-card-content>
         </md-card>
-        <md-card layout="column" flex>
+        <md-card class="col-md-3">
             <md-card-title>
                 <md-card-title-text class="text-center">
                     <span class="md-subhead">Pokemon Bag: {{ user.pokemon.length }}/{{ user.max_pokemon_storage }}</span>
@@ -41,7 +41,7 @@
                 </span>
             </md-card-content>
         </md-card>
-        <md-card layout="column" flex>
+        <md-card class="col-md-3">
             <md-card-title>
                 <md-card-title-text class="text-center">
                     <span class="md-subhead">Item Bag: {{ user.current_item_storage }}/{{ user.max_item_storage }}</span>
