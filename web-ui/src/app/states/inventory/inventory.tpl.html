@@ -1,5 +1,7 @@
 <md-content class="md-padding">
-    <h1>Inventory</h1>
+    <div class="page-header">
+        <h1>Inventory <small>({{ inventory.length }})</small></h1>
+    </div>
     <md-progress-circular ng-if="isLoading" md-mode="indeterminate"></md-progress-circular>
     <pre>{{inventory | json}}</pre>
 </md-content>

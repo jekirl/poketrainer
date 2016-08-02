@@ -1,10 +1,12 @@
 <md-content class="md-padding">
-    <h1>Status: {{user.username}}</h1>
+    <div class="page-header">
+        <h1>Status: {{ user.username }} <small>Level: {{ user.player_stats.level }}</small></h1>
+    </div>
     <ui-gmap-google-map center='map.center' zoom='map.zoom'>
         <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
         </ui-gmap-marker>
     </ui-gmap-google-map>
-    <div class="row">
+    <div class="row m-t-16">
         <div class="col-md-3 text-center">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -44,7 +46,7 @@
         <div class="col-md-3 text-center">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Item Bag: {{ user.current_item_storage }}/{{ user.max_item_storage }}</h3>
+                    <h3 class="panel-title">Item Bag:<br>{{ user.current_item_storage }}/{{ user.max_item_storage }}</h3>
                 </div>
                 <div class="panel-body">
                     <span class="chart" easypiechart percent="user.itemsInvPercent" options="itemsInvOptions">
@@ -54,5 +56,5 @@
             </div>
         </div>
     </div>
-    <pre>{{user | json}}</pre>
+    <pre class="m-t-16">{{user | json}}</pre>
 </md-content>
