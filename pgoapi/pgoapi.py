@@ -31,17 +31,16 @@ from __future__ import absolute_import
 
 import json
 import logging
+import os
 from collections import defaultdict
 from itertools import chain
 from time import time
 
 import gevent
 import six
+from geopy.geocoders import GoogleV3
 from cachetools import TTLCache
 from gevent.coros import BoundedSemaphore
-
-import os
-from geopy.geocoders import GoogleV3
 
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
@@ -691,7 +690,7 @@ class PGoApi:
                              in pokemons]
         if pokemons:
             self.log.debug("Nearby pokemon: : %s", pokemon_distances)
-            self.log.info("[POKEDEX]\t- A wild %s appeared!",
+            self.log.info("[POKEDEX]\t- This area is known for it's local population of %s.",
                           ", ".join(map(lambda x: POKEMON_NAMES[str(x['pokemon_id'])], pokemons)))
         else:
             if self.HEARTBEAT_DETAIL != "HIDDEN":
