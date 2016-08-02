@@ -10,7 +10,7 @@
     crossorigin="anonymous">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"
     crossorigin="anonymous">
-  <link rel="stylesheet" href="http://getbootstrap.com/examples/dashboard/dashboard.css">
+  <link rel="stylesheet" href="https://getbootstrap.com/examples/dashboard/dashboard.css">
   <style>
     .scrolloff {
         pointer-events: none;
@@ -29,20 +29,23 @@
   {% endblock head %}
 </head>
 <body>
+
   {% if username == null %}
     {% set navigation_bar = [
-      ("/", 'accounts', 'Account List')
+      ("accounts", "accounts", "Account List")
     ] -%}
   {% else %}
     {% set navigation_bar = [
-      ("/", 'accounts', 'Account List'),
-      ("/%s/status"%username, 'status', 'Status'),
-      ("/%s/inventory"%username, 'inventory', 'Inventory'),
-      ("/%s/pokemon"%username, 'pokemon', 'Pokémon'),
-      ("/%s/eggs"%username, 'eggs', 'Eggs'),
-      ("/%s/journal"%username, 'journal', 'Journal')
+      ("accounts", "accounts", "Account List"),
+      ("status", 'status', 'Status'),
+      ("inventory", 'inventory', 'Inventory'),
+      ("pokemon", 'pokemon', 'Pokémon')
     ] -%}
   {% endif %}
+  {# we cant create links for routes that are not set yet, future pages:
+    ("eggs", 'eggs', 'Eggs'),
+    ("journal", 'journal', 'Journal')
+  #}
   {% set active_page = active_page|default('status') -%}
 
   <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -53,7 +56,7 @@
       <ul class="nav navbar-nav">
         {% for href, id, caption in navigation_bar %}
           <li{% if id == active_page %} class="active"{% endif%}>
-            <a href="{{ href|e }}">{{ caption|e }}</a>
+            <a href="{{ url_for(href|e, username = username) }}">{{ caption|e }}</a>
           </li>
         {% endfor %}
     </div>
