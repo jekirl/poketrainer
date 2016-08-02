@@ -2,69 +2,91 @@
   "accounts": [
     {
       "auth_service": "google",
-      "username": "test@gmail.com",
-      "password": "password",
-      "location": "University of Southern California, Los Angeles, CA",
+      "username": "@gmail.com",
+      "password": "",
+      "location": "32.714627, -117.162521",
       "GMAPS_API_KEY": "some api key here",
       "BEHAVIOR": {
-        "USE_GOOGLE": true,
-        "STEP_SIZE": 100,
-        "WANDER_STEPS": 0,
-        "EXPERIMENTAL": false,
-        "SKIP_VISITED_FORT_DURATION": 600,
+        "USE_GOOGLE": false,
+        "STEP_SIZE": 150,
+        "WANDER_STEPS": 20,
+        "EXPERIMENTAL": true,
+        "SKIP_VISITED_FORT_DURATION": 300,
         "SPIN_ALL_FORTS": true,
-        "STAY_WITHIN_PROXIMITY": 9999,
+        "STAY_WITHIN_PROXIMITY": 725,
         "AUTO_USE_LUCKY_EGG": false,
-        "EXTRA_WAIT" : 0.2,
-        "SLEEP_MULT" : 1.0
+        "EXTRA_WAIT" : 0.0,
+        "SLEEP_MULT" : 0.0,
+        "USE_CACHED_FORTS" : true,
+        "CACHED_FORTS_SORTED" : false
       },
       "CAPTURE": {
         "CATCH_POKEMON": true,
-        "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 3,
-        "MAX_CATCH_ATTEMPTS": 10,
-        "USE_POKEBALL_IF_PERCENT": 15,
-        "USE_GREATBALL_IF_PERCENT": 15,
-        "USE_ULTRABALL_IF_PERCENT": 15,
-        "USE_MASTERBALL": false
+        "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 1,
+        "MAX_CATCH_ATTEMPTS": 10
       },
       "EGG_INCUBATION": {
         "ENABLE": true,
-        "USE_DISPOSABLE_INCUBATORS": false,
+        "USE_DISPOSABLE_INCUBATORS": true,
         "BIG_EGGS_FIRST": true
       },
       "POKEMON_EVOLUTION": {
         "PIDGEY": 12,
-        "WEEDLE": 12
+        "WEEDLE": 12,
+        "CATERPIE": 12,
+        "RATTATA": 25,
+        "ABRA": 25,
+        "GEODUDE": 25,
+        "EKANS": 50,
+        "PIKACHU": 50,
+        "SANDSHREW": 50,
+        "CLEFAIRY": 50,
+        "VULPIX": 50,
+        "JIGGLYPUFF": 50,
+        "ZUBAT": 50,
+        "PARAS": 50,
+        "VENONAT": 50,
+        "DIGLETT": 50,
+        "MEOWTH": 50,
+        "PSYDUCK": 50,
+        "MANKEY": 50,
+        "GROWLITHE": 50,
+        "TENTACOOL": 50,
+        "PONYTA": 50,
+        "SLOWPOKE": 50,
+        "MAGNEMITE": 50,
+        "DODUO": 50,
+        "SEEL": 50,
+        "GRIMER": 50,
+        "SHELLDER": 50,
+        "DROWZEE": 50,
+        "KRABBY": 50,
+        "VOLTORB": 50,
+        "EXEGGCUTE": 50,
+        "CUBONE": 50,
+        "KOFFING": 50,
+        "RHYHORN": 50,
+        "HORSEA": 50,
+        "GOLDEEN": 50,
+        "STARYU": 50,
+        "OMANYTE": 50,
+        "KABUTO": 50
       },
       "POKEMON_CLEANUP": {
         "MIN_SIMILAR_POKEMON": 1,
         "MAX_SIMILAR_POKEMON": 999,
-        "KEEP_POKEMON_NAMES": ["MEWTWO"],
-        "THROW_POKEMON_NAMES": ["PIDGEY"],
+        "KEEP_POKEMON_NAMES": ["MEWTWO","SNORLAX","LAPRAS","DRAGONITE","VAPOREON","SLOWBRO","GOLEM","MUK","EXEGGUTOR","CHARIZARD","VENUSAUR","BLASTOISE"],
+        "THROW_POKEMON_NAMES": ["RATTATA"],
         "RELEASE_METHOD": "CLASSIC",
         "RELEASE_METHOD_CLASSIC": {
-          "KEEP_CP_OVER": 500,
-          "KEEP_IV_OVER": 50
+          "KEEP_CP_OVER": 1000,
+          "KEEP_IV_OVER": 95,
+          "KEEP_IV_ONLY_WITH_PERCENT_CP": 0,
+          "MAX_POKEMON_HIGH_IV": 999
         },
         "RELEASE_METHOD_DUPLICATES": {
           "RELEASE_DUPLICATES_MAX_SCORE": 1000,
           "RELEASE_DUPLICATES_SCALAR": 0.9
-        },
-        "RELEASE_METHOD_ADVANCED": {
-          "ALWAYS_RELEASE_BELOW_LEVEL": 0,
-          "KEEP_CP_OVER": 1000,
-          "KEEP_IV_OVER": 90,
-          "BEST_CP": {
-            "MIN_AMOUNT": 1,
-            "KEEP_ADDITIONAL_SCALAR": 1.0,
-            "MAX_AMOUNT": 999
-          },
-          "BEST_IV": {
-            "MIN_AMOUNT": 1,
-            "KEEP_ADDITIONAL_SCALAR": 1.0,
-            "MAX_AMOUNT": 999,
-            "IGNORE_BELOW": 50
-          }
         },
         "SCORE_METHOD": "CP",
         "SCORE_METHOD_FANCY": {
@@ -73,16 +95,18 @@
         }
       },
       "MIN_ITEMS": {
-        "ITEM_POTION": 5,
-        "ITEM_SUPER_POTION": 5,
-        "ITEM_HYPER_POTION": 10,
-        "ITEM_MAX_POTION": 20,
-        "ITEM_POKE_BALL": 100,
-        "ITEM_GREAT_BALL": 50,
-        "ITEM_ULTRA_BALL": 30,
-        "ITEM_RAZZ_BERRY": 10,
-        "ITEM_REVIVE": 5,
-        "ITEM_MAX_REVIVE": 10
+        "ITEM_POKE_BALL": 30,
+        "ITEM_GREAT_BALL": 100,
+        "ITEM_ULTRA_BALL": 300,
+        "ITEM_POTION": 1,
+        "ITEM_SUPER_POTION": 1,
+        "ITEM_HYPER_POTION": 1,
+        "ITEM_MAX_POTION": 300,
+        "ITEM_BLUK_BERRY": 10,
+        "ITEM_NANAB_BERRY": 10,
+        "ITEM_REVIVE": 1,
+        "ITEM_MAX_REVIVE": 50,
+        "ITEM_RAZZ_BERRY": 100
       },
       "NEEDY_ITEM_FARMING": {
         "ENABLE": false,
