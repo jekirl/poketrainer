@@ -780,6 +780,9 @@ class PGoApi:
     def get_player_info(self, as_json=True):
         return self.player.to_json()
 
+    def get_player_stats(self, as_json=True):
+        return self.player_stats.to_json()
+
     def do_release_pokemon_by_id(self, p_id):
         self.release_pokemon(pokemon_id=int(p_id))
         self.gsleep(0.2)

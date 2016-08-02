@@ -22,6 +22,9 @@ class Listener(object):
     def get_player_info(self):
         return self.api.get_player_info()
 
+    def get_player_stats(self):
+        return self.api.get_player_stats()
+
     def snipe_pokemon(self, lat, lng):
         return self.api.snipe_pokemon(float(lat), float(lng))
 

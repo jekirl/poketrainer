@@ -1,6 +1,5 @@
 import json
 
-
 class Player:
     def __init__(self, player_data):
         self.player_data = player_data

@@ -179,14 +179,28 @@ def users():
 @app.route('/api/player/<username>', methods=['GET'])
 def get_player(username):
     s = get_api_rpc(username)
-    player_json= json.loads(s.get_player_info())
+    player = json.loads(s.get_player_info())
+    player_stats = json.loads(s.get_player_stats())
     latlng = s.current_location()
-    player_json['latitude'] = latlng[0]
-    player_json['longitude'] = latlng[1]
-    player_json['level_xp'] = player.get('experience', 0) - player.get('prev_level_xp', 0)
-    player_json['hourly_exp'] = player.get("hourly_exp", 0)  # Not showing up in inv or player data
-    player_json['goal_xp'] = player.get('next_level_xp', 0) - player.get('prev_level_xp', 0)
+    items = json.loads(s.get_inventory())['inventory_items']
+    pokemons_data = []
+    candy = defaultdict(int)
+    for item in items:
+        item = item['inventory_item_data']
+        pokemon = item.get("pokemon_data", {})
+        if "pokemon_id" in pokemon:
+            pokemons_data.append(pokemon)
+        if "pokemon_family" in item:
+            filled_family = str(item['pokemon_family']['family_id']).zfill(4)
+            candy[filled_family] += item['pokemon_family'].get("candy", 0)
+    player['item_capacity'] = player['max_item_storage']
+    player['pokemon_capacity'] = player['max_item_storage']
+    player['latitude'] = latlng[0]
+    player['longitude'] = latlng[1]
+    player['player_stats'] = player_stats
+    player['pokemon'] = pokemons_data
     return jsonify(player)
+
 
 @app.route('/api/player/<username>/pokemon', methods=['GET'])
 def get_pokemon(username):
