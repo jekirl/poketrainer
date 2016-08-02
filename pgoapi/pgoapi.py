@@ -42,7 +42,8 @@ from gevent.coros import BoundedSemaphore
 
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
-from pgoapi.exceptions import AuthException, ServerBusyOrOfflineException, TooManyEmptyResponses
+from pgoapi.exceptions import (AuthException, ServerBusyOrOfflineException,
+                               TooManyEmptyResponses)
 from pgoapi.inventory import Inventory as Player_Inventory
 from pgoapi.location import (distance_in_meters, filtered_forts,
                              get_increments, get_neighbors, get_route)
