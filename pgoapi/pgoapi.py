@@ -276,10 +276,10 @@ class PGoApi:
         return (self._position_lat, self._position_lng, self._position_alt)
 
     def get_position_name(self, lat, lon):
-        geolocator = GoogleV3()
-        location = geolocator.geocode(str(lat) + ',' + str(lon))
-        location_name = location.address.encode('utf-8')
         if self.PRETTY_LOCATIONS:
+            geolocator = GoogleV3()
+            location = geolocator.geocode(str(lat) + ',' + str(lon))
+            location_name = location.address.encode('utf-8')
             return location_name
         else:
             return str(lat) + ', ' + str(lon)
@@ -962,9 +962,9 @@ class PGoApi:
 
     def do_catch_pokemon(self, encounter_id, spawn_point_id, capture_probability, pokemon):
         if self.HEARTBEAT_DETAIL != "HIDDEN":
-            self.log.info("[ENCOUNTER]- Noticed some rustling grass...")
+            self.log.info("[ENCOUNTER]- A wild %s appeared!", pokemon)
         else:
-            self.log.info("[ENCOUNTER]- Noticed some rustling grass...")
+            self.log.info("[ENCOUNTER]- A wild %s appeared!", pokemon.pokemon_type)
         catch_attempt = self.attempt_catch(encounter_id, spawn_point_id, capture_probability)
         capture_status = catch_attempt.get('status', -1)
         if capture_status == 1:
@@ -1001,7 +1001,7 @@ class PGoApi:
             # begin encounter_id
             position = self.get_position()
             pokemon = Pokemon(pokemon_data)
-            self.log.info("[ENCOUNTER]- A wild %s appeared!", pokemon)
+            self.log.info("[ENCOUNTER]- Noticed some rustling grass..")
             self.gsleep(0.2)
             encounter = self.encounter(encounter_id=encounter_id,
                                        spawn_point_id=spawn_point_id,
