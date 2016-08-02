@@ -105,6 +105,7 @@ class PGoApi:
         self.percentages = [pokeball_percent, greatball_percent, ultraball_percent, use_masterball]
 
         self.pokemon_caught = 0
+        self.forts_spun = 0
         self.player = Player({})
         self.player_stats = PlayerStats({})
         self.inventory = Player_Inventory(self.percentages, [])
@@ -424,7 +425,7 @@ class PGoApi:
         if 'GET_PLAYER' in responses:
             self.player = Player(responses.get('GET_PLAYER', {}).get('player_data', {}))
             if self.HEARTBEAT_DETAIL != "HIDDEN":
-                self.log.info("[TRAINER]\t- Player Info: {0}, Pokemon Caught in this run: {1}".format(self.player, self.pokemon_caught))
+                self.log.info("[TRAINER]\t- Player Info: {0}, Pokemon Caught in this run: {1}, PokeStops Checked: {2}".format(self.player, self.pokemon_caught, self.forts_spun))
 
         if 'GET_INVENTORY' in res.get('responses', {}):
             with open("data_dumps/%s.json" % self.config['username'], "w") as f:
@@ -607,11 +608,13 @@ class PGoApi:
                 self.log.info("[POKESTOP]\t- Checked into PokeStop! Picked up some %s", reward)
             else:
                 self.log.info("[POKESTOP]\t- Checked into PokeStop!", fort_name)
+            self.forts_spun += 1
             self.visited_forts[fort['id']] = fort
         elif result == 4:
             self.log.debug("For spinned but Your inventory is full : %s", res)
             self.log.info("[POKESTOP]\t- Checked into PokeStop at... Wait, my bag is full!")
             self.visited_forts[fort['id']] = fort
+            self.forts_spun += 1
         elif result == 2:
             self.log.debug("Could not spin fort -  fort not in range %s", res)
             self.log.info("[POKESTOP]\t- Tried to check into PokeStop, but it was %sm away...", fort_distance)
