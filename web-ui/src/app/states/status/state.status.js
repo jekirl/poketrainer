@@ -42,9 +42,9 @@ angular.module('Poketrainer.State.Status', [
 
     .controller('StatusController', function StatusController($scope, User, userData) {
         $scope.user = userData;
-        $scope.user.xpPercent = Math.floor(($scope.user.player_stats.experience-$scope.user.player_stats.prev_level_xp)/($scope.user.player_stats.next_level_xp-$scope.user.player_stats.prev_level_xp)*100);
-        $scope.user.uniquePokedexPercent = Math.floor($scope.user.player_stats.player_stats.unique_pokedex_entries / 151 * 100);
-        $scope.user.pokemonInvPercent = Math.floor($scope.user.pokemon.length / $scope.user.max_pokemon_storage  * 100);
+        $scope.user.xpPercent = Math.floor(($scope.user.experience-$scope.user.prev_level_xp)/($scope.user.next_level_xp-$scope.user.prev_level_xp)*100);
+        $scope.user.uniquePokedexPercent = Math.floor($scope.user.unique_pokedex_entries / 151 * 100);
+        $scope.user.pokemonInvPercent = Math.floor($scope.user.pokemon.length / $scope.user.pokemon_capacity  * 100);
 
         $scope.map = { center: { latitude: userData.latitude, longitude: userData.longitude }, zoom: 14 };
         $scope.marker = {
