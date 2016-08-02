@@ -8,19 +8,19 @@
         <md-card layout="column" flex>
             <md-card-title>
                 <md-card-title-text class="text-center">
-                    <span class="md-subhead">Level XP: {{ user.level_xp }}/{{ user.goal_xp }}</span>
+                    <span class="md-subhead">Level XP: {{ user.player_stats.experience | number}}/{{ user.player_stats.next_level_xp | number}}</span>
                 </md-card-title-text>
             </md-card-title>
             <md-card-content class="text-center">
-                <span class="chart" easypiechart percent="user.levelDingPercent" options="expLvlOptions">
-                    <span class="percent" ng-bind="user.levelDingPercent"></span>
+                <span class="chart" easypiechart percent="user.xpPercent" options="expLvlOptions">
+                    <span class="percent" ng-bind="user.xpPercent"></span>
                 </span>
             </md-card-content>
         </md-card>
         <md-card layout="column" flex>
             <md-card-title>
                 <md-card-title-text class="text-center">
-                    <span class="md-subhead">Unique Pokemon: {{ user.uniquePokedexEntries }}/151</span>
+                    <span class="md-subhead">Unique Pokemon: {{ user.player_stats.player_stats.unique_pokedex_entries }}/151</span>
                 </md-card-title-text>
             </md-card-title>
             <md-card-content class="text-center">
@@ -32,7 +32,7 @@
         <md-card layout="column" flex>
             <md-card-title>
                 <md-card-title-text class="text-center">
-                    <span class="md-subhead">Pokemon Bag: {{ user.current_pokemon_storage }}/{{ user.max_pokemon_storage }}</span>
+                    <span class="md-subhead">Pokemon Bag: {{ user.pokemon.length }}/{{ user.max_pokemon_storage }}</span>
                 </md-card-title-text>
             </md-card-title>
             <md-card-content class="text-center">

@@ -179,10 +179,13 @@ def users():
 @app.route('/api/player/<username>', methods=['GET'])
 def get_player(username):
     s = get_api_rpc(username)
-    player = json.loads(s.get_player_info())
+    player_json= json.loads(s.get_player_info())
     latlng = s.current_location()
-    player['latitude'] = latlng[0]
-    player['longitude'] = latlng[1]
+    player_json['latitude'] = latlng[0]
+    player_json['longitude'] = latlng[1]
+    player_json['level_xp'] = player.get('experience', 0) - player.get('prev_level_xp', 0)
+    player_json['hourly_exp'] = player.get("hourly_exp", 0)  # Not showing up in inv or player data
+    player_json['goal_xp'] = player.get('next_level_xp', 0) - player.get('prev_level_xp', 0)
     return jsonify(player)
 
 @app.route('/api/player/<username>/pokemon', methods=['GET'])
