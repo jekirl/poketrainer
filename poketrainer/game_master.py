@@ -1,6 +1,6 @@
 import csv
 import re
-from os import path
+from os import path, sep as os_sep
 
 from six import iteritems
 
@@ -38,7 +38,8 @@ class PokemonData(object):
 
 GAME_MASTER = {}
 
-_game_master_file_path = path.join(path.dirname(path.dirname(__file__)), "GAME_MASTER_POKEMON_v0_2.tsv")
+_game_master_file_path = path.join(path.dirname(path.dirname(__file__)),
+                                   "resources" + os_sep + "GAME_MASTER_POKEMON_v0_2.tsv")
 with open(_game_master_file_path) as tsvfile:
     tsvreader = csv.DictReader(tsvfile, delimiter='\t')
     attributes = []

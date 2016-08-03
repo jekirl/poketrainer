@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import os
 
 from poketrainer.pokemon import Pokemon
-from library.pgoapi import Item_pb2 as Enum_Items
+from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Enum_Items
 
 
 def get_item_name(s_item_id):

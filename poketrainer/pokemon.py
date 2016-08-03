@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import json
 from math import floor, sqrt
-from os import path
+from os import path, sep as os_sep
 
 from poketrainer.game_master import GAME_MASTER, PokemonData
 from poketrainer.poke_lvl_data import POKEMON_LVL_DATA, TCPM_VALS, get_tcpm
@@ -10,7 +10,7 @@ from helper.utilities import all_in
 
 POKEMON_NAMES = {}
 
-_names_file_path = path.join(path.dirname(path.dirname(__file__)), "pokemon.en.json")
+_names_file_path = path.join(path.dirname(path.dirname(__file__)), "resources" + os_sep + "pokemon.en.json")
 with open(_names_file_path) as jsonfile:
     POKEMON_NAMES.update(json.load(jsonfile))
 

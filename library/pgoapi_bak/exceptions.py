@@ -58,7 +58,3 @@ class ServerSideAccessForbiddenException(Exception):
 
 class UnexpectedResponseException(Exception):
     pass
-
-
-class TooManyEmptyResponses(Exception):
-    pass

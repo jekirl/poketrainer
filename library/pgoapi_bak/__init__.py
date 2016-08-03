@@ -23,42 +23,43 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 Author: tjado <https://github.com/tejado>
 """
 
+from __future__ import absolute_import
 
-class AuthException(Exception):
+from helper.exceptions import PleaseInstallProtobufVersion3
+
+import pkg_resources
+import logging
+
+__title__ = 'pgoapi'
+__version__ = '1.1.6'
+__author__ = 'tjado'
+__license__ = 'MIT License'
+__copyright__ = 'Copyright (c) 2016 tjado <https://github.com/tejado>'
+
+protobuf_exist = False
+protobuf_version = 0
+try:
+    protobuf_version = pkg_resources.get_distribution("protobuf").version
+    protobuf_exist = True
+except:
     pass
 
+if (not protobuf_exist) or (int(protobuf_version[:1]) < 3):
+    raise PleaseInstallProtobufVersion3()
 
-class NotLoggedInException(Exception):
-    pass
+from .pgoapi import PGoApi
+from .rpc_api import RpcApi
+from .auth import Auth
 
+logging.getLogger("pgoapi").addHandler(logging.NullHandler())
+logging.getLogger("rpc_api").addHandler(logging.NullHandler())
+logging.getLogger("utilities").addHandler(logging.NullHandler())
+logging.getLogger("auth").addHandler(logging.NullHandler())
+logging.getLogger("auth_ptc").addHandler(logging.NullHandler())
+logging.getLogger("auth_google").addHandler(logging.NullHandler())
 
-class ServerBusyOrOfflineException(Exception):
-    pass
-
-
-class PleaseInstallProtobufVersion3(Exception):
-    pass
-
-
-class NoPlayerPositionSetException(Exception):
-    pass
-
-
-class EmptySubrequestChainException(Exception):
-    pass
-
-
-class ServerSideRequestThrottlingException(Exception):
-    pass
-
-
-class ServerSideAccessForbiddenException(Exception):
-    pass
-
-
-class UnexpectedResponseException(Exception):
-    pass
-
-
-class TooManyEmptyResponses(Exception):
+try:
+    import requests.packages.urllib3
+    requests.packages.urllib3.disable_warnings()
+except:
     pass

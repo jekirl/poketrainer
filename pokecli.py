@@ -39,23 +39,12 @@ from time import sleep
 
 import gevent
 import zerorpc
-from geopy.geocoders import GoogleV3
 from six import PY2, iteritems
 
-from library.pgoapi import PGoApi
+from poketrainer.poketrainer import Poketrainer
 from listener import Listener
 
 logger = logging.getLogger(__name__)
-
-
-def get_pos_by_name(location_name):
-    geolocator = GoogleV3()
-    loc = geolocator.geocode(location_name)
-
-    logger.info('Your given location: %s', loc.address.encode('utf-8'))
-    logger.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
-
-    return (loc.latitude, loc.longitude, loc.altitude)
 
 
 def dict_merge(dct, merge_dct):
@@ -99,14 +88,16 @@ def init_config():
     return config.__dict__
 
 
-def main(position=None):
+def main(prev_location=None):
     # log settings
     # log format
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
     # log level for http request class
     logging.getLogger("requests").setLevel(logging.WARNING)
-    # log level for main pgoapi class
-    logging.getLogger("pgoapi").setLevel(logging.INFO)
+    # log level for pgoapi class
+    logging.getLogger("pgoapi").setLevel(logging.WARNING)
+    # log level for main bot class
+    logging.getLogger("bot").setLevel(logging.INFO)
     # log level for internal pgoapi class
     logging.getLogger("rpc_api").setLevel(logging.INFO)
 
@@ -117,16 +108,9 @@ def main(position=None):
     if config["debug"]:
         logging.getLogger("requests").setLevel(logging.DEBUG)
         logging.getLogger("pgoapi").setLevel(logging.DEBUG)
+        logging.getLogger("bot").setLevel(logging.DEBUG)
         logging.getLogger("rpc_api").setLevel(logging.DEBUG)
 
-    if not position:
-        position = get_pos_by_name(config["location"])
-
-    # instantiate pgoapi
-    api = PGoApi(config)
-
-    # provide player position on the earth
-    api.set_position(*position)
 
     desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
     sock_port = 0
@@ -147,25 +131,23 @@ def main(position=None):
     with open(desc_file, "w+") as f:
         f.write(json.dumps(data, indent=2))
 
-    s = zerorpc.Server(Listener(api))
+    # instantiate pgoapi
+    bot = Poketrainer(config, prev_location)
+
+    s = zerorpc.Server(Listener(bot))
     s.bind("tcp://127.0.0.1:%i" % sock_port) # the free port should still be the same
     gevent.spawn(s.run)
-
-    # retry login every 30 seconds if any errors
-    while not api.login(config["auth_service"], config["username"], config["password"]):
-        logger.error('Retrying Login in 30 seconds')
-        sleep(30)
 
     # main loop
     while True:
         try:
-            api.main_loop()
+            bot.main_loop()
         except Exception as e:
-            logger.exception('Error in main loop %s, restarting at location: %s', e, api._posf)
+            logger.exception('Error in main loop %s, restarting at location: %s', e, bot.api.get_position())
             # restart after sleep
             sleep(30)
             try:
-                main(api._posf)
+                main(bot.api.get_position())
             except KeyboardInterrupt:
                 raise
             except:

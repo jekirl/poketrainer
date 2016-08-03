@@ -1,4 +1,5 @@
 import csv
+from os import sep as os_sep
 
 from helper.utilities import take_closest
 
@@ -20,7 +21,7 @@ TCPM_VALS = []
 
 # data gathered from here:
 # https://www.reddit.com/r/TheSilphRoad/comments/4sa4p5/stardust_costs_increase_every_4_power_ups/
-with open("PoGoPokeLvl.tsv") as tsv:
+with open("resources" + os_sep + "PoGoPokeLvl.tsv") as tsv:
     reader = csv.DictReader(tsv, delimiter='\t')
     for row in reader:
         pokemon_lvl_data = PokemonLvlData()
