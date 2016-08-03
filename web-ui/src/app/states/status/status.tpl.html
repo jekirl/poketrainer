@@ -10,7 +10,7 @@
         <div class="col-md-3 text-center">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Level XP:<br>{{ user.experience | number}}/{{ user.next_level_xp | number}}</h3>
+                    <h3 class="panel-title">Level XP:<br>{{ user.level_xp | number}}/{{ user.goal_xp | number}}</h3>
                 </div>
                 <div class="panel-body">
                     <span class="chart" easypiechart percent="user.xpPercent" options="expLvlOptions">
@@ -81,7 +81,7 @@
             <th>Transfer</th>
           </thead>
           <tr ng-repeat="pokemon in user.pokemon">
-              <td data-order="{{ pokemon.creation_time_ms }}"><md-tooltip md-direction="right">Caught:{{ pokemon.creation_time_ms | date : 'medium' }}</md-tooltip><img style="max-height: 50px;" ng-src="http://127.0.0.1:5000/static/pokemon/{{('000' + pokemon.pokemon_id).substr(-3)}}.png"></td>
+              <td data-order="{{ pokemon.creation_time_ms }}"><md-tooltip md-direction="right">Caught:{{ pokemon.creation_time_ms | date : 'medium' }}</md-tooltip><img style="max-height: 50px;" ng-src="/assets/images/pokemon/{{('000' + pokemon.pokemon_id).substr(-3)}}.png"></td>
               <td data-order="{{pokemon.pokemon_id}}">{{pokemon.pokemon_id}}</td>
               <td>{{pokemon.name}}</td>
               <td data-order="{{pokemon.level}}">{{pokemon.level | number}}</td>

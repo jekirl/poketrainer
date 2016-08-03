@@ -42,7 +42,7 @@ angular.module('Poketrainer.State.Status', [
 
     .controller('StatusController', function StatusController($scope, User, userData) {
         $scope.user = userData;
-        $scope.user.xpPercent = Math.floor(($scope.user.experience-$scope.user.prev_level_xp)/($scope.user.next_level_xp-$scope.user.prev_level_xp)*100);
+        $scope.user.xpPercent = Math.floor($scope.user.level_xp/$scope.user.goal_xp*100);
         $scope.user.uniquePokedexPercent = Math.floor($scope.user.unique_pokedex_entries / 151 * 100);
         $scope.user.pokemonInvPercent = Math.floor($scope.user.pokemon.length / $scope.user.pokemon_capacity  * 100);
 
