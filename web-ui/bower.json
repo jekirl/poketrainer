@@ -30,7 +30,7 @@
     "angular-google-maps": "^2.3.3",
     "lodash": "^4.14.1",
     "jquery.easy-pie-chart": "^2.1.6",
-    "angular-ui-grid": "^3.2.1"
+    "angular-datatables": "^0.5.4"
   },
   "devDependencies": {},
   "overrides": {}

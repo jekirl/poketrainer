@@ -144,6 +144,7 @@ module.exports = (function () {
             ignorePlugins: ["jscs", "jshint", "sourcemaps"],
             scripts: [
                 bowerPath + '/jquery/dist/jquery.js',
+                bowerPath + '/datatables/media/js/jquery.dataTables.js',
 
                 /** Bootstrap **/
 
@@ -161,7 +162,7 @@ module.exports = (function () {
                 bowerPath + '/angular-simple-logger/dist/angular-simple-logger.js',
                 bowerPath + '/angular-google-maps/dist/angular-google-maps.js',
                 bowerPath + '/jquery.easy-pie-chart/dist/angular.easypiechart.js',
-                bowerPath + '/angular-ui-grid/ui-grid.js',
+                bowerPath + '/angular-datatables/dist/angular-datatables.js',
 
                 npmPath + '/chart.js/dist/Chart.js',
                 bowerPath + '/angular-chart.js/dist/angular-chart.js',
