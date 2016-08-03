@@ -1085,25 +1085,22 @@ class PGoApi:
 
     def cache_forts(self, forts):
         if not self.all_cached_forts:
-            with open(self.cache_filename,'wb') as handle:
+            with open(self.cache_filename, 'wb') as handle:
                 pickle.dump(forts, handle)
 
-            with open(self.cache_filename,'rb') as handle:
+            with open(self.cache_filename, 'rb') as handle:
                 self.all_cached_forts = pickle.load(handle)
 
             self.log.info("Cache was empty... Dumping in new forts and initializing all_cached_forts")
 
         else:
             for fort in forts:
-                #for subcache in self.all_cached_forts:
-                #if fort[0]['id'] not in self.all_cached_forts:
                 if not any(fort[0]['id'] == x[0]['id'] for x in self.all_cached_forts):
-                    #if fort[0]['id'] and subcache[0]['id'] and fort[0]['id'] == subcache[0]['id']:
-                    self.all_cached_forts.insert(0,fort)
+                    self.all_cached_forts.insert(0, fort)
                     self.log.info("Added new fort to cache")
 
-            with open(self.cache_filename,'wb') as handle:
-                 pickle.dump(self.all_cached_forts, handle)
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(self.all_cached_forts, handle)
 
         self.log.info("Cached forts %s: ", len(self.all_cached_forts))
 
@@ -1127,23 +1124,23 @@ class PGoApi:
     def sort_cached_forts(self):
         if not self.cache_is_sorted:
             self.log.info("Cache is unsorted, sorting now...")
-            tempallcached = copy.deepcopy(self.all_cached_forts) #copy over original
-            tempsorted = [copy.deepcopy(tempallcached[0])] #the final list to copy to cache
-            tempelement = copy.deepcopy(tempallcached[0]) #cur element
+            tempallcached = copy.deepcopy(self.all_cached_forts) # copy over original
+            tempsorted = [copy.deepcopy(tempallcached[0])] # the final list to copy to cache
+            tempelement = copy.deepcopy(tempallcached[0]) # cur element
             tempbool = True
 
-            while (len(tempsorted) < len(self.all_cached_forts)): #sort all elements
+            while (len(tempsorted) < len(self.all_cached_forts)): # sort all elements
                 templastelement = copy.deepcopy(tempsorted[-1])
                 tempelement = copy.deepcopy(tempsorted[0])
-                tempmaxfloat = sys.float_info.max #start with max float to find min distance
+                tempmaxfloat = sys.float_info.max # start with max float to find min distance
 
                 if(tempbool):
                     for fort in tempallcached:
                         if distance_in_meters((self._origPosF[0], self._origPosF[1]),
-                        (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat:
+                            (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat:
                             tempelement = copy.deepcopy(fort)
                             tempmaxfloat = distance_in_meters((self._origPosF[0], self._origPosF[1]),
-                            (fort[0]['latitude'], fort[0]['longitude']))
+                                (fort[0]['latitude'], fort[0]['longitude']))
 
                     tempsorted.pop(0)
                     tempsorted.append(tempelement)
@@ -1152,19 +1149,19 @@ class PGoApi:
                 else:
                     for fort in tempallcached:
                         if ((distance_in_meters((templastelement[0]['latitude'], templastelement[0]['longitude']),
-                        (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat)
-                        and (not any(fort[0]['id'] == x[0]['id'] for x in tempsorted))):
+                            (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat) and
+                            (not any(fort[0]['id'] == x[0]['id'] for x in tempsorted))):
                             tempelement = copy.deepcopy(fort)
                             tempmaxfloat = distance_in_meters((templastelement[0]['latitude'], templastelement[0]['longitude']),
-                            (fort[0]['latitude'], fort[0]['longitude']))
+                                (fort[0]['latitude'], fort[0]['longitude']))
                     tempallcached.remove(tempelement)
                     tempsorted.append(tempelement)
 
             self.spinnable_cached_forts = copy.deepcopy(tempsorted)
             self.cache_is_sorted = True
 
-            with open(self.cache_filename,'wb') as handle:
-                 pickle.dump(self.spinnable_cached_forts, handle)
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(self.spinnable_cached_forts, handle)
 
         if not self.spinnable_cached_forts:
             self.spinnable_cached_forts = copy.deepcopy(self.all_cached_forts)
@@ -1257,7 +1254,7 @@ class PGoApi:
                 else:
                     self.spin_near_fort()
                 if self.enable_caching and self.experimental and not self.use_cache:
-                    self.cache_forts(forts = self.new_forts)
+                    self.cache_forts(forts=self.new_forts)
                 # if catching fails 10 times, maybe you are sofbanned.
                 # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
                 while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
