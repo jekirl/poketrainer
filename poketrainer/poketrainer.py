@@ -40,7 +40,9 @@ import six
 from cachetools import TTLCache
 from gevent.coros import BoundedSemaphore
 
+from library import api
 from pgoapi.pgoapi import PGoApi
+#from library.api.pgoapi import protos
 from library.api.pgoapi.protos.POGOProtos import Enums_pb2
 from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 

@@ -97,7 +97,7 @@ def main(prev_location=None):
     # log level for pgoapi class
     logging.getLogger("pgoapi").setLevel(logging.WARNING)
     # log level for main bot class
-    logging.getLogger("bot").setLevel(logging.INFO)
+    logging.getLogger("poketrainer").setLevel(logging.INFO)
     # log level for internal pgoapi class
     logging.getLogger("rpc_api").setLevel(logging.INFO)
 
@@ -108,7 +108,7 @@ def main(prev_location=None):
     if config["debug"]:
         logging.getLogger("requests").setLevel(logging.DEBUG)
         logging.getLogger("pgoapi").setLevel(logging.DEBUG)
-        logging.getLogger("bot").setLevel(logging.DEBUG)
+        logging.getLogger("poketrainer").setLevel(logging.DEBUG)
         logging.getLogger("rpc_api").setLevel(logging.DEBUG)
 
 
