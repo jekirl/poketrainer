@@ -67,7 +67,6 @@ def init_config():
             config.__dict__[key] = value
 
     return config.__dict__
-config = init_config()
 
 
 def set_columns_to_ignore(columns_to_ignore):
@@ -154,6 +153,7 @@ def status(username):
     c = get_api_rpc(username)
     if c is None:
         return("There is no bot running with the input username!")
+    config = init_config()
     options['SCORE_METHOD'] = config.get('POKEMON_CLEANUP', {}).get("SCORE_METHOD", "CP")
     options['IGNORE_COLUMNS'] = config.get("IGNORE_COLUMNS", [])
     set_columns_to_ignore(options['IGNORE_COLUMNS'])
@@ -248,5 +248,34 @@ def snipe(username, latlng):
         status = 1
     return jsonify(status=status, result=msg)
 
+
+def init_web_config():
+    load = {
+        "hostname": "0.0.0.0",
+        "port": 5000,
+        "debug": True
+    }
+    config_file = "web_config.json"
+    # If config file exists, load variables from json
+    if os.path.isfile(config_file):
+        with open(config_file) as data:
+            load.update(json.load(data))
+    # Read passed in Arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--hostname", help="Server hostname/IP")
+    parser.add_argument("-p", "--port", help="Server TCP port number", type=int)
+    parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true')
+    web_config = parser.parse_args()
+    # Passed in arguments should trump
+    for key, value in load.iteritems():
+        if key not in web_config.__dict__ or not web_config.__dict__[key]:
+            web_config.__dict__[key] = value
+    return web_config.__dict__
+
+
+def main():
+    web_config = init_web_config()
+    app.run(host=web_config["hostname"], port=web_config["port"], debug=web_config["debug"])
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True)
+    main()
