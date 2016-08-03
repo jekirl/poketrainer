@@ -818,7 +818,7 @@ class PGoApi:
         for pokemons in caught_pokemon.values():
             for pokemon in pokemons:
                 self.log.info("%s", pokemon)
-                
+
     def rename_pokemon(self, p_id, p_name, p_iv):
         nickname = '{0}_{1}%'.format(p_name[0:8], int(float(p_iv)))
         self.log.info("Renaming %s (ID=%s) to %s", p_name, p_id, nickname)

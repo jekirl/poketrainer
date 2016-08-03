@@ -223,13 +223,15 @@ def transfer(username, p_id):
         flash("Failed!")
     return redirect(url_for('inventory', username=username))
 
+
 @app.route("/<username>/rename/<p_id>/<p_name>/<p_iv>")
 def rename(username, p_id, p_name, p_iv):
     c = get_api_rpc(username)
     try:
         if c.rename_pokemon(p_id, p_name, p_iv):
             flash('Renamed to {0}_{1}%'.format(p_name[0:8], int(float(p_iv))))
-        else: flash("Unable to rename")
+        else:
+            flash("Unable to rename")
     except:
         return jsonify(status=1, result='Error renaming Pokemon.')
     return redirect(url_for('status', username=username))
