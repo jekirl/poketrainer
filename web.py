@@ -10,8 +10,8 @@ from collections import defaultdict
 import zerorpc
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
 
-from pgoapi.poke_lvl_data import TCPM_VALS
-from pgoapi.pokemon import Pokemon
+from poketrainer.poke_lvl_data import TCPM_VALS
+from poketrainer.pokemon import Pokemon
 
 
 class ReverseProxied(object):
@@ -187,7 +187,7 @@ def status(username):
     player['level_xp'] = player.get('experience', 0) - player.get('prev_level_xp', 0)
     player['hourly_exp'] = player.get("hourly_exp", 0)  # Not showing up in inv or player data
     player['goal_xp'] = player.get('next_level_xp', 0) - player.get('prev_level_xp', 0)
-    return render_template('status.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, username=username, options=options)
+    return render_template('web/templates/status.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, username=username, options=options)
 
 
 @app.route("/<username>/pokemon")
@@ -199,7 +199,7 @@ def pokemon(username):
         # FIXME Use logger instead of print statements!
         print("Not valid Json")
 
-    return render_template('pokemon.html', pokemons=pokemons, username=username)
+    return render_template('web/templates/pokemon.html', pokemons=pokemons, username=username)
 
 
 @app.route("/<username>/inventory")
@@ -211,7 +211,7 @@ def inventory(username):
         # FIXME Use logger instead of print statements!
         print("Not valid Json")
 
-    return render_template('inventory.html', inventory=json.dumps(inventory, indent=2), username=username)
+    return render_template('web/templates/inventory.html', inventory=json.dumps(inventory, indent=2), username=username)
 
 
 @app.route("/<username>/transfer/<p_id>")

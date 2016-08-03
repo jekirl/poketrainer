@@ -14,14 +14,14 @@ from google.protobuf import descriptor_pb2
 _sym_db = _symbol_database.Default()
 
 
-from POGOProtos.Data import Player_pb2 as POGOProtos_dot_Data_dot_Player__pb2
+from library.POGOProtos.Data import Player_pb2 as POGOProtos_dot_Data_dot_Player__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Data_dot_Player__pb2.POGOProtos_dot_Enums__pb2
 from POGOProtos import Data_pb2 as POGOProtos_dot_Data__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Data__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Data__pb2.POGOProtos_dot_Data_dot_Player__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Data__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Data__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
-from POGOProtos.Data import Gym_pb2 as POGOProtos_dot_Data_dot_Gym__pb2
+from library.POGOProtos.Data import Gym_pb2 as POGOProtos_dot_Data_dot_Gym__pb2
 POGOProtos_dot_Data__pb2 = POGOProtos_dot_Data_dot_Gym__pb2.POGOProtos_dot_Data__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Data_dot_Gym__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Data_dot_Gym__pb2.POGOProtos_dot_Data_dot_Player__pb2
@@ -33,9 +33,9 @@ POGOProtos_dot_Map_dot_Fort__pb2 = POGOProtos_dot_Data_dot_Gym__pb2.POGOProtos_d
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Data_dot_Gym__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Data_dot_Gym__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
 
-from POGOProtos.Data.Player_pb2 import *
+from library.POGOProtos.Data import *
 from POGOProtos.Data_pb2 import *
-from POGOProtos.Data.Gym_pb2 import *
+from library.POGOProtos.Data import *
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='POGOProtos.Data.Battle.proto',

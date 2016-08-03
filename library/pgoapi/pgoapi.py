@@ -37,29 +37,28 @@ from time import time
 
 import gevent
 import six
+from library.POGOProtos import Enums_pb2
 from cachetools import TTLCache
 from gevent.coros import BoundedSemaphore
-
-from pgoapi.auth_google import AuthGoogle
-from pgoapi.auth_ptc import AuthPtc
-from pgoapi.exceptions import (AuthException, ServerBusyOrOfflineException,
-                               TooManyEmptyResponses)
-from pgoapi.inventory import Inventory as Player_Inventory
-from pgoapi.location import (distance_in_meters, filtered_forts,
-                             get_increments, get_neighbors, get_route)
-from pgoapi.player import Player as Player
-from pgoapi.player_stats import PlayerStats as PlayerStats
-from pgoapi.poke_utils import (create_capture_probability, get_inventory_data,
+from library.pgoapi.auth_ptc import AuthPtc
+from poketrainer.inventory import Inventory as Player_Inventory
+from poketrainer.player_stats import PlayerStats as PlayerStats
+from poketrainer.poke_utils import (create_capture_probability, get_inventory_data,
                                get_item_name, get_pokemon_by_long_id)
-from pgoapi.pokedex import pokedex
-from pgoapi.pokemon import POKEMON_NAMES, Pokemon
-from POGOProtos import Enums_pb2
-from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
-from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
-from pgoapi.release.base import ReleaseMethodFactory
-from pgoapi.rpc_api import RpcApi
+from poketrainer.pokedex import pokedex
+from library.POGOProtos.Inventory import Item_pb2 as Inventory
+from library.POGOProtos.Networking.Requests_pb2 import RequestType
+from library.pgoapi.rpc_api import RpcApi
 
-from .utilities import f2i
+from helper.exceptions import (AuthException, ServerBusyOrOfflineException,
+                               TooManyEmptyResponses)
+from helper.utilities import f2i
+from library.pgoapi.auth_google import AuthGoogle
+from poketrainer.location import (distance_in_meters, filtered_forts,
+                                  get_increments, get_neighbors, get_route)
+from poketrainer.player import Player as Player
+from poketrainer.pokemon import POKEMON_NAMES, Pokemon
+from poketrainer.release.base import ReleaseMethodFactory
 
 if six.PY3:
     from builtins import map as imap

@@ -42,8 +42,8 @@ import zerorpc
 from geopy.geocoders import GoogleV3
 from six import PY2, iteritems
 
+from library.pgoapi import PGoApi
 from listener import Listener
-from pgoapi import PGoApi
 
 logger = logging.getLogger(__name__)
 

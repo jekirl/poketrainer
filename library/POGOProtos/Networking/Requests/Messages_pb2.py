@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 from POGOProtos.Inventory import Item_pb2 as POGOProtos_dot_Inventory_dot_Item__pb2
-from POGOProtos.Data import Battle_pb2 as POGOProtos_dot_Data_dot_Battle__pb2
+from library.POGOProtos.Data import Battle_pb2 as POGOProtos_dot_Data_dot_Battle__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Data_dot_Battle__pb2.POGOProtos_dot_Data_dot_Player__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Data_dot_Battle__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data__pb2 = POGOProtos_dot_Data_dot_Battle__pb2.POGOProtos_dot_Data__pb2
@@ -34,13 +34,13 @@ POGOProtos_dot_Map_dot_Fort__pb2 = POGOProtos_dot_Data_dot_Battle__pb2.POGOProto
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Data_dot_Battle__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Data_dot_Battle__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
 from POGOProtos import Enums_pb2 as POGOProtos_dot_Enums__pb2
-from POGOProtos.Data import Player_pb2 as POGOProtos_dot_Data_dot_Player__pb2
+from library.POGOProtos.Data import Player_pb2 as POGOProtos_dot_Data_dot_Player__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Data_dot_Player__pb2.POGOProtos_dot_Enums__pb2
 
 from POGOProtos.Inventory.Item_pb2 import *
-from POGOProtos.Data.Battle_pb2 import *
+from library.POGOProtos.Data import *
 from POGOProtos.Enums_pb2 import *
-from POGOProtos.Data.Player_pb2 import *
+from library.POGOProtos.Data import *
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='POGOProtos.Networking.Requests.Messages.proto',

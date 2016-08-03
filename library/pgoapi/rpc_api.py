@@ -34,13 +34,13 @@ from importlib import import_module
 import requests
 from google.protobuf.message import DecodeError
 
-from pgoapi.exceptions import (NotLoggedInException,
+from helper.exceptions import (NotLoggedInException,
                                ServerBusyOrOfflineException)
-from pgoapi.protobuf_to_dict import protobuf_to_dict
-from pgoapi.protos.POGOProtos.Networking.Envelopes_pb2 import (RequestEnvelope,
-                                                               ResponseEnvelope)
-from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
-from pgoapi.utilities import to_camel_case
+from helper.utilities import to_camel_case
+from library.pgoapi import (RequestEnvelope,
+                            ResponseEnvelope, protobuf_to_dict)
+from library.pgoapi import RequestType
+from pgoapi import protobuf_to_dict
 
 
 class RpcApi:
