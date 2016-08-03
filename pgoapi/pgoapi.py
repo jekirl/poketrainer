@@ -53,7 +53,7 @@ from pgoapi.poke_utils import (create_capture_probability, get_inventory_data,
                                get_item_name, get_pokemon_by_long_id)
 from pgoapi.pokedex import pokedex
 from pgoapi.pokemon import POKEMON_NAMES, Pokemon
-from pgoapi.protos.POGOProtos import Enums_pb2
+from POGOProtos import Enums_pb2
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.release.base import ReleaseMethodFactory
