@@ -189,7 +189,7 @@ class PGoApi:
         self.spinnable_cached_forts = []
         self.use_cache = self.config.get("BEHAVIOR", {}).get("USE_CACHED_FORTS", False)
         self.cache_is_sorted = self.config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
-        self.visited_cache_forts = TTLCache(maxsize=120, ttl=config.get("BEHAVIOR", {}).get("SKIP_VISITED_FORT_DURATION", 600))
+        self.enable_caching = self.config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
 
         # Sanity checking
         self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon  # Experimental, and we needn't do this if we're farming anyway
@@ -1086,7 +1086,7 @@ class PGoApi:
     def cache_forts(self, forts):
         if not self.all_cached_forts:
             with open(self.cache_filename,'wb') as handle:
-                 pickle.dump(forts, handle)
+                pickle.dump(forts, handle)
 
             with open(self.cache_filename,'rb') as handle:
                 self.all_cached_forts = pickle.load(handle)
@@ -1115,7 +1115,8 @@ class PGoApi:
 
         except Exception as e:
             self.log.debug("Could not find or open cache, making new cache...")
-
+            if not os.path.exists('./cache'):
+                os.makedirs('./cache')
             try:
                 os.remove(self.cache_filename)
             except OSError:
@@ -1238,18 +1239,25 @@ class PGoApi:
     def main_loop(self):
         catch_attempt = 0
         self.heartbeat()
-        self.setup_cache()
+        if self.enable_caching and self.experimental:
+            if not self.use_cache:
+                self.log.info('==== CACHING MODE: CACHE FORTS ====')
+            else:
+                self.log.info('==== CACHING MODE: ROUTE+SPIN CACHED FORTS ====')
+            self.setup_cache()
         while True:
             self.heartbeat()
             # self.gsleep(1)
 
-            if self.use_cache and self.experimental:
+            if self.use_cache and self.experimental and self.enable_caching:
                 self.spin_all_cached_forts()
             else:
                 if self.experimental and self.spin_all_forts:
                     self.spin_all_forts_visible()
                 else:
                     self.spin_near_fort()
+                if self.enable_caching and self.experimental and not self.use_cache:
+                    self.cache_forts(forts = self.new_forts)
                 # if catching fails 10 times, maybe you are sofbanned.
                 # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
                 while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
