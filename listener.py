@@ -27,3 +27,6 @@ class Listener(object):
 
     def ping(self):
         return "pong"
+
+    def rename_pokemon(self, p_id, p_name, p_iv):
+        return self.api.rename_pokemon(p_id, p_name, p_iv)

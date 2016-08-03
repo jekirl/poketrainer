@@ -59,6 +59,7 @@
             <th style="{{options["ignore_move1"]}}">Move 1</th>
             <th style="{{options["ignore_move2"]}}">Move 2</th>
             <th style="{{options["ignore_transfer"]}}">Transfer</th>
+            <th style="{{options["ignore_rename"]}}">Rename</th>
           </thead>
           {% for pokemon in pokemons %}
           <tr id="{{pokemon.id}}">
@@ -81,6 +82,7 @@
               <td style="{{options["ignore_move1"]}}">{{attacks[pokemon.move_1]}}</td>
               <td style="{{options["ignore_move2"]}}">{{attacks[pokemon.move_2]}}</td>
               <td style="{{options["ignore_transfer"]}}"><a href="{{ url_for('transfer', username = username, p_id = pokemon.id)}}">Transfer</a></td>
+              <td style="{{options["ignore_rename"]}}"><a href="{{ url_for('rename', username = username, p_id = pokemon.id, p_name = pokemon.name, p_iv = pokemon.iv)}}">Rename</a></td>
           </tr>
           {% endfor %}
         </table>

@@ -818,6 +818,18 @@ class PGoApi:
         for pokemons in caught_pokemon.values():
             for pokemon in pokemons:
                 self.log.info("%s", pokemon)
+                
+    def rename_pokemon(self, p_id, p_name, p_iv):
+        nickname = '{0}_{1}%'.format(p_name[0:8], int(float(p_iv)))
+        self.log.info("Renaming %s (ID=%s) to %s", p_name, p_id, nickname)
+        self.nickname_pokemon(pokemon_id=int(p_id),
+                              nickname=nickname)
+        res = self.call()
+        self.log.debug("Rename response: %s.", res)
+        if not res:
+            self.log.error("There were a problem responses for api call: %s. Can't rename!", res)
+            return False
+        return True
 
     def cleanup_pokemon(self, inventory_items=None):
         if not inventory_items:
