@@ -29,16 +29,16 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 
 from __future__ import absolute_import
 
+import copy
 import json
 import logging
+import os
+import pickle
+import sys
+
 from collections import defaultdict
 from itertools import chain
 from time import time
-
-import sys
-import os
-import copy
-import pickle
 
 import gevent
 import six
