@@ -57,54 +57,54 @@
         </div>
     </div>
     <div class="row m-t-16">
-        <div class="table-responsive col-md-12">
+        <div class="col-md-12">
 
-            <div id="grid1" ui-grid="{ data: user.pokemon }" class="grid"></div>
-
-        <!--<table id="poke-table" class="table table-striped">
-            <thead>
-            <th>Recent</th>
-            <th>#</th>
-            <th>Name</th>
-            <th>Lvl</th>
-            <th>Score</th>
-            <th>IV</th>
-            <th>CP</th>
-            <th>Max CP</th>
-            <th>Candies</th>
-            <th>Candy Needed</th>
-            <th>Dust Needed</th>
-            <th>Power Up</th>
-            <th>Stamina</th>
-            <th>Att IV</th>
-            <th>Sta IV</th>
-            <th>Def IV</th>
-            <th>Move 1</th>
-            <th>Move 2</th>
-            <th>Transfer</th>
-          </thead>
-          <tr ng-repeat="pokemon in user.pokemon">
-              <td data-order="{{ pokemon.creation_time_ms }}"><md-tooltip md-direction="right">Caught:{{ pokemon.creation_time_ms | date : 'medium' }}</md-tooltip><img style="max-height: 50px;" ng-src="/assets/images/pokemon/{{('000' + pokemon.pokemon_id).substr(-3)}}.png"></td>
-              <td data-order="{{pokemon.pokemon_id}}">{{pokemon.pokemon_id}}</td>
-              <td>{{pokemon.name}}</td>
-              <td data-order="{{pokemon.level}}">{{pokemon.level | number}}</td>
-              <td data-order="{{pokemon.score}}">{{pokemon.score | number}}</td>
-              <td data-order="{{pokemon.iv|number}}">IV: {{  pokemon.iv | number:0 }}%</td>
-              <td data-order="{{pokemon.cp}}">CP: {{ pokemon.cp | number}}</td>
-              <td data-order="{{pokemon.max_evolve_cp}}">CP: {{pokemon.max_evolve_cp | number}}</td>
-              <td data-order="{{pokemon.candy}}">Candy: {{pokemon.candy | number}}</td>
-              <td data-order="{{pokemon.candy_needed_to_max_evolve}}">Candy: {{pokemon.candy_needed_to_max_evolve | number}}</td>
-              <td data-order="{{pokemon.dust_needed_to_max_evolve}}">Dust: {{pokemon.dust_needed_to_max_evolve | number}}</td>
-              <td data-order="{{pokemon.power_up_result}}">CP: {{pokemon.power_up_result | number}}</td>
-              <td data-order="{{pokemon.stamina}}">Stamina: {{pokemon.stamina | number}}</td>
-              <td data-order="{{pokemon.individual_attack}}">Att IV: {{pokemon.individual_attack}}</td>
-              <td data-order="{{pokemon.individual_stamina}}">Sta IV: {{pokemon.individual_stamina}}</td>
-              <td data-order="{{pokemon.individual_defense}}">Def IV: {{pokemon.individual_defense}}</td>
-              <td>{{user.attacks[pokemon.move_1]}}</td>
-              <td>{{user.attacks[pokemon.move_2]}}</td>
-              <td><a ng-click="transfer(user.username,pokemon.id)">Transfer</a></td>
-          </tr>
-        </table>-->
+            <table datatable="ng" class="row-border hover">
+                <thead>
+                    <th>Recent</th>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Lvl</th>
+                    <th>Score</th>
+                    <th>IV</th>
+                    <th>CP</th>
+                    <th>Max CP</th>
+                    <th>Candies</th>
+                    <th>Candy Needed</th>
+                    <th>Dust Needed</th>
+                    <th>Power Up</th>
+                    <th>Stamina</th>
+                    <th>Att IV</th>
+                    <th>Sta IV</th>
+                    <th>Def IV</th>
+                    <th>Move 1</th>
+                    <th>Move 2</th>
+                    <th>Transfer</th>
+                  </thead>
+                <tbody>
+                <tr ng-repeat="pokemon in user.pokemon">
+                    <td data-order="{{ pokemon.creation_time_ms }}"><md-tooltip md-direction="right">Caught:{{ pokemon.creation_time_ms | date : 'medium' }}</md-tooltip><img style="max-height: 50px;" ng-src="/assets/images/pokemon/{{('000' + pokemon.pokemon_id).substr(-3)}}.png"></td>
+                    <td data-order="{{pokemon.pokemon_id}}">{{pokemon.pokemon_id}}</td>
+                    <td>{{pokemon.name}}</td>
+                    <td data-order="{{pokemon.level}}">{{pokemon.level | number}}</td>
+                    <td data-order="{{pokemon.score}}">{{pokemon.score | number}}</td>
+                    <td data-order="{{pokemon.iv|number}}">IV: {{  pokemon.iv | number:0 }}%</td>
+                    <td data-order="{{pokemon.cp}}">CP: {{ pokemon.cp | number}}</td>
+                    <td data-order="{{pokemon.max_evolve_cp}}">CP: {{pokemon.max_evolve_cp | number}}</td>
+                    <td data-order="{{pokemon.candy}}">Candy: {{pokemon.candy | number}}</td>
+                    <td data-order="{{pokemon.candy_needed_to_max_evolve}}">Candy: {{pokemon.candy_needed_to_max_evolve | number}}</td>
+                    <td data-order="{{pokemon.dust_needed_to_max_evolve}}">Dust: {{pokemon.dust_needed_to_max_evolve | number}}</td>
+                    <td data-order="{{pokemon.power_up_result}}">CP: {{pokemon.power_up_result | number}}</td>
+                    <td data-order="{{pokemon.stamina}}">Stamina: {{pokemon.stamina | number}}</td>
+                    <td data-order="{{pokemon.individual_attack}}">Att IV: {{pokemon.individual_attack}}</td>
+                    <td data-order="{{pokemon.individual_stamina}}">Sta IV: {{pokemon.individual_stamina}}</td>
+                    <td data-order="{{pokemon.individual_defense}}">Def IV: {{pokemon.individual_defense}}</td>
+                    <td>{{user.attacks[pokemon.move_1]}}</td>
+                    <td>{{user.attacks[pokemon.move_2]}}</td>
+                    <td><a ng-click="transfer(user.username,pokemon.id)">Transfer</a></td>
+                </tr>
+                </tbody>
+            </table>
       </div>
     </div>
     <pre class="m-t-16">{{user | json}}</pre>
