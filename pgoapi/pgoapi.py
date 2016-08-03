@@ -181,6 +181,7 @@ class PGoApi:
         self.spin_all_forts = config.get("BEHAVIOR", {}).get("SPIN_ALL_FORTS", False)
         self.STAY_WITHIN_PROXIMITY = config.get("BEHAVIOR", {}).get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
         self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True)
+        self.should_catch_trash_pokemon = config.get("CAPTURE", {}).get("CATCH_TRASH", True)
         self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
 
         # Sanity checking
@@ -939,7 +940,15 @@ class PGoApi:
                 pokemon = Pokemon(resp.get('pokemon_data', {}))
                 capture_probability = create_capture_probability(resp.get('capture_probability', {}))
                 self.log.debug("Attempt Encounter: %s", json.dumps(resp, indent=4, sort_keys=True))
-                return self.do_catch_pokemon(encounter_id, fort_id, capture_probability, pokemon)
+
+                if not self.should_catch_trash_pokemon:
+                    if pokemon.pokemon_id not in self.throw_pokemon_ids:
+                        return self.do_catch_pokemon(encounter_id, fort_id, capture_probability, pokemon)
+                    else:
+                        self.log.info("[POKEDEX]\t- Ignoring %s", pokemon.pokemon_type)
+                else:
+                    return self.do_catch_pokemon(encounter_id, fort_id, capture_probability, pokemon)
+
             elif result == 5:
                 self.log.info("[ENCOUNTER]- Already carrying too many Pokemon. Trying to clear some space... %s",
                               POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
@@ -1020,7 +1029,13 @@ class PGoApi:
                     # self.gsleep(2)
 
                 self.encountered_pokemons[encounter_id] = pokemon_data
-                return self.do_catch_pokemon(encounter_id, spawn_point_id, capture_probability, pokemon)
+                if not self.should_catch_trash_pokemon:
+                    if pokemon.pokemon_id not in self.throw_pokemon_ids:
+                        return self.do_catch_pokemon(encounter_id, spawn_point_id, capture_probability, pokemon)
+                    else:
+                        self.log.info("[POKEDEX]\t- Ignoring %s", pokemon.pokemon_type)
+                else:
+                    return self.do_catch_pokemon(encounter_id, spawn_point_id, capture_probability, pokemon)
             elif result == 7:
                 self.log.info("[ENCOUNTER]- Already carrying too many Pokemon. Clearing some out before catching %s", pokemon.pokemon_type)
                 self.cleanup_pokemon()

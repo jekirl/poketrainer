@@ -20,6 +20,7 @@
       },
       "CAPTURE": {
         "CATCH_POKEMON": true,
+		"CATCH_TRASH": true,
         "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 3,
         "MAX_CATCH_ATTEMPTS": 10,
         "USE_POKEBALL_IF_PERCENT": 15,
