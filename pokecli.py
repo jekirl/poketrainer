@@ -135,7 +135,7 @@ def main(prev_location=None):
     bot = Poketrainer(config, prev_location)
 
     s = zerorpc.Server(Listener(bot))
-    s.bind("tcp://127.0.0.1:%i" % sock_port) # the free port should still be the same
+    s.bind("tcp://127.0.0.1:%i" % sock_port)  # the free port should still be the same
     gevent.spawn(s.run)
 
     # main loop

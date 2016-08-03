@@ -42,23 +42,22 @@ from gevent.coros import BoundedSemaphore
 
 from library import api
 from pgoapi.pgoapi import PGoApi
-#from library.api.pgoapi import protos
-from library.api.pgoapi.protos.POGOProtos import Enums_pb2
-from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
+# from library.api.pgoapi import protos
+from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Item_Enums
 
-
-from poketrainer.inventory import Inventory as Player_Inventory
-from poketrainer.player_stats import PlayerStats as PlayerStats
-from poketrainer.poke_utils import (create_capture_probability, get_inventory_data,
-                               get_item_name, get_pokemon_by_long_id)
-from poketrainer.pokedex import pokedex
+from .inventory import Inventory as Player_Inventory
+from .player_stats import PlayerStats as PlayerStats
+from .poke_utils import (create_capture_probability, get_inventory_data,
+                         get_item_name, get_pokemon_by_long_id)
+from .pokedex import pokedex
 
 from helper.exceptions import (AuthException, TooManyEmptyResponses)
-from poketrainer.location import (distance_in_meters, filtered_forts,
-                                  get_increments, get_location, get_neighbors, get_route)
-from poketrainer.player import Player as Player
-from poketrainer.pokemon import POKEMON_NAMES, Pokemon
-from poketrainer.release.base import ReleaseMethodFactory
+from .location import (distance_in_meters, filtered_forts,
+                       get_increments, get_location, get_neighbors, get_route)
+from .player import Player as Player
+from .pokemon import POKEMON_NAMES, Pokemon
+from .release.base import ReleaseMethodFactory
+from .config import Config
 
 if six.PY3:
     from builtins import map as imap
@@ -69,132 +68,82 @@ logger = logging.getLogger(__name__)
 
 
 class Poketrainer:
-    API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
-
     def __init__(self, config, prev_location=None):
 
         self.log = logging.getLogger(__name__)
 
+        # objects
+        self.config = Config(config)
+        self.releaseMethodFactory = ReleaseMethodFactory(config)
+        self.player = Player({})
+        self.player_stats = PlayerStats({})
+        self.inventory = Player_Inventory(self.config.ball_priorities, [])
+
+        self.api = None
+        self._origPosF = (0, 0, 0)
+        self._posf = (0, 0, 0)
+        self.load_api(prev_location)
+
+        # config values that might be changed during runtime
+        self.step_size = self.config.step_size
+        self.should_catch_pokemon = self.config.should_catch_pokemon
+
+        # timers, counters and triggers
+        self.pokemon_caught = 0
+        self._last_got_map_objects = 0
+        self._map_objects_rate_limit = 10.0
+        self._error_counter = 0
+        self._error_threshold = 10
+        self._heartbeat_number = 5
+        self._last_egg_use_time = 0
+        self._farm_mode_triggered = False
+        self.start_time = time()
+        self.persist_lock = False
+        self.exp_start = None
+        self.exp_current = None
+
+        # caches
+        self.encountered_pokemons = TTLCache(maxsize=120, ttl=self._map_objects_rate_limit * 2)
+        self.visited_forts = TTLCache(maxsize=120, ttl=self.config.skip_visited_fort_duration)
+        self.map_objects = {}
+
+        # threading / locking
+        self.sem = BoundedSemaphore(1)
+
+        # Sanity checking
+        self.config.farm_items_enabled = self.config.farm_items_enabled and self.config.experimental and self.should_catch_pokemon  # Experimental, and we needn't do this if we're farming anyway
+        if (
+                                self.config.farm_items_enabled and
+                                self.config.farm_ignore_pokeball_count and
+                            self.config.farm_ignore_greatball_count and
+                        self.config.farm_ignore_ultraball_count and
+                    self.config.farm_ignore_masterball_count
+        ):
+            self.config.farm_items_enabled = False
+            self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
+        elif self.config.farm_items_enabled and not (
+                    self.config.pokeball_farm_threshold < self.config.pokeball_continue_threshold):
+            self.config.farm_items_enabled = False
+            self.log.warn(
+                "FARM_ITEMS has been disabled due to farming threshold being below the continue. Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")
+
+    def load_api(self, prev_location=None):
         self.api = PGoApi()
 
-        self.config = config
-
-        self._firstRun = True
-        position = get_location(self.config["location"])
+        # get position and set it in the API
+        position = get_location(self.config.location)
         self._origPosF = position
         if prev_location:
-            self._firstRun = False
             position = prev_location
         self._posf = position
         self.api.set_position(*position)
 
         # retry login every 30 seconds if any errors
         self.log.info('Starting Login process...')
-        while not self.api.login(self.config["auth_service"], self.config["username"], self.config["password"]):
-            logger.error('Retrying Login in 30 seconds')
+        while not self.api.login(self.config.auth_service, self.config.username, self.config.password):
+            logger.error('Login error, retrying Login in 30 seconds')
             self.gsleep(30)
         self.log.info('Login successful')
-
-        self.releaseMethodFactory = ReleaseMethodFactory(self.config)
-        self._error_counter = 0
-        self._error_threshold = 10
-        self._heartbeat_number = 5
-        self._last_egg_use_time = 0
-        self._farm_mode_triggered = False
-        self._orig_step_size = config.get("BEHAVIOR", {}).get("STEP_SIZE", 200)
-        self.wander_steps = config.get("BEHAVIOR", {}).get("WANDER_STEPS", 0)
-        pokeball_percent = config.get("CAPTURE", {}).get("USE_POKEBALL_IF_PERCENT", 50)
-        greatball_percent = config.get("CAPTURE", {}).get("USE_GREATBALL_IF_PERCENT", 50)
-        ultraball_percent = config.get("CAPTURE", {}).get("USE_ULTRABALL_IF_PERCENT", 50)
-        use_masterball = config.get("CAPTURE", {}).get("USE_MASTERBALL", False)
-        self.percentages = [pokeball_percent, greatball_percent, ultraball_percent, use_masterball]
-
-        self.pokemon_caught = 0
-        self.player = Player({})
-        self.player_stats = PlayerStats({})
-        self.inventory = Player_Inventory(self.percentages, [])
-
-        self._last_got_map_objects = 0
-        self._map_objects_rate_limit = 10.0
-        self.map_objects = {}
-        self.encountered_pokemons = TTLCache(maxsize=120, ttl=self._map_objects_rate_limit * 2)
-
-        self.start_time = time()
-        self.exp_start = None
-        self.exp_current = None
-        self.sem = BoundedSemaphore(1)
-        self.persist_lock = False
-        self.sleep_mult = self.config.get("BEHAVIOR", {}).get("SLEEP_MULT", 1.5)
-        self.MIN_ITEMS = {}
-        for k, v in config.get("MIN_ITEMS", {}).items():
-            self.MIN_ITEMS[getattr(Inventory, k)] = v
-
-        self.POKEMON_EVOLUTION = {}
-        self.POKEMON_EVOLUTION_FAMILY = {}
-        for k, v in config.get("POKEMON_EVOLUTION", {}).items():
-            self.POKEMON_EVOLUTION[getattr(Enums_pb2, k)] = v
-            self.POKEMON_EVOLUTION_FAMILY[getattr(Enums_pb2, k)] = getattr(Enums_pb2, "FAMILY_" + k)
-
-        self.experimental = config.get("BEHAVIOR", {}).get("EXPERIMENTAL", False)
-
-        self.STEP_SIZE = self._orig_step_size
-
-        self.MIN_SIMILAR_POKEMON = config.get("POKEMON_CLEANUP", {}).get("MIN_SIMILAR_POKEMON", 1)  # Keep atleast one of everything.
-        self.MAX_SIMILAR_POKEMON = config.get("POKEMON_CLEANUP", {}).get("MAX_SIMILAR_POKEMON", 999)  # Stop keeping them at some amount
-        self.keep_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("POKEMON_CLEANUP", {}).get("KEEP_POKEMON_NAMES", []))
-        self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("POKEMON_CLEANUP", {}).get("THROW_POKEMON_NAMES", []))
-
-        self.RELEASE_METHOD = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD", "CLASSIC")
-        self.RELEASE_METHOD_CONF = config.get("POKEMON_CLEANUP", {}).get("RELEASE_METHOD_" + self.RELEASE_METHOD, {})
-
-        self.SCORE_METHOD = config.get("POKEMON_CLEANUP", {}).get("SCORE_METHOD", "CP")
-        self.SCORE_SETTINGS = config.get("POKEMON_CLEANUP", {}).get("SCORE_METHOD_" + self.SCORE_METHOD, {})
-
-        self.EGG_INCUBATION_ENABLED = config.get("EGG_INCUBATION", {}).get("ENABLE", True)
-        self.USE_DISPOSABLE_INCUBATORS = config.get("EGG_INCUBATION", {}).get("USE_DISPOSABLE_INCUBATORS", False)
-        self.INCUBATE_BIG_EGGS_FIRST = config.get("EGG_INCUBATION", {}).get("BIG_EGGS_FIRST", True)
-
-        self.FARM_ITEMS_ENABLED = config.get("NEEDY_ITEM_FARMING", {}).get("ENABLE",
-                                                                           True and self.experimental)  # be concious of pokeball/item limits
-        self.POKEBALL_CONTINUE_THRESHOLD = config.get("NEEDY_ITEM_FARMING", {}).get("POKEBALL_CONTINUE_THRESHOLD",
-                                                                                    50)  # keep at least 10 pokeballs of any assortment, otherwise go farming
-        self.POKEBALL_FARM_THRESHOLD = config.get("NEEDY_ITEM_FARMING", {}).get("POKEBALL_FARM_THRESHOLD",
-                                                                                10)  # at this point, go collect pokeballs
-        self.FARM_IGNORE_POKEBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_POKEBALL_COUNT",
-                                                                                   False)  # ignore pokeballs in the continue tally
-        self.FARM_IGNORE_GREATBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_GREATBALL_COUNT",
-                                                                                    False)  # ignore greatballs in the continue tally
-        self.FARM_IGNORE_ULTRABALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_ULTRABALL_COUNT",
-                                                                                    False)  # ignore ultraballs in the continue tally
-        self.FARM_IGNORE_MASTERBALL_COUNT = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_IGNORE_MASTERBALL_COUNT",
-                                                                                     True)  # ignore masterballs in the continue tally
-        self.FARM_OVERRIDE_STEP_SIZE = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_OVERRIDE_STEP_SIZE",
-                                                                                -1)  # should the step size be overriden when looking for more inventory, -1 to disable
-        self.LIST_POKEMON_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
-        self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
-
-        self.visited_forts = TTLCache(maxsize=120, ttl=config.get("BEHAVIOR", {}).get("SKIP_VISITED_FORT_DURATION", 600))
-        self.spin_all_forts = config.get("BEHAVIOR", {}).get("SPIN_ALL_FORTS", False)
-        self.STAY_WITHIN_PROXIMITY = config.get("BEHAVIOR", {}).get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
-        self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True)
-        self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
-
-        # Sanity checking
-        self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon  # Experimental, and we needn't do this if we're farming anyway
-        if (
-            self.FARM_ITEMS_ENABLED and
-            self.FARM_IGNORE_POKEBALL_COUNT and
-            self.FARM_IGNORE_GREATBALL_COUNT and
-            self.FARM_IGNORE_ULTRABALL_COUNT and
-            self.FARM_IGNORE_MASTERBALL_COUNT
-        ):
-            self.FARM_ITEMS_ENABLED = False
-            self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
-        elif self.FARM_ITEMS_ENABLED and not (self.POKEBALL_FARM_THRESHOLD < self.POKEBALL_CONTINUE_THRESHOLD):
-            self.FARM_ITEMS_ENABLED = False
-            self.log.warn(
-                "FARM_ITEMS has been disabled due to farming threshold being below the continue. Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")
-
 
     '''
     Blocking lock
@@ -202,6 +151,7 @@ class Poketrainer:
         - persist=True will ensure the lock will not be released until the user
           explicitly sets self.persist_lock=False.
     '''
+
     def cond_lock(self, persist=False):
         if self.sem.locked():
             if self.locker == id(gevent.getcurrent()):
@@ -217,14 +167,15 @@ class Poketrainer:
     '''
     Releases the lock if needed and the user didn't persist it
     '''
+
     def cond_release(self):
         if self.sem.locked() and \
-                self.locker == id(gevent.getcurrent()) and not self.persist_lock:
+                        self.locker == id(gevent.getcurrent()) and not self.persist_lock:
             self.log.debug("%s is now releasing lock", id(gevent.getcurrent()))
             self.sem.release()
 
     def gsleep(self, t):
-        gevent.sleep(t * self.sleep_mult)
+        gevent.sleep(t * self.config.sleep_mult)
 
     # instead of a full heartbeat, just update position.
     # useful for sniping for example
@@ -238,7 +189,8 @@ class Poketrainer:
     def snipe_pokemon(self, lat, lng):
         self.cond_lock(persist=True)
 
-        self.gsleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
+        self.gsleep(
+            2)  # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
         curr_lat = self._posf[0]
         curr_lng = self._posf[1]
 
@@ -308,9 +260,9 @@ class Poketrainer:
     def update_player_inventory(self):
         res = self.api.get_inventory()
         if 'GET_INVENTORY' in res.get('responses', {}):
-            inventory_items = res.get('responses', {})\
+            inventory_items = res.get('responses', {}) \
                 .get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
-            self.inventory = Player_Inventory(self.percentages, inventory_items)
+            self.inventory = Player_Inventory(self.config.ball_priorities, inventory_items)
         return res
 
     def get_player_inventory(self, as_json=True):
@@ -327,7 +279,8 @@ class Poketrainer:
         if not res or res.get("direction", -1) == 102:
             self.log.error("There were a problem responses for api call: %s. Restarting!!!", res)
             raise AuthException("Token probably expired?")
-        self.log.debug('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2, default=lambda obj: obj.decode('utf8'))))
+        self.log.debug(
+            'Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2, default=lambda obj: obj.decode('utf8'))))
 
         responses = res.get('responses', {})
         if 'GET_PLAYER' in responses:
@@ -335,25 +288,26 @@ class Poketrainer:
             self.log.info("Player Info: {0}, Pokemon Caught in this run: {1}".format(self.player, self.pokemon_caught))
 
         if 'GET_INVENTORY' in res.get('responses', {}):
-            with open("data_dumps/%s.json" % self.config['username'], "w") as f:
+            with open("data_dumps/%s.json" % self.config.username, "w") as f:
                 responses['lat'] = self._posf[0]
                 responses['lng'] = self._posf[1]
                 responses['hourly_exp'] = self.hourly_exp(self.player_stats.experience)
                 f.write(json.dumps(responses, indent=2, default=lambda obj: obj.decode('utf8')))
 
             inventory_items = responses.get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
-            self.inventory = Player_Inventory(self.percentages, inventory_items)
+            self.inventory = Player_Inventory(self.config.ball_priorities, inventory_items)
             for inventory_item in self.inventory.inventory_items:
                 if "player_stats" in inventory_item['inventory_item_data']:
                     self.player_stats = PlayerStats(inventory_item['inventory_item_data']['player_stats'])
                     self.log.info("Player Stats: {}".format(self.player_stats))
                     self.hourly_exp(self.player_stats.experience)
-            if self.LIST_INVENTORY_BEFORE_CLEANUP:
+            if self.config.list_inventory_before_cleanup:
                 self.log.info("Player Items Before Cleanup: %s", self.inventory)
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
             self.log.info("Player Inventory after cleanup: %s", self.inventory)
-            if self.LIST_POKEMON_BEFORE_CLEANUP:
-                self.log.info(get_inventory_data(res, self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS))
+            if self.config.list_pokemon_before_cleanup:
+                self.log.info(get_inventory_data(res, self.player_stats.level, self.config.score_method,
+                                                 self.config.score_settings))
             self.incubate_eggs()
             # Auto-use lucky-egg if applicable
             self.use_lucky_egg()
@@ -361,37 +315,37 @@ class Poketrainer:
             self.cleanup_pokemon(self.inventory.inventory_items)
 
             # Farm precon
-            if self.FARM_ITEMS_ENABLED:
+            if self.config.farm_items_enabled:
                 pokeball_count = 0
-                if not self.FARM_IGNORE_POKEBALL_COUNT:
+                if not self.config.farm_ignore_pokeball_count:
                     pokeball_count += self.inventory.poke_balls
-                if not self.FARM_IGNORE_GREATBALL_COUNT:
+                if not self.config.farm_ignore_greatball_count:
                     pokeball_count += self.inventory.great_balls
-                if not self.FARM_IGNORE_ULTRABALL_COUNT:
+                if not self.config.farm_ignore_ultraball_count:
                     pokeball_count += self.inventory.ultra_balls
-                if not self.FARM_IGNORE_MASTERBALL_COUNT:
+                if not self.config.farm_ignore_masterball_count:
                     pokeball_count += self.inventory.master_balls
-                if self.POKEBALL_FARM_THRESHOLD > pokeball_count and not self._farm_mode_triggered:
+                if self.config.pokeball_farm_threshold > pokeball_count and not self._farm_mode_triggered:
                     self.should_catch_pokemon = False
                     self._farm_mode_triggered = True
                     self.log.info("Player only has %s Pokeballs, farming for more...", pokeball_count)
-                    if self.FARM_OVERRIDE_STEP_SIZE != -1:
-                        self.STEP_SIZE = self.FARM_OVERRIDE_STEP_SIZE
-                        self.log.info("Player has changed speed to %s", self.STEP_SIZE)
-                elif self.POKEBALL_CONTINUE_THRESHOLD <= pokeball_count and self._farm_mode_triggered:
-                    self.should_catch_pokemon = self.config.get("CAPTURE", {}).get("CATCH_POKEMON", True) # Restore catch pokemon setting from config file
+                    if self.config.farm_override_step_size != -1:
+                        self.step_size = self.config.farm_override_step_size
+                        self.log.info("Player has changed speed to %s", self.step_size)
+                elif self.config.pokeball_continue_threshold <= pokeball_count and self._farm_mode_triggered:
+                    self.should_catch_pokemon = self.config.should_catch_pokemon  # Restore catch pokemon setting from config file
                     self._farm_mode_triggered = False
                     self.log.info("Player has %s Pokeballs, continuing to catch more!", pokeball_count)
-                    if self.FARM_OVERRIDE_STEP_SIZE != -1:
-                        self.STEP_SIZE = self._orig_step_size
-                        self.log.info("Player has returned to normal speed of %s", self.STEP_SIZE)
+                    if self.config.farm_override_step_size != -1:
+                        self.step_size = self.config.step_size
+                        self.log.info("Player has returned to normal speed of %s", self.step_size)
         self._heartbeat_number += 1
         return res
 
     def use_lucky_egg(self):
-        if self.config.get("BEHAVIOR", {}).get("AUTO_USE_LUCKY_EGG", False) and \
+        if self.config.use_lucky_egg and \
                 self.inventory.has_lucky_egg() and time() - self._last_egg_use_time > 30 * 60:
-            response = self.api.use_item_xp_boost(item_id=Inventory.ITEM_LUCKY_EGG)
+            response = self.api.use_item_xp_boost(item_id=Item_Enums.ITEM_LUCKY_EGG)
             result = response.get('responses', {}).get('USE_ITEM_XP_BOOST', {}).get('result', -1)
             if result == 1:
                 self.log.info("Ate a lucky egg! Yummy! :)")
@@ -410,15 +364,15 @@ class Poketrainer:
     def walk_to(self, loc, waypoints=[], directly=False):  # location in floats of course...
         # If we are going directly we don't want to follow a google maps
         # walkable route.
-        use_google = self.config.get("BEHAVIOR", {}).get("USE_GOOGLE", False)
+        use_google = self.config.use_google
 
         if directly is True:
             use_google = False
 
-        step_size = self.STEP_SIZE
+        step_size = self.step_size
         route_data = get_route(
-            self._posf, loc, use_google, self.config.get("GMAPS_API_KEY", ""),
-            self.experimental and self.spin_all_forts, waypoints,
+            self._posf, loc, use_google, self.config.gmaps_api_key,
+            self.config.experimental and self.config.spin_all_forts, waypoints,
             step_size=step_size
         )
         catch_attempt = 0
@@ -441,11 +395,11 @@ class Poketrainer:
                 self.heartbeat()
 
                 if directly is False:
-                    if self.experimental and self.spin_all_forts:
+                    if self.config.experimental and self.config.spin_all_forts:
                         self.spin_nearest_fort()
 
                 # self.gsleep(1)
-                while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
+                while self.catch_near_pokemon() and catch_attempt <= self.config.max_catch_attempts:
                     self.gsleep(1)
                     catch_attempt += 1
                 catch_attempt = 0
@@ -459,15 +413,16 @@ class Poketrainer:
     def spin_nearest_fort(self):
         map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = self.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.config.stay_within_proximity,
+                                      self.visited_forts)
         if destinations:
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
             self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
 
             # Fort is close enough to change our route and walk to
-            if self.wander_steps > 0 and nearest_fort_dis > 40.00 and nearest_fort_dis <= self.wander_steps:
-                    self.walk_to_fort(destinations[0], directly=True)
+            if self.config.wander_steps > 0 and nearest_fort_dis > 40.00 and nearest_fort_dis <= self.config.wander_steps:
+                self.walk_to_fort(destinations[0], directly=True)
             elif nearest_fort_dis <= 40.00:
                 self.fort_search_pgoapi(nearest_fort, player_postion=self.api.get_position(),
                                         fort_distance=nearest_fort_dis)
@@ -481,9 +436,9 @@ class Poketrainer:
     def fort_search_pgoapi(self, fort, player_postion, fort_distance):
         self.gsleep(0.2)
         res = self.api.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'],
-                               fort_longitude=fort['longitude'],
-                               player_latitude=player_postion[0],
-                               player_longitude=player_postion[1])
+                                   fort_longitude=fort['longitude'],
+                                   player_latitude=player_postion[0],
+                                   player_longitude=player_postion[1])
         result = -1
         if res:
             res = res.get('responses', {}).get('FORT_SEARCH', {})
@@ -512,7 +467,8 @@ class Poketrainer:
                           fort['longitude'], fort_distance)
         elif result == 3:
             self.log.debug("Could not spin fort -  still on cooldown %s", res)
-            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Still on cooldown", fort['latitude'],
+            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Still on cooldown",
+                          fort['latitude'],
                           fort['longitude'])
         else:
             self.log.debug("Could not spin fort %s", res)
@@ -525,7 +481,8 @@ class Poketrainer:
         res = self.nearby_map_objects()
         map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = self.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.config.stay_within_proximity,
+                                      self.visited_forts)
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Or server error')
@@ -558,7 +515,8 @@ class Poketrainer:
         res = self.nearby_map_objects()
         map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = self.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
+        destinations = filtered_forts(self._origPosF, self._posf, forts, self.config.stay_within_proximity,
+                                      self.visited_forts)
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Returning back to origin')
@@ -598,6 +556,7 @@ class Poketrainer:
         return catches_successful
 
     def nearby_map_objects(self):
+        self.gsleep(10.0)
         if time() - self._last_got_map_objects > self._map_objects_rate_limit:
             position = self.api.get_position()
             neighbors = get_neighbors(self._posf)
@@ -607,6 +566,8 @@ class Poketrainer:
                 since_timestamp_ms=[0] * len(neighbors),
                 cell_id=neighbors)
             self._last_got_map_objects = time()
+            print(self.map_objects)
+            exit()
         return self.map_objects
 
     def attempt_catch(self, encounter_id, spawn_point_id, capture_probability=None):
@@ -616,16 +577,16 @@ class Poketrainer:
         if not capture_probability:
             capture_probability = {}
         # Max 4 attempts to catch pokemon
-        while catch_status != 1 and self.inventory.can_attempt_catch() and catch_attempts <= self.max_catch_attempts:
+        while catch_status != 1 and self.inventory.can_attempt_catch() and catch_attempts <= self.config.max_catch_attempts:
             item_capture_mult = 1.0
 
             # Try to use a berry to increase the chance of catching the pokemon when we have failed enough attempts
-            if catch_attempts > self.config.get("CAPTURE", {}).get("MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY", 3) \
+            if catch_attempts > self.config.min_failed_attempts_before_using_berry \
                     and self.inventory.has_berry():
                 self.log.info("Feeding da razz berry!")
                 self.gsleep(0.2)
                 r = self.api.use_item_capture(item_id=self.inventory.take_berry(), encounter_id=encounter_id,
-                                          spawn_point_id=spawn_point_id)\
+                                              spawn_point_id=spawn_point_id) \
                     .get('responses', {}).get('USE_ITEM_CAPTURE', {})
                 if r.get("success", False):
                     item_capture_mult = r.get("item_capture_mult", 1.0)
@@ -634,7 +595,7 @@ class Poketrainer:
 
             pokeball = self.inventory.take_next_ball(capture_probability)
             self.log.info("Attempting catch with {0} at {1:.2f}% chance. Try Number: {2}".format(get_item_name(
-                          pokeball), item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
+                pokeball), item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
             self.gsleep(0.5)
             r = self.api.catch_pokemon(
                 normalized_reticle_size=1.950,
@@ -661,27 +622,27 @@ class Poketrainer:
     def cleanup_inventory(self, inventory_items=None):
         if not inventory_items:
             self.gsleep(0.2)
-            inventory_items = self.api.get_inventory()\
+            inventory_items = self.api.get_inventory() \
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         item_count = 0
         for inventory_item in inventory_items:
             if "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
                 if (
-                    item['item_id'] in self.MIN_ITEMS and
-                    "count" in item and
-                    item['count'] > self.MIN_ITEMS[item['item_id']]
+                                    item['item_id'] in self.config.min_items and
+                                    "count" in item and
+                                item['count'] > self.config.min_items[item['item_id']]
                 ):
-                    recycle_count = item['count'] - self.MIN_ITEMS[item['item_id']]
+                    recycle_count = item['count'] - self.config.min_items[item['item_id']]
                     item_count += item['count'] - recycle_count
                     self.log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
                     self.gsleep(0.2)
-                    res = self.api.recycle_inventory_item(item_id=item['item_id'], count=recycle_count)\
+                    res = self.api.recycle_inventory_item(item_id=item['item_id'], count=recycle_count) \
                         .get('responses', {}).get('RECYCLE_INVENTORY_ITEM', {})
                     response_code = res.get('result', -1)
                     if response_code == 1:
                         self.log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
-                                      item['item_id']), res.get('new_count', 0)))
+                            item['item_id']), res.get('new_count', 0)))
                     else:
                         self.log.info("Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']),
                                                                                 response_code))
@@ -695,14 +656,16 @@ class Poketrainer:
     def get_caught_pokemons(self, inventory_items=None, as_json=False):
         if not inventory_items:
             self.gsleep(0.2)
-            inventory_items = self.api.get_inventory()\
+            inventory_items = self.api.get_inventory() \
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         caught_pokemon = defaultdict(list)
         for inventory_item in inventory_items:
-            if "pokemon_data" in inventory_item['inventory_item_data'] and not inventory_item['inventory_item_data']['pokemon_data'].get("is_egg", False):
+            if "pokemon_data" in inventory_item['inventory_item_data'] and not inventory_item['inventory_item_data'][
+                'pokemon_data'].get("is_egg", False):
                 # is a pokemon:
                 pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
-                pokemon = Pokemon(pokemon_data, self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS)
+                pokemon = Pokemon(pokemon_data, self.player_stats.level, self.config.score_method,
+                                  self.config.score_settings)
 
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
@@ -729,7 +692,7 @@ class Poketrainer:
 
     def get_pokemon_stats(self, inventory_items=None):
         if not inventory_items:
-            inventory_items = self.api.get_inventory()\
+            inventory_items = self.api.get_inventory() \
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         caught_pokemon = self.get_caught_pokemons(inventory_items)
         for pokemons in caught_pokemon.values():
@@ -738,14 +701,14 @@ class Poketrainer:
 
     def cleanup_pokemon(self, inventory_items=None):
         if not inventory_items:
-            inventory_items = self.api.get_inventory()\
+            inventory_items = self.api.get_inventory() \
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         caught_pokemon = self.get_caught_pokemons(inventory_items)
         releaseMethod = self.releaseMethodFactory.getReleaseMethod()
         for pokemonId, pokemons in caught_pokemon.iteritems():
             pokemonsToRelease, pokemonsToKeep = releaseMethod.getPokemonToRelease(pokemonId, pokemons)
 
-            if self.config.get('POKEMON_CLEANUP', {}).get('TESTING_MODE', False):
+            if self.config.pokemon_cleanup_testing_mode:
                 for pokemon in pokemonsToRelease:
                     self.log.info("(TESTING) Would release pokemon: %s", pokemon)
                 for pokemon in pokemonsToKeep:
@@ -757,14 +720,14 @@ class Poketrainer:
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:
             self.gsleep(0.2)
-            inventory_items = self.api.get_inventory()\
+            inventory_items = self.api.get_inventory() \
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         caught_pokemon = self.get_caught_pokemons(inventory_items)
-        self.inventory = Player_Inventory(self.percentages, inventory_items)
+        self.inventory = Player_Inventory(self.config.ball_priorities, inventory_items)
         for pokemons in caught_pokemon.values():
-            if len(pokemons) > self.MIN_SIMILAR_POKEMON:
+            if len(pokemons) > self.config.min_similar_pokemon:
                 pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
-                for pokemon in pokemons[self.MIN_SIMILAR_POKEMON:]:
+                for pokemon in pokemons[self.config.min_similar_pokemon:]:
                     # If we can't evolve this type of pokemon anymore, don't check others.
                     if not self.attempt_evolve_pokemon(pokemon):
                         break
@@ -778,7 +741,7 @@ class Poketrainer:
             # self.gsleep(3)
             if status == 1:
                 evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}),
-                                          self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS)
+                                          self.player_stats.level, self.config.score_method, self.config.score_settings)
                 # I don' think we need additional stats for evolved pokemon. Since we do not do anything with it.
                 # evolved_pokemon.pokemon_additional_data = self.game_master.get(pokemon.pokemon_id, PokemonData())
                 self.log.info("Evolved to %s", evolved_pokemon)
@@ -793,12 +756,13 @@ class Poketrainer:
             return False
 
     def is_pokemon_eligible_for_evolution(self, pokemon):
-        candy_have = self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None), -1)
-        candy_needed = self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None)
+        candy_have = self.inventory.pokemon_candy.get(
+            self.config.pokemon_evolution_family.get(pokemon.pokemon_id, None), -1)
+        candy_needed = self.config.pokemon_evolution.get(pokemon.pokemon_id, None)
         return candy_have > candy_needed and \
-            pokemon.pokemon_id not in self.keep_pokemon_ids \
-            and not pokemon.is_favorite \
-            and pokemon.pokemon_id in self.POKEMON_EVOLUTION
+               pokemon.pokemon_id not in self.config.keep_pokemon_ids \
+               and not pokemon.is_favorite \
+               and pokemon.pokemon_id in self.config.pokemon_evolution
 
     def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:
@@ -813,7 +777,7 @@ class Poketrainer:
             self.log.info("At Fort with Lure AND Active Pokemon %s",
                           POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
             resp = self.api.disk_encounter(encounter_id=encounter_id, fort_id=fort_id, player_latitude=position[0],
-                                       player_longitude=position[1])\
+                                           player_longitude=position[1]) \
                 .get('responses', {}).get('DISK_ENCOUNTER', {})
             result = resp.get('result', -1)
             if result == 1 and 'pokemon_data' in resp and 'capture_probability' in resp:
@@ -865,7 +829,8 @@ class Poketrainer:
             self.log.info("Could not catch pokemon:  %s, status: %s", pokemon, capture_status)
             return False
 
-    def encounter_pokemon(self, pokemon_data, retry=False, new_loc=None):  # take in a MapPokemon from MapCell.catchable_pokemons
+    def encounter_pokemon(self, pokemon_data, retry=False,
+                          new_loc=None):  # take in a MapPokemon from MapCell.catchable_pokemons
         # Update Inventory to make sure we can catch this mon
         try:
             self.update_player_inventory()
@@ -879,16 +844,17 @@ class Poketrainer:
             pokemon = Pokemon(pokemon_data)
             self.log.info("Trying initiate catching Pokemon: %s", pokemon)
             encounter = self.api.encounter(encounter_id=encounter_id,
-                                       spawn_point_id=spawn_point_id,
-                                       player_latitude=position[0],
-                                       player_longitude=position[1])\
+                                           spawn_point_id=spawn_point_id,
+                                           player_latitude=position[0],
+                                           player_longitude=position[1]) \
                 .get('responses', {}).get('ENCOUNTER', {})
             self.log.debug("Attempting to Start Encounter: %s", encounter)
             result = encounter.get('status', -1)
             if result == 1 and 'wild_pokemon' in encounter and 'capture_probability' in encounter:
                 pokemon = Pokemon(encounter.get('wild_pokemon', {}).get('pokemon_data', {}))
                 capture_probability = create_capture_probability(encounter.get('capture_probability', {}))
-                self.log.debug("Attempt Encounter Capture Probability: %s", json.dumps(encounter, indent=4, sort_keys=True))
+                self.log.debug("Attempt Encounter Capture Probability: %s",
+                               json.dumps(encounter, indent=4, sort_keys=True))
 
                 if new_loc:
                     # change loc for sniping
@@ -900,7 +866,8 @@ class Poketrainer:
                 self.encountered_pokemons[encounter_id] = pokemon_data
                 return self.do_catch_pokemon(encounter_id, spawn_point_id, capture_probability, pokemon)
             elif result == 7:
-                self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try", pokemon.pokemon_type)
+                self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
+                              pokemon.pokemon_type)
                 self.cleanup_pokemon()
                 if not retry:
                     return self.encounter_pokemon(pokemon_data, retry=True, new_loc=new_loc)
@@ -912,7 +879,7 @@ class Poketrainer:
             return False
 
     def incubate_eggs(self):
-        if not self.EGG_INCUBATION_ENABLED:
+        if not self.config.egg_incubation_enabled:
             return
         if self.player_stats.km_walked > 0:
             for incubator in self.inventory.incubators_busy:
@@ -933,7 +900,7 @@ class Poketrainer:
         for incubator in self.inventory.incubators_available:
             if incubator['item_id'] == 901:  # unlimited use
                 pass
-            elif self.USE_DISPOSABLE_INCUBATORS and incubator['item_id'] == 902:  # limited use
+            elif self.config.use_disposable_incubators and incubator['item_id'] == 902:  # limited use
                 pass
             else:
                 continue
@@ -941,13 +908,13 @@ class Poketrainer:
             eggs_available = sorted(eggs_available, key=lambda egg: egg['creation_time_ms'],
                                     reverse=False)  # oldest first
             eggs_available = sorted(eggs_available, key=lambda egg: egg['egg_km_walked_target'],
-                                    reverse=self.INCUBATE_BIG_EGGS_FIRST)  # now sort as defined
+                                    reverse=self.config.incubate_big_eggs_first)  # now sort as defined
             if not len(eggs_available) > 0 or not self.attempt_start_incubation(eggs_available[0], incubator):
                 break
 
     def attempt_start_incubation(self, egg, incubator):
         self.log.info("Start incubating %skm egg", egg['egg_km_walked_target'])
-        incubate_res = self.api.use_item_egg_incubator(item_id=incubator['id'], pokemon_id=egg['id'])\
+        incubate_res = self.api.use_item_egg_incubator(item_id=incubator['id'], pokemon_id=egg['id']) \
             .get('responses', {}).get('USE_ITEM_EGG_INCUBATOR', {})
         status = incubate_res.get('result', -1)
         # self.gsleep(3)
@@ -990,17 +957,17 @@ class Poketrainer:
             self.heartbeat()
             # self.gsleep(1)
 
-            if self.experimental and self.spin_all_forts:
+            if self.config.experimental and self.config.spin_all_forts:
                 self.spin_all_forts_visible()
             else:
                 self.spin_near_fort()
             # if catching fails 10 times, maybe you are sofbanned.
             # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
-            while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
+            while self.catch_near_pokemon() and catch_attempt <= self.config.max_catch_attempts:
                 # self.gsleep(4)
                 catch_attempt += 1
                 pass
-            if catch_attempt > self.max_catch_attempts:
+            if catch_attempt > self.config.max_catch_attempts:
                 self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times",
                               catch_attempt)
             catch_attempt = 0

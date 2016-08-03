@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import json
 from collections import defaultdict
 
-from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory_Enum
+from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Item_Enums
 
 
 class Inventory:
@@ -35,25 +35,25 @@ class Inventory:
             item = inventory_item['inventory_item_data'].get('item', {})
             item_id = item.get('item_id', -1)
             item_count = item.get('count', 0)
-            if item_id == Inventory_Enum.ITEM_POTION:
+            if item_id == Item_Enums.ITEM_POTION:
                 self.potion = item_count
-            elif item_id == Inventory_Enum.ITEM_SUPER_POTION:
+            elif item_id == Item_Enums.ITEM_SUPER_POTION:
                 self.super_potion = item_count
-            elif item_id == Inventory_Enum.ITEM_MAX_POTION:
+            elif item_id == Item_Enums.ITEM_MAX_POTION:
                 self.max_potion = item_count
-            elif item_id == Inventory_Enum.ITEM_HYPER_POTION:
+            elif item_id == Item_Enums.ITEM_HYPER_POTION:
                 self.hyper_potion = item_count
-            elif item_id == Inventory_Enum.ITEM_POKE_BALL:
+            elif item_id == Item_Enums.ITEM_POKE_BALL:
                 self.poke_balls = item_count
-            elif item_id == Inventory_Enum.ITEM_GREAT_BALL:
+            elif item_id == Item_Enums.ITEM_GREAT_BALL:
                 self.great_balls = item_count
-            elif item_id == Inventory_Enum.ITEM_MASTER_BALL:
+            elif item_id == Item_Enums.ITEM_MASTER_BALL:
                 self.master_balls = item_count
-            elif item_id == Inventory_Enum.ITEM_ULTRA_BALL:
+            elif item_id == Item_Enums.ITEM_ULTRA_BALL:
                 self.ultra_balls = item_count
-            elif item_id == Inventory_Enum.ITEM_LUCKY_EGG:
+            elif item_id == Item_Enums.ITEM_LUCKY_EGG:
                 self.lucky_eggs = item_count
-            elif item_id == Inventory_Enum.ITEM_RAZZ_BERRY:
+            elif item_id == Item_Enums.ITEM_RAZZ_BERRY:
                 self.razz_berries = item_count
             pokemon_family = inventory_item['inventory_item_data'].get('pokemon_family', {})
             self.pokemon_candy[pokemon_family.get('family_id', -1)] = pokemon_family.get('candy', -1)
@@ -84,26 +84,26 @@ class Inventory:
 
     def best_ball(self):
         if self.use_masterball and self.master_balls:
-            return Inventory_Enum.ITEM_MASTER_BALL
+            return Item_Enums.ITEM_MASTER_BALL
         elif self.ultra_balls:
-            return Inventory_Enum.ITEM_ULTRA_BALL
+            return Item_Enums.ITEM_ULTRA_BALL
         elif self.great_balls:
-            return Inventory_Enum.ITEM_GREAT_BALL
+            return Item_Enums.ITEM_GREAT_BALL
         else:
-            return Inventory_Enum.ITEM_POKE_BALL
+            return Item_Enums.ITEM_POKE_BALL
 
     # FIXME make not bad, this should be configurable
     def take_next_ball(self, capture_probability):
         if self.can_attempt_catch():
-            if capture_probability.get(Inventory_Enum.ITEM_POKE_BALL, 0) > self.pokeball_percent and self.poke_balls:
+            if capture_probability.get(Item_Enums.ITEM_POKE_BALL, 0) > self.pokeball_percent and self.poke_balls:
                 self.take_pokeball()
-                return Inventory_Enum.ITEM_POKE_BALL
-            elif capture_probability.get(Inventory_Enum.ITEM_GREAT_BALL, 0) > self.greatball_percent and self.great_balls:
+                return Item_Enums.ITEM_POKE_BALL
+            elif capture_probability.get(Item_Enums.ITEM_GREAT_BALL, 0) > self.greatball_percent and self.great_balls:
                 self.take_greatball()
-                return Inventory_Enum.ITEM_GREAT_BALL
-            elif capture_probability.get(Inventory_Enum.ITEM_ULTRA_BALL, 0) > self.ultraball_percent and self.ultra_balls:
+                return Item_Enums.ITEM_GREAT_BALL
+            elif capture_probability.get(Item_Enums.ITEM_ULTRA_BALL, 0) > self.ultraball_percent and self.ultra_balls:
                 self.take_ultraball()
-                return Inventory_Enum.ITEM_ULTRA_BALL
+                return Item_Enums.ITEM_ULTRA_BALL
             else:
                 best_ball = self.best_ball()
                 self.take_ball(self.best_ball())
@@ -112,39 +112,39 @@ class Inventory:
             return -1
 
     def take_ball(self, ball_id):
-        if ball_id == Inventory_Enum.ITEM_POKE_BALL:
+        if ball_id == Item_Enums.ITEM_POKE_BALL:
             self.poke_balls -= 1
-        elif ball_id == Inventory_Enum.ITEM_GREAT_BALL:
+        elif ball_id == Item_Enums.ITEM_GREAT_BALL:
             self.great_balls -= 1
-        elif ball_id == Inventory_Enum.ITEM_ULTRA_BALL:
+        elif ball_id == Item_Enums.ITEM_ULTRA_BALL:
             self.ultra_balls -= 1
-        elif ball_id == Inventory_Enum.ITEM_MASTER_BALL:
+        elif ball_id == Item_Enums.ITEM_MASTER_BALL:
             self.master_balls -= 1
 
     def has_lucky_egg(self):
         for inventory_item in self.inventory_items:
             item = inventory_item['inventory_item_data'].get('item', {})
             item_id = item.get('item_id', -1)
-            if item_id == Inventory_Enum.ITEM_LUCKY_EGG:
+            if item_id == Item_Enums.ITEM_LUCKY_EGG:
                 return True
         return False
 
     def take_lucky_egg(self):
         self.lucky_eggs -= 1
-        return Inventory_Enum.ITEM_LUCKY_EGG
+        return Item_Enums.ITEM_LUCKY_EGG
 
     def has_berry(self):
         # Only Razz berries are in the game at the moment
         for inventory_item in self.inventory_items:
             item = inventory_item['inventory_item_data'].get('item', {})
             item_id = item.get('item_id', -1)
-            if item_id == Inventory_Enum.ITEM_RAZZ_BERRY:
+            if item_id == Item_Enums.ITEM_RAZZ_BERRY:
                 return True
         return False
 
     def take_berry(self):
         self.razz_berries -= 1
-        return Inventory_Enum.ITEM_RAZZ_BERRY
+        return Item_Enums.ITEM_RAZZ_BERRY
 
     def __str__(self):
         str_ = "PokeBalls: {0}, GreatBalls: {1}, MasterBalls: {2}, UltraBalls: {3} \n " \
