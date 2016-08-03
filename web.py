@@ -206,7 +206,7 @@ def get_player(username):
         pkmn.candy = candy[pkmn.family_id]
         pkmn.set_max_cp(TCPM_VALS[int(player['level'] * 2 + 1)])
         pkmn.score = format(pkmn.score, '.2f').rstrip('0').rstrip('.')  # makes the value more presentable to the user
-        seriPoke = json.loads(pkmn.to_json())
+        seriPoke = json.loads(pkmn.to_json()) # this makes the pokemon class serializable although its kinda hacky
         pokemons.append(seriPoke)
     player['username'] = player_json['player_data']['username']
     player['level_xp'] = player.get('experience', 0) - player.get('prev_level_xp', 0)
