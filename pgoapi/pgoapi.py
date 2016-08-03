@@ -1107,19 +1107,19 @@ class PGoApi:
     def setup_cache(self):
         try:
             self.log.debug("Opening cache file...")
-            with open(self.cache_filename,'rb') as handle:
+            with open(self.cache_filename, 'rb') as handle:
                 self.all_cached_forts = pickle.load(handle)
 
         except Exception as e:
-            self.log.debug("Could not find or open cache, making new cache...")
+            self.log.debug("Could not find or open cache, making new cache... %s", e)
             if not os.path.exists('./cache'):
                 os.makedirs('./cache')
             try:
                 os.remove(self.cache_filename)
             except OSError:
                 pass
-            with open(self.cache_filename,'wb') as handle:
-                 pickle.dump(self.all_cached_forts, handle)
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(self.all_cached_forts, handle)
 
     def sort_cached_forts(self):
         if not self.cache_is_sorted:
@@ -1136,11 +1136,9 @@ class PGoApi:
 
                 if(tempbool):
                     for fort in tempallcached:
-                        if distance_in_meters((self._origPosF[0], self._origPosF[1]),
-                            (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat:
+                        if distance_in_meters((self._origPosF[0], self._origPosF[1]), (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat:
                             tempelement = copy.deepcopy(fort)
-                            tempmaxfloat = distance_in_meters((self._origPosF[0], self._origPosF[1]),
-                                (fort[0]['latitude'], fort[0]['longitude']))
+                            tempmaxfloat = distance_in_meters((self._origPosF[0], self._origPosF[1]), (fort[0]['latitude'], fort[0]['longitude']))
 
                     tempsorted.pop(0)
                     tempsorted.append(tempelement)
@@ -1149,11 +1147,10 @@ class PGoApi:
                 else:
                     for fort in tempallcached:
                         if ((distance_in_meters((templastelement[0]['latitude'], templastelement[0]['longitude']),
-                            (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat) and
-                            (not any(fort[0]['id'] == x[0]['id'] for x in tempsorted))):
+                                                (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat) and (not any(fort[0]['id'] == x[0]['id'] for x in tempsorted))):
                             tempelement = copy.deepcopy(fort)
                             tempmaxfloat = distance_in_meters((templastelement[0]['latitude'], templastelement[0]['longitude']),
-                                (fort[0]['latitude'], fort[0]['longitude']))
+                                                              (fort[0]['latitude'], fort[0]['longitude']))
                     tempallcached.remove(tempelement)
                     tempsorted.append(tempelement)
 
