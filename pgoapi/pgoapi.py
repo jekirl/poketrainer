@@ -34,7 +34,7 @@ import json
 import logging
 import os
 import pickle
-import sys 
+import sys
 
 from collections import defaultdict
 from itertools import chain
