@@ -47,7 +47,7 @@ angular.module('Poketrainer.State.Status', [
         $scope.user.uniquePokedexPercent = Math.floor($scope.user.unique_pokedex_entries / 151 * 100);
         $scope.user.pokemonInvPercent = Math.floor($scope.user.pokemon.length / $scope.user.pokemon_capacity  * 100);
 
-        $scope.map = { center: { latitude: userData.latitude, longitude: userData.longitude }, zoom: 14 };
+        $scope.map = { center: { latitude: userData.latitude, longitude: userData.longitude }, zoom: 14, scrollwheel: false };
         $scope.marker = {
             id: 0,
             coords: {
