@@ -29,7 +29,8 @@
     "angular-simple-logger": "^0.1.7",
     "angular-google-maps": "^2.3.3",
     "lodash": "^4.14.1",
-    "jquery.easy-pie-chart": "^2.1.6"
+    "jquery.easy-pie-chart": "^2.1.6",
+    "datatables-angular-directive": "*"
   },
   "devDependencies": {},
   "overrides": {}

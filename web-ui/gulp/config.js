@@ -161,6 +161,7 @@ module.exports = (function () {
                 bowerPath + '/angular-simple-logger/dist/angular-simple-logger.js',
                 bowerPath + '/angular-google-maps/dist/angular-google-maps.js',
                 bowerPath + '/jquery.easy-pie-chart/dist/angular.easypiechart.js',
+                bowerPath + '/datatables-angular-directive/angular.datatables.js',
 
                 npmPath + '/chart.js/dist/Chart.js',
                 bowerPath + '/angular-chart.js/dist/angular-chart.js',

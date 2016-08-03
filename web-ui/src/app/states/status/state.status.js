@@ -2,7 +2,8 @@ angular.module('Poketrainer.State.Status', [
     'ui.router',
     'uiGmapgoogle-maps',
     'chart.js',
-    'easypiechart'
+    'easypiechart',
+    'datatablesDirectives'
 ])
 
     .config(function config($stateProvider, uiGmapGoogleMapApiProvider) {
