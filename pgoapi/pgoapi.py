@@ -184,6 +184,9 @@ class PGoApi:
         self.should_catch_trash_pokemon = config.get("CAPTURE", {}).get("CATCH_TRASH", True)
         self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
 
+        self.max_pokestop_noloot = 10
+        self.pokestop_noloot_count = 0
+
         # Sanity checking
         self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon  # Experimental, and we needn't do this if we're farming anyway
         if (
@@ -238,7 +241,7 @@ class PGoApi:
                 return False
 
             if self._auth_provider is None or not self._auth_provider.is_login():
-                self.log.info('[LOGIN]\t- Not logged in')
+                self.log.info('[LOGIN]\t\t- Not logged in')
                 return False
 
             player_position = self.get_position()
@@ -255,7 +258,7 @@ class PGoApi:
             try:
                 response = request.request(api_endpoint, self._req_method_list[id(gevent.getcurrent())], player_position)
             except ServerBusyOrOfflineException:
-                self.log.info('[LOGIN]\t- Server seems to be busy or offline - try again!')
+                self.log.info('[LOGIN]\t\t- Server seems to be busy or offline - try again!')
 
             # cleanup after call execution
             self.log.debug('Cleanup of request!')
@@ -442,9 +445,9 @@ class PGoApi:
                         self.log.info("[TRAINER]\t- Player Stats: {}".format(self.player_stats))
                     self.hourly_exp(self.player_stats.experience)
             if self.LIST_INVENTORY_BEFORE_CLEANUP:
-                self.log.info("[INVENTORY]- Backpack before cleaning up: %s", self.inventory)
+                self.log.info("[INVENTORY]\t- Backpack before cleaning up: %s", self.inventory)
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
-            self.log.info("[INVENTORY]- Backpack after cleaning up: %s", self.inventory)
+            self.log.info("[INVENTORY]\t- Backpack after cleaning up: %s", self.inventory)
             if self.LIST_POKEMON_BEFORE_CLEANUP:
                 self.log.info(get_inventory_data(res, self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS))
             self.incubate_eggs()
@@ -604,9 +607,14 @@ class PGoApi:
                 reward = 'XP +' + str(res['experience_awarded'])
                 for item_id, amount in six.iteritems(items):
                     reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
+                self.log.info('[STANDING]\t- ===============================================')
                 self.log.info("[POKESTOP]\t- Checked into PokeStop! Picked up some %s", reward)
+                self.log.info('[STANDING]\t- ===============================================')
             else:
-                self.log.info("[POKESTOP]\t- Checked into PokeStop!", fort_name)
+                self.log.info('[STANDING]\t- ===============================================')
+                self.log.info("[POKESTOP]\t- Checked into PokeStop!")
+                self.log.info('[STANDING]\t- ===============================================')
+                self.pokestop_noloot_count += 1
             self.forts_spun += 1
             self.visited_forts[fort['id']] = fort
         elif result == 4:
@@ -781,22 +789,22 @@ class PGoApi:
                     recycle_count = item['count'] - self.MIN_ITEMS[item['item_id']]
                     item_count += item['count'] - recycle_count
                     if self.HEARTBEAT_DETAIL != "HIDDEN":
-                        self.log.info("[INVENTORY]- Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
+                        self.log.info("[INVENTORY]\t- Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
                     self.gsleep(0.2)
                     res = self.recycle_inventory_item(item_id=item['item_id'], count=recycle_count).call()\
                         .get('responses', {}).get('RECYCLE_INVENTORY_ITEM', {})
                     response_code = res.get('result', -1)
                     if response_code == 1:
-                        self.log.info("[INVENTORY]- {0}(s) recycled, got {1} left.".format(get_item_name(
+                        self.log.info("[INVENTORY]\t- {0}(s) recycled, got {1} left.".format(get_item_name(
                                       item['item_id']), res.get('new_count', 0)))
                     else:
                         if self.HEARTBEAT_DETAIL != "HIDDEN":
-                            self.log.info("[INVENTORY]- Couldn't recycle {0}, this bin has a note attached: Code: {1}".format(get_item_name(item['item_id']), response_code))
+                            self.log.info("[INVENTORY]\t- Couldn't recycle {0}, this bin has a note attached: Code: {1}".format(get_item_name(item['item_id']), response_code))
                     self.gsleep(1)
                 elif "count" in item:
                     item_count += item['count']
         if item_count > 0:
-            self.log.info("[INVENTORY]- Carrying {0}/{1} in backpack.".format(item_count, self.player.max_item_storage))
+            self.log.info("[INVENTORY]\t- Carrying {0}/{1} in backpack.".format(item_count, self.player.max_item_storage))
         return self.update_player_inventory()
 
     def get_caught_pokemons(self, inventory_items=None, as_json=False):
@@ -1127,23 +1135,23 @@ class PGoApi:
 
     def login(self, provider, username, password, cached=False):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
-            raise AuthException("[LOGIN]\t- Username/password not correctly specified")
+            raise AuthException("[LOGIN]\t\t- Username/password not correctly specified")
 
         if provider == 'ptc':
             self._auth_provider = AuthPtc()
         elif provider == 'google':
             self._auth_provider = AuthGoogle()
         else:
-            raise AuthException("[LOGIN]\t- Invalid authentication provider - only ptc/google available.")
+            raise AuthException("[LOGIN]\t\t- Invalid authentication provider - only ptc/google available.")
 
         self.log.debug('Auth provider: %s', provider)
 
         if not self._auth_provider.login(username, password):
-            self.log.info('[LOGIN]\t- Login process failed')
+            self.log.info('[LOGIN]\t\t- Login process failed')
             return False
 
         self.log.debug('Starting RPC login sequence (app simulation)')
-        self.log.info('[LOGIN]\t- Simulating Client Sequence')
+        self.log.info('[LOGIN]\t\t- Simulating Client Sequence')
         # making a standard call, like it is also done by the client
         self.get_player()
         self.get_hatched_eggs()
@@ -1154,30 +1162,30 @@ class PGoApi:
         response = self.call()
 
         if not response:
-            self.log.info('[LOGIN]\t- Login failed!')
+            self.log.info('[LOGIN]\t\t- Login failed!')
             return False
 
         if 'api_url' in response:
             self._api_endpoint = ('https://{}/rpc'.format(response['api_url']))
             self.log.debug('Setting API endpoint to: %s', self._api_endpoint)
         else:
-            self.log.error('[LOGIN]\t- Login failed - unexpected server response!')
+            self.log.error('[LOGIN]\t\t- Login failed - unexpected server response!')
             return False
 
         if 'auth_ticket' in response:
             self._auth_provider.set_ticket(response['auth_ticket'].values())
 
         self.log.debug('Starting RPC login sequence (app simulation)')
-        self.log.info('[LOGIN]\t- Finished Simulating Client Sequence')
-        self.log.info('[LOGIN]\t- Login process completed')
+        self.log.info('[LOGIN]\t\t- Finished Simulating Client Sequence')
+        self.log.info('[LOGIN]\t\t- Login process completed')
         if self.HEARTBEAT_DETAIL == "HIDDEN":
             if os.name == 'nt':
                 os.system('cls')
             else:
                 print("\033c")
+        self.log.info('[POKETRAINER]\t- ===============================================')
         return True
-        self.log.info('======================================================')
-        return True
+
 
     def main_loop(self):
         catch_attempt = 0
@@ -1190,16 +1198,13 @@ class PGoApi:
                 self.spin_all_forts_visible()
             else:
                 self.spin_near_fort()
-            # if catching fails 10 times, maybe you are sofbanned.
-            # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
-            while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
-                # self.gsleep(4)
-                catch_attempt += 1
+            # If pokestops spun 10 times but no items rewarded, possible softban
+            while self.max_pokestop_noloot <= self.pokestop_noloot_count:
+                self.gsleep(4)
                 pass
-            if catch_attempt > self.max_catch_attempts:
-                self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times",
-                              catch_attempt)
-            catch_attempt = 0
+            if self.max_pokestop_noloot > self.pokestop_noloot_count:
+                self.log.warn("[TRAINER]\t- You have checked into %s/%s PokeStops and recieved no loot. It's likely you are softbanned.", self.pokestop_noloot_count, self.max_pokestop_noloot)
+            self.max_pokestop_noloot = 0
 
             if self._error_counter >= self._error_threshold:
                 raise TooManyEmptyResponses('Too many errors in this run!!!')

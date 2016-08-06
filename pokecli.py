@@ -102,7 +102,11 @@ def init_config():
 def main(position=None):
     # log settings
     # log format
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+    #if config["CONSOLE_OUTPUT"]["HEARTBEAT_DETAIL"] == "DETAILED":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s |\t%(message)s')
+    #else:
+        #logging.basicConfig(level=logging.INFO, format='\t%(message)s')
+        #logger.info('========================================================')
     # log level for http request class
     logging.getLogger("requests").setLevel(logging.WARNING)
     # log level for main pgoapi class
@@ -113,6 +117,7 @@ def main(position=None):
     config = init_config()
     if not config:
         return
+
 
     if config["debug"]:
         logging.getLogger("requests").setLevel(logging.DEBUG)
