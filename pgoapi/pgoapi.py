@@ -42,7 +42,12 @@ from gevent.coros import BoundedSemaphore
 
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
-from pgoapi.exceptions import AuthException, NotLoggedInException, ServerBusyOrOfflineException, NoPlayerPositionSetException, EmptySubrequestChainException, AuthTokenExpiredException, ServerApiEndpointRedirectException, UnexpectedResponseException
+from pgoapi.exceptions import (AuthException, AuthTokenExpiredException,
+                               NotLoggedInException,
+                               ServerApiEndpointRedirectException,
+                               ServerBusyOrOfflineException,
+                               TooManyEmptyResponses,
+                               UnexpectedResponseException)
 from pgoapi.inventory import Inventory as Player_Inventory
 from pgoapi.location import (distance_in_meters, filtered_forts,
                              get_increments, get_neighbors, get_route)
@@ -58,8 +63,6 @@ from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.release.base import ReleaseMethodFactory
 from pgoapi.rpc_api import RpcApi
 from pgoapi.utilities import parse_api_endpoint
-
-from .utilities import f2i
 
 if six.PY3:
     from builtins import map as imap
@@ -239,7 +242,6 @@ class PGoApi:
         else:
             self._api_endpoint = parse_api_endpoint(api_url)
 
-
     def call(self):
         self.cond_lock()
         self.gsleep(self.config.get("BEHAVIOR", {}).get("EXTRA_WAIT", 0.3))
@@ -274,7 +276,7 @@ class PGoApi:
                     """
                     try:
                         self.log.info('Access Token rejected! Requesting new one...')
-                        self._auth_provider.get_access_token(force_refresh = True)
+                        self._auth_provider.get_access_token(force_refresh=True)
                     except:
                         error = 'Request for new Access Token failed! Logged out...'
                         self.log.error(error)
@@ -298,8 +300,6 @@ class PGoApi:
                 except UnexpectedResponseException as e:
                     self.log.error('Unexpected server response!')
                     raise
-
-
 
             # cleanup after call execution
             self.log.debug('Cleanup of request!')
@@ -736,7 +736,7 @@ class PGoApi:
             gevent.sleep(1.0)
             self.map_objects = self.get_map_objects(
                 latitude=position[0], longitude=position[1],
-                since_timestamp_ms=[0,] * len(neighbors),
+                since_timestamp_ms=[0, ] * len(neighbors),
                 cell_id=neighbors).call()
             self._last_got_map_objects = time()
         return self.map_objects
@@ -877,9 +877,9 @@ class PGoApi:
             inventory_items = self.get_inventory().call()\
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         caught_pokemon = self.get_caught_pokemons(inventory_items)
-        releaseMethod = self.releaseMethodFactory.getReleaseMethod()
+        release_method = self.releaseMethodFactory.getReleaseMethod()
         for pokemonId, pokemons in caught_pokemon.iteritems():
-            pokemonsToRelease, pokemonsToKeep = releaseMethod.getPokemonToRelease(pokemonId, pokemons)
+            pokemonsToRelease, pokemonsToKeep = release_method.getPokemonToRelease(pokemonId, pokemons)
 
             if self.config.get('POKEMON_CLEANUP', {}).get('TESTING_MODE', False):
                 for pokemon in pokemonsToRelease:
@@ -1142,7 +1142,6 @@ class PGoApi:
         else:
             raise AuthException("Invalid Credential Input - Please provide username/password or an oauth2 refresh token")
 
-
         self.log.info('Starting RPC login sequence (app simulation)')
         # making a standard call, like it is also done by the client
         self.get_player()
@@ -1156,7 +1155,6 @@ class PGoApi:
         if not response:
             self.log.info('Login failed!')
             return False
-
 
         if 'auth_ticket' in response:
             self._auth_provider.set_ticket(response['auth_ticket'].values())
