@@ -1,3 +1,8 @@
+# Post-Unknown6 changes:
+
+The current version of the bot currently requires the encrypt library. Hop on the #poketrainer slack to find out more.
+
+
 # Please do not sell the bot, or use it to sell accounts/power leveling or what have you. If you really can't help yourself from trying to make money on it, please donate a portion of your profits to [Kiva](https://www.kiva.org/).
 ## To the people that have done so already (heard from quite a few already), thank you for making the world a better place.
 
@@ -16,7 +21,7 @@
 
  #### Rename `config.json.example` to `config.json`
 ```
-usage: python pokecli.py [-h] [-i CONFIG_INDEX] [-l LOCATION] [-d]
+usage: pokecli.py [-h] [-i CONFIG_INDEX] [-l LOCATION] [-e ENCRYPT_LIB] [-d]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -24,6 +29,8 @@ optional arguments:
                         Index of account in config.json
   -l LOCATION, --location LOCATION
                         Location
+  -e ENCRYPT_LIB, --encrypt-lib ENCRYPT_LIB
+                        encrypt lib, libencrypt.so/encrypt.dll
   -d, --debug           Debug Mode
 ```
 
