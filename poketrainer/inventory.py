@@ -1,6 +1,8 @@
 from __future__ import absolute_import
+
 import json
 from collections import defaultdict
+
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory_Enum
 
 

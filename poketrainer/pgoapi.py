@@ -44,15 +44,20 @@ import gevent
 import six
 from cachetools import TTLCache
 from gevent.coros import BoundedSemaphore
-
 from pgoapi.exceptions import (AuthException, AuthTokenExpiredException,
                                NotLoggedInException,
                                ServerApiEndpointRedirectException,
                                ServerBusyOrOfflineException,
                                UnexpectedResponseException)
+from pgoapi.pgoapi import PGoApi as basePGoApi
+from pgoapi.protos.POGOProtos import Enums_pb2
+from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
+from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
+from pgoapi.rpc_api import RpcApi
+
 from .inventory import Inventory as Player_Inventory
-from .location import (distance_in_meters, filtered_forts,
-                       get_increments, get_neighbors, get_route)
+from .location import (distance_in_meters, filtered_forts, get_increments,
+                       get_neighbors, get_route)
 from .player import Player as Player
 from .player_stats import PlayerStats as PlayerStats
 from .poke_utils import (create_capture_probability, get_inventory_data,
@@ -60,7 +65,6 @@ from .poke_utils import (create_capture_probability, get_inventory_data,
 from .pokedex import pokedex
 from .pokemon import POKEMON_NAMES, Pokemon
 from .release.base import ReleaseMethodFactory
-from pgoapi.rpc_api import RpcApi
 
 from pgoapi.pgoapi import PGoApi as basePGoApi
 
@@ -1255,7 +1259,6 @@ class PGoApi(basePGoApi):
             if self.use_cache and self.experimental and self.enable_caching:
                 self.spin_all_cached_forts()
             else:
-<<<<<<< 6fbcaf5465630f3d1464420da2721b7e92c9f36a
                 if self.experimental and self.spin_all_forts:
                     self.spin_all_forts_visible()
                 else:
@@ -1268,14 +1271,6 @@ class PGoApi(basePGoApi):
                     # self.gsleep(4)
                     catch_attempt += 1
                     pass
-=======
-                self.spin_near_fort()
-            # if catching fails 10 times, maybe you are sofbanned.
-            # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
-            while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
-                # self.gsleep(4)
-                catch_attempt += 1
->>>>>>> ran autoflake and cleaned up errors
             if catch_attempt > self.max_catch_attempts:
                 self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times",
                               catch_attempt)

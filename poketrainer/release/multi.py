@@ -1,10 +1,12 @@
 import copy
 import logging
 
+
 from six import iteritems
 
-import base
 from pgoapi.protos.POGOProtos import Enums_pb2
+
+import base
 
 logger = logging.getLogger(__name__)
 
