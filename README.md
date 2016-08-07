@@ -1,7 +1,16 @@
 # Post-Unknown6 changes:
 
-The current version of the bot currently requires the encrypt library. Hop on the #poketrainer slack to find out more.
+# The current version of the bot currently requires the encrypt library. Hop on the #poketrainer slack to find out more.
+### Long story short, you need to make `libencrypt.so` or `encrypt.dll` by finding the `c_code` folder of one of the `unknown6` repositories and running `make clean; make`. You then put the built files into the same folder as pokecli.py and run it with:
+```python pokecli.py -i ACCOUNT_INDEx -e YOUR_ENCRYPT_LIB_NAME_GOES_HERE.DLL.SO```
 
+
+
+----
+
+----
+
+----
 
 # Please do not sell the bot, or use it to sell accounts/power leveling or what have you. If you really can't help yourself from trying to make money on it, please donate a portion of your profits to [Kiva](https://www.kiva.org/).
 ## To the people that have done so already (heard from quite a few already), thank you for making the world a better place.
