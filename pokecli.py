@@ -37,55 +37,36 @@ import os.path
 import socket
 from time import sleep
 
+import thread
+import eventlet
+from eventlet import wsgi, tpool
 import gevent
 import zerorpc
 from six import PY2, iteritems
 
-from poketrainer.poketrainer import Poketrainer
+from poketrainer.api_wrapper import ApiWrapper
 from listener import Listener
+
+import webserver
 
 logger = logging.getLogger(__name__)
 
-
-def dict_merge(dct, merge_dct):
-    for k, v in iteritems(merge_dct):
-        if (
-            k in dct and isinstance(dct[k], dict) and
-            isinstance(merge_dct[k], collections.Mapping)
-        ):
-            dict_merge(dct[k], merge_dct[k])
-        else:
-            dct[k] = merge_dct[k]
-    return dct
+poketrainers = []
+pool = eventlet.GreenPool()
 
 
-def init_config():
+def init_arguments():
     parser = argparse.ArgumentParser()
-    config_file = "config.json"
-
-    # If config file exists, load variables from json
-    load = {}
-    if os.path.isfile(config_file):
-        with open(config_file) as data:
-            load.update(json.load(data))
-
     # Read passed in Arguments
-    parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
-    parser.add_argument("-l", "--location", help="Location")
+    parser.add_argument("-i", "--config_index", help="Index of account to start in config.json", type=int)
+    parser.add_argument("-l", "--location",
+                        help="Location. Only applies if an account was selected through config_index parameter")
+    parser.add_argument("-w", "--start_webserver",
+                        help="Start Webserver. Does not apply if an account was selected through config_index parameter",
+                        action='store_true', default=False)
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
-    config = parser.parse_args()
-    defaults = load.get('defaults', {})
-    account = load['accounts'][config.__dict__['config_index']]
-    load = dict_merge(defaults, account)
-    # Passed in arguments shoud trump
-    for key, value in iteritems(load):
-        if key not in config.__dict__ or not config.__dict__[key]:
-            config.__dict__[key] = value
-    if config.auth_service not in ['ptc', 'google']:
-        logger.error("Invalid Auth service specified! ('ptc' or 'google')")
-        return None
-
-    return config.__dict__
+    arguments = parser.parse_args()
+    return arguments.__dict__, arguments.__dict__['config_index'], arguments.__dict__['start_webserver'], arguments.__dict__['debug']
 
 
 def main(prev_location=None):
@@ -101,57 +82,76 @@ def main(prev_location=None):
     # log level for internal pgoapi class
     logging.getLogger("rpc_api").setLevel(logging.INFO)
 
-    config = init_config()
+    config, config_index, start_webserver, debug = init_config()
     if not config:
         return
 
-    if config["debug"]:
+    if debug:
         logging.getLogger("requests").setLevel(logging.DEBUG)
         logging.getLogger("pgoapi").setLevel(logging.DEBUG)
         logging.getLogger("poketrainer").setLevel(logging.DEBUG)
         logging.getLogger("rpc_api").setLevel(logging.DEBUG)
 
 
-    desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
-    sock_port = 0
-    s = socket.socket()
-    s.bind(("", 0))  # let the kernel find a free port
-    sock_port = s.getsockname()[1]
-    s.close()
-    data = {}
+    #desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
+    #sock_port = 0
+    #s = socket.socket()
+    #s.bind(("", 0))  # let the kernel find a free port
+    #sock_port = s.getsockname()[1]
+    #s.close()
+    #data = {}
 
-    if os.path.isfile(desc_file):
-        with open(desc_file, 'r+') as f:
-            data = f.read()
-            if PY2:
-                data = json.loads(data.encode() if len(data) > 0 else '{}')
-            else:
-                data = json.loads(data if len(data) > 0 else '{}')
-    data[config["username"]] = sock_port
-    with open(desc_file, "w+") as f:
-        f.write(json.dumps(data, indent=2))
+    #if os.path.isfile(desc_file):
+    #    with open(desc_file, 'r+') as f:
+    #        data = f.read()
+    #        if PY2:
+    #            data = json.loads(data.encode() if len(data) > 0 else '{}')
+    #        else:
+    #            data = json.loads(data if len(data) > 0 else '{}')
+    #data[config["username"]] = sock_port
+    #with open(desc_file, "w+") as f:
+    #    f.write(json.dumps(data, indent=2))
 
-    # instantiate pgoapi
-    bot = Poketrainer(config, prev_location)
+    # instantiate api wrapper
+    #api_wrapper = ApiWrapper(config, prev_location)
 
-    s = zerorpc.Server(Listener(bot))
-    s.bind("tcp://127.0.0.1:%i" % sock_port)  # the free port should still be the same
-    gevent.spawn(s.run)
+    #s = zerorpc.Server(Listener(api_wrapper))
+    #s.bind("tcp://127.0.0.1:%i" % sock_port)  # the free port should still be the same
+    #gevent.spawn(s.run)
 
-    # main loop
-    while True:
+    #poketrainer = Poketrainer(api_wrapper)
+
+    #gevent.spawn(api_wrapper.main_loop)
+    #gevent.spawn(poketrainer.main_loop)
+
+    # if config_index is set, start the according thread
+    if config_index is not None:
+        poketrainer = ApiWrapper(config_index, pool, prev_location)
+        poketrainer.open_socket()
+        poketrainer.start()
         try:
-            bot.main_loop()
-        except Exception as e:
-            logger.exception('Error in main loop %s, restarting at location: %s', e, bot.api.get_position())
-            # restart after sleep
-            sleep(30)
-            try:
-                main(bot.api.get_position())
-            except KeyboardInterrupt:
-                raise
-            except:
-                pass
+            poketrainer.thread.wait()
+        except KeyboardInterrupt:
+            logger.info('Exiting...')
+            exit(0)
+    # not config_index set, load all accounts
+    else:
+        # create a class for each account configured
+        for config_index, account_config in enumerate(config):
+            poketrainers.append(ApiWrapper(config_index, pool, prev_location))
+
+        # start all threads that are configured to auto-start
+        for i, account_config in enumerate(config):
+            if account_config.get('autostart', False):
+                poketrainers[0].start()
+                poketrainers.append(ApiWrapper(account_config, pool, prev_location))
+
+        try:
+            web_thread = pool.spawn(webserver.main, poketrainers)
+            web_thread.wait()
+        except KeyboardInterrupt:
+            logger.info('Exiting...')
+
 
 if __name__ == '__main__':
     main()

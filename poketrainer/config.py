@@ -9,14 +9,14 @@ from library.api.pgoapi.protos.POGOProtos import Enums_pb2 as Enums
 class Config:
 
     def __init__(self, config):
-        self._config_data = config
+        self.__config_data = config
+        self.__password = config["password"]
+        self.__password_used = False
 
         self.location = config["location"]
         self.auth_service = config["auth_service"]
         self.username = config["username"]
-        self.password = config["password"]
         self.gmaps_api_key = config.get("GMAPS_API_KEY", "")
-
 
         self.step_size = config.get("BEHAVIOR", {}).get("STEP_SIZE", 200)
         self.wander_steps = config.get("BEHAVIOR", {}).get("WANDER_STEPS", 0)
@@ -27,7 +27,6 @@ class Config:
         self.spin_all_forts = config.get("BEHAVIOR", {}).get("SPIN_ALL_FORTS", False)
         self.stay_within_proximity = config.get("BEHAVIOR", {}).get("STAY_WITHIN_PROXIMITY",
                                                                     9999999)  # Stay within proximity
-
         self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True)
         self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
         self.min_failed_attempts_before_using_berry = config.get("CAPTURE", {}).get("MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY", 3)
@@ -86,3 +85,9 @@ class Config:
         self.list_inventory_before_cleanup = config.get("CONSOLE_OUTPUT", {}).get("LIST_INVENTORY_BEFORE_CLEANUP",
                                                                                   True)  # list inventory in console
 
+    def get_password(self):
+        # for security reasons, we only make the password available once
+        if not self.__password_used:
+            self.__password_used = True
+            return self.__password
+        return ''

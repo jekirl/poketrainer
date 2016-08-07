@@ -1,43 +1,19 @@
-"""
-pgoapi - Pokemon Go API
-Copyright (c) 2016 tjado <https://github.com/tejado>
-Modifications Copyright (c) 2016 j-e-k <https://github.com/j-e-k>
-Modifications Copyright (c) 2016 Brad Smith <https://github.com/infinitewarp>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
-OR OTHER DEALINGS IN THE SOFTWARE.
-
-Author: tjado <https://github.com/tejado>
-Modifications by: j-e-k <https://github.com/j-e-k>
-Modifications by: Brad Smith <https://github.com/infinitewarp>
-"""
-
 from __future__ import absolute_import
 
 import json
 import logging
+import os
+import os.path
+import socket
 from collections import defaultdict
 from itertools import chain
 from time import time
 
-import eventlet
-import gevent
 import six
+import eventlet
+from eventlet import wsgi
+from six import PY2, iteritems
+import gevent
 from cachetools import TTLCache
 from gevent.coros import BoundedSemaphore
 
@@ -53,12 +29,14 @@ from .poke_utils import (create_capture_probability, get_inventory_data,
 from .pokedex import pokedex
 
 from helper.exceptions import (AuthException, TooManyEmptyResponses)
+from helper.utilities import dict_merge
 from .location import (distance_in_meters, filtered_forts,
                        get_increments, get_location, get_neighbors, get_route)
 from .player import Player as Player
 from .pokemon import POKEMON_NAMES, Pokemon
 from .release.base import ReleaseMethodFactory
 from .config import Config
+from .poketrainer import Poketrainer
 
 if six.PY3:
     from builtins import map as imap
@@ -68,23 +46,29 @@ elif six.PY2:
 logger = logging.getLogger(__name__)
 
 
-class Poketrainer:
-    def __init__(self, api_wrapper):
+class ApiWrapper:
+    def __init__(self, config_index, thread_pool, force_debug=False):
 
-        self.counter = 0
+        self.trainer = None
+        self.thread = None
+        self.socket = None
+        self.thread_pool = thread_pool
+        self.config_index = config_index
+        self.force_debug = force_debug
+
         self.log = logging.getLogger(__name__)
 
         # objects
-        self.api_wrapper = api_wrapper
-        self.config = api_wrapper.config
-        self.releaseMethodFactory = ReleaseMethodFactory(api_wrapper.config)
+        self.config = None
+        self.releaseMethodFactory = ReleaseMethodFactory(config)
         self.player = Player({})
         self.player_stats = PlayerStats({})
         self.inventory = Player_Inventory(self.config.ball_priorities, [])
 
-        self.api = api_wrapper.api
+        self.api = None
         self._origPosF = (0, 0, 0)
         self._posf = (0, 0, 0)
+        self.load_api(prev_location)
 
         # config values that might be changed during runtime
         self.step_size = self.config.step_size
@@ -129,274 +113,285 @@ class Poketrainer:
                 "FARM_ITEMS has been disabled due to farming threshold being below the continue. Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")
 
     def sleep(self, t):
-        self.api_wrapper.sleep(t)
+        eventlet.sleep(t * self.config.sleep_mult)
+        #gevent.sleep(t * self.config.sleep_mult)
 
-    def heartbeat(self):
-        # making a standard call to update position, etc
-        req = self.api.create_request()
-        req.get_player()
-        if self._heartbeat_number % 10 == 0:
-            req.check_awarded_badges()
-            req.get_inventory()
-        res = req.call()
+    def open_socket(self):
+        desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
+        s = socket.socket()
+        s.bind(("", 0))  # let the kernel find a free port
+        sock_port = s.getsockname()[1]
+        s.close()
+        data = {}
+
+        if os.path.isfile(desc_file):
+            with open(desc_file, 'r+') as f:
+                data = f.read()
+                if PY2:
+                    data = json.loads(data.encode() if len(data) > 0 else '{}')
+                else:
+                    data = json.loads(data if len(data) > 0 else '{}')
+        data[self.config["username"]] = sock_port
+        with open(desc_file, "w+") as f:
+            f.write(json.dumps(data, indent=2))
+
+        self.socket = self.thread_pool.spawn(wsgi.server, eventlet.listen(('127.0.0.1', sock_port)), self)
+
+    def load_api(self, prev_location=None):
+        self.log.info('login process')
+        return
+        self.api = PGoApi()
+
+        # get position and set it in the API
+        position = get_location(self.config.location)
+        self._origPosF = position
+        if prev_location:
+            position = prev_location
+        self._posf = position
+        self.api.set_position(*position)
+
+        # retry login every 30 seconds if any errors
+        self.log.info('Starting Login process...')
+        while not self.api.login(self.config.auth_service, self.config.username, self.config.get_password()):
+            logger.error('Login error, retrying Login in 30 seconds')
+            self.sleep(30)
+        self.log.info('Login successful')
+
+    '''
+    Blocking lock
+        - only locks if current thread (greenlet) doesn't own the lock
+        - persist=True will ensure the lock will not be released until the user
+          explicitly sets self.persist_lock=False.
+    '''
+    def cond_lock(self, persist=False):
+        if self.sem.locked():
+            if self.locker == id(gevent.getcurrent()):
+                self.log.debug("Locker is -- %s. No need to re-lock", id(gevent.getcurrent()))
+                return
+            else:
+                self.log.debug("Already locked by %s. Greenlet %s will wait...", self.locker, id(gevent.getcurrent()))
+        self.sem.acquire()
+        self.persist_lock = persist
+        self.log.debug("%s acquired lock (persist=%s)!", id(gevent.getcurrent()), persist)
+        self.locker = id(gevent.getcurrent())
+
+    '''
+    Releases the lock if needed and the user didn't persist it
+    '''
+    def cond_release(self):
+        if self.sem.locked() and \
+                        self.locker == id(gevent.getcurrent()) and not self.persist_lock:
+            self.log.debug("%s is now releasing lock", id(gevent.getcurrent()))
+            self.sem.release()
+
+    # newest event always locks all previous events, no matter where they are, right?
+    # that's not cool
+    def call_old(self):
+        # before doing stuff
+        self.cond_lock()
+        try:
+            # getting id of current event
+            gevent_id = id(gevent.getcurrent())
+        finally:
+            # after we're done
+            self.cond_release()
+
+    # instead of a full heartbeat, just update position.
+    # useful for sniping for example
+    def send_update_pos(self):
+        res = self.api.get_player()
         if not res or res.get("direction", -1) == 102:
-            self.log.error("There were a problem responses for api call: %s. Restarting!!!", res)
-            raise AuthException("Token probably expired?")
-        self.log.debug(
-            'Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2, default=lambda obj: obj.decode('utf8'))))
+            self.log.error("There were a problem responses for api call: %s. Can't snipe!", res)
+            return False
+        return True
 
-        responses = res.get('responses', {})
-        if 'GET_PLAYER' in responses:
-            self.player = Player(responses.get('GET_PLAYER', {}).get('player_data', {}))
-            self.log.info("Player Info: {0}, Pokemon Caught in this run: {1}".format(self.player, self.pokemon_caught))
+    def snipe_pokemon(self, lat, lng):
+        self.cond_lock(persist=True)
 
+        self.sleep(
+            2)  # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
+        curr_lat = self._posf[0]
+        curr_lng = self._posf[1]
+
+        try:
+            self.log.info("Sniping pokemon at %f, %f", lat, lng)
+            self.log.info("Waiting for API limit timer ...")
+            while time() - self._last_got_map_objects < self._map_objects_rate_limit:
+                self.sleep(0.1)
+
+            # move to snipe location
+            self.api.set_position(lat, lng, 0.0)
+            if not self.send_update_pos():
+                return False
+
+            self.log.debug("Teleported to sniping location %f, %f", lat, lng)
+
+            # find pokemons in dest
+            map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
+            pokemons = self.flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
+
+            # catch first pokemon:
+            origin = (self._posf[0], self._posf[1])
+            pokemon_rarity_and_dist = [
+                (
+                    pokemon, pokedex.get_rarity_by_id(pokemon['pokemon_id']),
+                    distance_in_meters(origin, (pokemon['latitude'], pokemon['longitude']))
+                )
+                for pokemon in pokemons]
+            pokemon_rarity_and_dist.sort(key=lambda x: x[1], reverse=True)
+
+            if pokemon_rarity_and_dist:
+                self.log.info("Rarest pokemon: : %s", POKEMON_NAMES[str(pokemon_rarity_and_dist[0][0]['pokemon_id'])])
+                return self.encounter_pokemon(pokemon_rarity_and_dist[0][0], new_loc=(curr_lat, curr_lng))
+            else:
+                self.log.info("No nearby pokemon. Can't snipe!")
+                return False
+
+        finally:
+            self.api.set_position(curr_lat, curr_lng, 0.0)
+            self.send_update_pos()
+            self.log.debug("Teleported back to origin at %f, %f", self._posf[0], self._posf[1])
+            # self.sleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
+            self.persist_lock = False
+            self.cond_release()
+
+    def update_player_inventory(self):
+        res = self.api.get_inventory()
         if 'GET_INVENTORY' in res.get('responses', {}):
-
-            # update objects
-            inventory_items = responses.get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
+            inventory_items = res.get('responses', {}) \
+                .get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
             self.inventory = Player_Inventory(self.config.ball_priorities, inventory_items)
-            for inventory_item in self.inventory.inventory_items:
-                if "player_stats" in inventory_item['inventory_item_data']:
-                    self.player_stats = PlayerStats(
-                        inventory_item['inventory_item_data']['player_stats'],
-                        self.start_time, self.exp_start,
-                        self.pokemon_caught
-                    )
-                    if self.exp_start is None:
-                        self.exp_start = self.player_stats.run_exp_start
-                    self.log.info("Player Stats: {}".format(self.player_stats))
-            if self.config.list_inventory_before_cleanup:
-                self.log.info("Player Items Before Cleanup: %s", self.inventory)
-            self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
-            self.log.info("Player Inventory after cleanup: %s", self.inventory)
-            if self.config.list_pokemon_before_cleanup:
-                self.log.info(get_inventory_data(res, self.player_stats.level, self.config.score_method,
-                                                 self.config.score_settings))
-
-            # save data dump
-            with open("data_dumps/%s.json" % self.config.username, "w") as f:
-                responses['lat'] = self._posf[0]
-                responses['lng'] = self._posf[1]
-                responses['hourly_exp'] = self.player_stats.run_hourly_exp
-                f.write(json.dumps(responses, indent=2, default=lambda obj: obj.decode('utf8')))
-
-            # maintenance
-            self.incubate_eggs()
-            self.use_lucky_egg()
-            self.attempt_evolve(self.inventory.inventory_items)
-            self.cleanup_pokemon(self.inventory.inventory_items)
-
-            # Farm precon
-            if self.config.farm_items_enabled:
-                pokeball_count = 0
-                if not self.config.farm_ignore_pokeball_count:
-                    pokeball_count += self.inventory.poke_balls
-                if not self.config.farm_ignore_greatball_count:
-                    pokeball_count += self.inventory.great_balls
-                if not self.config.farm_ignore_ultraball_count:
-                    pokeball_count += self.inventory.ultra_balls
-                if not self.config.farm_ignore_masterball_count:
-                    pokeball_count += self.inventory.master_balls
-                if self.config.pokeball_farm_threshold > pokeball_count and not self._farm_mode_triggered:
-                    self.should_catch_pokemon = False
-                    self._farm_mode_triggered = True
-                    self.log.info("Player only has %s Pokeballs, farming for more...", pokeball_count)
-                    if self.config.farm_override_step_size != -1:
-                        self.step_size = self.config.farm_override_step_size
-                        self.log.info("Player has changed speed to %s", self.step_size)
-                elif self.config.pokeball_continue_threshold <= pokeball_count and self._farm_mode_triggered:
-                    self.should_catch_pokemon = self.config.should_catch_pokemon  # Restore catch pokemon setting from config file
-                    self._farm_mode_triggered = False
-                    self.log.info("Player has %s Pokeballs, continuing to catch more!", pokeball_count)
-                    if self.config.farm_override_step_size != -1:
-                        self.step_size = self.config.step_size
-                        self.log.info("Player has returned to normal speed of %s", self.step_size)
-        self._heartbeat_number += 1
         return res
 
-    def walk_to(self, loc, waypoints=[], directly=False):  # location in floats of course...
-        # If we are going directly we don't want to follow a google maps
-        # walkable route.
-        use_google = self.config.use_google
+    def get_player_inventory(self, as_json=True):
+        return self.inventory.to_json()
 
-        if directly is True:
-            use_google = False
-
-        step_size = self.step_size
-        route_data = get_route(
-            self._posf, loc, use_google, self.config.gmaps_api_key,
-            self.config.experimental and self.config.spin_all_forts, waypoints,
-            step_size=step_size
-        )
-        catch_attempt = 0
-        base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (self._posf[0], self._posf[1])
-        total_distance_traveled = 0
-        total_distance = route_data['total_distance']
-        self.log.info('===============================================')
-        self.log.info("Total trip distance will be: {0:.2f} meters".format(total_distance))
-
-        for step_data in route_data['steps']:
-            step = (step_data['lat'], step_data['long'])
-            step_increments = get_increments(self._posf, step, step_size)
-
-            for i, next_point in enumerate(step_increments):
-                distance_to_point = distance_in_meters(self._posf, next_point)
-                total_distance_traveled += distance_to_point
-                travel_link = '%s%s,%s' % (base_travel_link, next_point[0], next_point[1])
-                self.log.info("Travel Link: %s", travel_link)
-                self.api.set_position(*next_point)
-                self.heartbeat()
-
-                if directly is False:
-                    if self.config.experimental and self.config.spin_all_forts:
-                        self.spin_nearest_fort()
-
-                # self.sleep(1)
-                while self.catch_near_pokemon() and catch_attempt <= self.config.max_catch_attempts:
-                    self.sleep(1)
-                    catch_attempt += 1
-                catch_attempt = 0
-
-            self.log.info('Traveled %.2f meters of %.2f of the trip', total_distance_traveled, total_distance)
-        self.log.info('===============================================')
-
-    def walk_back_to_origin(self):
-        self.walk_to(self._origPosF)
-
-    def spin_nearest_fort(self):
-        map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
-        forts = self.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.config.stay_within_proximity,
-                                      self.visited_forts)
-        if destinations:
-            nearest_fort = destinations[0][0]
-            nearest_fort_dis = destinations[0][1]
-            self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
-
-            # Fort is close enough to change our route and walk to
-            if self.config.wander_steps > 0 and nearest_fort_dis > 40.00 and nearest_fort_dis <= self.config.wander_steps:
-                self.walk_to_fort(destinations[0], directly=True)
-            elif nearest_fort_dis <= 40.00:
-                self.fort_search_pgoapi(nearest_fort, player_postion=self.api.get_position(),
-                                        fort_distance=nearest_fort_dis)
-                if 'lure_info' in nearest_fort and self.should_catch_pokemon:
-                    self.disk_encounter_pokemon(nearest_fort['lure_info'])
-
+    def use_lucky_egg(self):
+        if self.config.use_lucky_egg and \
+                self.inventory.has_lucky_egg() and time() - self._last_egg_use_time > 30 * 60:
+            response = self.api.use_item_xp_boost(item_id=Item_Enums.ITEM_LUCKY_EGG)
+            result = response.get('responses', {}).get('USE_ITEM_XP_BOOST', {}).get('result', -1)
+            if result == 1:
+                self.log.info("Ate a lucky egg! Yummy! :)")
+                self.inventory.take_lucky_egg()
+                self._last_egg_use_time = time()
+                return True
+            elif result == 3:
+                self.log.info("Lucky egg already active")
+                return False
+            else:
+                self.log.info("Lucky Egg couldn't be used, status code %s", result)
+                return False
         else:
-            self.log.info('No spinnable forts within proximity. Or server returned no map objects.')
-            self._error_counter += 1
-
-    def spin_all_forts_visible(self):
-        res = self.nearby_map_objects()
-        map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
-        forts = self.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.config.stay_within_proximity,
-                                      self.visited_forts)
-        if not destinations:
-            self.log.debug("No fort to walk to! %s", res)
-            self.log.info('No more spinnable forts within proximity. Or server error')
-            self._error_counter += 1
-            self.walk_back_to_origin()
             return False
-        if len(destinations) >= 20:
-            destinations = destinations[:20]
-        furthest_fort = destinations[0][0]
-        self.log.info("Walking to fort at  http://maps.google.com/maps?q=%s,%s", furthest_fort['latitude'],
-                      furthest_fort['longitude'])
-        self.walk_to((furthest_fort['latitude'], furthest_fort['longitude']),
-                     map(lambda x: "via:%f,%f" % (x[0]['latitude'], x[0]['longitude']), destinations[1:]))
+
+    def fort_search_pgoapi(self, fort, player_postion, fort_distance):
+        self.sleep(0.2)
+        res = self.api.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'],
+                                   fort_longitude=fort['longitude'],
+                                   player_latitude=player_postion[0],
+                                   player_longitude=player_postion[1])
+        result = -1
+        if res:
+            res = res.get('responses', {}).get('FORT_SEARCH', {})
+            result = res.pop('result', -1)
+        if result == 1:
+            self.log.info("Visiting fort... (http://maps.google.com/maps?q=%s,%s)", fort['latitude'], fort['longitude'])
+            if "items_awarded" in res:
+                items = defaultdict(int)
+                for item in res['items_awarded']:
+                    items[item['item_id']] += item['item_count']
+                reward = 'XP +' + str(res['experience_awarded'])
+                for item_id, amount in six.iteritems(items):
+                    reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
+                self.log.info("Fort spun, yielding: %s",
+                              reward)
+            else:
+                self.log.info("Fort spun, but did not yield any rewards. Possible soft ban?")
+            self.visited_forts[fort['id']] = fort
+        elif result == 4:
+            self.log.debug("For spinned but Your inventory is full : %s", res)
+            self.log.info("For spinned but Your inventory is full.")
+            self.visited_forts[fort['id']] = fort
+        elif result == 2:
+            self.log.debug("Could not spin fort -  fort not in range %s", res)
+            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Not in Range %s", fort['latitude'],
+                          fort['longitude'], fort_distance)
+        elif result == 3:
+            self.log.debug("Could not spin fort -  still on cooldown %s", res)
+            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Still on cooldown",
+                          fort['latitude'],
+                          fort['longitude'])
+        else:
+            self.log.debug("Could not spin fort %s", res)
+            self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Error id: %s", fort['latitude'],
+                          fort['longitude'], result)
+            return False
         return True
 
-    def return_to_start(self):
-        self.api.set_position(*self._origPosF)
+    def nearby_map_objects(self):
+        self.sleep(10.0)
+        if time() - self._last_got_map_objects > self._map_objects_rate_limit:
+            position = self.api.get_position()
+            neighbors = get_neighbors(self._posf)
+            gevent.sleep(1.0)
+            self.map_objects = self.api.get_map_objects(
+                latitude=position[0], longitude=position[1],
+                since_timestamp_ms=[0] * len(neighbors),
+                cell_id=neighbors)
+            self._last_got_map_objects = time()
+            print(self.map_objects)
+            exit()
+        return self.map_objects
 
-    def walk_to_fort(self, fort_data, directly=False):
-        fort = fort_data[0]
-        self.log.info(
-            "Walking to fort at  http://maps.google.com/maps?q=%s,%s",
-            fort['latitude'], fort['longitude'])
-        self.walk_to((fort['latitude'], fort['longitude']), directly=directly)
-        self.fort_search_pgoapi(fort, self.api.get_position(), fort_data[1])
-        if 'lure_info' in fort and self.should_catch_pokemon:
-            self.disk_encounter_pokemon(fort['lure_info'])
+    def attempt_catch(self, encounter_id, spawn_point_id, capture_probability=None):
+        catch_status = -1
+        catch_attempts = 1
+        ret = {}
+        if not capture_probability:
+            capture_probability = {}
+        # Max 4 attempts to catch pokemon
+        while catch_status != 1 and self.inventory.can_attempt_catch() and catch_attempts <= self.config.max_catch_attempts:
+            item_capture_mult = 1.0
 
-    def spin_near_fort(self):
-        res = self.nearby_map_objects()
-        map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
-        forts = self.flatmap(lambda c: c.get('forts', []), map_cells)
-        destinations = filtered_forts(self._origPosF, self._posf, forts, self.config.stay_within_proximity,
-                                      self.visited_forts)
-        if not destinations:
-            self.log.debug("No fort to walk to! %s", res)
-            self.log.info('No more spinnable forts within proximity. Returning back to origin')
-            self.walk_back_to_origin()
-            return False
+            # Try to use a berry to increase the chance of catching the pokemon when we have failed enough attempts
+            if catch_attempts > self.config.min_failed_attempts_before_using_berry \
+                    and self.inventory.has_berry():
+                self.log.info("Feeding da razz berry!")
+                self.sleep(0.2)
+                r = self.api.use_item_capture(item_id=self.inventory.take_berry(), encounter_id=encounter_id,
+                                              spawn_point_id=spawn_point_id) \
+                    .get('responses', {}).get('USE_ITEM_CAPTURE', {})
+                if r.get("success", False):
+                    item_capture_mult = r.get("item_capture_mult", 1.0)
+                else:
+                    self.log.info("Could not feed the Pokemon. (%s)", r)
 
-        for fort_data in destinations:
-            self.walk_to_fort(fort_data)
-
-        return True
-
-    def catch_near_pokemon(self):
-        if self.should_catch_pokemon is False:
-            return False
-
-        map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
-        pokemons = self.flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
-        pokemons = filter(lambda p: (p['encounter_id'] not in self.encountered_pokemons), pokemons)
-
-        # catch first pokemon:
-        origin = (self._posf[0], self._posf[1])
-        pokemon_distances = [(pokemon, distance_in_meters(origin, (pokemon['latitude'], pokemon['longitude']))) for
-                             pokemon
-                             in pokemons]
-        if pokemons:
-            self.log.debug("Nearby pokemon: : %s", pokemon_distances)
-            self.log.info("Nearby Pokemon: %s",
-                          ", ".join(map(lambda x: POKEMON_NAMES[str(x['pokemon_id'])], pokemons)))
-        else:
-            self.log.info("No nearby pokemon")
-        catches_successful = False
-        for pokemon_distance in pokemon_distances:
-            target = pokemon_distance
-            self.log.debug("Catching pokemon: : %s, distance: %f meters", target[0], target[1])
-            catches_successful &= self.encounter_pokemon(target[0])
-            # self.sleep(random.randrange(4, 8))
-        return catches_successful
-
-    def cleanup_inventory(self, inventory_items=None):
-        if not inventory_items:
-            self.sleep(0.2)
-            inventory_items = self.api.get_inventory() \
-                .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
-        item_count = 0
-        for inventory_item in inventory_items:
-            if "item" in inventory_item['inventory_item_data']:
-                item = inventory_item['inventory_item_data']['item']
-                if (
-                                    item['item_id'] in self.config.min_items and
-                                    "count" in item and
-                                item['count'] > self.config.min_items[item['item_id']]
-                ):
-                    recycle_count = item['count'] - self.config.min_items[item['item_id']]
-                    item_count += item['count'] - recycle_count
-                    self.log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
-                    self.sleep(0.2)
-                    res = self.api.recycle_inventory_item(item_id=item['item_id'], count=recycle_count) \
-                        .get('responses', {}).get('RECYCLE_INVENTORY_ITEM', {})
-                    response_code = res.get('result', -1)
-                    if response_code == 1:
-                        self.log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
-                            item['item_id']), res.get('new_count', 0)))
-                    else:
-                        self.log.info("Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']),
-                                                                                response_code))
-                    self.sleep(1)
-                elif "count" in item:
-                    item_count += item['count']
-        if item_count > 0:
-            self.log.info("Inventory has {0}/{1} items".format(item_count, self.player.max_item_storage))
-        return self.update_player_inventory()
+            pokeball = self.inventory.take_next_ball(capture_probability)
+            self.log.info("Attempting catch with {0} at {1:.2f}% chance. Try Number: {2}".format(get_item_name(
+                pokeball), item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
+            self.sleep(0.5)
+            r = self.api.catch_pokemon(
+                normalized_reticle_size=1.950,
+                pokeball=pokeball,
+                spin_modifier=0.850,
+                hit_pokemon=True,
+                normalized_hit_position=1,
+                encounter_id=encounter_id,
+                spawn_point_id=spawn_point_id,
+            ).get('responses', {}).get('CATCH_POKEMON', {})
+            catch_attempts += 1
+            if "status" in r:
+                catch_status = r['status']
+                # fleed or error
+                if catch_status == 3 or catch_status == 0:
+                    break
+            ret = r
+            # Sleep between catch attempts
+            # self.sleep(3)
+        # Sleep after the catch (the pokemon animation time)
+        # self.sleep(4)
+        return ret
 
     def get_caught_pokemons(self, inventory_items=None, as_json=False):
         if not inventory_items:
@@ -695,38 +690,53 @@ class Poketrainer:
             self.update_player_inventory()
             return False
 
-    def main_loop(self):
-        i = 0
-        while True:
-            if i > 300:
-                return
-            self.counter += 1
-            self.log.info('Running Poketrainer %s - %s, %s', self.counter, self.api_wrapper.counter, self.api_wrapper.__name__)
-            self.sleep(1.0)
-            i += 1
-        catch_attempt = 0
-        self.heartbeat()
-        while True:
-            self.heartbeat()
-            # self.sleep(1)
+    def load_config(self):
+        config_file = "config.json"
 
-            if self.config.experimental and self.config.spin_all_forts:
-                self.spin_all_forts_visible()
-            else:
-                self.spin_near_fort()
-            # if catching fails 10 times, maybe you are sofbanned.
-            # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
-            while self.catch_near_pokemon() and catch_attempt <= self.config.max_catch_attempts:
-                # self.sleep(4)
-                catch_attempt += 1
-                pass
-            if catch_attempt > self.config.max_catch_attempts:
-                self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times",
-                              catch_attempt)
-            catch_attempt = 0
+        # If config file exists, load variables from json
+        load = {}
+        if os.path.isfile(config_file):
+            with open(config_file) as data:
+                load.update(json.load(data))
 
-            if self._error_counter >= self._error_threshold:
-                raise TooManyEmptyResponses('Too many errors in this run!!!')
+        defaults = load.get('defaults', {})
+        config = load.get('accounts', [])[self.config_index]
+
+        if self.force_debug or config.get('debug', False):
+            logging.getLogger("requests").setLevel(logging.DEBUG)
+            logging.getLogger("pgoapi").setLevel(logging.DEBUG)
+            logging.getLogger("poketrainer").setLevel(logging.DEBUG)
+            logging.getLogger("rpc_api").setLevel(logging.DEBUG)
+
+        if config.get('auth_service', '') not in ['ptc', 'google']:
+            logger.error("Invalid Auth service specified for account %s! ('ptc' or 'google')", i)
+            return False
+
+            # merge account section with defaults
+        self.config = Config(dict_merge(defaults, config))
+        return True
+
+    def callback(self, gt):
+        try:
+            result = gt.wait()
+            logger.info('Thread finished with result: %s', result)
+        except Exception as e:
+            logger.exception('Error in main loop %s, restarting at location: %s',
+                             e, self._posf)
+            # restart after sleep
+            eventlet.sleep(5)
+            self.start()
+
+    def start(self):
+        if self.load_config():
+
+            self.trainer = Poketrainer(self)
+            self.thread = self.thread_pool.spawn(self.trainer.main_loop)
+            self.thread.link(self.callback)
+
+    def stop(self):
+        self.thread.kill()
+        self.trainer = None
 
     @staticmethod
     def flatmap(f, items):
