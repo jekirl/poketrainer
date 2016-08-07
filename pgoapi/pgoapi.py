@@ -1235,7 +1235,7 @@ class PGoApi:
                 fort['latitude'], fort['longitude'])
             self.walk_to((fort['latitude'], fort['longitude']), directly=False)
             self.fort_search_pgoapi(fort, self.get_position(), distance_in_meters((fort['latitude'], fort['longitude']),
-                                              (self._posf[0], self._posf[1])))
+                                                                                  (self._posf[0], self._posf[1])))
 
         return True
 
