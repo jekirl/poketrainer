@@ -15,8 +15,8 @@
         "SPIN_ALL_FORTS": true,
         "STAY_WITHIN_PROXIMITY": 9999,
         "AUTO_USE_LUCKY_EGG": false,
-        "EXTRA_WAIT" : 0.2,
-        "SLEEP_MULT" : 1.0
+        "EXTRA_WAIT" : 0.3,
+        "SLEEP_MULT" : 1.5
       },
       "CAPTURE": {
         "CATCH_POKEMON": true,
@@ -37,6 +37,7 @@
         "WEEDLE": 12
       },
       "POKEMON_CLEANUP": {
+        "TESTING_MODE": false,
         "MIN_SIMILAR_POKEMON": 1,
         "MAX_SIMILAR_POKEMON": 999,
         "KEEP_POKEMON_NAMES": ["MEWTWO"],
@@ -45,6 +46,37 @@
         "RELEASE_METHOD_CLASSIC": {
           "KEEP_CP_OVER": 500,
           "KEEP_IV_OVER": 50
+        },
+        "RELEASE_METHOD_MULTI": {
+          "MULTI_DEFAULT_RELEASE_METHOD": "CLASSIC",
+          "RELEASE_METHOD_CLASSIC": {
+            "KEEP_IV_OVER": 90
+          },
+          "POKEMON_CONFIGS": {
+            "PIDGEOTTO": {
+              "RELEASE_METHOD": "CLASSIC",
+              "RELEASE_METHOD_CLASSIC": {
+                "KEEP_CP_OVER": 740,
+                "KEEP_IV_OVER": 80
+              }
+            },
+            "RATICATE": {
+              "RELEASE_METHOD_CLASSIC": {
+                "KEEP_CP_OVER": 850
+              }
+            },
+            "PINSIR": {
+              "RELEASE_METHOD_CLASSIC": {
+                "KEEP_CP_OVER": 1100
+              }
+            },
+            "EEVEE": {
+              "RELEASE_METHOD_CLASSIC": {
+                "KEEP_CP_OVER": 650,
+                "KEEP_IV_OVER": 85
+              }
+            }
+          }
         },
         "RELEASE_METHOD_DUPLICATES": {
           "RELEASE_DUPLICATES_MAX_SCORE": 1000,

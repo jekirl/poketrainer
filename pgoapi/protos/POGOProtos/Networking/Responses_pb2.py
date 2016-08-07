@@ -47,13 +47,13 @@ POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Settings_dot_Master__pb2
 POGOProtos_dot_Settings_dot_Master_dot_Item__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Settings_dot_Master_dot_Item__pb2
 POGOProtos_dot_Inventory__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Inventory__pb2
 POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
+POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Data__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Data_dot_Player__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Data_dot_Player__pb2
-POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Settings_dot_Master_dot_Pokemon__pb2 = POGOProtos_dot_Settings_dot_Master__pb2.POGOProtos_dot_Settings_dot_Master_dot_Pokemon__pb2
@@ -85,13 +85,13 @@ POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Map_dot_Fort__pb2.POGOPr
 from POGOProtos.Inventory import Item_pb2 as POGOProtos_dot_Inventory_dot_Item__pb2
 from POGOProtos import Inventory_pb2 as POGOProtos_dot_Inventory__pb2
 POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
+POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Data__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Data_dot_Player__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Data_dot_Player__pb2
-POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Inventory__pb2.POGOProtos_dot_Enums__pb2
 from POGOProtos import Map_pb2 as POGOProtos_dot_Map__pb2
 POGOProtos_dot_Map_dot_Fort__pb2 = POGOProtos_dot_Map__pb2.POGOProtos_dot_Map_dot_Fort__pb2
@@ -127,7 +127,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='POGOProtos.Networking.Responses.proto',
   package='POGOProtos.Networking.Responses',
   syntax='proto3',
-  serialized_pb=_b('\n%POGOProtos.Networking.Responses.proto\x12\x1fPOGOProtos.Networking.Responses\x1a\x1cPOGOProtos.Data.Battle.proto\x1a\x1dPOGOProtos.Data.Capture.proto\x1a\x16POGOProtos.Enums.proto\x1a\x15POGOProtos.Data.proto\x1a POGOProtos.Settings.Master.proto\x1a\x19POGOProtos.Settings.proto\x1a\x1cPOGOProtos.Map.Pokemon.proto\x1a\x1cPOGOProtos.Data.Player.proto\x1a\x19POGOProtos.Data.Gym.proto\x1a\x19POGOProtos.Map.Fort.proto\x1a\x1fPOGOProtos.Inventory.Item.proto\x1a\x1aPOGOProtos.Inventory.proto\x1a\x14POGOProtos.Map.proto\x1a\x1aPOGOProtos.Data.Logs.proto\"\x19\n\x17\x41\x64\x64\x46ortModifierResponse\"\x8c\x03\n\x11\x41ttackGymResponse\x12I\n\x06result\x18\x01 \x01(\x0e\x32\x39.POGOProtos.Networking.Responses.AttackGymResponse.Result\x12\x35\n\nbattle_log\x18\x02 \x01(\x0b\x32!.POGOProtos.Data.Battle.BattleLog\x12\x11\n\tbattle_id\x18\x03 \x01(\t\x12\x42\n\x0f\x61\x63tive_defender\x18\x04 \x01(\x0b\x32).POGOProtos.Data.Battle.BattlePokemonInfo\x12\x42\n\x0f\x61\x63tive_attacker\x18\x05 \x01(\x0b\x32).POGOProtos.Data.Battle.BattlePokemonInfo\"Z\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12 \n\x1c\x45RROR_INVALID_ATTACK_ACTIONS\x10\x02\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\x03\"\xc1\x02\n\x14\x43\x61tchPokemonResponse\x12Q\n\x06status\x18\x01 \x01(\x0e\x32\x41.POGOProtos.Networking.Responses.CatchPokemonResponse.CatchStatus\x12\x14\n\x0cmiss_percent\x18\x02 \x01(\x01\x12\x1b\n\x13\x63\x61ptured_pokemon_id\x18\x03 \x01(\x06\x12<\n\rcapture_award\x18\x04 \x01(\x0b\x32%.POGOProtos.Data.Capture.CaptureAward\"e\n\x0b\x43\x61tchStatus\x12\x0f\n\x0b\x43\x41TCH_ERROR\x10\x00\x12\x11\n\rCATCH_SUCCESS\x10\x01\x12\x10\n\x0c\x43\x41TCH_ESCAPE\x10\x02\x12\x0e\n\nCATCH_FLEE\x10\x03\x12\x10\n\x0c\x43\x41TCH_MISSED\x10\x04\"\x80\x01\n\x1a\x43heckAwardedBadgesResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x33\n\x0e\x61warded_badges\x18\x02 \x03(\x0e\x32\x1b.POGOProtos.Enums.BadgeType\x12\x1c\n\x14\x61warded_badge_levels\x18\x03 \x03(\x05\"\xc2\x02\n\x1e\x43heckCodenameAvailableResponse\x12\x10\n\x08\x63odename\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\x12\x15\n\ris_assignable\x18\x03 \x01(\x08\x12V\n\x06status\x18\x04 \x01(\x0e\x32\x46.POGOProtos.Networking.Responses.CheckCodenameAvailableResponse.Status\"\x88\x01\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1a\n\x16\x43ODENAME_NOT_AVAILABLE\x10\x02\x12\x16\n\x12\x43ODENAME_NOT_VALID\x10\x03\x12\x11\n\rCURRENT_OWNER\x10\x04\x12\x1f\n\x1b\x43ODENAME_CHANGE_NOT_ALLOWED\x10\x05\"\xb0\x02\n\x15\x43laimCodenameResponse\x12\x10\n\x08\x63odename\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\x12\x15\n\ris_assignable\x18\x03 \x01(\x08\x12M\n\x06status\x18\x04 \x01(\x0e\x32=.POGOProtos.Networking.Responses.ClaimCodenameResponse.Status\"\x88\x01\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1a\n\x16\x43ODENAME_NOT_AVAILABLE\x10\x02\x12\x16\n\x12\x43ODENAME_NOT_VALID\x10\x03\x12\x11\n\rCURRENT_OWNER\x10\x04\x12\x1f\n\x1b\x43ODENAME_CHANGE_NOT_ALLOWED\x10\x05\"\xab\x01\n\x19\x43ollectDailyBonusResponse\x12Q\n\x06result\x18\x01 \x01(\x0e\x32\x41.POGOProtos.Networking.Responses.CollectDailyBonusResponse.Result\";\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x0b\n\x07\x46\x41ILURE\x10\x02\x12\x0c\n\x08TOO_SOON\x10\x03\"\x97\x02\n!CollectDailyDefenderBonusResponse\x12Y\n\x06result\x18\x01 \x01(\x0e\x32I.POGOProtos.Networking.Responses.CollectDailyDefenderBonusResponse.Result\x12\x15\n\rcurrency_type\x18\x02 \x03(\t\x12\x18\n\x10\x63urrency_awarded\x18\x03 \x03(\x05\x12\x17\n\x0f\x64\x65\x66\x65nders_count\x18\x04 \x01(\x05\"M\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x0b\n\x07\x46\x41ILURE\x10\x02\x12\x0c\n\x08TOO_SOON\x10\x03\x12\x10\n\x0cNO_DEFENDERS\x10\x04\"\xea\x02\n\x15\x44iskEncounterResponse\x12M\n\x06result\x18\x01 \x01(\x0e\x32=.POGOProtos.Networking.Responses.DiskEncounterResponse.Result\x12\x32\n\x0cpokemon_data\x18\x02 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12H\n\x13\x63\x61pture_probability\x18\x03 \x01(\x0b\x32+.POGOProtos.Data.Capture.CaptureProbability\"\x83\x01\n\x06Result\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x11\n\rNOT_AVAILABLE\x10\x02\x12\x10\n\x0cNOT_IN_RANGE\x10\x03\x12\x1e\n\x1a\x45NCOUNTER_ALREADY_FINISHED\x10\x04\x12\x1a\n\x16POKEMON_INVENTORY_FULL\x10\x05\"\xf0\t\n\x1d\x44ownloadItemTemplatesResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x63\n\x0eitem_templates\x18\x02 \x03(\x0b\x32K.POGOProtos.Networking.Responses.DownloadItemTemplatesResponse.ItemTemplate\x12\x14\n\x0ctimestamp_ms\x18\x03 \x01(\x04\x1a\xc2\x08\n\x0cItemTemplate\x12\x13\n\x0btemplate_id\x18\x01 \x01(\t\x12\x45\n\x10pokemon_settings\x18\x02 \x01(\x0b\x32+.POGOProtos.Settings.Master.PokemonSettings\x12?\n\ritem_settings\x18\x03 \x01(\x0b\x32(.POGOProtos.Settings.Master.ItemSettings\x12?\n\rmove_settings\x18\x04 \x01(\x0b\x32(.POGOProtos.Settings.Master.MoveSettings\x12P\n\x16move_sequence_settings\x18\x05 \x01(\x0b\x32\x30.POGOProtos.Settings.Master.MoveSequenceSettings\x12I\n\x0etype_effective\x18\x08 \x01(\x0b\x32\x31.POGOProtos.Settings.Master.TypeEffectiveSettings\x12\x41\n\x0e\x62\x61\x64ge_settings\x18\n \x01(\x0b\x32).POGOProtos.Settings.Master.BadgeSettings\x12:\n\x06\x63\x61mera\x18\x0b \x01(\x0b\x32*.POGOProtos.Settings.Master.CameraSettings\x12\x45\n\x0cplayer_level\x18\x0c \x01(\x0b\x32/.POGOProtos.Settings.Master.PlayerLevelSettings\x12?\n\tgym_level\x18\r \x01(\x0b\x32,.POGOProtos.Settings.Master.GymLevelSettings\x12\x46\n\x0f\x62\x61ttle_settings\x18\x0e \x01(\x0b\x32-.POGOProtos.Settings.Master.GymBattleSettings\x12I\n\x12\x65ncounter_settings\x18\x0f \x01(\x0b\x32-.POGOProtos.Settings.Master.EncounterSettings\x12\x44\n\x10iap_item_display\x18\x10 \x01(\x0b\x32*.POGOProtos.Settings.Master.IapItemDisplay\x12=\n\x0ciap_settings\x18\x11 \x01(\x0b\x32\'.POGOProtos.Settings.Master.IapSettings\x12L\n\x10pokemon_upgrades\x18\x12 \x01(\x0b\x32\x32.POGOProtos.Settings.Master.PokemonUpgradeSettings\x12J\n\x0f\x65quipped_badges\x18\x13 \x01(\x0b\x32\x31.POGOProtos.Settings.Master.EquippedBadgeSettings\"\xec\x01\n#DownloadRemoteConfigVersionResponse\x12[\n\x06result\x18\x01 \x01(\x0e\x32K.POGOProtos.Networking.Responses.DownloadRemoteConfigVersionResponse.Result\x12#\n\x1bitem_templates_timestamp_ms\x18\x02 \x01(\x04\x12!\n\x19\x61sset_digest_timestamp_ms\x18\x03 \x01(\x04\" \n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\"n\n\x18\x44ownloadSettingsResponse\x12\r\n\x05\x65rror\x18\x01 \x01(\t\x12\x0c\n\x04hash\x18\x02 \x01(\t\x12\x35\n\x08settings\x18\x03 \x01(\x0b\x32#.POGOProtos.Settings.GlobalSettings\"\x1f\n\x0c\x45\x63hoResponse\x12\x0f\n\x07\x63ontext\x18\x01 \x01(\t\"\xb4\x04\n\x11\x45ncounterResponse\x12\x39\n\x0cwild_pokemon\x18\x01 \x01(\x0b\x32#.POGOProtos.Map.Pokemon.WildPokemon\x12Q\n\nbackground\x18\x02 \x01(\x0e\x32=.POGOProtos.Networking.Responses.EncounterResponse.Background\x12I\n\x06status\x18\x03 \x01(\x0e\x32\x39.POGOProtos.Networking.Responses.EncounterResponse.Status\x12H\n\x13\x63\x61pture_probability\x18\x04 \x01(\x0b\x32+.POGOProtos.Data.Capture.CaptureProbability\"\"\n\nBackground\x12\x08\n\x04PARK\x10\x00\x12\n\n\x06\x44\x45SERT\x10\x01\"\xd7\x01\n\x06Status\x12\x13\n\x0f\x45NCOUNTER_ERROR\x10\x00\x12\x15\n\x11\x45NCOUNTER_SUCCESS\x10\x01\x12\x17\n\x13\x45NCOUNTER_NOT_FOUND\x10\x02\x12\x14\n\x10\x45NCOUNTER_CLOSED\x10\x03\x12\x1a\n\x16\x45NCOUNTER_POKEMON_FLED\x10\x04\x12\x1a\n\x16\x45NCOUNTER_NOT_IN_RANGE\x10\x05\x12\x1e\n\x1a\x45NCOUNTER_ALREADY_HAPPENED\x10\x06\x12\x1a\n\x16POKEMON_INVENTORY_FULL\x10\x07\"\xad\x02\n!EncounterTutorialCompleteResponse\x12Y\n\x06result\x18\x01 \x01(\x0e\x32I.POGOProtos.Networking.Responses.EncounterTutorialCompleteResponse.Result\x12\x32\n\x0cpokemon_data\x18\x02 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12<\n\rcapture_award\x18\x03 \x01(\x0b\x32%.POGOProtos.Data.Capture.CaptureAward\";\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x19\n\x15\x45RROR_INVALID_POKEMON\x10\x02\"\xe3\x01\n\x12\x45quipBadgeResponse\x12J\n\x06result\x18\x01 \x01(\x0e\x32:.POGOProtos.Networking.Responses.EquipBadgeResponse.Result\x12\x37\n\x08\x65quipped\x18\x02 \x01(\x0b\x32%.POGOProtos.Data.Player.EquippedBadge\"H\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x13\n\x0f\x43OOLDOWN_ACTIVE\x10\x02\x12\x11\n\rNOT_QUALIFIED\x10\x03\"\xf9\x02\n\x15\x45volvePokemonResponse\x12M\n\x06result\x18\x01 \x01(\x0e\x32=.POGOProtos.Networking.Responses.EvolvePokemonResponse.Result\x12:\n\x14\x65volved_pokemon_data\x18\x02 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12\x1a\n\x12\x65xperience_awarded\x18\x03 \x01(\x05\x12\x15\n\rcandy_awarded\x18\x04 \x01(\x05\"\xa1\x01\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1a\n\x16\x46\x41ILED_POKEMON_MISSING\x10\x02\x12!\n\x1d\x46\x41ILED_INSUFFICIENT_RESOURCES\x10\x03\x12 \n\x1c\x46\x41ILED_POKEMON_CANNOT_EVOLVE\x10\x04\x12\x1e\n\x1a\x46\x41ILED_POKEMON_IS_DEPLOYED\x10\x05\"\xa8\x04\n\x19\x46ortDeployPokemonResponse\x12Q\n\x06result\x18\x01 \x01(\x0e\x32\x41.POGOProtos.Networking.Responses.FortDeployPokemonResponse.Result\x12J\n\x0c\x66ort_details\x18\x02 \x01(\x0b\x32\x34.POGOProtos.Networking.Responses.FortDetailsResponse\x12\x32\n\x0cpokemon_data\x18\x03 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12\x30\n\tgym_state\x18\x04 \x01(\x0b\x32\x1d.POGOProtos.Data.Gym.GymState\"\x85\x02\n\x06Result\x12\x11\n\rNO_RESULT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12%\n!ERROR_ALREADY_HAS_POKEMON_ON_FORT\x10\x02\x12!\n\x1d\x45RROR_OPPOSING_TEAM_OWNS_FORT\x10\x03\x12\x16\n\x12\x45RROR_FORT_IS_FULL\x10\x04\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\x05\x12\x1c\n\x18\x45RROR_PLAYER_HAS_NO_TEAM\x10\x06\x12\x1d\n\x19\x45RROR_POKEMON_NOT_FULL_HP\x10\x07\x12$\n ERROR_PLAYER_BELOW_MINIMUM_LEVEL\x10\x08\"\xfc\x02\n\x13\x46ortDetailsResponse\x12\x0f\n\x07\x66ort_id\x18\x01 \x01(\t\x12/\n\nteam_color\x18\x02 \x01(\x0e\x32\x1b.POGOProtos.Enums.TeamColor\x12\x32\n\x0cpokemon_data\x18\x03 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x12\n\nimage_urls\x18\x05 \x03(\t\x12\n\n\x02\x66p\x18\x06 \x01(\x05\x12\x0f\n\x07stamina\x18\x07 \x01(\x05\x12\x13\n\x0bmax_stamina\x18\x08 \x01(\x05\x12+\n\x04type\x18\t \x01(\x0e\x32\x1d.POGOProtos.Map.Fort.FortType\x12\x10\n\x08latitude\x18\n \x01(\x01\x12\x11\n\tlongitude\x18\x0b \x01(\x01\x12\x13\n\x0b\x64\x65scription\x18\x0c \x01(\t\x12\x34\n\tmodifiers\x18\r \x03(\x0b\x32!.POGOProtos.Map.Fort.FortModifier\"\xb0\x02\n\x19\x46ortRecallPokemonResponse\x12Q\n\x06result\x18\x01 \x01(\x0e\x32\x41.POGOProtos.Networking.Responses.FortRecallPokemonResponse.Result\x12J\n\x0c\x66ort_details\x18\x02 \x01(\x0b\x32\x34.POGOProtos.Networking.Responses.FortDetailsResponse\"t\n\x06Result\x12\x11\n\rNO_RESULT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\x02\x12\x1d\n\x19\x45RROR_POKEMON_NOT_ON_FORT\x10\x03\x12\x13\n\x0f\x45RROR_NO_PLAYER\x10\x04\"\xbb\x03\n\x12\x46ortSearchResponse\x12J\n\x06result\x18\x01 \x01(\x0e\x32:.POGOProtos.Networking.Responses.FortSearchResponse.Result\x12;\n\ritems_awarded\x18\x02 \x03(\x0b\x32$.POGOProtos.Inventory.Item.ItemAward\x12\x14\n\x0cgems_awarded\x18\x03 \x01(\x05\x12\x36\n\x10pokemon_data_egg\x18\x04 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12\x1a\n\x12\x65xperience_awarded\x18\x05 \x01(\x05\x12&\n\x1e\x63ooldown_complete_timestamp_ms\x18\x06 \x01(\x03\x12\"\n\x1a\x63hain_hack_sequence_number\x18\x07 \x01(\x05\"f\n\x06Result\x12\x11\n\rNO_RESULT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x10\n\x0cOUT_OF_RANGE\x10\x02\x12\x16\n\x12IN_COOLDOWN_PERIOD\x10\x03\x12\x12\n\x0eINVENTORY_FULL\x10\x04\"a\n\x16GetAssetDigestResponse\x12\x31\n\x06\x64igest\x18\x01 \x03(\x0b\x32!.POGOProtos.Data.AssetDigestEntry\x12\x14\n\x0ctimestamp_ms\x18\x02 \x01(\x04\"S\n\x17GetDownloadUrlsResponse\x12\x38\n\rdownload_urls\x18\x01 \x03(\x0b\x32!.POGOProtos.Data.DownloadUrlEntry\"\x83\x02\n\x15GetGymDetailsResponse\x12\x30\n\tgym_state\x18\x01 \x01(\x0b\x32\x1d.POGOProtos.Data.Gym.GymState\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04urls\x18\x03 \x03(\t\x12M\n\x06result\x18\x04 \x01(\x0e\x32=.POGOProtos.Networking.Responses.GetGymDetailsResponse.Result\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\"8\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\x02\"\x8e\x01\n\x16GetHatchedEggsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x16\n\npokemon_id\x18\x02 \x03(\x06\x42\x02\x10\x01\x12\x1a\n\x12\x65xperience_awarded\x18\x03 \x03(\x05\x12\x15\n\rcandy_awarded\x18\x04 \x03(\x05\x12\x18\n\x10stardust_awarded\x18\x05 \x03(\x05\"\xed\x02\n\x19GetIncensePokemonResponse\x12Q\n\x06result\x18\x01 \x01(\x0e\x32\x41.POGOProtos.Networking.Responses.GetIncensePokemonResponse.Result\x12\x17\n\x0fpokemon_type_id\x18\x02 \x01(\x05\x12\x10\n\x08latitude\x18\x03 \x01(\x01\x12\x11\n\tlongitude\x18\x04 \x01(\x01\x12\x1a\n\x12\x65ncounter_location\x18\x05 \x01(\t\x12\x14\n\x0c\x65ncounter_id\x18\x06 \x01(\x06\x12\x1e\n\x16\x64isappear_timestamp_ms\x18\x07 \x01(\x03\"m\n\x06Result\x12\x1d\n\x19INCENSE_ENCOUNTER_UNKNOWN\x10\x00\x12\x1f\n\x1bINCENSE_ENCOUNTER_AVAILABLE\x10\x01\x12#\n\x1fINCENSE_ENCOUNTER_NOT_AVAILABLE\x10\x02\"f\n\x14GetInventoryResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12=\n\x0finventory_delta\x18\x02 \x01(\x0b\x32$.POGOProtos.Inventory.InventoryDelta\"u\n\x15GetMapObjectsResponse\x12*\n\tmap_cells\x18\x01 \x03(\x0b\x32\x17.POGOProtos.Map.MapCell\x12\x30\n\x06status\x18\x02 \x01(\x0e\x32 .POGOProtos.Map.MapObjectsStatus\"\xd0\x01\n\x18GetPlayerProfileResponse\x12P\n\x06result\x18\x01 \x01(\x0e\x32@.POGOProtos.Networking.Responses.GetPlayerProfileResponse.Result\x12\x12\n\nstart_time\x18\x02 \x01(\x03\x12,\n\x06\x62\x61\x64ges\x18\x03 \x03(\x0b\x32\x1c.POGOProtos.Data.PlayerBadge\" \n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\"V\n\x11GetPlayerResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.POGOProtos.Data.PlayerData\"C\n\x1dGetSuggestedCodenamesResponse\x12\x11\n\tcodenames\x18\x01 \x03(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\"\xf4\x02\n\x18IncenseEncounterResponse\x12P\n\x06result\x18\x01 \x01(\x0e\x32@.POGOProtos.Networking.Responses.IncenseEncounterResponse.Result\x12\x32\n\x0cpokemon_data\x18\x02 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12H\n\x13\x63\x61pture_probability\x18\x03 \x01(\x0b\x32+.POGOProtos.Data.Capture.CaptureProbability\"\x87\x01\n\x06Result\x12\x1d\n\x19INCENSE_ENCOUNTER_UNKNOWN\x10\x00\x12\x1d\n\x19INCENSE_ENCOUNTER_SUCCESS\x10\x01\x12#\n\x1fINCENSE_ENCOUNTER_NOT_AVAILABLE\x10\x02\x12\x1a\n\x16POKEMON_INVENTORY_FULL\x10\x03\"\x97\x02\n\x16LevelUpRewardsResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.LevelUpRewardsResponse.Result\x12;\n\ritems_awarded\x18\x02 \x03(\x0b\x32$.POGOProtos.Inventory.Item.ItemAward\x12\x39\n\x0eitems_unlocked\x18\x04 \x03(\x0e\x32!.POGOProtos.Inventory.Item.ItemId\"5\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x13\n\x0f\x41WARDED_ALREADY\x10\x02\"a\n\x1cMarkTutorialCompleteResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.POGOProtos.Data.PlayerData\"\xdf\x01\n\x17NicknamePokemonResponse\x12O\n\x06result\x18\x01 \x01(\x0e\x32?.POGOProtos.Networking.Responses.NicknamePokemonResponse.Result\"s\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1a\n\x16\x45RROR_INVALID_NICKNAME\x10\x02\x12\x1b\n\x17\x45RROR_POKEMON_NOT_FOUND\x10\x03\x12\x18\n\x14\x45RROR_POKEMON_IS_EGG\x10\x04\"\x96\x01\n\x14PlayerUpdateResponse\x12:\n\rwild_pokemons\x18\x01 \x03(\x0b\x32#.POGOProtos.Map.Pokemon.WildPokemon\x12,\n\x05\x66orts\x18\x02 \x03(\x0b\x32\x1d.POGOProtos.Map.Fort.FortData\x12\x14\n\x0c\x66orts_nearby\x18\x03 \x01(\x05\"\xeb\x01\n\x1cRecycleInventoryItemResponse\x12T\n\x06result\x18\x01 \x01(\x0e\x32\x44.POGOProtos.Networking.Responses.RecycleInventoryItemResponse.Result\x12\x11\n\tnew_count\x18\x02 \x01(\x05\"b\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1b\n\x17\x45RROR_NOT_ENOUGH_COPIES\x10\x02\x12#\n\x1f\x45RROR_CANNOT_RECYCLE_INCUBATORS\x10\x03\"\xdd\x01\n\x16ReleasePokemonResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.ReleasePokemonResponse.Result\x12\x15\n\rcandy_awarded\x18\x02 \x01(\x05\"\\\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10POKEMON_DEPLOYED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x12\x18\n\x14\x45RROR_POKEMON_IS_EGG\x10\x04\"\xd7\x01\n\x11SetAvatarResponse\x12I\n\x06status\x18\x01 \x01(\x0e\x32\x39.POGOProtos.Networking.Responses.SetAvatarResponse.Status\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.POGOProtos.Data.PlayerData\"E\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x16\n\x12\x41VATAR_ALREADY_SET\x10\x02\x12\x0b\n\x07\x46\x41ILURE\x10\x03\"\xd1\x01\n\x1aSetContactSettingsResponse\x12R\n\x06status\x18\x01 \x01(\x0e\x32\x42.POGOProtos.Networking.Responses.SetContactSettingsResponse.Status\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.POGOProtos.Data.PlayerData\"-\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x0b\n\x07\x46\x41ILURE\x10\x02\"\xc9\x01\n\x1aSetFavoritePokemonResponse\x12R\n\x06result\x18\x01 \x01(\x0e\x32\x42.POGOProtos.Networking.Responses.SetFavoritePokemonResponse.Result\"W\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1b\n\x17\x45RROR_POKEMON_NOT_FOUND\x10\x02\x12\x18\n\x14\x45RROR_POKEMON_IS_EGG\x10\x03\"\xdd\x01\n\x15SetPlayerTeamResponse\x12M\n\x06status\x18\x01 \x01(\x0e\x32=.POGOProtos.Networking.Responses.SetPlayerTeamResponse.Status\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.POGOProtos.Data.PlayerData\"C\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10TEAM_ALREADY_SET\x10\x02\x12\x0b\n\x07\x46\x41ILURE\x10\x03\"\xc5\x01\n\x16SfidaActionLogResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.SfidaActionLogResponse.Result\x12\x39\n\x0blog_entries\x18\x02 \x03(\x0b\x32$.POGOProtos.Data.Logs.ActionLogEntry\" \n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\"\xaf\x05\n\x16StartGymBattleResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.StartGymBattleResponse.Result\x12!\n\x19\x62\x61ttle_start_timestamp_ms\x18\x02 \x01(\x03\x12\x1f\n\x17\x62\x61ttle_end_timestamp_ms\x18\x03 \x01(\x03\x12\x11\n\tbattle_id\x18\x04 \x01(\t\x12;\n\x08\x64\x65\x66\x65nder\x18\x05 \x01(\x0b\x32).POGOProtos.Data.Battle.BattleParticipant\x12\x35\n\nbattle_log\x18\x06 \x01(\x0b\x32!.POGOProtos.Data.Battle.BattleLog\"\xf9\x02\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x17\n\x13\x45RROR_GYM_NOT_FOUND\x10\x02\x12\x15\n\x11\x45RROR_GYM_NEUTRAL\x10\x03\x12\x18\n\x14\x45RROR_GYM_WRONG_TEAM\x10\x04\x12\x13\n\x0f\x45RROR_GYM_EMPTY\x10\x05\x12\x1a\n\x16\x45RROR_INVALID_DEFENDER\x10\x06\x12)\n%ERROR_TRAINING_INVALID_ATTACKER_COUNT\x10\x07\x12\x1d\n\x19\x45RROR_ALL_POKEMON_FAINTED\x10\x08\x12\x1a\n\x16\x45RROR_TOO_MANY_BATTLES\x10\t\x12\x1a\n\x16\x45RROR_TOO_MANY_PLAYERS\x10\n\x12\x1c\n\x18\x45RROR_GYM_BATTLE_LOCKOUT\x10\x0b\x12$\n ERROR_PLAYER_BELOW_MINIMUM_LEVEL\x10\x0c\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\r\"\xc2\x02\n\x16UpgradePokemonResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.UpgradePokemonResponse.Result\x12\x36\n\x10upgraded_pokemon\x18\x02 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\"\x9f\x01\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1b\n\x17\x45RROR_POKEMON_NOT_FOUND\x10\x02\x12 \n\x1c\x45RROR_INSUFFICIENT_RESOURCES\x10\x03\x12\x1f\n\x1b\x45RROR_UPGRADE_NOT_AVAILABLE\x10\x04\x12\x1d\n\x19\x45RROR_POKEMON_IS_DEPLOYED\x10\x05\"\x87\x02\n\x12UseIncenseResponse\x12J\n\x06result\x18\x01 \x01(\x0e\x32:.POGOProtos.Networking.Responses.UseIncenseResponse.Result\x12:\n\x0f\x61pplied_incense\x18\x02 \x01(\x0b\x32!.POGOProtos.Inventory.AppliedItem\"i\n\x06Result\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1a\n\x16INCENSE_ALREADY_ACTIVE\x10\x02\x12\x15\n\x11NONE_IN_INVENTORY\x10\x03\x12\x12\n\x0eLOCATION_UNSET\x10\x04\"\xb1\x01\n\x16UseItemCaptureResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x19\n\x11item_capture_mult\x18\x02 \x01(\x01\x12\x16\n\x0eitem_flee_mult\x18\x03 \x01(\x01\x12\x15\n\rstop_movement\x18\x04 \x01(\x08\x12\x13\n\x0bstop_attack\x18\x05 \x01(\x08\x12\x12\n\ntarget_max\x18\x06 \x01(\x08\x12\x13\n\x0btarget_slow\x18\x07 \x01(\x08\"\x9f\x03\n\x1bUseItemEggIncubatorResponse\x12S\n\x06result\x18\x01 \x01(\x0e\x32\x43.POGOProtos.Networking.Responses.UseItemEggIncubatorResponse.Result\x12\x39\n\regg_incubator\x18\x02 \x01(\x0b\x32\".POGOProtos.Inventory.EggIncubator\"\xef\x01\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1d\n\x19\x45RROR_INCUBATOR_NOT_FOUND\x10\x02\x12\x1f\n\x1b\x45RROR_POKEMON_EGG_NOT_FOUND\x10\x03\x12\x1c\n\x18\x45RROR_POKEMON_ID_NOT_EGG\x10\x04\x12\"\n\x1e\x45RROR_INCUBATOR_ALREADY_IN_USE\x10\x05\x12$\n ERROR_POKEMON_ALREADY_INCUBATING\x10\x06\x12%\n!ERROR_INCUBATOR_NO_USES_REMAINING\x10\x07\"\xc4\x01\n\x12UseItemGymResponse\x12J\n\x06result\x18\x01 \x01(\x0e\x32:.POGOProtos.Networking.Responses.UseItemGymResponse.Result\x12\x12\n\nupdated_gp\x18\x02 \x01(\x03\"N\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10\x45RROR_CANNOT_USE\x10\x02\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\x03\"\xe1\x01\n\x15UseItemPotionResponse\x12M\n\x06result\x18\x01 \x01(\x0e\x32=.POGOProtos.Networking.Responses.UseItemPotionResponse.Result\x12\x0f\n\x07stamina\x18\x02 \x01(\x05\"h\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10\x45RROR_NO_POKEMON\x10\x02\x12\x14\n\x10\x45RROR_CANNOT_USE\x10\x03\x12\x1a\n\x16\x45RROR_DEPLOYED_TO_FORT\x10\x04\"\xe1\x01\n\x15UseItemReviveResponse\x12M\n\x06result\x18\x01 \x01(\x0e\x32=.POGOProtos.Networking.Responses.UseItemReviveResponse.Result\x12\x0f\n\x07stamina\x18\x02 \x01(\x05\"h\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10\x45RROR_NO_POKEMON\x10\x02\x12\x14\n\x10\x45RROR_CANNOT_USE\x10\x03\x12\x1a\n\x16\x45RROR_DEPLOYED_TO_FORT\x10\x04\"\xbe\x02\n\x16UseItemXpBoostResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.UseItemXpBoostResponse.Result\x12\x39\n\rapplied_items\x18\x02 \x01(\x0b\x32\".POGOProtos.Inventory.AppliedItems\"\x98\x01\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1b\n\x17\x45RROR_INVALID_ITEM_TYPE\x10\x02\x12!\n\x1d\x45RROR_XP_BOOST_ALREADY_ACTIVE\x10\x03\x12\x1c\n\x18\x45RROR_NO_ITEMS_REMAINING\x10\x04\x12\x18\n\x14\x45RROR_LOCATION_UNSET\x10\x05P\x00P\x01P\x02P\x03P\x04P\x05P\x06P\x07P\x08P\tP\nP\x0bP\x0cP\rb\x06proto3')
+  serialized_pb=_b('\n%POGOProtos.Networking.Responses.proto\x12\x1fPOGOProtos.Networking.Responses\x1a\x1cPOGOProtos.Data.Battle.proto\x1a\x1dPOGOProtos.Data.Capture.proto\x1a\x16POGOProtos.Enums.proto\x1a\x15POGOProtos.Data.proto\x1a POGOProtos.Settings.Master.proto\x1a\x19POGOProtos.Settings.proto\x1a\x1cPOGOProtos.Map.Pokemon.proto\x1a\x1cPOGOProtos.Data.Player.proto\x1a\x19POGOProtos.Data.Gym.proto\x1a\x19POGOProtos.Map.Fort.proto\x1a\x1fPOGOProtos.Inventory.Item.proto\x1a\x1aPOGOProtos.Inventory.proto\x1a\x14POGOProtos.Map.proto\x1a\x1aPOGOProtos.Data.Logs.proto\"\x19\n\x17\x41\x64\x64\x46ortModifierResponse\"\x8c\x03\n\x11\x41ttackGymResponse\x12I\n\x06result\x18\x01 \x01(\x0e\x32\x39.POGOProtos.Networking.Responses.AttackGymResponse.Result\x12\x35\n\nbattle_log\x18\x02 \x01(\x0b\x32!.POGOProtos.Data.Battle.BattleLog\x12\x11\n\tbattle_id\x18\x03 \x01(\t\x12\x42\n\x0f\x61\x63tive_defender\x18\x04 \x01(\x0b\x32).POGOProtos.Data.Battle.BattlePokemonInfo\x12\x42\n\x0f\x61\x63tive_attacker\x18\x05 \x01(\x0b\x32).POGOProtos.Data.Battle.BattlePokemonInfo\"Z\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12 \n\x1c\x45RROR_INVALID_ATTACK_ACTIONS\x10\x02\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\x03\"\xc1\x02\n\x14\x43\x61tchPokemonResponse\x12Q\n\x06status\x18\x01 \x01(\x0e\x32\x41.POGOProtos.Networking.Responses.CatchPokemonResponse.CatchStatus\x12\x14\n\x0cmiss_percent\x18\x02 \x01(\x01\x12\x1b\n\x13\x63\x61ptured_pokemon_id\x18\x03 \x01(\x06\x12<\n\rcapture_award\x18\x04 \x01(\x0b\x32%.POGOProtos.Data.Capture.CaptureAward\"e\n\x0b\x43\x61tchStatus\x12\x0f\n\x0b\x43\x41TCH_ERROR\x10\x00\x12\x11\n\rCATCH_SUCCESS\x10\x01\x12\x10\n\x0c\x43\x41TCH_ESCAPE\x10\x02\x12\x0e\n\nCATCH_FLEE\x10\x03\x12\x10\n\x0c\x43\x41TCH_MISSED\x10\x04\"\x80\x01\n\x1a\x43heckAwardedBadgesResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x33\n\x0e\x61warded_badges\x18\x02 \x03(\x0e\x32\x1b.POGOProtos.Enums.BadgeType\x12\x1c\n\x14\x61warded_badge_levels\x18\x03 \x03(\x05\"\xc2\x02\n\x1e\x43heckCodenameAvailableResponse\x12\x10\n\x08\x63odename\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\x12\x15\n\ris_assignable\x18\x03 \x01(\x08\x12V\n\x06status\x18\x04 \x01(\x0e\x32\x46.POGOProtos.Networking.Responses.CheckCodenameAvailableResponse.Status\"\x88\x01\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1a\n\x16\x43ODENAME_NOT_AVAILABLE\x10\x02\x12\x16\n\x12\x43ODENAME_NOT_VALID\x10\x03\x12\x11\n\rCURRENT_OWNER\x10\x04\x12\x1f\n\x1b\x43ODENAME_CHANGE_NOT_ALLOWED\x10\x05\"\xb0\x02\n\x15\x43laimCodenameResponse\x12\x10\n\x08\x63odename\x18\x01 \x01(\t\x12\x14\n\x0cuser_message\x18\x02 \x01(\t\x12\x15\n\ris_assignable\x18\x03 \x01(\x08\x12M\n\x06status\x18\x04 \x01(\x0e\x32=.POGOProtos.Networking.Responses.ClaimCodenameResponse.Status\"\x88\x01\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1a\n\x16\x43ODENAME_NOT_AVAILABLE\x10\x02\x12\x16\n\x12\x43ODENAME_NOT_VALID\x10\x03\x12\x11\n\rCURRENT_OWNER\x10\x04\x12\x1f\n\x1b\x43ODENAME_CHANGE_NOT_ALLOWED\x10\x05\"\xab\x01\n\x19\x43ollectDailyBonusResponse\x12Q\n\x06result\x18\x01 \x01(\x0e\x32\x41.POGOProtos.Networking.Responses.CollectDailyBonusResponse.Result\";\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x0b\n\x07\x46\x41ILURE\x10\x02\x12\x0c\n\x08TOO_SOON\x10\x03\"\x97\x02\n!CollectDailyDefenderBonusResponse\x12Y\n\x06result\x18\x01 \x01(\x0e\x32I.POGOProtos.Networking.Responses.CollectDailyDefenderBonusResponse.Result\x12\x15\n\rcurrency_type\x18\x02 \x03(\t\x12\x18\n\x10\x63urrency_awarded\x18\x03 \x03(\x05\x12\x17\n\x0f\x64\x65\x66\x65nders_count\x18\x04 \x01(\x05\"M\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x0b\n\x07\x46\x41ILURE\x10\x02\x12\x0c\n\x08TOO_SOON\x10\x03\x12\x10\n\x0cNO_DEFENDERS\x10\x04\"\xea\x02\n\x15\x44iskEncounterResponse\x12M\n\x06result\x18\x01 \x01(\x0e\x32=.POGOProtos.Networking.Responses.DiskEncounterResponse.Result\x12\x32\n\x0cpokemon_data\x18\x02 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12H\n\x13\x63\x61pture_probability\x18\x03 \x01(\x0b\x32+.POGOProtos.Data.Capture.CaptureProbability\"\x83\x01\n\x06Result\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x11\n\rNOT_AVAILABLE\x10\x02\x12\x10\n\x0cNOT_IN_RANGE\x10\x03\x12\x1e\n\x1a\x45NCOUNTER_ALREADY_FINISHED\x10\x04\x12\x1a\n\x16POKEMON_INVENTORY_FULL\x10\x05\"\xf0\t\n\x1d\x44ownloadItemTemplatesResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x63\n\x0eitem_templates\x18\x02 \x03(\x0b\x32K.POGOProtos.Networking.Responses.DownloadItemTemplatesResponse.ItemTemplate\x12\x14\n\x0ctimestamp_ms\x18\x03 \x01(\x04\x1a\xc2\x08\n\x0cItemTemplate\x12\x13\n\x0btemplate_id\x18\x01 \x01(\t\x12\x45\n\x10pokemon_settings\x18\x02 \x01(\x0b\x32+.POGOProtos.Settings.Master.PokemonSettings\x12?\n\ritem_settings\x18\x03 \x01(\x0b\x32(.POGOProtos.Settings.Master.ItemSettings\x12?\n\rmove_settings\x18\x04 \x01(\x0b\x32(.POGOProtos.Settings.Master.MoveSettings\x12P\n\x16move_sequence_settings\x18\x05 \x01(\x0b\x32\x30.POGOProtos.Settings.Master.MoveSequenceSettings\x12I\n\x0etype_effective\x18\x08 \x01(\x0b\x32\x31.POGOProtos.Settings.Master.TypeEffectiveSettings\x12\x41\n\x0e\x62\x61\x64ge_settings\x18\n \x01(\x0b\x32).POGOProtos.Settings.Master.BadgeSettings\x12:\n\x06\x63\x61mera\x18\x0b \x01(\x0b\x32*.POGOProtos.Settings.Master.CameraSettings\x12\x45\n\x0cplayer_level\x18\x0c \x01(\x0b\x32/.POGOProtos.Settings.Master.PlayerLevelSettings\x12?\n\tgym_level\x18\r \x01(\x0b\x32,.POGOProtos.Settings.Master.GymLevelSettings\x12\x46\n\x0f\x62\x61ttle_settings\x18\x0e \x01(\x0b\x32-.POGOProtos.Settings.Master.GymBattleSettings\x12I\n\x12\x65ncounter_settings\x18\x0f \x01(\x0b\x32-.POGOProtos.Settings.Master.EncounterSettings\x12\x44\n\x10iap_item_display\x18\x10 \x01(\x0b\x32*.POGOProtos.Settings.Master.IapItemDisplay\x12=\n\x0ciap_settings\x18\x11 \x01(\x0b\x32\'.POGOProtos.Settings.Master.IapSettings\x12L\n\x10pokemon_upgrades\x18\x12 \x01(\x0b\x32\x32.POGOProtos.Settings.Master.PokemonUpgradeSettings\x12J\n\x0f\x65quipped_badges\x18\x13 \x01(\x0b\x32\x31.POGOProtos.Settings.Master.EquippedBadgeSettings\"\xec\x01\n#DownloadRemoteConfigVersionResponse\x12[\n\x06result\x18\x01 \x01(\x0e\x32K.POGOProtos.Networking.Responses.DownloadRemoteConfigVersionResponse.Result\x12#\n\x1bitem_templates_timestamp_ms\x18\x02 \x01(\x04\x12!\n\x19\x61sset_digest_timestamp_ms\x18\x03 \x01(\x04\" \n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\"n\n\x18\x44ownloadSettingsResponse\x12\r\n\x05\x65rror\x18\x01 \x01(\t\x12\x0c\n\x04hash\x18\x02 \x01(\t\x12\x35\n\x08settings\x18\x03 \x01(\x0b\x32#.POGOProtos.Settings.GlobalSettings\"\x1f\n\x0c\x45\x63hoResponse\x12\x0f\n\x07\x63ontext\x18\x01 \x01(\t\"\xb4\x04\n\x11\x45ncounterResponse\x12\x39\n\x0cwild_pokemon\x18\x01 \x01(\x0b\x32#.POGOProtos.Map.Pokemon.WildPokemon\x12Q\n\nbackground\x18\x02 \x01(\x0e\x32=.POGOProtos.Networking.Responses.EncounterResponse.Background\x12I\n\x06status\x18\x03 \x01(\x0e\x32\x39.POGOProtos.Networking.Responses.EncounterResponse.Status\x12H\n\x13\x63\x61pture_probability\x18\x04 \x01(\x0b\x32+.POGOProtos.Data.Capture.CaptureProbability\"\"\n\nBackground\x12\x08\n\x04PARK\x10\x00\x12\n\n\x06\x44\x45SERT\x10\x01\"\xd7\x01\n\x06Status\x12\x13\n\x0f\x45NCOUNTER_ERROR\x10\x00\x12\x15\n\x11\x45NCOUNTER_SUCCESS\x10\x01\x12\x17\n\x13\x45NCOUNTER_NOT_FOUND\x10\x02\x12\x14\n\x10\x45NCOUNTER_CLOSED\x10\x03\x12\x1a\n\x16\x45NCOUNTER_POKEMON_FLED\x10\x04\x12\x1a\n\x16\x45NCOUNTER_NOT_IN_RANGE\x10\x05\x12\x1e\n\x1a\x45NCOUNTER_ALREADY_HAPPENED\x10\x06\x12\x1a\n\x16POKEMON_INVENTORY_FULL\x10\x07\"\xad\x02\n!EncounterTutorialCompleteResponse\x12Y\n\x06result\x18\x01 \x01(\x0e\x32I.POGOProtos.Networking.Responses.EncounterTutorialCompleteResponse.Result\x12\x32\n\x0cpokemon_data\x18\x02 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12<\n\rcapture_award\x18\x03 \x01(\x0b\x32%.POGOProtos.Data.Capture.CaptureAward\";\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x19\n\x15\x45RROR_INVALID_POKEMON\x10\x02\"\xe3\x01\n\x12\x45quipBadgeResponse\x12J\n\x06result\x18\x01 \x01(\x0e\x32:.POGOProtos.Networking.Responses.EquipBadgeResponse.Result\x12\x37\n\x08\x65quipped\x18\x02 \x01(\x0b\x32%.POGOProtos.Data.Player.EquippedBadge\"H\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x13\n\x0f\x43OOLDOWN_ACTIVE\x10\x02\x12\x11\n\rNOT_QUALIFIED\x10\x03\"\xf9\x02\n\x15\x45volvePokemonResponse\x12M\n\x06result\x18\x01 \x01(\x0e\x32=.POGOProtos.Networking.Responses.EvolvePokemonResponse.Result\x12:\n\x14\x65volved_pokemon_data\x18\x02 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12\x1a\n\x12\x65xperience_awarded\x18\x03 \x01(\x05\x12\x15\n\rcandy_awarded\x18\x04 \x01(\x05\"\xa1\x01\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1a\n\x16\x46\x41ILED_POKEMON_MISSING\x10\x02\x12!\n\x1d\x46\x41ILED_INSUFFICIENT_RESOURCES\x10\x03\x12 \n\x1c\x46\x41ILED_POKEMON_CANNOT_EVOLVE\x10\x04\x12\x1e\n\x1a\x46\x41ILED_POKEMON_IS_DEPLOYED\x10\x05\"\xa8\x04\n\x19\x46ortDeployPokemonResponse\x12Q\n\x06result\x18\x01 \x01(\x0e\x32\x41.POGOProtos.Networking.Responses.FortDeployPokemonResponse.Result\x12J\n\x0c\x66ort_details\x18\x02 \x01(\x0b\x32\x34.POGOProtos.Networking.Responses.FortDetailsResponse\x12\x32\n\x0cpokemon_data\x18\x03 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12\x30\n\tgym_state\x18\x04 \x01(\x0b\x32\x1d.POGOProtos.Data.Gym.GymState\"\x85\x02\n\x06Result\x12\x11\n\rNO_RESULT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12%\n!ERROR_ALREADY_HAS_POKEMON_ON_FORT\x10\x02\x12!\n\x1d\x45RROR_OPPOSING_TEAM_OWNS_FORT\x10\x03\x12\x16\n\x12\x45RROR_FORT_IS_FULL\x10\x04\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\x05\x12\x1c\n\x18\x45RROR_PLAYER_HAS_NO_TEAM\x10\x06\x12\x1d\n\x19\x45RROR_POKEMON_NOT_FULL_HP\x10\x07\x12$\n ERROR_PLAYER_BELOW_MINIMUM_LEVEL\x10\x08\"\xfc\x02\n\x13\x46ortDetailsResponse\x12\x0f\n\x07\x66ort_id\x18\x01 \x01(\t\x12/\n\nteam_color\x18\x02 \x01(\x0e\x32\x1b.POGOProtos.Enums.TeamColor\x12\x32\n\x0cpokemon_data\x18\x03 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x12\n\nimage_urls\x18\x05 \x03(\t\x12\n\n\x02\x66p\x18\x06 \x01(\x05\x12\x0f\n\x07stamina\x18\x07 \x01(\x05\x12\x13\n\x0bmax_stamina\x18\x08 \x01(\x05\x12+\n\x04type\x18\t \x01(\x0e\x32\x1d.POGOProtos.Map.Fort.FortType\x12\x10\n\x08latitude\x18\n \x01(\x01\x12\x11\n\tlongitude\x18\x0b \x01(\x01\x12\x13\n\x0b\x64\x65scription\x18\x0c \x01(\t\x12\x34\n\tmodifiers\x18\r \x03(\x0b\x32!.POGOProtos.Map.Fort.FortModifier\"\xb0\x02\n\x19\x46ortRecallPokemonResponse\x12Q\n\x06result\x18\x01 \x01(\x0e\x32\x41.POGOProtos.Networking.Responses.FortRecallPokemonResponse.Result\x12J\n\x0c\x66ort_details\x18\x02 \x01(\x0b\x32\x34.POGOProtos.Networking.Responses.FortDetailsResponse\"t\n\x06Result\x12\x11\n\rNO_RESULT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\x02\x12\x1d\n\x19\x45RROR_POKEMON_NOT_ON_FORT\x10\x03\x12\x13\n\x0f\x45RROR_NO_PLAYER\x10\x04\"\xbb\x03\n\x12\x46ortSearchResponse\x12J\n\x06result\x18\x01 \x01(\x0e\x32:.POGOProtos.Networking.Responses.FortSearchResponse.Result\x12;\n\ritems_awarded\x18\x02 \x03(\x0b\x32$.POGOProtos.Inventory.Item.ItemAward\x12\x14\n\x0cgems_awarded\x18\x03 \x01(\x05\x12\x36\n\x10pokemon_data_egg\x18\x04 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12\x1a\n\x12\x65xperience_awarded\x18\x05 \x01(\x05\x12&\n\x1e\x63ooldown_complete_timestamp_ms\x18\x06 \x01(\x03\x12\"\n\x1a\x63hain_hack_sequence_number\x18\x07 \x01(\x05\"f\n\x06Result\x12\x11\n\rNO_RESULT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x10\n\x0cOUT_OF_RANGE\x10\x02\x12\x16\n\x12IN_COOLDOWN_PERIOD\x10\x03\x12\x12\n\x0eINVENTORY_FULL\x10\x04\"a\n\x16GetAssetDigestResponse\x12\x31\n\x06\x64igest\x18\x01 \x03(\x0b\x32!.POGOProtos.Data.AssetDigestEntry\x12\x14\n\x0ctimestamp_ms\x18\x02 \x01(\x04\"S\n\x17GetDownloadUrlsResponse\x12\x38\n\rdownload_urls\x18\x01 \x03(\x0b\x32!.POGOProtos.Data.DownloadUrlEntry\"\x83\x02\n\x15GetGymDetailsResponse\x12\x30\n\tgym_state\x18\x01 \x01(\x0b\x32\x1d.POGOProtos.Data.Gym.GymState\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0c\n\x04urls\x18\x03 \x03(\t\x12M\n\x06result\x18\x04 \x01(\x0e\x32=.POGOProtos.Networking.Responses.GetGymDetailsResponse.Result\x12\x13\n\x0b\x64\x65scription\x18\x05 \x01(\t\"8\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\x02\"\x8e\x01\n\x16GetHatchedEggsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x16\n\npokemon_id\x18\x02 \x03(\x06\x42\x02\x10\x01\x12\x1a\n\x12\x65xperience_awarded\x18\x03 \x03(\x05\x12\x15\n\rcandy_awarded\x18\x04 \x03(\x05\x12\x18\n\x10stardust_awarded\x18\x05 \x03(\x05\"\x85\x03\n\x19GetIncensePokemonResponse\x12Q\n\x06result\x18\x01 \x01(\x0e\x32\x41.POGOProtos.Networking.Responses.GetIncensePokemonResponse.Result\x12/\n\npokemon_id\x18\x02 \x01(\x0e\x32\x1b.POGOProtos.Enums.PokemonId\x12\x10\n\x08latitude\x18\x03 \x01(\x01\x12\x11\n\tlongitude\x18\x04 \x01(\x01\x12\x1a\n\x12\x65ncounter_location\x18\x05 \x01(\t\x12\x14\n\x0c\x65ncounter_id\x18\x06 \x01(\x06\x12\x1e\n\x16\x64isappear_timestamp_ms\x18\x07 \x01(\x03\"m\n\x06Result\x12\x1d\n\x19INCENSE_ENCOUNTER_UNKNOWN\x10\x00\x12\x1f\n\x1bINCENSE_ENCOUNTER_AVAILABLE\x10\x01\x12#\n\x1fINCENSE_ENCOUNTER_NOT_AVAILABLE\x10\x02\"f\n\x14GetInventoryResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12=\n\x0finventory_delta\x18\x02 \x01(\x0b\x32$.POGOProtos.Inventory.InventoryDelta\"u\n\x15GetMapObjectsResponse\x12*\n\tmap_cells\x18\x01 \x03(\x0b\x32\x17.POGOProtos.Map.MapCell\x12\x30\n\x06status\x18\x02 \x01(\x0e\x32 .POGOProtos.Map.MapObjectsStatus\"\xd0\x01\n\x18GetPlayerProfileResponse\x12P\n\x06result\x18\x01 \x01(\x0e\x32@.POGOProtos.Networking.Responses.GetPlayerProfileResponse.Result\x12\x12\n\nstart_time\x18\x02 \x01(\x03\x12,\n\x06\x62\x61\x64ges\x18\x03 \x03(\x0b\x32\x1c.POGOProtos.Data.PlayerBadge\" \n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\"V\n\x11GetPlayerResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.POGOProtos.Data.PlayerData\"C\n\x1dGetSuggestedCodenamesResponse\x12\x11\n\tcodenames\x18\x01 \x03(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\"\xf4\x02\n\x18IncenseEncounterResponse\x12P\n\x06result\x18\x01 \x01(\x0e\x32@.POGOProtos.Networking.Responses.IncenseEncounterResponse.Result\x12\x32\n\x0cpokemon_data\x18\x02 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\x12H\n\x13\x63\x61pture_probability\x18\x03 \x01(\x0b\x32+.POGOProtos.Data.Capture.CaptureProbability\"\x87\x01\n\x06Result\x12\x1d\n\x19INCENSE_ENCOUNTER_UNKNOWN\x10\x00\x12\x1d\n\x19INCENSE_ENCOUNTER_SUCCESS\x10\x01\x12#\n\x1fINCENSE_ENCOUNTER_NOT_AVAILABLE\x10\x02\x12\x1a\n\x16POKEMON_INVENTORY_FULL\x10\x03\"\x97\x02\n\x16LevelUpRewardsResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.LevelUpRewardsResponse.Result\x12;\n\ritems_awarded\x18\x02 \x03(\x0b\x32$.POGOProtos.Inventory.Item.ItemAward\x12\x39\n\x0eitems_unlocked\x18\x04 \x03(\x0e\x32!.POGOProtos.Inventory.Item.ItemId\"5\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x13\n\x0f\x41WARDED_ALREADY\x10\x02\"a\n\x1cMarkTutorialCompleteResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.POGOProtos.Data.PlayerData\"\xdf\x01\n\x17NicknamePokemonResponse\x12O\n\x06result\x18\x01 \x01(\x0e\x32?.POGOProtos.Networking.Responses.NicknamePokemonResponse.Result\"s\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1a\n\x16\x45RROR_INVALID_NICKNAME\x10\x02\x12\x1b\n\x17\x45RROR_POKEMON_NOT_FOUND\x10\x03\x12\x18\n\x14\x45RROR_POKEMON_IS_EGG\x10\x04\"\x96\x01\n\x14PlayerUpdateResponse\x12:\n\rwild_pokemons\x18\x01 \x03(\x0b\x32#.POGOProtos.Map.Pokemon.WildPokemon\x12,\n\x05\x66orts\x18\x02 \x03(\x0b\x32\x1d.POGOProtos.Map.Fort.FortData\x12\x14\n\x0c\x66orts_nearby\x18\x03 \x01(\x05\"\xeb\x01\n\x1cRecycleInventoryItemResponse\x12T\n\x06result\x18\x01 \x01(\x0e\x32\x44.POGOProtos.Networking.Responses.RecycleInventoryItemResponse.Result\x12\x11\n\tnew_count\x18\x02 \x01(\x05\"b\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1b\n\x17\x45RROR_NOT_ENOUGH_COPIES\x10\x02\x12#\n\x1f\x45RROR_CANNOT_RECYCLE_INCUBATORS\x10\x03\"\xdd\x01\n\x16ReleasePokemonResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.ReleasePokemonResponse.Result\x12\x15\n\rcandy_awarded\x18\x02 \x01(\x05\"\\\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10POKEMON_DEPLOYED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x12\x18\n\x14\x45RROR_POKEMON_IS_EGG\x10\x04\"\xd7\x01\n\x11SetAvatarResponse\x12I\n\x06status\x18\x01 \x01(\x0e\x32\x39.POGOProtos.Networking.Responses.SetAvatarResponse.Status\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.POGOProtos.Data.PlayerData\"E\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x16\n\x12\x41VATAR_ALREADY_SET\x10\x02\x12\x0b\n\x07\x46\x41ILURE\x10\x03\"\xd1\x01\n\x1aSetContactSettingsResponse\x12R\n\x06status\x18\x01 \x01(\x0e\x32\x42.POGOProtos.Networking.Responses.SetContactSettingsResponse.Status\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.POGOProtos.Data.PlayerData\"-\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x0b\n\x07\x46\x41ILURE\x10\x02\"\xc9\x01\n\x1aSetFavoritePokemonResponse\x12R\n\x06result\x18\x01 \x01(\x0e\x32\x42.POGOProtos.Networking.Responses.SetFavoritePokemonResponse.Result\"W\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1b\n\x17\x45RROR_POKEMON_NOT_FOUND\x10\x02\x12\x18\n\x14\x45RROR_POKEMON_IS_EGG\x10\x03\"\xdd\x01\n\x15SetPlayerTeamResponse\x12M\n\x06status\x18\x01 \x01(\x0e\x32=.POGOProtos.Networking.Responses.SetPlayerTeamResponse.Status\x12\x30\n\x0bplayer_data\x18\x02 \x01(\x0b\x32\x1b.POGOProtos.Data.PlayerData\"C\n\x06Status\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10TEAM_ALREADY_SET\x10\x02\x12\x0b\n\x07\x46\x41ILURE\x10\x03\"\xc5\x01\n\x16SfidaActionLogResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.SfidaActionLogResponse.Result\x12\x39\n\x0blog_entries\x18\x02 \x03(\x0b\x32$.POGOProtos.Data.Logs.ActionLogEntry\" \n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\"\xaf\x05\n\x16StartGymBattleResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.StartGymBattleResponse.Result\x12!\n\x19\x62\x61ttle_start_timestamp_ms\x18\x02 \x01(\x03\x12\x1f\n\x17\x62\x61ttle_end_timestamp_ms\x18\x03 \x01(\x03\x12\x11\n\tbattle_id\x18\x04 \x01(\t\x12;\n\x08\x64\x65\x66\x65nder\x18\x05 \x01(\x0b\x32).POGOProtos.Data.Battle.BattleParticipant\x12\x35\n\nbattle_log\x18\x06 \x01(\x0b\x32!.POGOProtos.Data.Battle.BattleLog\"\xf9\x02\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x17\n\x13\x45RROR_GYM_NOT_FOUND\x10\x02\x12\x15\n\x11\x45RROR_GYM_NEUTRAL\x10\x03\x12\x18\n\x14\x45RROR_GYM_WRONG_TEAM\x10\x04\x12\x13\n\x0f\x45RROR_GYM_EMPTY\x10\x05\x12\x1a\n\x16\x45RROR_INVALID_DEFENDER\x10\x06\x12)\n%ERROR_TRAINING_INVALID_ATTACKER_COUNT\x10\x07\x12\x1d\n\x19\x45RROR_ALL_POKEMON_FAINTED\x10\x08\x12\x1a\n\x16\x45RROR_TOO_MANY_BATTLES\x10\t\x12\x1a\n\x16\x45RROR_TOO_MANY_PLAYERS\x10\n\x12\x1c\n\x18\x45RROR_GYM_BATTLE_LOCKOUT\x10\x0b\x12$\n ERROR_PLAYER_BELOW_MINIMUM_LEVEL\x10\x0c\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\r\"\xc2\x02\n\x16UpgradePokemonResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.UpgradePokemonResponse.Result\x12\x36\n\x10upgraded_pokemon\x18\x02 \x01(\x0b\x32\x1c.POGOProtos.Data.PokemonData\"\x9f\x01\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1b\n\x17\x45RROR_POKEMON_NOT_FOUND\x10\x02\x12 \n\x1c\x45RROR_INSUFFICIENT_RESOURCES\x10\x03\x12\x1f\n\x1b\x45RROR_UPGRADE_NOT_AVAILABLE\x10\x04\x12\x1d\n\x19\x45RROR_POKEMON_IS_DEPLOYED\x10\x05\"\x87\x02\n\x12UseIncenseResponse\x12J\n\x06result\x18\x01 \x01(\x0e\x32:.POGOProtos.Networking.Responses.UseIncenseResponse.Result\x12:\n\x0f\x61pplied_incense\x18\x02 \x01(\x0b\x32!.POGOProtos.Inventory.AppliedItem\"i\n\x06Result\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1a\n\x16INCENSE_ALREADY_ACTIVE\x10\x02\x12\x15\n\x11NONE_IN_INVENTORY\x10\x03\x12\x12\n\x0eLOCATION_UNSET\x10\x04\"\xb1\x01\n\x16UseItemCaptureResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x19\n\x11item_capture_mult\x18\x02 \x01(\x01\x12\x16\n\x0eitem_flee_mult\x18\x03 \x01(\x01\x12\x15\n\rstop_movement\x18\x04 \x01(\x08\x12\x13\n\x0bstop_attack\x18\x05 \x01(\x08\x12\x12\n\ntarget_max\x18\x06 \x01(\x08\x12\x13\n\x0btarget_slow\x18\x07 \x01(\x08\"\x9f\x03\n\x1bUseItemEggIncubatorResponse\x12S\n\x06result\x18\x01 \x01(\x0e\x32\x43.POGOProtos.Networking.Responses.UseItemEggIncubatorResponse.Result\x12\x39\n\regg_incubator\x18\x02 \x01(\x0b\x32\".POGOProtos.Inventory.EggIncubator\"\xef\x01\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1d\n\x19\x45RROR_INCUBATOR_NOT_FOUND\x10\x02\x12\x1f\n\x1b\x45RROR_POKEMON_EGG_NOT_FOUND\x10\x03\x12\x1c\n\x18\x45RROR_POKEMON_ID_NOT_EGG\x10\x04\x12\"\n\x1e\x45RROR_INCUBATOR_ALREADY_IN_USE\x10\x05\x12$\n ERROR_POKEMON_ALREADY_INCUBATING\x10\x06\x12%\n!ERROR_INCUBATOR_NO_USES_REMAINING\x10\x07\"\xc4\x01\n\x12UseItemGymResponse\x12J\n\x06result\x18\x01 \x01(\x0e\x32:.POGOProtos.Networking.Responses.UseItemGymResponse.Result\x12\x12\n\nupdated_gp\x18\x02 \x01(\x03\"N\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10\x45RROR_CANNOT_USE\x10\x02\x12\x16\n\x12\x45RROR_NOT_IN_RANGE\x10\x03\"\xe1\x01\n\x15UseItemPotionResponse\x12M\n\x06result\x18\x01 \x01(\x0e\x32=.POGOProtos.Networking.Responses.UseItemPotionResponse.Result\x12\x0f\n\x07stamina\x18\x02 \x01(\x05\"h\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10\x45RROR_NO_POKEMON\x10\x02\x12\x14\n\x10\x45RROR_CANNOT_USE\x10\x03\x12\x1a\n\x16\x45RROR_DEPLOYED_TO_FORT\x10\x04\"\xe1\x01\n\x15UseItemReviveResponse\x12M\n\x06result\x18\x01 \x01(\x0e\x32=.POGOProtos.Networking.Responses.UseItemReviveResponse.Result\x12\x0f\n\x07stamina\x18\x02 \x01(\x05\"h\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x14\n\x10\x45RROR_NO_POKEMON\x10\x02\x12\x14\n\x10\x45RROR_CANNOT_USE\x10\x03\x12\x1a\n\x16\x45RROR_DEPLOYED_TO_FORT\x10\x04\"\xbe\x02\n\x16UseItemXpBoostResponse\x12N\n\x06result\x18\x01 \x01(\x0e\x32>.POGOProtos.Networking.Responses.UseItemXpBoostResponse.Result\x12\x39\n\rapplied_items\x18\x02 \x01(\x0b\x32\".POGOProtos.Inventory.AppliedItems\"\x98\x01\n\x06Result\x12\t\n\x05UNSET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\x1b\n\x17\x45RROR_INVALID_ITEM_TYPE\x10\x02\x12!\n\x1d\x45RROR_XP_BOOST_ALREADY_ACTIVE\x10\x03\x12\x1c\n\x18\x45RROR_NO_ITEMS_REMAINING\x10\x04\x12\x18\n\x14\x45RROR_LOCATION_UNSET\x10\x05P\x00P\x01P\x02P\x03P\x04P\x05P\x06P\x07P\x08P\tP\nP\x0bP\x0cP\rb\x06proto3')
   ,
   dependencies=[POGOProtos_dot_Data_dot_Battle__pb2.DESCRIPTOR,POGOProtos_dot_Data_dot_Capture__pb2.DESCRIPTOR,POGOProtos_dot_Enums__pb2.DESCRIPTOR,POGOProtos_dot_Data__pb2.DESCRIPTOR,POGOProtos_dot_Settings_dot_Master__pb2.DESCRIPTOR,POGOProtos_dot_Settings__pb2.DESCRIPTOR,POGOProtos_dot_Map_dot_Pokemon__pb2.DESCRIPTOR,POGOProtos_dot_Data_dot_Player__pb2.DESCRIPTOR,POGOProtos_dot_Data_dot_Gym__pb2.DESCRIPTOR,POGOProtos_dot_Map_dot_Fort__pb2.DESCRIPTOR,POGOProtos_dot_Inventory_dot_Item__pb2.DESCRIPTOR,POGOProtos_dot_Inventory__pb2.DESCRIPTOR,POGOProtos_dot_Map__pb2.DESCRIPTOR,POGOProtos_dot_Data_dot_Logs__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -725,8 +725,8 @@ _GETINCENSEPOKEMONRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=8473,
-  serialized_end=8582,
+  serialized_start=8497,
+  serialized_end=8606,
 )
 _sym_db.RegisterEnumDescriptor(_GETINCENSEPOKEMONRESPONSE_RESULT)
 
@@ -777,8 +777,8 @@ _INCENSEENCOUNTERRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9413,
-  serialized_end=9548,
+  serialized_start=9437,
+  serialized_end=9572,
 )
 _sym_db.RegisterEnumDescriptor(_INCENSEENCOUNTERRESPONSE_RESULT)
 
@@ -803,8 +803,8 @@ _LEVELUPREWARDSRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=9777,
-  serialized_end=9830,
+  serialized_start=9801,
+  serialized_end=9854,
 )
 _sym_db.RegisterEnumDescriptor(_LEVELUPREWARDSRESPONSE_RESULT)
 
@@ -837,8 +837,8 @@ _NICKNAMEPOKEMONRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=10040,
-  serialized_end=10155,
+  serialized_start=10064,
+  serialized_end=10179,
 )
 _sym_db.RegisterEnumDescriptor(_NICKNAMEPOKEMONRESPONSE_RESULT)
 
@@ -867,8 +867,8 @@ _RECYCLEINVENTORYITEMRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=10448,
-  serialized_end=10546,
+  serialized_start=10472,
+  serialized_end=10570,
 )
 _sym_db.RegisterEnumDescriptor(_RECYCLEINVENTORYITEMRESPONSE_RESULT)
 
@@ -901,8 +901,8 @@ _RELEASEPOKEMONRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=10678,
-  serialized_end=10770,
+  serialized_start=10702,
+  serialized_end=10794,
 )
 _sym_db.RegisterEnumDescriptor(_RELEASEPOKEMONRESPONSE_RESULT)
 
@@ -931,8 +931,8 @@ _SETAVATARRESPONSE_STATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=10919,
-  serialized_end=10988,
+  serialized_start=10943,
+  serialized_end=11012,
 )
 _sym_db.RegisterEnumDescriptor(_SETAVATARRESPONSE_STATUS)
 
@@ -957,8 +957,8 @@ _SETCONTACTSETTINGSRESPONSE_STATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=11155,
-  serialized_end=11200,
+  serialized_start=11179,
+  serialized_end=11224,
 )
 _sym_db.RegisterEnumDescriptor(_SETCONTACTSETTINGSRESPONSE_STATUS)
 
@@ -987,8 +987,8 @@ _SETFAVORITEPOKEMONRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=11317,
-  serialized_end=11404,
+  serialized_start=11341,
+  serialized_end=11428,
 )
 _sym_db.RegisterEnumDescriptor(_SETFAVORITEPOKEMONRESPONSE_RESULT)
 
@@ -1017,8 +1017,8 @@ _SETPLAYERTEAMRESPONSE_STATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=11561,
-  serialized_end=11628,
+  serialized_start=11585,
+  serialized_end=11652,
 )
 _sym_db.RegisterEnumDescriptor(_SETPLAYERTEAMRESPONSE_STATUS)
 
@@ -1109,8 +1109,8 @@ _STARTGYMBATTLERESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=12141,
-  serialized_end=12518,
+  serialized_start=12165,
+  serialized_end=12542,
 )
 _sym_db.RegisterEnumDescriptor(_STARTGYMBATTLERESPONSE_RESULT)
 
@@ -1147,8 +1147,8 @@ _UPGRADEPOKEMONRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=12684,
-  serialized_end=12843,
+  serialized_start=12708,
+  serialized_end=12867,
 )
 _sym_db.RegisterEnumDescriptor(_UPGRADEPOKEMONRESPONSE_RESULT)
 
@@ -1181,8 +1181,8 @@ _USEINCENSERESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=13004,
-  serialized_end=13109,
+  serialized_start=13028,
+  serialized_end=13133,
 )
 _sym_db.RegisterEnumDescriptor(_USEINCENSERESPONSE_RESULT)
 
@@ -1227,8 +1227,8 @@ _USEITEMEGGINCUBATORRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=13468,
-  serialized_end=13707,
+  serialized_start=13492,
+  serialized_end=13731,
 )
 _sym_db.RegisterEnumDescriptor(_USEITEMEGGINCUBATORRESPONSE_RESULT)
 
@@ -1257,8 +1257,8 @@ _USEITEMGYMRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=13828,
-  serialized_end=13906,
+  serialized_start=13852,
+  serialized_end=13930,
 )
 _sym_db.RegisterEnumDescriptor(_USEITEMGYMRESPONSE_RESULT)
 
@@ -1291,8 +1291,8 @@ _USEITEMPOTIONRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=14030,
-  serialized_end=14134,
+  serialized_start=14054,
+  serialized_end=14158,
 )
 _sym_db.RegisterEnumDescriptor(_USEITEMPOTIONRESPONSE_RESULT)
 
@@ -1325,8 +1325,8 @@ _USEITEMREVIVERESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=14030,
-  serialized_end=14134,
+  serialized_start=14054,
+  serialized_end=14158,
 )
 _sym_db.RegisterEnumDescriptor(_USEITEMREVIVERESPONSE_RESULT)
 
@@ -1363,8 +1363,8 @@ _USEITEMXPBOOSTRESPONSE_RESULT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=14531,
-  serialized_end=14683,
+  serialized_start=14555,
+  serialized_end=14707,
 )
 _sym_db.RegisterEnumDescriptor(_USEITEMXPBOOSTRESPONSE_RESULT)
 
@@ -1470,7 +1470,7 @@ _CATCHPOKEMONRESPONSE = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='miss_percent', full_name='POGOProtos.Networking.Responses.CatchPokemonResponse.miss_percent', index=1,
       number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -2408,14 +2408,14 @@ _FORTDETAILSRESPONSE = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='latitude', full_name='POGOProtos.Networking.Responses.FortDetailsResponse.latitude', index=9,
       number=10, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='longitude', full_name='POGOProtos.Networking.Responses.FortDetailsResponse.longitude', index=10,
       number=11, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -2766,8 +2766,8 @@ _GETINCENSEPOKEMONRESPONSE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='pokemon_type_id', full_name='POGOProtos.Networking.Responses.GetIncensePokemonResponse.pokemon_type_id', index=1,
-      number=2, type=5, cpp_type=1, label=1,
+      name='pokemon_id', full_name='POGOProtos.Networking.Responses.GetIncensePokemonResponse.pokemon_id', index=1,
+      number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -2775,14 +2775,14 @@ _GETINCENSEPOKEMONRESPONSE = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='latitude', full_name='POGOProtos.Networking.Responses.GetIncensePokemonResponse.latitude', index=2,
       number=3, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='longitude', full_name='POGOProtos.Networking.Responses.GetIncensePokemonResponse.longitude', index=3,
       number=4, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -2821,7 +2821,7 @@ _GETINCENSEPOKEMONRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=8217,
-  serialized_end=8582,
+  serialized_end=8606,
 )
 
 
@@ -2858,8 +2858,8 @@ _GETINVENTORYRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8584,
-  serialized_end=8686,
+  serialized_start=8608,
+  serialized_end=8710,
 )
 
 
@@ -2896,8 +2896,8 @@ _GETMAPOBJECTSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8688,
-  serialized_end=8805,
+  serialized_start=8712,
+  serialized_end=8829,
 )
 
 
@@ -2942,8 +2942,8 @@ _GETPLAYERPROFILERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=8808,
-  serialized_end=9016,
+  serialized_start=8832,
+  serialized_end=9040,
 )
 
 
@@ -2980,8 +2980,8 @@ _GETPLAYERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9018,
-  serialized_end=9104,
+  serialized_start=9042,
+  serialized_end=9128,
 )
 
 
@@ -3018,8 +3018,8 @@ _GETSUGGESTEDCODENAMESRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9106,
-  serialized_end=9173,
+  serialized_start=9130,
+  serialized_end=9197,
 )
 
 
@@ -3064,8 +3064,8 @@ _INCENSEENCOUNTERRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9176,
-  serialized_end=9548,
+  serialized_start=9200,
+  serialized_end=9572,
 )
 
 
@@ -3110,8 +3110,8 @@ _LEVELUPREWARDSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9551,
-  serialized_end=9830,
+  serialized_start=9575,
+  serialized_end=9854,
 )
 
 
@@ -3148,8 +3148,8 @@ _MARKTUTORIALCOMPLETERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9832,
-  serialized_end=9929,
+  serialized_start=9856,
+  serialized_end=9953,
 )
 
 
@@ -3180,8 +3180,8 @@ _NICKNAMEPOKEMONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=9932,
-  serialized_end=10155,
+  serialized_start=9956,
+  serialized_end=10179,
 )
 
 
@@ -3225,8 +3225,8 @@ _PLAYERUPDATERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10158,
-  serialized_end=10308,
+  serialized_start=10182,
+  serialized_end=10332,
 )
 
 
@@ -3264,8 +3264,8 @@ _RECYCLEINVENTORYITEMRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10311,
-  serialized_end=10546,
+  serialized_start=10335,
+  serialized_end=10570,
 )
 
 
@@ -3303,8 +3303,8 @@ _RELEASEPOKEMONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10549,
-  serialized_end=10770,
+  serialized_start=10573,
+  serialized_end=10794,
 )
 
 
@@ -3342,8 +3342,8 @@ _SETAVATARRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10773,
-  serialized_end=10988,
+  serialized_start=10797,
+  serialized_end=11012,
 )
 
 
@@ -3381,8 +3381,8 @@ _SETCONTACTSETTINGSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=10991,
-  serialized_end=11200,
+  serialized_start=11015,
+  serialized_end=11224,
 )
 
 
@@ -3413,8 +3413,8 @@ _SETFAVORITEPOKEMONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11203,
-  serialized_end=11404,
+  serialized_start=11227,
+  serialized_end=11428,
 )
 
 
@@ -3452,8 +3452,8 @@ _SETPLAYERTEAMRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11407,
-  serialized_end=11628,
+  serialized_start=11431,
+  serialized_end=11652,
 )
 
 
@@ -3491,8 +3491,8 @@ _SFIDAACTIONLOGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11631,
-  serialized_end=11828,
+  serialized_start=11655,
+  serialized_end=11852,
 )
 
 
@@ -3558,8 +3558,8 @@ _STARTGYMBATTLERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=11831,
-  serialized_end=12518,
+  serialized_start=11855,
+  serialized_end=12542,
 )
 
 
@@ -3597,8 +3597,8 @@ _UPGRADEPOKEMONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12521,
-  serialized_end=12843,
+  serialized_start=12545,
+  serialized_end=12867,
 )
 
 
@@ -3636,8 +3636,8 @@ _USEINCENSERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=12846,
-  serialized_end=13109,
+  serialized_start=12870,
+  serialized_end=13133,
 )
 
 
@@ -3658,14 +3658,14 @@ _USEITEMCAPTURERESPONSE = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='item_capture_mult', full_name='POGOProtos.Networking.Responses.UseItemCaptureResponse.item_capture_mult', index=1,
       number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='item_flee_mult', full_name='POGOProtos.Networking.Responses.UseItemCaptureResponse.item_flee_mult', index=2,
       number=3, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -3709,8 +3709,8 @@ _USEITEMCAPTURERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13112,
-  serialized_end=13289,
+  serialized_start=13136,
+  serialized_end=13313,
 )
 
 
@@ -3748,8 +3748,8 @@ _USEITEMEGGINCUBATORRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13292,
-  serialized_end=13707,
+  serialized_start=13316,
+  serialized_end=13731,
 )
 
 
@@ -3787,8 +3787,8 @@ _USEITEMGYMRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13710,
-  serialized_end=13906,
+  serialized_start=13734,
+  serialized_end=13930,
 )
 
 
@@ -3826,8 +3826,8 @@ _USEITEMPOTIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=13909,
-  serialized_end=14134,
+  serialized_start=13933,
+  serialized_end=14158,
 )
 
 
@@ -3865,8 +3865,8 @@ _USEITEMREVIVERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14137,
-  serialized_end=14362,
+  serialized_start=14161,
+  serialized_end=14386,
 )
 
 
@@ -3904,8 +3904,8 @@ _USEITEMXPBOOSTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=14365,
-  serialized_end=14683,
+  serialized_start=14389,
+  serialized_end=14707,
 )
 
 _ATTACKGYMRESPONSE.fields_by_name['result'].enum_type = _ATTACKGYMRESPONSE_RESULT
@@ -3987,6 +3987,7 @@ _GETGYMDETAILSRESPONSE.fields_by_name['gym_state'].message_type = POGOProtos_dot
 _GETGYMDETAILSRESPONSE.fields_by_name['result'].enum_type = _GETGYMDETAILSRESPONSE_RESULT
 _GETGYMDETAILSRESPONSE_RESULT.containing_type = _GETGYMDETAILSRESPONSE
 _GETINCENSEPOKEMONRESPONSE.fields_by_name['result'].enum_type = _GETINCENSEPOKEMONRESPONSE_RESULT
+_GETINCENSEPOKEMONRESPONSE.fields_by_name['pokemon_id'].enum_type = POGOProtos_dot_Enums__pb2._POKEMONID
 _GETINCENSEPOKEMONRESPONSE_RESULT.containing_type = _GETINCENSEPOKEMONRESPONSE
 _GETINVENTORYRESPONSE.fields_by_name['inventory_delta'].message_type = POGOProtos_dot_Inventory__pb2._INVENTORYDELTA
 _GETMAPOBJECTSRESPONSE.fields_by_name['map_cells'].message_type = POGOProtos_dot_Map__pb2._MAPCELL

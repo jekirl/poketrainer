@@ -1,11 +1,12 @@
 from __future__ import absolute_import
 
 import json
-from math import sqrt
+from math import floor, sqrt
 from os import path
 
-from pgoapi.game_master import GAME_MASTER
-
+from pgoapi.game_master import GAME_MASTER, PokemonData
+from pgoapi.poke_lvl_data import POKEMON_LVL_DATA, TCPM_VALS, get_tcpm
+from pgoapi.utilities import all_in
 
 POKEMON_NAMES = {}
 
@@ -44,6 +45,7 @@ class Pokemon(object):
     def __init__(self, pokemon_data, player_level=0,
                  score_method="CP", score_settings=dict()):
         self.pokemon_data = pokemon_data
+        self.creation_time_ms = pokemon_data.get('creation_time_ms', 0)
         self.stamina = pokemon_data.get('stamina', 0)
         self.favorite = pokemon_data.get('favorite', -1)
         self.is_favorite = self.favorite != -1
@@ -64,27 +66,40 @@ class Pokemon(object):
         self.iv = self.get_iv_percentage()
         self.pokemon_type = POKEMON_NAMES.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore')
 
+        # Used in Web.py
+        if self.nickname is not "":
+            self.name = self.nickname
+        else:
+            self.name = self.pokemon_type
+        self.candy = 0
+        self.move_1 = pokemon_data.get('move_1', 0)
+        self.move_2 = pokemon_data.get('move_2', 0)
+
+        # Max Evolve based on ur lvl vals and Power Up
+        self.candy_needed_to_max_evolve = 0
+        self.dust_needed_to_max_evolve = 0
+        self.max_evolve_cp = 0
+        self.power_up_result = 0
+
         self.iv_normalized = -1.0
         self.max_cp = -1.0
         self.max_cp_absolute = -1.0
-        self.cpm_total = self.cp_multiplier + self.additional_cp_multiplier
-        self.level_wild = self.get_level_by_cpm(self.cp_multiplier)
-        self.level = self.get_level_by_cpm(self.cpm_total)
+
         additional_data = GAME_MASTER.get(self.pokemon_id)
         self.family_id = additional_data.FamilyId if additional_data else None
+
+        # helps with rounding errors
+        self.cpm_total = get_tcpm(self.cp_multiplier + self.additional_cp_multiplier)
+        self.level_wild = self.get_level_by_cpm(self.cp_multiplier)
+        self.level = self.get_level_by_cpm(self.cpm_total)
 
         # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
         attack = float(additional_data.BaseAttack) if additional_data else 0.0
         defense = float(additional_data.BaseDefense) if additional_data else 0.0
         stamina = float(additional_data.BaseStamina) if additional_data else 0.0
-        self.max_cp = ((attack + self.individual_attack) *
-                       sqrt(defense + self.individual_defense) *
-                       sqrt(stamina + self.individual_stamina) *
-                       pow(self.get_cpm_by_level(player_level + 1.5), 2)) / 10
-        self.max_cp_absolute = ((attack + self.individual_attack) *
-                                sqrt(defense + self.individual_defense) *
-                                sqrt(stamina + self.individual_stamina) *
-                                pow(self.get_cpm_by_level(40), 2)) / 10
+
+        self.max_cp = self.calc_cp(self.get_cpm_by_level(player_level + 1.5), additional_data)
+        self.max_cp_absolute = self.calc_cp(self.get_cpm_by_level(40), additional_data)
         # calculating these for level 40 to get more accurate values
         worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.get_cpm_by_level(40), 2)) / 10
         perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.get_cpm_by_level(40), 2)) / 10
@@ -131,6 +146,53 @@ class Pokemon(object):
 
     def __repr__(self):
         return self.__str__()
+
+    def calc_cp(self, tcpm, pokemon_details):
+        if not isinstance(pokemon_details, PokemonData) or not isinstance(tcpm, float):
+            return 0
+
+        baseAttk = int(pokemon_details.BaseAttack)
+        baseDef = int(pokemon_details.BaseDefense)
+        baseStamina = int(pokemon_details.BaseStamina)
+
+        attk = (baseAttk + self.individual_attack) * tcpm
+        defense = (baseDef + self.individual_defense) * tcpm
+        stamina = (baseStamina + self.individual_stamina) * tcpm
+
+        return int(max(10, floor(sqrt(stamina) * attk * sqrt(defense) / 10)))
+
+    def set_max_cp(self, max_tcpm):
+        poke_game_data = GAME_MASTER.get(self.pokemon_id, PokemonData())
+        if int(poke_game_data.PkMn) == 0 or max_tcpm not in TCPM_VALS or not all_in(['cp', 'cp_multiplier'], self.pokemon_data):
+            return
+
+        candy_to_evolve = int(poke_game_data.CandyToEvolve)
+
+        self.candy_needed_to_max_evolve = POKEMON_LVL_DATA[max_tcpm].candy_to_this_lvl - POKEMON_LVL_DATA[self.cpm_total].candy_to_this_lvl + candy_to_evolve
+        self.dust_needed_to_max_evolve = POKEMON_LVL_DATA[max_tcpm].stardust_to_this_lvl - POKEMON_LVL_DATA[self.cpm_total].stardust_to_this_lvl
+
+        i = 0
+        if self.pokemon_id == 133:  # is an Eevee
+            if self.nickname is 'Sparky':
+                i = 2
+            elif self.nickname is 'Pyro':
+                i = 3
+            else:  # Rainer or Vaporean is the default
+                i = 1
+        else:
+            while GAME_MASTER.get(self.pokemon_id + i + 1, PokemonData()).FamilyId == poke_game_data.FamilyId and candy_to_evolve > 0:
+                candy_to_evolve = int(GAME_MASTER.get(self.pokemon_id + i + 1, PokemonData()).CandyToEvolve)
+                self.candy_needed_to_max_evolve += candy_to_evolve
+                i += 1
+
+        if(i == 0):
+            self.max_evolve_cp = self.calc_cp(max_tcpm, poke_game_data)
+        else:
+            evolved_poke_data = GAME_MASTER.get(self.pokemon_id + i, PokemonData())
+            self.max_evolve_cp = self.calc_cp(max_tcpm, evolved_poke_data)
+
+        pokeLvl = POKEMON_LVL_DATA[self.cpm_total].pokemon_lvl
+        self.power_up_result = self.calc_cp(TCPM_VALS[pokeLvl], poke_game_data) - self.cp
 
     def get_level_by_cpm(self, cpm_total):
         prev_max_level = 0
