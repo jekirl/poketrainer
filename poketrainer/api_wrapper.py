@@ -141,6 +141,8 @@ class ApiWrapper:
         self.log.info('login process')
         return
         self.api = PGoApi()
+        # set signature!
+        self.api.activate_signature("libencrypt.so")
 
         # get position and set it in the API
         position = get_location(self.config.location)
@@ -330,14 +332,13 @@ class ApiWrapper:
         return True
 
     def nearby_map_objects(self):
-        self.sleep(10.0)
         if time() - self._last_got_map_objects > self._map_objects_rate_limit:
             position = self.api.get_position()
             neighbors = get_neighbors(self._posf)
             gevent.sleep(1.0)
             self.map_objects = self.api.get_map_objects(
                 latitude=position[0], longitude=position[1],
-                since_timestamp_ms=[0] * len(neighbors),
+                since_timestamp_ms=[0, ] * len(neighbors),
                 cell_id=neighbors)
             self._last_got_map_objects = time()
             print(self.map_objects)

@@ -1,3 +1,9 @@
+# Post-Unknown6 changes:
+
+# The current version of the bot currently requires the encrypt library. Hop on the #poketrainer slack to find out more.
+### Long story short, you need to make `libencrypt.so` or `encrypt.dll` by finding the `c_code` folder of one of the `unknown6` repositories and running `make clean; make`. You then put the built files into the same folder as pokecli.py and run it with:
+```python pokecli.py -i ACCOUNT_INDEx -e YOUR_ENCRYPT_LIB_NAME_GOES_HERE.DLL.SO```
+
 # Please do not sell the bot, or use it to sell accounts/power leveling or what have you. If you really can't help yourself from trying to make money on it, please donate a portion of your profits to [Kiva](https://www.kiva.org/).
 ## To the people that have done so already (heard from quite a few already), thank you for making the world a better place.
 
@@ -16,7 +22,7 @@
 
  #### Rename `config.json.example` to `config.json`
 ```
-usage: python pokecli.py [-h] [-i CONFIG_INDEX] [-l LOCATION] [-d]
+usage: pokecli.py [-h] [-i CONFIG_INDEX] [-l LOCATION] [-e ENCRYPT_LIB] [-d]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -24,6 +30,8 @@ optional arguments:
                         Index of account in config.json
   -l LOCATION, --location LOCATION
                         Location
+  -e ENCRYPT_LIB, --encrypt-lib ENCRYPT_LIB
+                        encrypt lib, libencrypt.so/encrypt.dll
   -d, --debug           Debug Mode
 ```
 
@@ -92,7 +100,7 @@ Below the accounts you can change options in the `default` section. If you need 
      * `POKEMON_CONFIGS` this is a mapping of pokemon name to configuration overrides for that pokemon
        * `pokemon name` this is a pokemon name in the set of valid names for `KEEP_POKEMON_NAMES`
          * `RELEASE_METHOD` this is required if the release method should be different from `MULTI_DEFAULT_RELEASE_METHOD` otherwise it will use default
-         * `RELEASE_METHOD_*` settings in these configuration blocks will override defaults for the this specific `pokemon name` 
+         * `RELEASE_METHOD_*` settings in these configuration blocks will override defaults for the this specific `pokemon name`
    * `SCORE_METHOD`
      * A pokemon's score is an arbitrary and configurable parameter defines how to sort pokemon by best > worst to decide which one to keep first. Possible values are "CP", "IV", "CPxIV", or "CP+IV" or the special "FANCY" method.
      * The "FANCY" method uses the options a `WEIGHT_IV` and `WEIGHT_LVL` which give the ability to specifically set more weight on Lvl or IV. The formula is as follows: `(iv / 100.0 * SCORE_WEIGHT_IV) + level / (player_level+1.5) * SCORE_WEIGHT_LVL` where player_level+1.5 is the max level that pokemon can reach when fully powered up.
@@ -157,7 +165,7 @@ docker run -ti --name poketrainer -v /path/to/poketrainer/config.json:/config.js
 The name option, poketrainer in the example, is arbirary. Multilple containers can be made using different names. -v maps the config file into the container. You can modify config.json and it will be reread when the container is started, no need to recreate the container or rebuild the image. -p maps the web interface to the external network, so you can check on the status of your training from a different machine. If you choose not to map the port, the ip address of the container can be found
 using `docker inspect poketrainer`.
 
-The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`. 
+The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`.
 
 You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.  	
 
@@ -176,6 +184,7 @@ What's working:
 
 
 ## Credits
+* [keyphact/UK6 team] https://github.com/keyphact/pgoapi for the unknown6 fix
 * [tejado](https://github.com/tejado) for the base of this
 * [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR
 * [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos

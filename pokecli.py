@@ -61,6 +61,7 @@ def init_arguments():
     parser.add_argument("-i", "--config_index", help="Index of account to start in config.json", type=int)
     parser.add_argument("-l", "--location",
                         help="Location. Only applies if an account was selected through config_index parameter")
+    parser.add_argument("-e", "--encrypt_lib", help="encrypt lib, libencrypt.so/encrypt.dll", default="libencrypt.so")
     parser.add_argument("-w", "--start_webserver",
                         help="Start Webserver. Does not apply if an account was selected through config_index parameter",
                         action='store_true', default=False)

@@ -288,6 +288,7 @@ class Poketrainer:
 
     def spin_all_forts_visible(self):
         res = self.nearby_map_objects()
+        self.log.debug("nearyby_map_objects: %s", res)
         map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = self.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.config.stay_within_proximity,
@@ -322,6 +323,7 @@ class Poketrainer:
 
     def spin_near_fort(self):
         res = self.nearby_map_objects()
+        self.log.debug("nearyby_map_objects: %s", res)
         map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = self.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.config.stay_within_proximity,
