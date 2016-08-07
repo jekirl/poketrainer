@@ -170,7 +170,6 @@ The container is now running in the foregorund, and can be stopped by using `Ctr
 
 You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.  	
 
-
 ### What's working:
 What's working:
  * A lot of things. Check out the example config to see some of the features. Catching Lured pokemon, sniping, regular pokemon, multiple kinds of navigation (google maps, walking, driving, customized speed), a web ui, auto transfers, auto evolves, auto power ups, auto egg incubation, inventory managament, multiple account botting. And much more, README to be updated soon.
