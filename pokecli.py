@@ -126,7 +126,7 @@ def main(position=None):
     # instantiate pgoapi
     api = PGoApi(config)
 
-    #set signature!
+    # set signature!
     api.activate_signature(config['encrypt_lib'])
 
     # provide player position on the earth

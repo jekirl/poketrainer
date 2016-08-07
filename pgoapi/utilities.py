@@ -26,21 +26,11 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
 import struct
-from bisect import bisect_left
-import re
 import time
-import struct
-import ctypes
-import xxhash
-import logging
-
-from json import JSONEncoder
 from binascii import unhexlify
+from bisect import bisect_left
 
-# other stuff
-from google.protobuf.internal import encoder
-from geopy.geocoders import GoogleV3
-from s2sphere import LatLng, Angle, Cap, RegionCoverer, math
+import xxhash
 
 
 def f2i(float):
@@ -73,7 +63,7 @@ def all_in(candidates, sequence):
 
 def take_closest(my_number, my_list):
     """
-    Assumes my_list is sorted. Returns closest value to my_number.
+    Assume my_list is sorted. Returns closest value to my_number.
 
     If two numbers are equally close, return the smallest number.
     """
@@ -88,13 +78,16 @@ def take_closest(my_number, my_list):
         return after
     else:
         return before
-def get_time(ms = False):
+
+
+def get_time(ms=False):
     if ms:
         return int(round(time.time() * 1000))
     else:
         return int(round(time.time()))
 
-def get_format_time_diff(low, high, ms = True):
+
+def get_format_time_diff(low, high, ms=True):
     diff = (high - low)
     if ms:
         m, s = divmod(diff / 1000, 60)
@@ -103,6 +96,7 @@ def get_format_time_diff(low, high, ms = True):
     h, m = divmod(m, 60)
 
     return (h, m, s)
+
 
 def parse_api_endpoint(api_url):
     if not api_url.startswith("https"):
@@ -114,24 +108,31 @@ def parse_api_endpoint(api_url):
 class Rand48(object):
     def __init__(self, seed):
         self.n = seed
+
     def seed(self, seed):
         self.n = seed
+
     def srand(self, seed):
         self.n = (seed << 16) + 0x330e
+
     def next(self):
         self.n = (25214903917 * self.n + 11) & (2**48 - 1)
         return self.n
+
     def drand(self):
         return self.next() / 2**48
+
     def lrand(self):
         return self.next() >> 17
+
     def mrand(self):
         n = self.next() >> 16
         if n & (1 << 31):
             n -= 1 << 32
         return n
 
-def long_to_bytes (val, endianness='big'):
+
+def long_to_bytes(val, endianness='big'):
     """
     Use :ref:`string formatting` and :func:`~binascii.unhexlify` to
     convert ``val``, a :func:`long`, to a byte :func:`str`.
@@ -145,7 +146,6 @@ def long_to_bytes (val, endianness='big'):
 
     Using :ref:`string formatting` lets us use Python's C innards.
     """
-
     # one (1) hex digit per four (4) bits
     width = val.bit_length()
 
@@ -173,18 +173,20 @@ def generateLocation1(authticket, lat, lng, alt):
         alt = "\x00\x00\x00\x00\x00\x00\x00\x00"
     return xxhash.xxh32(locationBytes, seed=firstHash).intdigest()
 
+
 def generateLocation2(lat, lng, alt):
     locationBytes = d2h(lat) + d2h(lng) + d2h(alt)
     if not alt:
         alt = "\x00\x00\x00\x00\x00\x00\x00\x00"
-    return xxhash.xxh32(locationBytes, seed=0x1B845238).intdigest()      #Hash of location using static seed 0x1B845238
+    return xxhash.xxh32(locationBytes, seed=0x1B845238).intdigest()  # Hash of location using static seed 0x1B845238
 
 
 def generateRequestHash(authticket, request):
     firstHash = xxhash.xxh64(authticket, seed=0x1B845238).intdigest()
     return xxhash.xxh64(request, seed=firstHash).intdigest()
 
+
 def d2h(f):
-  hex = f2h(f)[2:].replace('L','')
-  hex = ("0" * (len(hex) % 2)) + hex
-  return  hex.decode("hex")
+    hex = f2h(f)[2:].replace('L', '')
+    hex = ("0" * (len(hex) % 2)) + hex
+    return hex.decode("hex")
