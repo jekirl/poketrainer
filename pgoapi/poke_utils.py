@@ -9,8 +9,10 @@ from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Enum_Items
 def get_item_name(s_item_id):
     available_items = Enum_Items.ItemId.DESCRIPTOR.values_by_number.items()
     for (item_id, item) in available_items:
+        itemName = ""
         if item_id == s_item_id:
-            return item.name.replace('ITEM_', '', 1)
+            itemName = item.name.replace('ITEM_', '', 1).replace('_', ' ')
+            return itemName
     return 'Unknown'
 
 

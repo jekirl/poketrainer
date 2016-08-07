@@ -145,16 +145,17 @@ class Inventory:
         return Inventory_Enum.ITEM_RAZZ_BERRY
 
     def __str__(self):
-        str_ = "PokeBalls: {0}, GreatBalls: {1}, MasterBalls: {2}, UltraBalls: {3} \n " \
-               "Potion: {4}, Super Potion: {5}, Max Potion {6}, Hyper Potion {7}, Lucky Eggs {8}, Razz Berries {9}"
+        str_ =  "\t PokeBalls:\t{0}\n\t\t\t| [INVENTORY]\t-\t GreatBalls:\t{1}\n\t\t\t| [INVENTORY]\t-\t UltraBalls:\t{2}\n\t\t\t| [INVENTORY]\t-\t MasterBalls:\t{3}\n" \
+                "\t\t\t| [INVENTORY]\t-\t Potion:\t{4}\n\t\t\t| [INVENTORY]\t-\t Super Potion:\t{5}\n\t\t\t| [INVENTORY]\t-\t Hyper Potion\t{6}\n\t\t\t| [INVENTORY]\t-\t Max Potion\t{7}\n" \
+                "\t\t\t| [INVENTORY]\t-\t Lucky Eggs\t{8}\n\t\t\t| [INVENTORY]\t-\t Razz Berries\t{9}"
         return str_.format(self.poke_balls,
                            self.great_balls,
-                           self.master_balls,
                            self.ultra_balls,
+                           self.master_balls,
                            self.potion,
                            self.super_potion,
-                           self.max_potion,
                            self.hyper_potion,
+                           self.max_potion,
                            self.lucky_eggs,
                            self.razz_berries)
 

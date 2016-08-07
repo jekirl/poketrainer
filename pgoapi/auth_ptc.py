@@ -48,7 +48,7 @@ class AuthPtc(Auth):
 
     def login(self, username, password):
 
-        self.log.info('Login for: %s', username)
+        self.log.info('[LOGIN]\t- Login for: %s', username)
 
         head = {'User-Agent': 'niantic'}
         r = self._session.get(self.PTC_LOGIN_URL, headers=head)
@@ -86,11 +86,11 @@ class AuthPtc(Auth):
         access_token = re.sub('.*access_token=', '', access_token)
 
         if '-sso.pokemon.com' in access_token:
-            self.log.info('PTC Login successful')
+            self.log.info('[LOGIN]\t- PTC Login successful')
             self.log.debug('PTC Session Token: %s', access_token[:25])
             self._auth_token = access_token
         else:
-            self.log.info('Seems not to be a PTC Session Token... login failed :(')
+            self.log.info('[LOGIN]\t- Seems not to be a PTC Session Token... login failed :(')
             return False
 
         self._login = True

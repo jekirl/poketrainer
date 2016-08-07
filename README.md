@@ -52,6 +52,7 @@ Below the accounts you can change options in the `default` section. If you need 
    * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
 * `CAPTURE`
    * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
+   * `CATCH_TRASH` Instructs the bot never to catch any pokemon in your 'THROW_POKEMON_NAMES' list : (default: true (it will catch trash))
    * `MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY` minimum number of failed capture attempts before trying to use a Razz Berry (default: 3)
    * `USE_POKEBALL_IF_PERCENT` As long as using a pokeball would result in at least this percent of a chance to capture, use it (default: 50)
    * `USE_GREATBALL_IF_PERCENT` If using a pokeball wouldn't result in at least the above percent, use a greatball if the capture rate is above this percent (default: 50)
@@ -92,7 +93,7 @@ Below the accounts you can change options in the `default` section. If you need 
      * `POKEMON_CONFIGS` this is a mapping of pokemon name to configuration overrides for that pokemon
        * `pokemon name` this is a pokemon name in the set of valid names for `KEEP_POKEMON_NAMES`
          * `RELEASE_METHOD` this is required if the release method should be different from `MULTI_DEFAULT_RELEASE_METHOD` otherwise it will use default
-         * `RELEASE_METHOD_*` settings in these configuration blocks will override defaults for the this specific `pokemon name` 
+         * `RELEASE_METHOD_*` settings in these configuration blocks will override defaults for the this specific `pokemon name`
    * `SCORE_METHOD`
      * A pokemon's score is an arbitrary and configurable parameter defines how to sort pokemon by best > worst to decide which one to keep first. Possible values are "CP", "IV", "CPxIV", or "CP+IV" or the special "FANCY" method.
      * The "FANCY" method uses the options a `WEIGHT_IV` and `WEIGHT_LVL` which give the ability to specifically set more weight on Lvl or IV. The formula is as follows: `(iv / 100.0 * SCORE_WEIGHT_IV) + level / (player_level+1.5) * SCORE_WEIGHT_LVL` where player_level+1.5 is the max level that pokemon can reach when fully powered up.
@@ -104,17 +105,30 @@ Below the accounts you can change options in the `default` section. If you need 
    * `FARM_OVERRIDE_STEP_SIZE`: `Integer`, When it goes into farming mode, the bot assumes this step size to potentially speed up resource gathering. _This might lead to softbans._ Setting to `-1` disables this feature. Disabled by default for safety.
    * If `EXPERIMENTAL` OR `CATCH_POKEMON` are false, this configuration will disable itself.
 
+* `CONSOLE_OUTPUT`
+    * `HEARTBEAT_DETAIL` : "hidden" will hide repetitive messages, such as the heartbeat.Any other value, (such as "detailed") will allow them to be shown.
+    * `PRETTY_LOCATIONS` : Will convert co-ordinates, where possible, into addresses. This allows better manual tracking of the bot's location in a familiar area, but uses many more geolocation requests.
+
 There are more options, check the current config.json.example, many are self-explanatory.
 
 
+### Find out Item ID's
+For Chosing what Items to keep, get the names here, [AeonLucidProtos_ItemID](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Inventory/Item/ItemId.proto)
+For Choosing what pokemon to keep get the names here,[AeonLucidProtos_Pokemon](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Enums/PokemonId.proto)
+
+Put them in config. Type exactly as the name appears
+
+
 ## Requirements
- * Run `pip install -r requirements.txt`
- * Python 2.7 or 3.5
- * requests
- * protobuf
- * gpsoauth
- * geopy (only for pokecli demo)
- * s2sphere (only for pokecli demo)
+ * For windows you will probably need to install [Microsoft Visual C++ Compiler for Python 2.7](https://www.microsoft.com/en-us/download/details.aspx?id=44266) first
+ * Install git via your package manager or [download it for windows](https://git-scm.com/download/win)
+ * Python 2.7 or 3.5 [windows downloads](https://www.python.org/downloads/)
+ * Run `pip install -r requirements.txt` in the bots folder from your console
+     * requests
+     * protobuf
+     * gpsoauth
+     * geopy (only for pokecli demo)
+     * s2sphere (only for pokecli demo)
 
 ### Python 2 vs 3
 
@@ -148,17 +162,10 @@ docker run -ti --name poketrainer -v /path/to/poketrainer/config.json:/config.js
 The name option, poketrainer in the example, is arbirary. Multilple containers can be made using different names. -v maps the config file into the container. You can modify config.json and it will be reread when the container is started, no need to recreate the container or rebuild the image. -p maps the web interface to the external network, so you can check on the status of your training from a different machine. If you choose not to map the port, the ip address of the container can be found
 using `docker inspect poketrainer`.
 
-The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`. 
+The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`.
 
-You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.  	
+You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.
 
-
-
-### Find out Item ID's
-For Chosing what Items to keep, get the names here, [AeonLucidProtos_ItemID](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Inventory/Item/ItemId.proto)
-For Choosing what pokemon to keep get the names here,[AeonLucidProtos_Pokemon](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Enums/PokemonId.proto)
-
-Put them in config. Type exactly as the name appears
 
 ### What's working:
 What's working:
