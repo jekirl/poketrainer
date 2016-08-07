@@ -125,6 +125,7 @@ Put them in config. Type exactly as the name appears
  * For windows you will probably need to install [Microsoft Visual C++ Compiler for Python 2.7](https://www.microsoft.com/en-us/download/details.aspx?id=44266) first
  * Install git via your package manager or [download it for windows](https://git-scm.com/download/win)
  * Python 2.7 or 3.5 [windows downloads](https://www.python.org/downloads/)
+     * Note: Python 3.5 support is somewhat experimental. Most things work, but it may not be as stable as using Python 2.7.
  * Run `pip install -r requirements.txt` in the bots folder from your console
      * requests
      * protobuf
