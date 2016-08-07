@@ -26,22 +26,22 @@ Author: tjado <https://github.com/tejado>
 from __future__ import absolute_import
 
 import six
-import logging
+from gpsoauth import perform_master_login, perform_oauth
 
 from pgoapi.auth import Auth
 from pgoapi.exceptions import AuthException
-from gpsoauth import perform_master_login, perform_oauth
+
 
 class AuthGoogle(Auth):
 
     GOOGLE_LOGIN_ANDROID_ID = '9774d56d682e549c'
-    GOOGLE_LOGIN_SERVICE= 'audience:server:client_id:848232511240-7so421jotr2609rmqakceuu1luuq0ptb.apps.googleusercontent.com'
+    GOOGLE_LOGIN_SERVICE = 'audience:server:client_id:848232511240-7so421jotr2609rmqakceuu1luuq0ptb.apps.googleusercontent.com'
     GOOGLE_LOGIN_APP = 'com.nianticlabs.pokemongo'
     GOOGLE_LOGIN_CLIENT_SIG = '321187995bc7cdc2b5fc91b11a96e2baa8602c62'
 
     def __init__(self):
         Auth.__init__(self)
-        
+
         self._auth_provider = 'google'
 
         self._refresh_token = None
@@ -53,7 +53,7 @@ class AuthGoogle(Auth):
             raise AuthException("Username/password not correctly specified")
 
         user_login = perform_master_login(username, password, self.GOOGLE_LOGIN_ANDROID_ID)
-        
+
         refresh_token = user_login.get('Token', None)
         if refresh_token is not None:
             self._refresh_token = refresh_token
@@ -68,7 +68,7 @@ class AuthGoogle(Auth):
         self.log.info('Google Refresh Token provided by user')
         self._refresh_token = refresh_token
 
-    def get_access_token(self, force_refresh = False):
+    def get_access_token(self, force_refresh=False):
         token_validity = self.check_access_token()
 
         if token_validity is True and force_refresh is False:
@@ -81,7 +81,7 @@ class AuthGoogle(Auth):
                 self.log.info('Request Google Access Token...')
 
             token_data = perform_oauth(None, self._refresh_token, self.GOOGLE_LOGIN_ANDROID_ID, self.GOOGLE_LOGIN_SERVICE, self.GOOGLE_LOGIN_APP,
-                self.GOOGLE_LOGIN_CLIENT_SIG)
+                                       self.GOOGLE_LOGIN_CLIENT_SIG)
 
             access_token = token_data.get('Auth', None)
             if access_token is not None:
