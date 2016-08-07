@@ -1,13 +1,17 @@
 import base64
 
 import six
-from google.protobuf.descriptor import FieldDescriptor
+
 from google.protobuf.message import Message
+from google.protobuf.descriptor import FieldDescriptor
+
 
 __all__ = ["protobuf_to_dict", "TYPE_CALLABLE_MAP", "dict_to_protobuf",
            "REVERSE_TYPE_CALLABLE_MAP"]
 
+
 EXTENSION_CONTAINER = '___X'
+
 
 TYPE_CALLABLE_MAP = {
     FieldDescriptor.TYPE_DOUBLE: float,
@@ -121,8 +125,7 @@ def _get_field_mapping(pb, dict_value, strict):
             raise ValueError("Extension keys must be integers.")
         if ext_num not in pb._extensions_by_number:
             if strict:
-                raise KeyError(
-                    "%s does not have a extension with number %s. Perhaps you forgot to import it?" % (pb, key))
+                raise KeyError("%s does not have a extension with number %s. Perhaps you forgot to import it?" % (pb, key))
             continue
         ext_field = pb._extensions_by_number[ext_num]
         pb_val = None

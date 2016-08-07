@@ -18,13 +18,13 @@ from POGOProtos.Inventory import Item_pb2 as POGOProtos_dot_Inventory_dot_Item__
 from POGOProtos.Settings.Master import Item_pb2 as POGOProtos_dot_Settings_dot_Master_dot_Item__pb2
 POGOProtos_dot_Inventory__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Inventory__pb2
 POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
+POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Data__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Data_dot_Player__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Inventory_dot_Item__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Inventory_dot_Item__pb2
 POGOProtos_dot_Data_dot_Player__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Data_dot_Player__pb2
-POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Enums__pb2
 POGOProtos_dot_Enums__pb2 = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.POGOProtos_dot_Enums__pb2
 from POGOProtos.Settings.Master import Pokemon_pb2 as POGOProtos_dot_Settings_dot_Master_dot_Pokemon__pb2
@@ -39,7 +39,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='POGOProtos.Settings.Master.proto',
   package='POGOProtos.Settings.Master',
   syntax='proto3',
-  serialized_pb=_b('\n POGOProtos.Settings.Master.proto\x12\x1aPOGOProtos.Settings.Master\x1a\x16POGOProtos.Enums.proto\x1a\x1fPOGOProtos.Inventory.Item.proto\x1a%POGOProtos.Settings.Master.Item.proto\x1a(POGOProtos.Settings.Master.Pokemon.proto\"e\n\rBadgeSettings\x12/\n\nbadge_type\x18\x01 \x01(\x0e\x32\x1b.POGOProtos.Enums.BadgeType\x12\x12\n\nbadge_rank\x18\x02 \x01(\x05\x12\x0f\n\x07targets\x18\x03 \x03(\x05\"\xd7\x03\n\x0e\x43\x61meraSettings\x12\x13\n\x0bnext_camera\x18\x01 \x01(\t\x12<\n\rinterpolation\x18\x02 \x03(\x0e\x32%.POGOProtos.Enums.CameraInterpolation\x12\x33\n\x0btarget_type\x18\x03 \x03(\x0e\x32\x1e.POGOProtos.Enums.CameraTarget\x12\x15\n\rease_in_speed\x18\x04 \x03(\x02\x12\x16\n\x0e\x65\x61st_out_speed\x18\x05 \x03(\x02\x12\x18\n\x10\x64uration_seconds\x18\x06 \x03(\x02\x12\x14\n\x0cwait_seconds\x18\x07 \x03(\x02\x12\x1a\n\x12transition_seconds\x18\x08 \x03(\x02\x12\x14\n\x0c\x61ngle_degree\x18\t \x03(\x02\x12\x1b\n\x13\x61ngle_offset_degree\x18\n \x03(\x02\x12\x14\n\x0cpitch_degree\x18\x0b \x03(\x02\x12\x1b\n\x13pitch_offset_degree\x18\x0c \x03(\x02\x12\x13\n\x0broll_degree\x18\r \x03(\x02\x12\x17\n\x0f\x64istance_meters\x18\x0e \x03(\x02\x12\x16\n\x0eheight_percent\x18\x0f \x03(\x02\x12\x16\n\x0evert_ctr_ratio\x18\x10 \x03(\x02\"\xae\x01\n\x11\x45ncounterSettings\x12\x1c\n\x14spin_bonus_threshold\x18\x01 \x01(\x02\x12!\n\x19\x65xcellent_throw_threshold\x18\x02 \x01(\x02\x12\x1d\n\x15great_throw_threshold\x18\x03 \x01(\x02\x12\x1c\n\x14nice_throw_threshold\x18\x04 \x01(\x02\x12\x1b\n\x13milestone_threshold\x18\x05 \x01(\x05\"y\n\x15\x45quippedBadgeSettings\x12\x1f\n\x17\x65quip_badge_cooldown_ms\x18\x01 \x01(\x03\x12\x1f\n\x17\x63\x61tch_probability_bonus\x18\x02 \x03(\x02\x12\x1e\n\x16\x66lee_probability_bonus\x18\x03 \x03(\x02\"\xc6\x03\n\x11GymBattleSettings\x12\x16\n\x0e\x65nergy_per_sec\x18\x01 \x01(\x02\x12\x19\n\x11\x64odge_energy_cost\x18\x02 \x01(\x02\x12\x18\n\x10retarget_seconds\x18\x03 \x01(\x02\x12\x1d\n\x15\x65nemy_attack_interval\x18\x04 \x01(\x02\x12\x1e\n\x16\x61ttack_server_interval\x18\x05 \x01(\x02\x12\x1e\n\x16round_duration_seconds\x18\x06 \x01(\x02\x12#\n\x1b\x62onus_time_per_ally_seconds\x18\x07 \x01(\x02\x12$\n\x1cmaximum_attackers_per_battle\x18\x08 \x01(\x05\x12)\n!same_type_attack_bonus_multiplier\x18\t \x01(\x02\x12\x16\n\x0emaximum_energy\x18\n \x01(\x05\x12$\n\x1c\x65nergy_delta_per_health_lost\x18\x0b \x01(\x02\x12\x19\n\x11\x64odge_duration_ms\x18\x0c \x01(\x05\x12\x1c\n\x14minimum_player_level\x18\r \x01(\x05\x12\x18\n\x10swap_duration_ms\x18\x0e \x01(\x05\"w\n\x10GymLevelSettings\x12\x1b\n\x13required_experience\x18\x01 \x03(\x05\x12\x14\n\x0cleader_slots\x18\x02 \x03(\x05\x12\x15\n\rtrainer_slots\x18\x03 \x03(\x05\x12\x19\n\x11search_roll_bonus\x18\x04 \x03(\x05\"\xaf\x01\n\x0eIapItemDisplay\x12\x0b\n\x03sku\x18\x01 \x01(\t\x12\x37\n\x08\x63\x61tegory\x18\x02 \x01(\x0e\x32%.POGOProtos.Enums.HoloIapItemCategory\x12\x12\n\nsort_order\x18\x03 \x01(\x05\x12\x33\n\x08item_ids\x18\x04 \x03(\x0e\x32!.POGOProtos.Inventory.Item.ItemId\x12\x0e\n\x06\x63ounts\x18\x05 \x03(\x05\"\x8c\x02\n\x0bIapSettings\x12\x19\n\x11\x64\x61ily_bonus_coins\x18\x01 \x01(\x05\x12(\n daily_defender_bonus_per_pokemon\x18\x02 \x03(\x05\x12*\n\"daily_defender_bonus_max_defenders\x18\x03 \x01(\x05\x12%\n\x1d\x64\x61ily_defender_bonus_currency\x18\x04 \x03(\t\x12\"\n\x1amin_time_between_claims_ms\x18\x05 \x01(\x03\x12\x1b\n\x13\x64\x61ily_bonus_enabled\x18\x06 \x01(\x08\x12$\n\x1c\x64\x61ily_defender_bonus_enabled\x18\x07 \x01(\x08\"\xb5\x07\n\x0cItemSettings\x12\x32\n\x07item_id\x18\x01 \x01(\x0e\x32!.POGOProtos.Inventory.Item.ItemId\x12\x36\n\titem_type\x18\x02 \x01(\x0e\x32#.POGOProtos.Inventory.Item.ItemType\x12\x30\n\x08\x63\x61tegory\x18\x03 \x01(\x0e\x32\x1e.POGOProtos.Enums.ItemCategory\x12\x11\n\tdrop_freq\x18\x04 \x01(\x02\x12\x1a\n\x12\x64rop_trainer_level\x18\x05 \x01(\x05\x12\x45\n\x08pokeball\x18\x06 \x01(\x0b\x32\x33.POGOProtos.Settings.Master.Item.PokeballAttributes\x12\x41\n\x06potion\x18\x07 \x01(\x0b\x32\x31.POGOProtos.Settings.Master.Item.PotionAttributes\x12\x41\n\x06revive\x18\x08 \x01(\x0b\x32\x31.POGOProtos.Settings.Master.Item.ReviveAttributes\x12\x41\n\x06\x62\x61ttle\x18\t \x01(\x0b\x32\x31.POGOProtos.Settings.Master.Item.BattleAttributes\x12=\n\x04\x66ood\x18\n \x01(\x0b\x32/.POGOProtos.Settings.Master.Item.FoodAttributes\x12V\n\x11inventory_upgrade\x18\x0b \x01(\x0b\x32;.POGOProtos.Settings.Master.Item.InventoryUpgradeAttributes\x12L\n\x08xp_boost\x18\x0c \x01(\x0b\x32:.POGOProtos.Settings.Master.Item.ExperienceBoostAttributes\x12\x43\n\x07incense\x18\r \x01(\x0b\x32\x32.POGOProtos.Settings.Master.Item.IncenseAttributes\x12N\n\regg_incubator\x18\x0e \x01(\x0b\x32\x37.POGOProtos.Settings.Master.Item.EggIncubatorAttributes\x12N\n\rfort_modifier\x18\x0f \x01(\x0b\x32\x37.POGOProtos.Settings.Master.Item.FortModifierAttributes\"(\n\x14MoveSequenceSettings\x12\x10\n\x08sequence\x18\x01 \x03(\t\"\xb9\x03\n\x0cMoveSettings\x12:\n\x0bmovement_id\x18\x01 \x01(\x0e\x32%.POGOProtos.Enums.PokemonMovementType\x12\x14\n\x0c\x61nimation_id\x18\x02 \x01(\x05\x12\x33\n\x0cpokemon_type\x18\x03 \x01(\x0e\x32\x1d.POGOProtos.Enums.PokemonType\x12\r\n\x05power\x18\x04 \x01(\x02\x12\x17\n\x0f\x61\x63\x63uracy_chance\x18\x05 \x01(\x02\x12\x17\n\x0f\x63ritical_chance\x18\x06 \x01(\x02\x12\x13\n\x0bheal_scalar\x18\x07 \x01(\x02\x12\x1b\n\x13stamina_loss_scalar\x18\x08 \x01(\x02\x12\x19\n\x11trainer_level_min\x18\t \x01(\x05\x12\x19\n\x11trainer_level_max\x18\n \x01(\x05\x12\x10\n\x08vfx_name\x18\x0b \x01(\t\x12\x13\n\x0b\x64uration_ms\x18\x0c \x01(\x05\x12\x1e\n\x16\x64\x61mage_window_start_ms\x18\r \x01(\x05\x12\x1c\n\x14\x64\x61mage_window_end_ms\x18\x0e \x01(\x05\x12\x14\n\x0c\x65nergy_delta\x18\x0f \x01(\x05\"\x9d\x01\n\x13PlayerLevelSettings\x12\x10\n\x08rank_num\x18\x01 \x03(\x05\x12\x1b\n\x13required_experience\x18\x02 \x03(\x05\x12\x15\n\rcp_multiplier\x18\x03 \x03(\x02\x12\x1c\n\x14max_egg_player_level\x18\x04 \x01(\x05\x12\"\n\x1amax_encounter_player_level\x18\x05 \x01(\x05\"\x94\x07\n\x0fPokemonSettings\x12/\n\npokemon_id\x18\x01 \x01(\x0e\x32\x1b.POGOProtos.Enums.PokemonId\x12\x13\n\x0bmodel_scale\x18\x03 \x01(\x02\x12+\n\x04type\x18\x04 \x01(\x0e\x32\x1d.POGOProtos.Enums.PokemonType\x12-\n\x06type_2\x18\x05 \x01(\x0e\x32\x1d.POGOProtos.Enums.PokemonType\x12\x44\n\x06\x63\x61mera\x18\x06 \x01(\x0b\x32\x34.POGOProtos.Settings.Master.Pokemon.CameraAttributes\x12J\n\tencounter\x18\x07 \x01(\x0b\x32\x37.POGOProtos.Settings.Master.Pokemon.EncounterAttributes\x12\x42\n\x05stats\x18\x08 \x01(\x0b\x32\x33.POGOProtos.Settings.Master.Pokemon.StatsAttributes\x12\x32\n\x0bquick_moves\x18\t \x03(\x0e\x32\x1d.POGOProtos.Enums.PokemonMove\x12\x36\n\x0f\x63inematic_moves\x18\n \x03(\x0e\x32\x1d.POGOProtos.Enums.PokemonMove\x12\x16\n\x0e\x61nimation_time\x18\x0b \x03(\x02\x12\x32\n\revolution_ids\x18\x0c \x03(\x0e\x32\x1b.POGOProtos.Enums.PokemonId\x12\x16\n\x0e\x65volution_pips\x18\r \x01(\x05\x12/\n\x06rarity\x18\x0e \x01(\x0e\x32\x1f.POGOProtos.Enums.PokemonRarity\x12\x18\n\x10pokedex_height_m\x18\x0f \x01(\x02\x12\x19\n\x11pokedex_weight_kg\x18\x10 \x01(\x02\x12\x36\n\x11parent_pokemon_id\x18\x11 \x01(\x0e\x32\x1b.POGOProtos.Enums.PokemonId\x12\x16\n\x0eheight_std_dev\x18\x12 \x01(\x02\x12\x16\n\x0eweight_std_dev\x18\x13 \x01(\x02\x12\x1c\n\x14km_distance_to_hatch\x18\x14 \x01(\x02\x12\x34\n\tfamily_id\x18\x15 \x01(\x0e\x32!.POGOProtos.Enums.PokemonFamilyId\x12\x17\n\x0f\x63\x61ndy_to_evolve\x18\x16 \x01(\x05\"\x84\x01\n\x16PokemonUpgradeSettings\x12\x1a\n\x12upgrades_per_level\x18\x01 \x01(\x05\x12#\n\x1b\x61llowed_levels_above_player\x18\x02 \x01(\x05\x12\x12\n\ncandy_cost\x18\x03 \x03(\x05\x12\x15\n\rstardust_cost\x18\x04 \x03(\x05\"b\n\x15TypeEffectiveSettings\x12\x15\n\rattack_scalar\x18\x01 \x03(\x02\x12\x32\n\x0b\x61ttack_type\x18\x02 \x01(\x0e\x32\x1d.POGOProtos.Enums.PokemonTypeP\x00P\x01P\x02P\x03\x62\x06proto3')
+  serialized_pb=_b('\n POGOProtos.Settings.Master.proto\x12\x1aPOGOProtos.Settings.Master\x1a\x16POGOProtos.Enums.proto\x1a\x1fPOGOProtos.Inventory.Item.proto\x1a%POGOProtos.Settings.Master.Item.proto\x1a(POGOProtos.Settings.Master.Pokemon.proto\"e\n\rBadgeSettings\x12/\n\nbadge_type\x18\x01 \x01(\x0e\x32\x1b.POGOProtos.Enums.BadgeType\x12\x12\n\nbadge_rank\x18\x02 \x01(\x05\x12\x0f\n\x07targets\x18\x03 \x03(\x05\"\xd7\x03\n\x0e\x43\x61meraSettings\x12\x13\n\x0bnext_camera\x18\x01 \x01(\t\x12<\n\rinterpolation\x18\x02 \x03(\x0e\x32%.POGOProtos.Enums.CameraInterpolation\x12\x33\n\x0btarget_type\x18\x03 \x03(\x0e\x32\x1e.POGOProtos.Enums.CameraTarget\x12\x15\n\rease_in_speed\x18\x04 \x03(\x02\x12\x16\n\x0e\x65\x61st_out_speed\x18\x05 \x03(\x02\x12\x18\n\x10\x64uration_seconds\x18\x06 \x03(\x02\x12\x14\n\x0cwait_seconds\x18\x07 \x03(\x02\x12\x1a\n\x12transition_seconds\x18\x08 \x03(\x02\x12\x14\n\x0c\x61ngle_degree\x18\t \x03(\x02\x12\x1b\n\x13\x61ngle_offset_degree\x18\n \x03(\x02\x12\x14\n\x0cpitch_degree\x18\x0b \x03(\x02\x12\x1b\n\x13pitch_offset_degree\x18\x0c \x03(\x02\x12\x13\n\x0broll_degree\x18\r \x03(\x02\x12\x17\n\x0f\x64istance_meters\x18\x0e \x03(\x02\x12\x16\n\x0eheight_percent\x18\x0f \x03(\x02\x12\x16\n\x0evert_ctr_ratio\x18\x10 \x03(\x02\"\xae\x01\n\x11\x45ncounterSettings\x12\x1c\n\x14spin_bonus_threshold\x18\x01 \x01(\x02\x12!\n\x19\x65xcellent_throw_threshold\x18\x02 \x01(\x02\x12\x1d\n\x15great_throw_threshold\x18\x03 \x01(\x02\x12\x1c\n\x14nice_throw_threshold\x18\x04 \x01(\x02\x12\x1b\n\x13milestone_threshold\x18\x05 \x01(\x05\"y\n\x15\x45quippedBadgeSettings\x12\x1f\n\x17\x65quip_badge_cooldown_ms\x18\x01 \x01(\x03\x12\x1f\n\x17\x63\x61tch_probability_bonus\x18\x02 \x03(\x02\x12\x1e\n\x16\x66lee_probability_bonus\x18\x03 \x03(\x02\"\xc6\x03\n\x11GymBattleSettings\x12\x16\n\x0e\x65nergy_per_sec\x18\x01 \x01(\x02\x12\x19\n\x11\x64odge_energy_cost\x18\x02 \x01(\x02\x12\x18\n\x10retarget_seconds\x18\x03 \x01(\x02\x12\x1d\n\x15\x65nemy_attack_interval\x18\x04 \x01(\x02\x12\x1e\n\x16\x61ttack_server_interval\x18\x05 \x01(\x02\x12\x1e\n\x16round_duration_seconds\x18\x06 \x01(\x02\x12#\n\x1b\x62onus_time_per_ally_seconds\x18\x07 \x01(\x02\x12$\n\x1cmaximum_attackers_per_battle\x18\x08 \x01(\x05\x12)\n!same_type_attack_bonus_multiplier\x18\t \x01(\x02\x12\x16\n\x0emaximum_energy\x18\n \x01(\x05\x12$\n\x1c\x65nergy_delta_per_health_lost\x18\x0b \x01(\x02\x12\x19\n\x11\x64odge_duration_ms\x18\x0c \x01(\x05\x12\x1c\n\x14minimum_player_level\x18\r \x01(\x05\x12\x18\n\x10swap_duration_ms\x18\x0e \x01(\x05\"w\n\x10GymLevelSettings\x12\x1b\n\x13required_experience\x18\x01 \x03(\x05\x12\x14\n\x0cleader_slots\x18\x02 \x03(\x05\x12\x15\n\rtrainer_slots\x18\x03 \x03(\x05\x12\x19\n\x11search_roll_bonus\x18\x04 \x03(\x05\"\xaf\x01\n\x0eIapItemDisplay\x12\x0b\n\x03sku\x18\x01 \x01(\t\x12\x37\n\x08\x63\x61tegory\x18\x02 \x01(\x0e\x32%.POGOProtos.Enums.HoloIapItemCategory\x12\x12\n\nsort_order\x18\x03 \x01(\x05\x12\x33\n\x08item_ids\x18\x04 \x03(\x0e\x32!.POGOProtos.Inventory.Item.ItemId\x12\x0e\n\x06\x63ounts\x18\x05 \x03(\x05\"\x8c\x02\n\x0bIapSettings\x12\x19\n\x11\x64\x61ily_bonus_coins\x18\x01 \x01(\x05\x12(\n daily_defender_bonus_per_pokemon\x18\x02 \x03(\x05\x12*\n\"daily_defender_bonus_max_defenders\x18\x03 \x01(\x05\x12%\n\x1d\x64\x61ily_defender_bonus_currency\x18\x04 \x03(\t\x12\"\n\x1amin_time_between_claims_ms\x18\x05 \x01(\x03\x12\x1b\n\x13\x64\x61ily_bonus_enabled\x18\x06 \x01(\x08\x12$\n\x1c\x64\x61ily_defender_bonus_enabled\x18\x07 \x01(\x08\"\xb5\x07\n\x0cItemSettings\x12\x32\n\x07item_id\x18\x01 \x01(\x0e\x32!.POGOProtos.Inventory.Item.ItemId\x12\x36\n\titem_type\x18\x02 \x01(\x0e\x32#.POGOProtos.Inventory.Item.ItemType\x12\x30\n\x08\x63\x61tegory\x18\x03 \x01(\x0e\x32\x1e.POGOProtos.Enums.ItemCategory\x12\x11\n\tdrop_freq\x18\x04 \x01(\x02\x12\x1a\n\x12\x64rop_trainer_level\x18\x05 \x01(\x05\x12\x45\n\x08pokeball\x18\x06 \x01(\x0b\x32\x33.POGOProtos.Settings.Master.Item.PokeballAttributes\x12\x41\n\x06potion\x18\x07 \x01(\x0b\x32\x31.POGOProtos.Settings.Master.Item.PotionAttributes\x12\x41\n\x06revive\x18\x08 \x01(\x0b\x32\x31.POGOProtos.Settings.Master.Item.ReviveAttributes\x12\x41\n\x06\x62\x61ttle\x18\t \x01(\x0b\x32\x31.POGOProtos.Settings.Master.Item.BattleAttributes\x12=\n\x04\x66ood\x18\n \x01(\x0b\x32/.POGOProtos.Settings.Master.Item.FoodAttributes\x12V\n\x11inventory_upgrade\x18\x0b \x01(\x0b\x32;.POGOProtos.Settings.Master.Item.InventoryUpgradeAttributes\x12L\n\x08xp_boost\x18\x0c \x01(\x0b\x32:.POGOProtos.Settings.Master.Item.ExperienceBoostAttributes\x12\x43\n\x07incense\x18\r \x01(\x0b\x32\x32.POGOProtos.Settings.Master.Item.IncenseAttributes\x12N\n\regg_incubator\x18\x0e \x01(\x0b\x32\x37.POGOProtos.Settings.Master.Item.EggIncubatorAttributes\x12N\n\rfort_modifier\x18\x0f \x01(\x0b\x32\x37.POGOProtos.Settings.Master.Item.FortModifierAttributes\"(\n\x14MoveSequenceSettings\x12\x10\n\x08sequence\x18\x01 \x03(\t\"\xb1\x03\n\x0cMoveSettings\x12\x32\n\x0bmovement_id\x18\x01 \x01(\x0e\x32\x1d.POGOProtos.Enums.PokemonMove\x12\x14\n\x0c\x61nimation_id\x18\x02 \x01(\x05\x12\x33\n\x0cpokemon_type\x18\x03 \x01(\x0e\x32\x1d.POGOProtos.Enums.PokemonType\x12\r\n\x05power\x18\x04 \x01(\x02\x12\x17\n\x0f\x61\x63\x63uracy_chance\x18\x05 \x01(\x02\x12\x17\n\x0f\x63ritical_chance\x18\x06 \x01(\x02\x12\x13\n\x0bheal_scalar\x18\x07 \x01(\x02\x12\x1b\n\x13stamina_loss_scalar\x18\x08 \x01(\x02\x12\x19\n\x11trainer_level_min\x18\t \x01(\x05\x12\x19\n\x11trainer_level_max\x18\n \x01(\x05\x12\x10\n\x08vfx_name\x18\x0b \x01(\t\x12\x13\n\x0b\x64uration_ms\x18\x0c \x01(\x05\x12\x1e\n\x16\x64\x61mage_window_start_ms\x18\r \x01(\x05\x12\x1c\n\x14\x64\x61mage_window_end_ms\x18\x0e \x01(\x05\x12\x14\n\x0c\x65nergy_delta\x18\x0f \x01(\x05\"\x9d\x01\n\x13PlayerLevelSettings\x12\x10\n\x08rank_num\x18\x01 \x03(\x05\x12\x1b\n\x13required_experience\x18\x02 \x03(\x05\x12\x15\n\rcp_multiplier\x18\x03 \x03(\x02\x12\x1c\n\x14max_egg_player_level\x18\x04 \x01(\x05\x12\"\n\x1amax_encounter_player_level\x18\x05 \x01(\x05\"\x94\x07\n\x0fPokemonSettings\x12/\n\npokemon_id\x18\x01 \x01(\x0e\x32\x1b.POGOProtos.Enums.PokemonId\x12\x13\n\x0bmodel_scale\x18\x03 \x01(\x02\x12+\n\x04type\x18\x04 \x01(\x0e\x32\x1d.POGOProtos.Enums.PokemonType\x12-\n\x06type_2\x18\x05 \x01(\x0e\x32\x1d.POGOProtos.Enums.PokemonType\x12\x44\n\x06\x63\x61mera\x18\x06 \x01(\x0b\x32\x34.POGOProtos.Settings.Master.Pokemon.CameraAttributes\x12J\n\tencounter\x18\x07 \x01(\x0b\x32\x37.POGOProtos.Settings.Master.Pokemon.EncounterAttributes\x12\x42\n\x05stats\x18\x08 \x01(\x0b\x32\x33.POGOProtos.Settings.Master.Pokemon.StatsAttributes\x12\x32\n\x0bquick_moves\x18\t \x03(\x0e\x32\x1d.POGOProtos.Enums.PokemonMove\x12\x36\n\x0f\x63inematic_moves\x18\n \x03(\x0e\x32\x1d.POGOProtos.Enums.PokemonMove\x12\x16\n\x0e\x61nimation_time\x18\x0b \x03(\x02\x12\x32\n\revolution_ids\x18\x0c \x03(\x0e\x32\x1b.POGOProtos.Enums.PokemonId\x12\x16\n\x0e\x65volution_pips\x18\r \x01(\x05\x12/\n\x06rarity\x18\x0e \x01(\x0e\x32\x1f.POGOProtos.Enums.PokemonRarity\x12\x18\n\x10pokedex_height_m\x18\x0f \x01(\x02\x12\x19\n\x11pokedex_weight_kg\x18\x10 \x01(\x02\x12\x36\n\x11parent_pokemon_id\x18\x11 \x01(\x0e\x32\x1b.POGOProtos.Enums.PokemonId\x12\x16\n\x0eheight_std_dev\x18\x12 \x01(\x02\x12\x16\n\x0eweight_std_dev\x18\x13 \x01(\x02\x12\x1c\n\x14km_distance_to_hatch\x18\x14 \x01(\x02\x12\x34\n\tfamily_id\x18\x15 \x01(\x0e\x32!.POGOProtos.Enums.PokemonFamilyId\x12\x17\n\x0f\x63\x61ndy_to_evolve\x18\x16 \x01(\x05\"\x84\x01\n\x16PokemonUpgradeSettings\x12\x1a\n\x12upgrades_per_level\x18\x01 \x01(\x05\x12#\n\x1b\x61llowed_levels_above_player\x18\x02 \x01(\x05\x12\x12\n\ncandy_cost\x18\x03 \x03(\x05\x12\x15\n\rstardust_cost\x18\x04 \x03(\x05\"b\n\x15TypeEffectiveSettings\x12\x15\n\rattack_scalar\x18\x01 \x03(\x02\x12\x32\n\x0b\x61ttack_type\x18\x02 \x01(\x0e\x32\x1d.POGOProtos.Enums.PokemonTypeP\x00P\x01P\x02P\x03\x62\x06proto3')
   ,
   dependencies=[POGOProtos_dot_Enums__pb2.DESCRIPTOR,POGOProtos_dot_Inventory_dot_Item__pb2.DESCRIPTOR,POGOProtos_dot_Settings_dot_Master_dot_Item__pb2.DESCRIPTOR,POGOProtos_dot_Settings_dot_Master_dot_Pokemon__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -238,28 +238,28 @@ _ENCOUNTERSETTINGS = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='spin_bonus_threshold', full_name='POGOProtos.Settings.Master.EncounterSettings.spin_bonus_threshold', index=0,
       number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='excellent_throw_threshold', full_name='POGOProtos.Settings.Master.EncounterSettings.excellent_throw_threshold', index=1,
       number=2, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='great_throw_threshold', full_name='POGOProtos.Settings.Master.EncounterSettings.great_throw_threshold', index=2,
       number=3, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='nice_throw_threshold', full_name='POGOProtos.Settings.Master.EncounterSettings.nice_throw_threshold', index=3,
       number=4, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -342,49 +342,49 @@ _GYMBATTLESETTINGS = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='energy_per_sec', full_name='POGOProtos.Settings.Master.GymBattleSettings.energy_per_sec', index=0,
       number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='dodge_energy_cost', full_name='POGOProtos.Settings.Master.GymBattleSettings.dodge_energy_cost', index=1,
       number=2, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='retarget_seconds', full_name='POGOProtos.Settings.Master.GymBattleSettings.retarget_seconds', index=2,
       number=3, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='enemy_attack_interval', full_name='POGOProtos.Settings.Master.GymBattleSettings.enemy_attack_interval', index=3,
       number=4, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='attack_server_interval', full_name='POGOProtos.Settings.Master.GymBattleSettings.attack_server_interval', index=4,
       number=5, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='round_duration_seconds', full_name='POGOProtos.Settings.Master.GymBattleSettings.round_duration_seconds', index=5,
       number=6, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='bonus_time_per_ally_seconds', full_name='POGOProtos.Settings.Master.GymBattleSettings.bonus_time_per_ally_seconds', index=6,
       number=7, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -398,7 +398,7 @@ _GYMBATTLESETTINGS = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='same_type_attack_bonus_multiplier', full_name='POGOProtos.Settings.Master.GymBattleSettings.same_type_attack_bonus_multiplier', index=8,
       number=9, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -412,7 +412,7 @@ _GYMBATTLESETTINGS = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='energy_delta_per_health_lost', full_name='POGOProtos.Settings.Master.GymBattleSettings.energy_delta_per_health_lost', index=10,
       number=11, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -669,7 +669,7 @@ _ITEMSETTINGS = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='drop_freq', full_name='POGOProtos.Settings.Master.ItemSettings.drop_freq', index=3,
       number=4, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -829,35 +829,35 @@ _MOVESETTINGS = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='power', full_name='POGOProtos.Settings.Master.MoveSettings.power', index=3,
       number=4, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='accuracy_chance', full_name='POGOProtos.Settings.Master.MoveSettings.accuracy_chance', index=4,
       number=5, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='critical_chance', full_name='POGOProtos.Settings.Master.MoveSettings.critical_chance', index=5,
       number=6, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='heal_scalar', full_name='POGOProtos.Settings.Master.MoveSettings.heal_scalar', index=6,
       number=7, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='stamina_loss_scalar', full_name='POGOProtos.Settings.Master.MoveSettings.stamina_loss_scalar', index=7,
       number=8, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -923,7 +923,7 @@ _MOVESETTINGS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=3101,
-  serialized_end=3542,
+  serialized_end=3534,
 )
 
 
@@ -981,8 +981,8 @@ _PLAYERLEVELSETTINGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3545,
-  serialized_end=3702,
+  serialized_start=3537,
+  serialized_end=3694,
 )
 
 
@@ -1003,7 +1003,7 @@ _POKEMONSETTINGS = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='model_scale', full_name='POGOProtos.Settings.Master.PokemonSettings.model_scale', index=1,
       number=3, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -1087,14 +1087,14 @@ _POKEMONSETTINGS = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='pokedex_height_m', full_name='POGOProtos.Settings.Master.PokemonSettings.pokedex_height_m', index=13,
       number=15, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='pokedex_weight_kg', full_name='POGOProtos.Settings.Master.PokemonSettings.pokedex_weight_kg', index=14,
       number=16, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -1108,21 +1108,21 @@ _POKEMONSETTINGS = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='height_std_dev', full_name='POGOProtos.Settings.Master.PokemonSettings.height_std_dev', index=16,
       number=18, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='weight_std_dev', full_name='POGOProtos.Settings.Master.PokemonSettings.weight_std_dev', index=17,
       number=19, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='km_distance_to_hatch', full_name='POGOProtos.Settings.Master.PokemonSettings.km_distance_to_hatch', index=18,
       number=20, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -1152,8 +1152,8 @@ _POKEMONSETTINGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3705,
-  serialized_end=4621,
+  serialized_start=3697,
+  serialized_end=4613,
 )
 
 
@@ -1204,8 +1204,8 @@ _POKEMONUPGRADESETTINGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4624,
-  serialized_end=4756,
+  serialized_start=4616,
+  serialized_end=4748,
 )
 
 
@@ -1242,8 +1242,8 @@ _TYPEEFFECTIVESETTINGS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4758,
-  serialized_end=4856,
+  serialized_start=4750,
+  serialized_end=4848,
 )
 
 _BADGESETTINGS.fields_by_name['badge_type'].enum_type = POGOProtos_dot_Enums__pb2._BADGETYPE
@@ -1264,7 +1264,7 @@ _ITEMSETTINGS.fields_by_name['xp_boost'].message_type = POGOProtos_dot_Settings_
 _ITEMSETTINGS.fields_by_name['incense'].message_type = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2._INCENSEATTRIBUTES
 _ITEMSETTINGS.fields_by_name['egg_incubator'].message_type = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2._EGGINCUBATORATTRIBUTES
 _ITEMSETTINGS.fields_by_name['fort_modifier'].message_type = POGOProtos_dot_Settings_dot_Master_dot_Item__pb2._FORTMODIFIERATTRIBUTES
-_MOVESETTINGS.fields_by_name['movement_id'].enum_type = POGOProtos_dot_Enums__pb2._POKEMONMOVEMENTTYPE
+_MOVESETTINGS.fields_by_name['movement_id'].enum_type = POGOProtos_dot_Enums__pb2._POKEMONMOVE
 _MOVESETTINGS.fields_by_name['pokemon_type'].enum_type = POGOProtos_dot_Enums__pb2._POKEMONTYPE
 _POKEMONSETTINGS.fields_by_name['pokemon_id'].enum_type = POGOProtos_dot_Enums__pb2._POKEMONID
 _POKEMONSETTINGS.fields_by_name['type'].enum_type = POGOProtos_dot_Enums__pb2._POKEMONTYPE

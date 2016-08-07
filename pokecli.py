@@ -83,6 +83,7 @@ def init_config():
     # Read passed in Arguments
     parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
     parser.add_argument("-l", "--location", help="Location")
+    parser.add_argument("-e", "--encrypt-lib", help="encrypt lib, libencrypt.so/encrypt.dll")
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
     config = parser.parse_args()
     defaults = load.get('defaults', {})
@@ -124,6 +125,9 @@ def main(position=None):
 
     # instantiate pgoapi
     api = PGoApi(config)
+
+    #set signature!
+    api.activate_signature("libencrypt.so")
 
     # provide player position on the earth
     api.set_position(*position)
