@@ -112,14 +112,23 @@ Below the accounts you can change options in the `default` section. If you need 
 There are more options, check the current config.json.example, many are self-explanatory.
 
 
+### Find out Item ID's
+For Chosing what Items to keep, get the names here, [AeonLucidProtos_ItemID](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Inventory/Item/ItemId.proto)
+For Choosing what pokemon to keep get the names here,[AeonLucidProtos_Pokemon](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Enums/PokemonId.proto)
+
+Put them in config. Type exactly as the name appears
+
+
 ## Requirements
- * Run `pip install -r requirements.txt`
- * Python 2.7 or 3.5
- * requests
- * protobuf
- * gpsoauth
- * geopy (only for pokecli demo)
- * s2sphere (only for pokecli demo)
+ * For windows you will probably need to install [Microsoft Visual C++ Compiler for Python 2.7](https://www.microsoft.com/en-us/download/details.aspx?id=44266) first
+ * Install git via your package manager or [download it for windows](https://git-scm.com/download/win)
+ * Python 2.7 or 3.5 [windows downloads](https://www.python.org/downloads/)
+ * Run `pip install -r requirements.txt` in the bots folder from your console
+     * requests
+     * protobuf
+     * gpsoauth
+     * geopy (only for pokecli demo)
+     * s2sphere (only for pokecli demo)
 
 ### Python 2 vs 3
 
@@ -146,8 +155,8 @@ If you are not updating the Python code, you do not need to install or use tox.
 ### pokecli with Docker (optional)
 Build and run container:
 ```
-cd poketrainer/container
-docker build -t pokecli .
+cd poketrainer/
+docker build -t pokecli -f container/Dockerfile .
 docker run -ti --name poketrainer -v /path/to/poketrainer/config.json:/config.json -p 5000:5000 pokecli -i 0
 ```
 The name option, poketrainer in the example, is arbirary. Multilple containers can be made using different names. -v maps the config file into the container. You can modify config.json and it will be reread when the container is started, no need to recreate the container or rebuild the image. -p maps the web interface to the external network, so you can check on the status of your training from a different machine. If you choose not to map the port, the ip address of the container can be found
@@ -157,13 +166,6 @@ The container is now running in the foregorund, and can be stopped by using `Ctr
 
 You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.
 
-
-
-### Find out Item ID's
-For Chosing what Items to keep, get the names here, [AeonLucidProtos_ItemID](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Inventory/Item/ItemId.proto)
-For Choosing what pokemon to keep get the names here,[AeonLucidProtos_Pokemon](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Enums/PokemonId.proto)
-
-Put them in config. Type exactly as the name appears
 
 ### What's working:
 What's working:
