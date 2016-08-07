@@ -10,8 +10,8 @@ from collections import defaultdict
 import zerorpc
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
 
-from pgoapi.poke_lvl_data import TCPM_VALS
-from pgoapi.pokemon import Pokemon
+from poketrainer.poke_lvl_data import TCPM_VALS
+from poketrainer.pokemon import Pokemon
 
 
 class ReverseProxied(object):
