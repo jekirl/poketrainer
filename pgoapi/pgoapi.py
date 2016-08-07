@@ -58,7 +58,7 @@ from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.release.base import ReleaseMethodFactory
 from pgoapi.rpc_api import RpcApi
 from pgoapi.utilities import parse_api_endpoint
-
+from pgoapi.snipe import DEFAULT_SNIPER
 from .utilities import f2i
 
 if six.PY3:
@@ -1021,10 +1021,22 @@ class PGoApi:
                                        player_latitude=position[0],
                                        player_longitude=position[1]).call()\
                 .get('responses', {}).get('ENCOUNTER', {})
+
+
             self.log.debug("Attempting to Start Encounter: %s", encounter)
             result = encounter.get('status', -1)
             if result == 1 and 'wild_pokemon' in encounter and 'capture_probability' in encounter:
                 pokemon = Pokemon(encounter.get('wild_pokemon', {}).get('pokemon_data', {}))
+                DEFAULT_SNIPER.post_encounter(
+                   id=encounter_id,
+                   spawn_point_id=spawn_point_id,
+                   pokemon_id=pokemon.pokemon_id,
+                   cp=pokemon.cp,
+                   iv=int(pokemon.iv),
+                   expires=pokemon_data.get("expiration_timestamp_ms",0)/1000,
+                   point={"lat": pokemon_data.get("latitude",0), "lon": pokemon_data.get("longitude",0)}
+                )
+
                 capture_probability = create_capture_probability(encounter.get('capture_probability', {}))
                 self.log.debug("Attempt Encounter Capture Probability: %s", json.dumps(encounter, indent=4, sort_keys=True))
 
@@ -1172,7 +1184,10 @@ class PGoApi:
         while True:
             self.heartbeat()
             # self.gsleep(1)
-
+            if self.config.get("AUTO_SNIPE",False):
+                for pokemon_data in DEFAULT_SNIPER.poll_since():
+                    while self.snipe_pokemon(*pokemon_data['loc']):
+                        continue
             if self.experimental and self.spin_all_forts:
                 self.spin_all_forts_visible()
             else:
