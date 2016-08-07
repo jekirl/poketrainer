@@ -1253,7 +1253,7 @@ class PGoApi:
             pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
             for pokemon in pokemons:
                 if not len(pokemon.nickname) > 0:
-                    self.nicknamePokemon(pid = pokemon.id, name = pokedex.get_name_by_id(pokemon.pokemon_id) + str(int(pokemon.get_iv_percentage())))
+                    self.nicknamePokemon(pid=pokemon.id, name=pokedex.get_name_by_id(pokemon.pokemon_id) + str(int(pokemon.get_iv_percentage())))
                     self.gsleep(.2)
 
     def nicknamePokemon(self, pid, name):
