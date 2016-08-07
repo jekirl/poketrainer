@@ -156,6 +156,7 @@ If you are not updating the Python code, you do not need to install or use tox.
 
 ### pokecli with Docker (optional)
 Build and run container:
+libencrypt.so must be built and placed in the root of the poketrainer directory.
 ```
 cd poketrainer/
 docker build -t pokecli -f container/Dockerfile .
