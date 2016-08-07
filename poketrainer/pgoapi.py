@@ -1105,48 +1105,6 @@ class PGoApi(basePGoApi):
             self.update_player_inventory()
             return False
 
-    # def login(self, provider, username, password, oauth2_refresh_token=None):
-    #     if not isinstance(username, basestring) or not isinstance(password, basestring):
-    #         raise AuthException("Username/password not correctly specified")
-
-    #     if provider == 'ptc':
-    #         self._auth_provider = AuthPtc()
-    #     elif provider == 'google':
-    #         self._auth_provider = AuthGoogle()
-    #     else:
-    #         raise AuthException("Invalid authentication provider - only ptc/google available.")
-
-    #     self.log.debug('Auth provider: %s', provider)
-
-    #     if oauth2_refresh_token is not None:
-    #         self._auth_provider.set_refresh_token(oauth2_refresh_token)
-    #     elif username is not None and password is not None:
-    #         self._auth_provider.user_login(username, password)
-    #     else:
-    #         raise AuthException("Invalid Credential Input - Please provide username/password or an oauth2 refresh token")
-
-    #     self.log.info('Starting RPC login sequence (app simulation)')
-    #     # making a standard call, like it is also done by the client
-    #     self.get_player()
-    #     self.get_hatched_eggs()
-    #     self.get_inventory()
-    #     self.check_awarded_badges()
-    #     self.download_settings(hash="05daf51635c82611d1aac95c0b051d3ec088a930")
-    #     self.gsleep(1.0)
-    #     response = self.call()
-
-    #     if not response:
-    #         self.log.info('Login failed!')
-    #         return False
-
-    #     if 'auth_ticket' in response:
-    #         self._auth_provider.set_ticket(response['auth_ticket'].values())
-
-    #     self.log.info('Finished RPC login sequence (app simulation)')
-    #     self.log.info('Login process completed')
-
-    #     return True
-
     def main_loop(self):
         catch_attempt = 0
         self.heartbeat()
