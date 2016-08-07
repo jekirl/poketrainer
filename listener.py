@@ -26,4 +26,4 @@ class Listener(object):
         return self.api.snipe_pokemon(float(lat), float(lng))
 
     def ping(self):
-        return "pong"
+return "pong"

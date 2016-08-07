@@ -25,8 +25,17 @@ Author: tjado <https://github.com/tejado>
 Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
+import collections
 import struct
+import six
+from itertools import chain
 from bisect import bisect_left
+from six import PY2, iteritems
+
+if six.PY3:
+    from builtins import map as imap
+elif six.PY2:
+    from itertools import imap
 
 
 def f2i(float):
@@ -76,8 +85,10 @@ def take_closest(my_number, my_list):
         return before
 
 
-def dict_merge(dct, merge_dct):
+def dict_merge(dct, merge_dct, filtered_key=None):
     for k, v in iteritems(merge_dct):
+        if filtered_key and k == filtered_key:
+            continue
         if (
             k in dct and isinstance(dct[k], dict) and
             isinstance(merge_dct[k], collections.Mapping)
@@ -86,3 +97,7 @@ def dict_merge(dct, merge_dct):
         else:
             dct[k] = merge_dct[k]
     return dct
+
+
+def flatmap(f, items):
+        return list(chain.from_iterable(imap(f, items)))

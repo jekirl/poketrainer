@@ -10,7 +10,8 @@ class Config:
 
     def __init__(self, config):
         self.__config_data = config
-        self.__password = config["password"]
+        self.config_data = config
+        self.__password = self.config_data.pop("password", 'NA')
         self.__password_used = False
 
         self.location = config["location"]

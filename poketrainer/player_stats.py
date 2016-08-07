@@ -29,7 +29,7 @@ class PlayerStats:
             if self.run_exp_start is None:
                 self.run_exp_start = self.experience
             self.run_exp_earned = float(self.experience - self.run_exp_start)
-            self.run_duration_s = float((time() - self.run_start_time))
+            self.run_duration_s = float(time() - self.run_start_time)
             self.run_hourly_exp = float(self.run_exp_earned / (self.run_duration_s / 3600.00))
 
     def __str__(self):
