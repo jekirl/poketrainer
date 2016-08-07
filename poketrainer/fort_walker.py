@@ -161,6 +161,7 @@ class FortWalker:
             result = res.pop('result', -1)
         if result == 1:
             self.log.info("Visiting fort... (http://maps.google.com/maps?q=%s,%s)", fort['latitude'], fort['longitude'])
+            self.parent.sleep(1.0)
             if "items_awarded" in res:
                 items = defaultdict(int)
                 for item in res['items_awarded']:

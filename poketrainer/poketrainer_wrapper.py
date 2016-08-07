@@ -476,11 +476,11 @@ class PoketrainerWrapper:
     def do_release_pokemon(self, pokemon):
         self.log.info("Releasing pokemon: %s", pokemon)
         if self.do_release_pokemon_by_id(pokemon.id):
+            self.sleep(1.0)
             self.log.info("Successfully Released Pokemon %s", pokemon)
         else:
             # self.log.debug("Failed to release pokemon %s, %s", pokemon, release_res)  # FIXME release_res is not in scope!
             self.log.info("Failed to release Pokemon %s", pokemon)
-        self.sleep(1.0)
 
     def get_pokemon_stats(self, inventory_items=None):
         if not inventory_items:
@@ -645,11 +645,11 @@ class PoketrainerWrapper:
                     recycle_count = item['count'] - self.config.min_items[item['item_id']]
                     item_count += item['count'] - recycle_count
                     self.log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
-                    self.sleep(1.0)
                     res = self.api.recycle_inventory_item(item_id=item['item_id'], count=recycle_count) \
                         .get('responses', {}).get('RECYCLE_INVENTORY_ITEM', {})
                     response_code = res.get('result', -1)
                     if response_code == 1:
+                        self.sleep(1.0)
                         self.log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
                             item['item_id']), res.get('new_count', 0)))
                     else:
