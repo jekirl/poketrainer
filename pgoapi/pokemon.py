@@ -120,22 +120,32 @@ class Pokemon(object):
         self.try_keep = False
 
     def __str__(self):
-        nickname = ""
+        nickname = self.pokemon_type.decode('utf8')
 
         if len(self.nickname) > 0:
             nickname = "Nickname: " + self.nickname + ", "
+            #\t\t\t| [INVENTORY]\t-\t
+
+        spacerName = "\t\t"
+        if len(nickname) >= 8:
+            spacerName = "\t"
+
+        spacerCP = "\t\t"
+        if self.cp > 999:
+            spacerCP = "\t"
 
         if self.max_cp > 0:
-            str_ = "{0}Type: {1} CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, " \
-                   "LvlWild: {5:.1f}, MaxCP: {6:.0f}, Score: {7}, IV-Norm.: {8:.0f}"
+            str_ = "\t\t\t| [POKEMON]\t-\t{0}{8}CP: {1}{9}IV: {2:.2f}\tLvl: {3:.1f}\t" \
+                   "LvlWild: {4:.1f}\tMaxCP: {5:.0f}\tScore: {6}\tIV-Norm.: {7:.0f}"
             return str_.format(nickname,
-                               self.pokemon_type.decode('utf8'),
                                self.cp, self.iv,
                                self.level,
                                self.level_wild,
                                self.max_cp,
                                self.score,
-                               self.iv_normalized)
+                               self.iv_normalized,
+                               spacerName,
+                               spacerCP)
         else:
             str_ = "{0}Type: {1}, CP: {2}, IV: {3:.2f}, Lvl: {4:.1f}, LvlWild: {5:.1f}"
             return str_.format(nickname,
