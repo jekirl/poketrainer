@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import os
 
-from pgoapi.pokemon import Pokemon
+from .pokemon import Pokemon
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Enum_Items
 
 

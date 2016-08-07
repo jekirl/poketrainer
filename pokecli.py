@@ -43,7 +43,7 @@ from geopy.geocoders import GoogleV3
 from six import PY2, iteritems
 
 from listener import Listener
-from pgoapi import PGoApi
+from poketrainer.pgoapi import PGoApi
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +83,7 @@ def init_config():
     # Read passed in Arguments
     parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
     parser.add_argument("-l", "--location", help="Location")
+    parser.add_argument("-e", "--encrypt_lib", help="encrypt lib, libencrypt.so/encrypt.dll", default="libencrypt.so")
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
     config = parser.parse_args()
     defaults = load.get('defaults', {})
@@ -125,6 +126,9 @@ def main(position=None):
     # instantiate pgoapi
     api = PGoApi(config)
 
+    # set signature!
+    api.activate_signature(config['encrypt_lib'])
+    
     # provide player position on the earth
     api.set_position(*position)
 

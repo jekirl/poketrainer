@@ -4,9 +4,9 @@ import json
 from math import floor, sqrt
 from os import path
 
-from pgoapi.game_master import GAME_MASTER, PokemonData
-from pgoapi.poke_lvl_data import POKEMON_LVL_DATA, TCPM_VALS, get_tcpm
-from pgoapi.utilities import all_in
+from .game_master import GAME_MASTER, PokemonData
+from .poke_lvl_data import POKEMON_LVL_DATA, TCPM_VALS, get_tcpm
+from .utilities import all_in
 
 POKEMON_NAMES = {}
 
