@@ -128,7 +128,7 @@ def main(position=None):
 
     # set signature!
     api.activate_signature(config['encrypt_lib'])
-    
+
     # provide player position on the earth
     api.set_position(*position)
 

@@ -40,8 +40,6 @@ import six
 from cachetools import TTLCache
 from gevent.coros import BoundedSemaphore
 
-from pgoapi.auth_google import AuthGoogle
-from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import (AuthException, AuthTokenExpiredException,
                                NotLoggedInException,
                                ServerApiEndpointRedirectException,
@@ -49,11 +47,11 @@ from pgoapi.exceptions import (AuthException, AuthTokenExpiredException,
                                UnexpectedResponseException)
 from .inventory import Inventory as Player_Inventory
 from .location import (distance_in_meters, filtered_forts,
-                             get_increments, get_neighbors, get_route)
+                       get_increments, get_neighbors, get_route)
 from .player import Player as Player
 from .player_stats import PlayerStats as PlayerStats
 from .poke_utils import (create_capture_probability, get_inventory_data,
-                               get_item_name, get_pokemon_by_long_id)
+                         get_item_name, get_pokemon_by_long_id)
 from .pokedex import pokedex
 from .pokemon import POKEMON_NAMES, Pokemon
 from pgoapi.protos.POGOProtos import Enums_pb2
@@ -63,11 +61,10 @@ from .release.base import ReleaseMethodFactory
 from pgoapi.rpc_api import RpcApi
 from pgoapi.pgoapi import PGoApi as basePGoApi
 
-from .utilities import f2i, parse_api_endpoint
+from .utilities import parse_api_endpoint
 
 if six.PY3:
     from builtins import map as imap
-    from past.builtins import basestring
 elif six.PY2:
     from itertools import imap
 
@@ -294,7 +291,7 @@ class PGoApi(basePGoApi):
             # return request.call()
         finally:
             self.cond_release()
-        
+
     def list_curr_methods(self):
         for i in self._req_method_list.get(id(gevent.getcurrent()), []):
             print("{} ({})".format(RequestType.Name(i), i))
@@ -573,7 +570,7 @@ class PGoApi(basePGoApi):
         map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
-        
+
         if destinations:
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
@@ -673,7 +670,7 @@ class PGoApi(basePGoApi):
         map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
-        
+
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Returning back to origin')
@@ -719,7 +716,7 @@ class PGoApi(basePGoApi):
             gevent.sleep(1.0)
             self.map_objects = self.get_map_objects(
                 latitude=position[0], longitude=position[1],
-                since_timestamp_ms=[0,] * len(neighbors),
+                since_timestamp_ms=[0, ] * len(neighbors),
                 cell_id=neighbors).call()
             self._last_got_map_objects = time()
         return self.map_objects
@@ -1121,14 +1118,13 @@ class PGoApi(basePGoApi):
             while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
                 # self.gsleep(4)
                 catch_attempt += 1
-                pass
             if catch_attempt > self.max_catch_attempts:
                 self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times",
                               catch_attempt)
             catch_attempt = 0
 
             if self._error_counter >= self._error_threshold:
-                raise TooManyEmptyResponses('Too many errors in this run!!!')
+                raise RuntimeError('Too many errors in this run!!!')
 
     @staticmethod
     def flatmap(f, items):

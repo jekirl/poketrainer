@@ -26,7 +26,11 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
 import struct
+import time
+from binascii import unhexlify
 from bisect import bisect_left
+
+import xxhash
 
 
 def f2i(float):
