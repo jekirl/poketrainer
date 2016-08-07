@@ -60,6 +60,7 @@ Below the accounts you can change options in the `default` section. If you need 
    * `ENABLE_CACHING` is the master switch, no caching methods will run if this is set to false
    * `USE_CACHED_FORTS` should be set to false on your first run, it will run as normal and cache forts you'd normally visit. Set this to true after you've cached enough forts or "Cached Forts: x" output is stable, around 10 for a 1500 proximity, 100 step configuration, wait longer if needed.
    * `CACHED_FORTS_SORTED` set to true if the cache is sorted/pathing is calculated. Leave it false if you're unsure.
+   * `RENAME_WITH_IV` rename caught pokemon to include IV, will not rename those with a nickname already
 * `CAPTURE`
    * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
    * `MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY` minimum number of failed capture attempts before trying to use a Razz Berry (default: 3)

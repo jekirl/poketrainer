@@ -19,7 +19,8 @@
         "SLEEP_MULT" : 1.5,
         "ENABLE_CACHING" :false,
         "USE_CACHED_FORTS" : false,
-        "CACHED_FORTS_SORTED" : false
+        "CACHED_FORTS_SORTED" : false,
+        "RENAME_WITH_IV": false
       },
       "CAPTURE": {
         "CATCH_POKEMON": true,

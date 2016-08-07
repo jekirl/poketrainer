@@ -207,6 +207,8 @@ class PGoApi:
         self.cache_is_sorted = self.config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
         self.enable_caching = self.config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
 
+        self.rename_with_iv = self.config.get("BEHAVIOR", {}).get("RENAME_WITH_IV", False)
+
     '''
     Blocking lock
         - only locks if current thread (greenlet) doesn't own the lock
@@ -904,6 +906,9 @@ class PGoApi:
             else:
                 for pokemon in pokemonsToRelease:
                     self.do_release_pokemon(pokemon)
+        if self.rename_with_iv and self.experimental:
+            self.log.info("RENAMING POKEMON WITH IV")
+            self.rename_with_IV()
 
     def attempt_evolve(self, inventory_items=None):
         if not inventory_items:
@@ -1238,6 +1243,21 @@ class PGoApi:
                                                                                   (self._posf[0], self._posf[1])))
 
         return True
+
+    def rename_with_IV(self):
+        inventory_items = self.get_inventory().call()\
+            .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
+        caught_pokemon = self.get_caught_pokemons(inventory_items)
+        self.inventory = Player_Inventory(self.percentages, inventory_items)
+        for pokemons in caught_pokemon.values():
+            pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
+            for pokemon in pokemons:
+                if not len(pokemon.nickname) > 0:
+                    self.nicknamePokemon(pid = pokemon.id, name = pokedex.get_name_by_id(pokemon.pokemon_id) + str(int(pokemon.get_iv_percentage())))
+                    self.gsleep(.2)
+
+    def nicknamePokemon(self, pid, name):
+        self.nickname_pokemon(pokemon_id=pid, nickname=name).call()
 
     def login(self, provider, username, password, oauth2_refresh_token=None):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
