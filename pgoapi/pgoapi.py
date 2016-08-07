@@ -878,7 +878,7 @@ class PGoApi:
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         caught_pokemon = self.get_caught_pokemons(inventory_items)
         release_method = self.releaseMethodFactory.getReleaseMethod()
-        for pokemonId, pokemons in caught_pokemon.iteritems():
+        for pokemonId, pokemons in six.iteritems(caught_pokemon):
             pokemonsToRelease, pokemonsToKeep = release_method.getPokemonToRelease(pokemonId, pokemons)
 
             if self.config.get('POKEMON_CLEANUP', {}).get('TESTING_MODE', False):
@@ -931,7 +931,7 @@ class PGoApi:
     def is_pokemon_eligible_for_evolution(self, pokemon):
         candy_have = self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None), -1)
         candy_needed = self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None)
-        return candy_have > candy_needed and \
+        return candy_needed and candy_have > candy_needed and \
             pokemon.pokemon_id not in self.keep_pokemon_ids \
             and not pokemon.is_favorite \
             and pokemon.pokemon_id in self.POKEMON_EVOLUTION
