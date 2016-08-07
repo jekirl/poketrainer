@@ -184,7 +184,7 @@ What's working:
 
 
 ## Credits
-* [keyphact/UK6 team] https://github.com/keyphact/pgoapi for the unknown6 fix
+* [keyphact/UK6 team](https://github.com/keyphact/pgoapi) for the unknown6 fix
 * [tejado](https://github.com/tejado) for the base of this
 * [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR
 * [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos
