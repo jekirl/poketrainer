@@ -1277,13 +1277,23 @@ class PGoApi:
                 self.spin_all_forts_visible()
             else:
                 self.spin_near_fort()
-            # If pokestops spun 10 times but no items rewarded, possible softban
+            # If pokestops spun 10 times but no items rewarded, possible softban (~teh3viL)
             while self.max_pokestop_noloot <= self.pokestop_noloot_count:
                 self.gsleep(4)
                 pass
             if self.max_pokestop_noloot > self.pokestop_noloot_count:
                 self.log.warn("[TRAINER]\t- You have checked into %s/%s PokeStops and recieved no loot. It's likely you are softbanned.", self.pokestop_noloot_count, self.max_pokestop_noloot)
             self.max_pokestop_noloot = 0
+
+            # if catching fails 10 times, maybe you are sofbanned.
+            # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
+            while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
+                # self.gsleep(4)
+                catch_attempt += 1
+                pass
+            if catch_attempt > self.max_catch_attempts:
+                self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times", catch_attempt)
+            catch_attempt = 0
 
             if self._error_counter >= self._error_threshold:
                 raise TooManyEmptyResponses('Too many errors in this run!!!')
