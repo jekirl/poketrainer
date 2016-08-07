@@ -157,7 +157,6 @@ If you are not updating the Python code, you do not need to install or use tox.
 
 ### pokecli with Docker (optional)
 Build and run container:
-libencrypt.so must be built and placed in the root of the poketrainer directory.
 ```
 cd poketrainer/
 docker build -t pokecli -f container/Dockerfile .
@@ -169,7 +168,6 @@ using `docker inspect poketrainer`.
 The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`.
 
 You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.  	
-
 
 ### What's working:
 What's working:
