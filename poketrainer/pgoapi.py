@@ -1136,6 +1136,7 @@ class PGoApi(basePGoApi):
             self.update_player_inventory()
             return False
 
+<<<<<<< 2e8f979db31f20d6adb7625f17c5e38bf968f3ed
     def cache_forts(self, forts):
         if not self.all_cached_forts:
             with open(self.cache_filename, 'wb') as handle:
@@ -1242,6 +1243,8 @@ class PGoApi(basePGoApi):
 
         return True
 
+=======
+>>>>>>> cleaned up some comments and errors
     def main_loop(self):
         catch_attempt = 0
         self.heartbeat()
