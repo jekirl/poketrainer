@@ -45,8 +45,6 @@ import six
 from cachetools import TTLCache
 from gevent.coros import BoundedSemaphore
 
-from pgoapi.auth_google import AuthGoogle
-from pgoapi.auth_ptc import AuthPtc
 from pgoapi.exceptions import (AuthException, AuthTokenExpiredException,
                                NotLoggedInException,
                                ServerApiEndpointRedirectException,
@@ -58,7 +56,7 @@ from .location import (distance_in_meters, filtered_forts,
 from .player import Player as Player
 from .player_stats import PlayerStats as PlayerStats
 from .poke_utils import (create_capture_probability, get_inventory_data,
-                               get_item_name, get_pokemon_by_long_id)
+                         get_item_name, get_pokemon_by_long_id)
 from .pokedex import pokedex
 from .pokemon import POKEMON_NAMES, Pokemon
 from .release.base import ReleaseMethodFactory
@@ -66,12 +64,11 @@ from pgoapi.rpc_api import RpcApi
 
 from pgoapi.pgoapi import PGoApi as basePGoApi
 
-from .utilities import f2i, parse_api_endpoint
+from .utilities import parse_api_endpoint
 
 
 if six.PY3:
     from builtins import map as imap
-    from past.builtins import basestring
 elif six.PY2:
     from itertools import imap
 
@@ -321,7 +318,7 @@ class PGoApi(basePGoApi):
             # return request.call()
         finally:
             self.cond_release()
-        
+
     def list_curr_methods(self):
         for i in self._req_method_list.get(id(gevent.getcurrent()), []):
             print("{} ({})".format(RequestType.Name(i), i))
@@ -600,7 +597,7 @@ class PGoApi(basePGoApi):
         map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
-        
+
         if destinations:
             self.new_forts = destinations
             nearest_fort = destinations[0][0]
@@ -704,7 +701,7 @@ class PGoApi(basePGoApi):
         map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
-        
+
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
             self.log.info('No more spinnable forts within proximity. Returning back to origin')
@@ -1136,7 +1133,6 @@ class PGoApi(basePGoApi):
             self.update_player_inventory()
             return False
 
-<<<<<<< 2e8f979db31f20d6adb7625f17c5e38bf968f3ed
     def cache_forts(self, forts):
         if not self.all_cached_forts:
             with open(self.cache_filename, 'wb') as handle:
@@ -1243,8 +1239,6 @@ class PGoApi(basePGoApi):
 
         return True
 
-=======
->>>>>>> cleaned up some comments and errors
     def main_loop(self):
         catch_attempt = 0
         self.heartbeat()
@@ -1261,6 +1255,7 @@ class PGoApi(basePGoApi):
             if self.use_cache and self.experimental and self.enable_caching:
                 self.spin_all_cached_forts()
             else:
+<<<<<<< 6fbcaf5465630f3d1464420da2721b7e92c9f36a
                 if self.experimental and self.spin_all_forts:
                     self.spin_all_forts_visible()
                 else:
@@ -1273,13 +1268,21 @@ class PGoApi(basePGoApi):
                     # self.gsleep(4)
                     catch_attempt += 1
                     pass
+=======
+                self.spin_near_fort()
+            # if catching fails 10 times, maybe you are sofbanned.
+            # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
+            while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
+                # self.gsleep(4)
+                catch_attempt += 1
+>>>>>>> ran autoflake and cleaned up errors
             if catch_attempt > self.max_catch_attempts:
                 self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times",
                               catch_attempt)
             catch_attempt = 0
 
             if self._error_counter >= self._error_threshold:
-                raise TooManyEmptyResponses('Too many errors in this run!!!')
+                raise RuntimeError('Too many errors in this run!!!')
 
     @staticmethod
     def flatmap(f, items):
