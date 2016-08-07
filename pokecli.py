@@ -52,8 +52,8 @@ def get_pos_by_name(location_name):
     geolocator = GoogleV3()
     loc = geolocator.geocode(location_name)
 
-    logger.info('Your given location: %s', loc.address.encode('utf-8'))
-    logger.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
+    logger.info('[LOGIN]\t-Your given location: %s', loc.address.encode('utf-8'))
+    logger.info('[LOGIN]\t-lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
 
     return (loc.latitude, loc.longitude, loc.altitude)
 
@@ -103,7 +103,7 @@ def main(position=None):
     # log settings
     # log format
     #if config["CONSOLE_OUTPUT"]["HEARTBEAT_DETAIL"] == "DETAILED":
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s |\t%(message)s')
+    logging.basicConfig(level=logging.INFO, format='\t| %(message)s')
     #else:
         #logging.basicConfig(level=logging.INFO, format='\t%(message)s')
         #logger.info('========================================================')
@@ -129,7 +129,7 @@ def main(position=None):
             position_str = config["location"]
             # Could do with a better way of deciding how to split address
             position_split = position_str.split(', ')
-            logger.info('Your given location: %s', position_str)
+            logger.info('[LOGIN]\t- Your given location: %s', position_str)
             position = (float(position_split[0]), float(position_split[1]), 0.0)
         else:
             position = get_pos_by_name(config["location"])

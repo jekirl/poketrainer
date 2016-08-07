@@ -32,6 +32,7 @@ from __future__ import absolute_import
 import json
 import logging
 import os
+import random
 from collections import defaultdict
 from itertools import chain
 from time import time
@@ -96,9 +97,14 @@ class PGoApi:
         self._farm_mode_triggered = False
         self._orig_step_size = config.get("BEHAVIOR", {}).get("STEP_SIZE", 200)
         self.wander_steps = config.get("BEHAVIOR", {}).get("WANDER_STEPS", 0)
-        pokeball_percent = config.get("CAPTURE", {}).get("USE_POKEBALL_IF_PERCENT", 50)
-        greatball_percent = config.get("CAPTURE", {}).get("USE_GREATBALL_IF_PERCENT", 50)
-        ultraball_percent = config.get("CAPTURE", {}).get("USE_ULTRABALL_IF_PERCENT", 50)
+
+        self.USE_MULTI_LOCATIONS = config.get("BEHAVIOUR", {}).get("USE_MULTI_LOCATIONS", True)
+        self.MULTI_LOCATIONS_LIST = config.get("BEHAVIOUR", {}).get("MULTI_LOCATIONS", [])
+        self.NEXT_ORIGIN_POINT = 0
+
+        pokeball_percent = config.get("CAPTURE", {}).get("USE_POKEBALL_IF_PERCENT", 60)
+        greatball_percent = config.get("CAPTURE", {}).get("USE_GREATBALL_IF_PERCENT", 40)
+        ultraball_percent = config.get("CAPTURE", {}).get("USE_ULTRABALL_IF_PERCENT", 20)
         use_masterball = config.get("CAPTURE", {}).get("USE_MASTERBALL", False)
         self.percentages = [pokeball_percent, greatball_percent, ultraball_percent, use_masterball]
 
@@ -287,6 +293,11 @@ class PGoApi:
         else:
             return str(lat) + ', ' + str(lon)
 
+    def get_position_by_name(self, location_name):
+        geolocator = GoogleV3()
+        loc = geolocator.geocode(location_name)
+        return (loc.latitude, loc.longitude, loc.altitude)
+
     def set_position(self, lat, lng, alt):
         self.log.debug('Set Position - Lat: %s Long: %s Alt: %s', lat, lng, alt)
         self._posf = (lat, lng, alt)
@@ -445,11 +456,14 @@ class PGoApi:
                         self.log.info("[TRAINER]\t- Player Stats: {}".format(self.player_stats))
                     self.hourly_exp(self.player_stats.experience)
             if self.LIST_INVENTORY_BEFORE_CLEANUP:
-                self.log.info("[INVENTORY]\t- Backpack before cleaning up: %s", self.inventory)
+                self.log.info("[INVENTORY]\t- Backpack before cleaning up:")
+                self.log.info("[INVENTORY]\t- %s", self.inventory)
             self.log.debug(self.cleanup_inventory(self.inventory.inventory_items))
-            self.log.info("[INVENTORY]\t- Backpack after cleaning up: %s", self.inventory)
+            if self.HEARTBEAT_DETAIL != "HIDDEN":
+                self.log.info("[INVENTORY]\t- Backpack after cleaning up:")
+                self.log.info("[INVENTORY]\t- %s", self.inventory)
             if self.LIST_POKEMON_BEFORE_CLEANUP:
-                self.log.info(get_inventory_data(res, self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS))
+                self.log.info("[POKEMON]\t- Your PokeBox currently holds: \n" + get_inventory_data(res, self.player_stats.level, self.SCORE_METHOD, self.SCORE_SETTINGS))
             self.incubate_eggs()
             # Auto-use lucky-egg if applicable
             self.use_lucky_egg()
@@ -525,8 +539,7 @@ class PGoApi:
         base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (self._posf[0], self._posf[1])
         total_distance_traveled = 0
         total_distance = route_data['total_distance']
-        self.log.info('[STANDING]\t- ===============================================')
-        self.log.info("[STANDING]\t- Planning an adventure! Route is {0:.2f}m long.".format(total_distance))
+        self.log.info("[STANDING]\t- Planning the journey... route is around %skm long.", (total_distance / 1000))
 
         for step_data in route_data['steps']:
             step = (step_data['lat'], step_data['long'])
@@ -539,7 +552,7 @@ class PGoApi:
                 travel_name = self.get_position_name(next_point[0], next_point[1])
                 self.log.info("[WALKING]\t- Heading to %s", travel_name)
                 if self.HEARTBEAT_DETAIL != "HIDDEN":
-                    self.log.info("[WALKING]\t- Following this route: %s)", travel_link)
+                    self.log.info("[WALKING]\t- Following this route: %s", travel_link)
                 self.set_position(*next_point)
                 self.heartbeat()
 
@@ -554,12 +567,65 @@ class PGoApi:
                 catch_attempt = 0
 
             self.log.info('[WALKING]\t- Walked %.2fm, another %.2fm to go!', total_distance_traveled, (total_distance - total_distance_traveled))
-            self.log.info('[STANDING]\t- ===============================================')
+            self.log.info('[WALKING]\t- ===============================================')
         self.log.info('[STANDING]\t- Whew! Finished route. Where to next?')
+        self.log.info('[STANDING]\t- ===============================================')
 
     def walk_back_to_origin(self):
-        self.log.info('[WALKING]\t- Heading back home.')
-        self.walk_to(self._origPosF)
+        self.log.info('[STANDING]\t- ===============================================')
+        if self.USE_MULTI_LOCATIONS:
+            #locations = self.MULTI_LOCATIONS_LIST
+            locations = (
+                "51.624896, -3.941547",
+                "51.620173, -3.942371",
+                "51.616862, -3.936583",
+                "51.616199, -3.951028",
+                "51.612668, -3.963243",
+                "51.614516, -3.974847",
+                "51.608938, -3.979930",
+                "51.569956, -3.973842",
+                "51.641672, -3.934780",
+                "51.654956, -3.916273",
+                "51.662118, -3.885604",
+                "51.653747, -3.884949",
+                "51.661431, -3.802480"
+            )
+
+            i = self.NEXT_ORIGIN_POINT
+            locationsLength = len(locations)
+            base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (self._posf[0], self._posf[1])
+            nextLocation = self._origPosF
+
+            if (i <= locationsLength):
+                nextLocation = self.get_position_by_name(str(locations[i]))
+            else:
+                i = -1
+
+            nextLocationName = self.get_position_name(nextLocation[0], nextLocation[1])
+            distance_to_point = int(distance_in_meters(self._posf, nextLocation))
+            distance_suffix = "m"
+            if distance_to_point > 1000:
+                distance_to_point = int((distance_to_point / 1000))
+                distance_suffix = "km"
+            travel_link = '%s%s,%s' % (base_travel_link, nextLocation[0], nextLocation[1])
+
+            currentLocation = "location " + str(i) + "/" + str(locationsLength)
+            if (i) == -1:
+                currentLocation = "home"
+
+            self.log.info('[STANDING]\t- Looks like %s is next on my map! [%s%s away]', currentLocation, distance_to_point, distance_suffix)
+            self.log.info('[STANDING]\t- I hope there\'s a PokeStop at %s', nextLocationName)
+            if self.HEARTBEAT_DETAIL != "HIDDEN":
+                    self.log.info("[WALKING]\t- Following this route: %s", travel_link)
+            self.walk_to(nextLocation)
+        else:
+            self.log.info('[STANDING]\t- Heading back to %s. [%s]', self.get_position_name(self._origPosF[0], self._origPosF[1]), self.NEXT_ORIGIN_POINT)
+            self.walk_to(self._origPosF)
+
+        # Increase the counter for next location
+        self.NEXT_ORIGIN_POINT += 1
+
+
 
     def spin_nearest_fort(self):
         map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
@@ -641,7 +707,7 @@ class PGoApi:
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
-            self.log.info("[STANDING]\t- Can't seem to see any PokeStops around...")
+            self.log.info("[STANDING]\t- Can't seem to see any PokeStops around... Checking map")
             self._error_counter += 1
             self.walk_back_to_origin()
             return False
@@ -674,7 +740,7 @@ class PGoApi:
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
         if not destinations:
             self.log.debug("No fort to walk to! %s", res)
-            self.log.info("[STANDING]\t- Can't seem to see any more PokeStops around... Heading back.")
+            self.log.info("[STANDING]\t- Can't seem to see any more PokeStops around... Checking map.")
             self.walk_back_to_origin()
             return False
 
@@ -750,10 +816,12 @@ class PGoApi:
             self.log.info("[ENCOUNTER]- {2}/11: Using {0}, {1:.2f}% catch chance.".format(get_item_name(
                           pokeball), item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
             self.gsleep(0.5)
+            randomise_reticle = random.uniform(1.100, 1.950)
+            randomise_spin = random.uniform(0.850, 0.900)
             r = self.catch_pokemon(
-                normalized_reticle_size=1.950,
+                normalized_reticle_size=randomise_reticle,
                 pokeball=pokeball,
-                spin_modifier=0.850,
+                spin_modifier=randomise_spin,
                 hit_pokemon=True,
                 normalized_hit_position=1,
                 encounter_id=encounter_id,
@@ -1073,8 +1141,10 @@ class PGoApi:
 
                 incubator_egg_distance = incubator['target_km_walked'] - incubator_start_km_walked
                 incubator_distance_done = self.player_stats.km_walked - incubator_start_km_walked
-                self.log.info('[TRAINER]\t- %skm egg wiggled! Walked %s/%skm!', incubator_egg_distance,
+                self.log.info('[INCUBATOR]\t- ===============================================')
+                self.log.info('[INCUBATOR]\t- %skm egg wiggled! Walked %s/%skm!', incubator_egg_distance,
                               round(incubator_distance_done, 2), incubator_egg_distance)
+                self.log.info('[INCUBATOR]\t- ===============================================')
         for incubator in self.inventory.incubators_available:
             if incubator['item_id'] == 901:  # unlimited use
                 pass
@@ -1099,18 +1169,20 @@ class PGoApi:
         status = incubate_res.get('result', -1)
         # self.gsleep(3)
         if status == 1:
-            self.log.info("[TRAINER]\t- Hatching %skm egg. Better keep an eye on it!", egg['egg_km_walked_target'])
+            self.log.info('[INCUBATOR]\t- ===============================================')
+            self.log.info("[INCUBATOR]\t- Hatching %skm egg. Better keep an eye on it!", egg['egg_km_walked_target'])
+            self.log.info('[INCUBATOR]\t- ===============================================')
             self.update_player_inventory()
             return True
         else:
             self.log.debug("Could not start incubating %s", incubate_res)
-            self.log.info("[TRAINER]\t- Couldn't start hatching %skm egg, incubator is playing up. The screen says: %s", egg['egg_km_walked_target'], status)
+            self.log.info("[INCUBATOR]\t- Couldn't start hatching %skm egg, incubator is playing up. The screen says: %s", egg['egg_km_walked_target'], status)
             self.update_player_inventory()
             return False
 
     def attempt_finish_incubation(self):
         if self.HEARTBEAT_DETAIL != "HIDDEN":
-            self.log.info("[TRAINER]\t- Checking on incubators...")
+            self.log.info("[INCUBATOR]\t- Checking on incubators...")
         self.gsleep(0.2)
         hatch_res = self.get_hatched_eggs().call().get('responses', {}).get('GET_HATCHED_EGGS', {})
         status = hatch_res.get('success', -1)
@@ -1119,6 +1191,7 @@ class PGoApi:
             self.update_player_inventory()
             for i, pokemon_id in enumerate(hatch_res['pokemon_id']):
                 pokemon = get_pokemon_by_long_id(pokemon_id, self.inventory.inventory_items)
+                self.log.info('[INCUBATOR]\t- ===============================================')
                 self.log.info("[TRAINER]\t- %s Hatched from egg! Gained +%sXP, +%s Candy, and +%s Stardust",
                               pokemon.pokemon_type,
                               hatch_res['experience_awarded'][i],
@@ -1126,10 +1199,11 @@ class PGoApi:
                               hatch_res['stardust_awarded'][i])
                 if self.HEARTBEAT_DETAIL != "HIDDEN":
                     self.log.info("[POKEMON]\t- %s", pokemon)
+                self.log.info('[INCUBATOR]\t- ===============================================')
             return True
         else:
             self.log.debug("Could not get hatched eggs %s", hatch_res)
-            self.log.info("[TRAINER]\t- Incubators are playing up, Screen says: %s", status)
+            self.log.info("[INCUBATOR]\t- Incubators are playing up, Screen says: %s", status)
             self.update_player_inventory()
             return False
 
@@ -1142,16 +1216,16 @@ class PGoApi:
         elif provider == 'google':
             self._auth_provider = AuthGoogle()
         else:
-            raise AuthException("[LOGIN]\t\t- Invalid authentication provider - only ptc/google available.")
+            raise AuthException("[LOGIN]\t- Invalid authentication provider - only ptc/google available.")
 
         self.log.debug('Auth provider: %s', provider)
 
         if not self._auth_provider.login(username, password):
-            self.log.info('[LOGIN]\t\t- Login process failed')
+            self.log.info('[LOGIN]\t- Login process failed')
             return False
 
         self.log.debug('Starting RPC login sequence (app simulation)')
-        self.log.info('[LOGIN]\t\t- Simulating Client Sequence')
+        self.log.info('[LOGIN]\t- Simulating Client Sequence')
         # making a standard call, like it is also done by the client
         self.get_player()
         self.get_hatched_eggs()
@@ -1162,22 +1236,22 @@ class PGoApi:
         response = self.call()
 
         if not response:
-            self.log.info('[LOGIN]\t\t- Login failed!')
+            self.log.info('[LOGIN]\t- Login failed!')
             return False
 
         if 'api_url' in response:
             self._api_endpoint = ('https://{}/rpc'.format(response['api_url']))
             self.log.debug('Setting API endpoint to: %s', self._api_endpoint)
         else:
-            self.log.error('[LOGIN]\t\t- Login failed - unexpected server response!')
+            self.log.error('[LOGIN]\t- Login failed - unexpected server response!')
             return False
 
         if 'auth_ticket' in response:
             self._auth_provider.set_ticket(response['auth_ticket'].values())
 
         self.log.debug('Starting RPC login sequence (app simulation)')
-        self.log.info('[LOGIN]\t\t- Finished Simulating Client Sequence')
-        self.log.info('[LOGIN]\t\t- Login process completed')
+        self.log.info('[LOGIN]\t- Finished Simulating Client Sequence')
+        self.log.info('[LOGIN]\t- Login process completed')
         if self.HEARTBEAT_DETAIL == "HIDDEN":
             if os.name == 'nt':
                 os.system('cls')
