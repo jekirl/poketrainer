@@ -34,6 +34,7 @@ import subprocess
 from importlib import import_module
 
 import requests
+import six
 from google.protobuf import message
 
 import Signature_pb2
@@ -50,9 +51,6 @@ from pgoapi.utilities import (generateLocation1, generateLocation2,
 from POGOProtos.Networking.Envelopes_pb2 import (RequestEnvelope,
                                                  ResponseEnvelope)
 from POGOProtos.Networking.Requests_pb2 import RequestType
-
-
-# from . import protos
 
 
 class RpcApi:
@@ -83,9 +81,8 @@ class RpcApi:
 
     def activate_signature(self, lib_path):
         try:
-            ctypes.cdll.LoadLibrary(lib_path)
             self._signature_gen = True
-            self._signature_lib = lib_path
+            self._signature_lib = ctypes.cdll.LoadLibrary(lib_path)
         except:
             raise
 
@@ -212,7 +209,7 @@ class RpcApi:
 
                 u6 = request.unknown6.add()
                 u6.request_type = 6
-                u6.unknown2.unknown1 = self._generate_signature(signature_proto, self._signature_lib)
+                u6.unknown2.unknown1 = self._generate_signature(signature_proto)
         else:
             self.log.debug('No Session Ticket found - using OAUTH Access Token')
             request.auth_info.provider = self._auth_provider.get_name()
@@ -227,19 +224,19 @@ class RpcApi:
         return request
 
     def _generate_signature(self, signature_plain, lib_path="encrypt.so"):
-        lib = ctypes.cdll.LoadLibrary(lib_path)
-        lib.argtypes = [ctypes.c_char_p, ctypes.c_size_t, ctypes.c_char_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_ubyte), ctypes.POINTER(ctypes.c_size_t)]
-        lib.restype = ctypes.c_int
+        if self._signature_lib is None:
+            self.activate_signature(lib_path)
+        self._signature_lib.argtypes = [ctypes.c_char_p, ctypes.c_size_t, ctypes.c_char_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_ubyte), ctypes.POINTER(ctypes.c_size_t)]
+        self._signature_lib.restype = ctypes.c_int
 
         iv = os.urandom(32)
 
         output_size = ctypes.c_size_t()
 
-        lib.encrypt(signature_plain, len(signature_plain), iv, 32, None, ctypes.byref(output_size))
+        self._signature_lib.encrypt(signature_plain, len(signature_plain), iv, 32, None, ctypes.byref(output_size))
         output = (ctypes.c_ubyte * output_size.value)()
-        lib.encrypt(signature_plain, len(signature_plain), iv, 32, ctypes.byref(output), ctypes.byref(output_size))
-
-        signature = b''.join(map(chr, output))
+        self._signature_lib.encrypt(signature_plain, len(signature_plain), iv, 32, ctypes.byref(output), ctypes.byref(output_size))
+        signature = b''.join(list(map(lambda x: six.int2byte(x), output)))
         return signature
 
     def _build_main_request_orig(self, subrequests, player_position=None):

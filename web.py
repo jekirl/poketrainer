@@ -9,6 +9,7 @@ from collections import defaultdict
 
 import zerorpc
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
+from six import iteritems
 
 from pgoapi.poke_lvl_data import TCPM_VALS
 from pgoapi.pokemon import Pokemon
@@ -62,7 +63,7 @@ def init_config():
     config = parser.parse_args()
     load = load['accounts'][config.__dict__['config_index']]
     # Passed in arguments shoud trump
-    for key, value in load.iteritems():
+    for key, value in iteritems(load):
         if key not in config.__dict__ or not config.__dict__[key]:
             config.__dict__[key] = value
 
@@ -172,9 +173,9 @@ def status(username):
             pokemons_data.append(pokemon)
         if 'player_stats' in item:
             player = item['player_stats']
-        if "pokemon_family" in item:
-            filled_family = str(item['pokemon_family']['family_id']).zfill(4)
-            candy[filled_family] += item['pokemon_family'].get("candy", 0)
+        if "candy" in item:
+            filled_family = str(item['candy']['family_id']).zfill(4)
+            candy[filled_family] += item['candy'].get("candy", 0)
     # add candy back into pokemon json
     pokemons = []
     for pokemon in pokemons_data:
@@ -267,7 +268,7 @@ def init_web_config():
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true')
     web_config = parser.parse_args()
     # Passed in arguments should trump
-    for key, value in load.iteritems():
+    for key, value in iteritems(load):
         if key not in web_config.__dict__ or not web_config.__dict__[key]:
             web_config.__dict__[key] = value
     return web_config.__dict__
