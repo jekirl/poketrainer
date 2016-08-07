@@ -43,8 +43,7 @@ from geopy.geocoders import GoogleV3
 from gevent.coros import BoundedSemaphore
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
-from pgoapi.exceptions import (AuthException, ServerBusyOrOfflineException,
-                               TooManyEmptyResponses)
+from pgoapi.exceptions import AuthException, NotLoggedInException, ServerBusyOrOfflineException, NoPlayerPositionSetException, EmptySubrequestChainException, AuthTokenExpiredException, ServerApiEndpointRedirectException, UnexpectedResponseException
 from pgoapi.inventory import Inventory as Player_Inventory
 from pgoapi.location import (distance_in_meters, filtered_forts,
                              get_increments, get_neighbors, get_route)
@@ -59,6 +58,7 @@ from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.release.base import ReleaseMethodFactory
 from pgoapi.rpc_api import RpcApi
+from pgoapi.utilities import parse_api_endpoint
 
 from .utilities import f2i
 
@@ -72,14 +72,14 @@ logger = logging.getLogger(__name__)
 
 
 class PGoApi:
-    API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
 
     def __init__(self, config):
 
         self.log = logging.getLogger(__name__)
+        self._api_endpoint = 'https://pgorelease.nianticlabs.com/plfe/rpc'
+        self._signature_lib = None
 
         self._auth_provider = None
-        self._api_endpoint = None
         self.config = config
         self.releaseMethodFactory = ReleaseMethodFactory(self.config)
         self._position_lat = 0  # int cooords
@@ -229,6 +229,22 @@ class PGoApi:
     def gsleep(self, t):
         gevent.sleep(t * self.sleep_mult)
 
+    def activate_signature(self, lib_path):
+        self._signature_lib = lib_path
+
+    def get_signature_lib(self):
+        return self._signature_lib
+
+    def get_api_endpoint(self):
+        return self._api_endpoint
+
+    def set_api_endpoint(self, api_url):
+        if api_url.startswith("https"):
+            self._api_endpoint = api_url
+        else:
+            self._api_endpoint = parse_api_endpoint(api_url)
+
+
     def call(self):
         self.cond_lock()
         self.gsleep(self.config.get("BEHAVIOR", {}).get("EXTRA_WAIT", 0.3))
@@ -244,10 +260,8 @@ class PGoApi:
 
             request = RpcApi(self._auth_provider)
 
-            if self._api_endpoint:
-                api_endpoint = self._api_endpoint
-            else:
-                api_endpoint = self.API_ENTRY
+            if self.get_signature_lib() is not None:
+                request.activate_signature(self.get_signature_lib())
 
             self.log.debug('Execution of RPC')
             response = None
@@ -255,6 +269,46 @@ class PGoApi:
                 response = request.request(api_endpoint, self._req_method_list[id(gevent.getcurrent())], player_position)
             except ServerBusyOrOfflineException:
                 self.log.info('[LOGIN]\t- Server seems to be busy or offline - try again!')
+            execute = True
+
+            while execute:
+                execute = False
+
+                try:
+                    response = request.request(self.get_api_endpoint(), self._req_method_list[id(gevent.getcurrent())], player_position)
+                except AuthTokenExpiredException as e:
+                    """
+                    This exception only occures if the OAUTH service provider (google/ptc) didn't send any expiration date
+                    so that we are assuming, that the access_token is always valid until the API server states differently.
+                    """
+                    try:
+                        self.log.info('Access Token rejected! Requesting new one...')
+                        self._auth_provider.get_access_token(force_refresh = True)
+                    except:
+                        error = 'Request for new Access Token failed! Logged out...'
+                        self.log.error(error)
+                        raise NotLoggedInException(error)
+
+                    """ reexecute the call"""
+                    execute = True
+                except ServerApiEndpointRedirectException as e:
+                    self.log.info('API Endpoint redirect... re-execution of call')
+                    new_api_endpoint = e.get_redirected_endpoint()
+
+                    self._api_endpoint = parse_api_endpoint(new_api_endpoint)
+                    self.set_api_endpoint(self._api_endpoint)
+
+                    """ reexecute the call"""
+                    execute = True
+                except ServerBusyOrOfflineException as e:
+                    """ no execute = True here, as API retries on HTTP level should be done on a lower level, e.g. in rpc_api """
+                    self.log.info('Server seems to be busy or offline - try again!')
+                    self.log.debug('ServerBusyOrOfflineException details: %s', e)
+                except UnexpectedResponseException as e:
+                    self.log.error('Unexpected server response!')
+                    raise
+
+
 
             # cleanup after call execution
             self.log.debug('Cleanup of request!')
@@ -289,9 +343,9 @@ class PGoApi:
         if self._firstRun:
             self._firstRun = False
             self._origPosF = self._posf
-        self._position_lat = f2i(lat)
-        self._position_lng = f2i(lng)
-        self._position_alt = f2i(alt)
+        self._position_lat = lat
+        self._position_lng = lng
+        self._position_alt = alt
 
     def __getattr__(self, func):
         def function(**kwargs):
@@ -333,6 +387,10 @@ class PGoApi:
             curr_lng = self._posf[1]
 
             self.log.info("[SNIPING]\t- Sniping pokemon at %f, %f", lat, lng)
+            self.log.info("Sniping pokemon at %f, %f", lat, lng)
+            self.log.info("Waiting for API limit timer ...")
+            while time() - self._last_got_map_objects < self._map_objects_rate_limit:
+                self.gsleep(0.1)
 
             # move to snipe location
             self.set_position(lat, lng, 0.0)
@@ -342,7 +400,7 @@ class PGoApi:
             self.log.debug("Teleported to sniping location %f, %f", lat, lng)
 
             # find pokemons in dest
-            map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
+            map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
             pokemons = PGoApi.flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
 
             # catch first pokemon:
@@ -627,6 +685,7 @@ class PGoApi:
 
     def spin_all_forts_visible(self):
         res = self.nearby_map_objects()
+        self.log.debug("nearyby_map_objects: %s", res)
         map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
@@ -660,6 +719,7 @@ class PGoApi:
 
     def spin_near_fort(self):
         res = self.nearby_map_objects()
+        self.log.debug("nearyby_map_objects: %s", res)
         map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
@@ -709,7 +769,7 @@ class PGoApi:
             gevent.sleep(1.0)
             self.map_objects = self.get_map_objects(
                 latitude=position[0], longitude=position[1],
-                since_timestamp_ms=[0] * len(neighbors),
+                since_timestamp_ms=[0,] * len(neighbors),
                 cell_id=neighbors).call()
             self._last_got_map_objects = time()
         return self.map_objects
@@ -1110,7 +1170,7 @@ class PGoApi:
             self.update_player_inventory()
             return False
 
-    def login(self, provider, username, password, cached=False):
+    def login(self, provider, username, password, oauth2_refresh_token=None):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
             raise AuthException("[LOGIN]\t- Username/password not correctly specified")
 
@@ -1126,6 +1186,13 @@ class PGoApi:
         if not self._auth_provider.login(username, password):
             self.log.info('[LOGIN]\t- Login process failed')
             return False
+
+        if oauth2_refresh_token is not None:
+            self._auth_provider.set_refresh_token(oauth2_refresh_token)
+        elif username is not None and password is not None:
+            self._auth_provider.user_login(username, password)
+        else:
+            raise AuthException("Invalid Credential Input - Please provide username/password or an oauth2 refresh token")
 
         self.log.debug('Starting RPC login sequence (app simulation)')
         self.log.info('[LOGIN]\t- Simulating Client Sequence')
