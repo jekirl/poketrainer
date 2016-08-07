@@ -173,9 +173,9 @@ def status(username):
             pokemons_data.append(pokemon)
         if 'player_stats' in item:
             player = item['player_stats']
-        if "pokemon_family" in item:
-            filled_family = str(item['pokemon_family']['family_id']).zfill(4)
-            candy[filled_family] += item['pokemon_family'].get("candy", 0)
+        if "candy" in item:
+            filled_family = str(item['candy']['family_id']).zfill(4)
+            candy[filled_family] += item['candy'].get("candy", 0)
     # add candy back into pokemon json
     pokemons = []
     for pokemon in pokemons_data:
