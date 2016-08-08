@@ -23,8 +23,8 @@ from pgoapi.pgoapi import PGoApi
 # from library.api.pgoapi import protos
 from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Item_Enums
 
-from .inventory import Inventory as Player_Inventory
-from .player_stats import PlayerStats as PlayerStats
+from .inventory import Inventory
+from .player_stats import PlayerStats
 from .poke_utils import (create_capture_probability, get_item_name, get_pokemon_by_long_id)
 from .pokedex import pokedex
 
@@ -66,71 +66,44 @@ class Poketrainer:
 
         # timers, counters and triggers
         self.pokemon_caught = 0
-        self._last_got_map_objects = 0
-        self._map_objects_rate_limit = 10.0
         self._error_counter = 0
         self._error_threshold = 10
-        self._last_egg_use_time = 0
         self.start_time = time()
         self.exp_start = None
         self._heartbeat_number = 5
         self._farm_mode_triggered = False
 
-        # objects
+        # objects, order is important!
         self.config = None
         self._load_config()
         self._open_socket()
 
-        self._origPosF = (0, 0, 0)
-        self.api = None
-        self._load_api()
-
         self.player = Player({})
         self.player_stats = PlayerStats({})
-        self.inventory = Player_Inventory(self, [])
+        self.inventory = Inventory(self, [])
         self.fort_walker = FortWalker(self)
-        self.poke_catcher = PokeCatcher(self)
-
         self.map_objects = MapObjects(self)
+        self.poke_catcher = PokeCatcher(self)
         self.incubate = Incubate(self)
         self.evolve = Evolve(self)
         self.release = Release(self)
         self.sniper = Sniper(self)
 
+        self._origPosF = (0, 0, 0)
+        self.api = None
+        self._load_api()
+
         # config values that might be changed during runtime
         self.step_size = self.config.step_size
         self.should_catch_pokemon = self.config.should_catch_pokemon
-
-        # caches
-        self.map_objects = {}
 
         # threading / locking
         self.sem = BoundedSemaphore(1)
         self.persist_lock = False
 
-        # Sanity checking, farm_items is Experimental, and we needn't do this if we're farming anyway
-        self.farm_items_enabled = (self.config.farm_items_enabled and
-                                   self.config.experimental and
-                                   self.should_catch_pokemon)
-        if (self.farm_items_enabled and
-                self.config.farm_ignore_pokeball_count and
-                self.config.farm_ignore_greatball_count and
-                self.config.farm_ignore_ultraball_count and
-                self.config.farm_ignore_masterball_count):
-            self.farm_items_enabled = False
-            self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
-        elif self.farm_items_enabled and not (
-                    self.config.pokeball_farm_threshold < self.config.pokeball_continue_threshold):
-            self.farm_items_enabled = False
-            self.log.warn("FARM_ITEMS has been disabled due to farming threshold being below the continue. " +
-                          "Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")
-
     def sleep(self, t):
         #eventlet.sleep(t * self.config.sleep_mult)
         gevent.sleep(t * self.config.sleep_mult)
-
-    def get_api_rate_limit(self):
-        return self._map_objects_rate_limit
 
     def _open_socket(self):
         desc_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), ".listeners")
@@ -321,7 +294,7 @@ class Poketrainer:
 
             # update objects
             inventory_items = responses.get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
-            self.inventory = Player_Inventory(self.config.ball_priorities, inventory_items)
+            self.inventory = Inventory(self, inventory_items)
             for inventory_item in self.inventory.inventory_items:
                 if "player_stats" in inventory_item['inventory_item_data']:
                     self.player_stats = PlayerStats(
@@ -334,19 +307,17 @@ class Poketrainer:
             if self.config.list_inventory_before_cleanup:
                 self.log.info("Player Inventory: %s", self.inventory)
             if not login_response:
-                self.log.debug(self.inventory.cleanup_inventory(self.inventory.inventory_items))
+                self.log.debug(self.inventory.cleanup_inventory())
                 self.log.info("Player Inventory after cleanup: %s", self.inventory)
             if self.config.list_pokemon_before_cleanup:
-                self.log.info(os.linesep.join(map(str, self.inventory.get_pokemon_data(res, self.player_stats.level,
-                                                                                       self.config.score_method,
-                                                                                       self.config.score_settings))))
+                self.log.info(os.linesep.join(map(str, self.inventory.get_caught_pokemon())))
 
             if not login_response:
                 # maintenance
                 self.incubate.incubate_eggs()
-                self.use_lucky_egg()
-                self.evolve.attempt_evolve(self.inventory.inventory_items)
-                self.cleanup.cleanup_pokemon(self.inventory.inventory_items)
+                self.inventory.use_lucky_egg()
+                self.evolve.attempt_evolve()
+                self.release.cleanup_pokemon()
 
             # save data dump
             with open("data_dumps/%s.json" % self.config.username, "w") as f:
@@ -357,7 +328,7 @@ class Poketrainer:
                 f.write(json.dumps(responses, indent=2, default=lambda obj: obj.decode('utf8')))
 
             # Farm precon
-            if self.farm_items_enabled:
+            if self.config.farm_items_enabled:
                 pokeball_count = 0
                 if not self.config.farm_ignore_pokeball_count:
                     pokeball_count += self.inventory.poke_balls
@@ -415,11 +386,6 @@ class Poketrainer:
     def get_orig_position(self):
         return self._origPosF
 
-    def wait_for_api_timer(self):
-        self.log.info("Waiting for API limit timer ...")
-        while time() - self._last_got_map_objects < self._map_objects_rate_limit:
-            self.sleep(0.1)
-
     """ FOLLOWING ARE FUNCTIONS FOR THE WEB LISTENER """
 
     def release_pokemon_by_id(self, p_id):
@@ -430,7 +396,7 @@ class Poketrainer:
         return self.get_position()
 
     def get_caught_pokemons(self):
-        return self.inventory.get_caught_pokemons(as_json=True)
+        return self.inventory.get_caught_pokemon_by_family(as_json=True)
 
     def get_inventory(self):
         return self.inventory.to_json()

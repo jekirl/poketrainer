@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import logging
 from cachetools import TTLCache
 
 from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Item_Enums
@@ -9,6 +10,8 @@ from library.api.pgoapi.protos.POGOProtos import Enums_pb2 as Enums
 class Config:
 
     def __init__(self, config):
+        self.log = logging.getLogger(__name__)
+
         self.__config_data = config
         self.config_data = config
         self.__password = self.config_data.pop("password", 'NA')
@@ -81,10 +84,29 @@ class Config:
                                                                                      True)  # ignore masterballs in the continue tally
         self.farm_override_step_size = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_OVERRIDE_STEP_SIZE",
                                                                                 -1)  # should the step size be overriden when looking for more inventory, -1 to disable
+        self._sanity_check_needy_item_farming()
         self.list_pokemon_before_cleanup = config.get("CONSOLE_OUTPUT", {}).get("LIST_POKEMON_BEFORE_CLEANUP",
                                                                                 True)  # list pokemon in console
         self.list_inventory_before_cleanup = config.get("CONSOLE_OUTPUT", {}).get("LIST_INVENTORY_BEFORE_CLEANUP",
                                                                                   True)  # list inventory in console
+
+    def _sanity_check_needy_item_farming(self):
+        # Sanity checking, farm_items is Experimental, and we needn't do this if we're farming anyway
+        self.farm_items_enabled = (self.farm_items_enabled and
+                                   self.experimental and
+                                   self.should_catch_pokemon)
+        if (self.farm_items_enabled and
+                self.farm_ignore_pokeball_count and
+                self.farm_ignore_greatball_count and
+                self.farm_ignore_ultraball_count and
+                self.farm_ignore_masterball_count):
+            self.farm_items_enabled = False
+            self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
+        elif self.farm_items_enabled and not (
+                    self.pokeball_farm_threshold < self.pokeball_continue_threshold):
+            self.farm_items_enabled = False
+            self.log.warn("FARM_ITEMS has been disabled due to farming threshold being below the continue. " +
+                          "Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")
 
     def get_password(self):
         # for security reasons, we only make the password available once

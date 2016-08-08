@@ -41,7 +41,7 @@ class ReleaseMethodFactory(object):
         return self._releaseHelper
 
     def getKlass(self, modulename):
-        return getattr(importlib.import_module("poketrainer.release." + modulename.lower()), 'ReleaseMethod')
+        return getattr(importlib.import_module("poketrainer.release_methods." + modulename.lower()), 'ReleaseMethod')
 
     def loadReleaseMethod(self, modulename, config):
         klass = self.getKlass(modulename)

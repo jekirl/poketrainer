@@ -3,6 +3,7 @@ import logging
 from helper.utilities import flatmap
 from .pokemon import POKEMON_NAMES
 from .location import distance_in_meters
+from .pokedex import pokedex
 
 
 class Sniper:
@@ -30,7 +31,7 @@ class Sniper:
 
         try:
             self.log.info("Sniping pokemon at %f, %f", lat, lng)
-            self.parent.wait_for_api_timer()
+            self.parent.map_objects.wait_for_api_timer()
 
             # move to snipe location
             self.parent.api.set_position(lat, lng, 0.0)
@@ -40,7 +41,8 @@ class Sniper:
             self.log.debug("Teleported to sniping location %f, %f", lat, lng)
 
             # find pokemons in dest
-            map_cells = self.parent.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
+            map_cells = self.parent.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {})\
+                .get('map_cells', [])
             pokemons = flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
 
             # catch first pokemon:
@@ -65,5 +67,5 @@ class Sniper:
             posf = self.parent.get_position()
             self.log.debug("Teleported back to origin at %f, %f", posf[0], posf[1])
             # self.sleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
-            self.persist_lock = False
+            self.parent.persist_lock = False
             self.parent.cond_release()

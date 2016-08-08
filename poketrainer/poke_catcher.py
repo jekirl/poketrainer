@@ -12,15 +12,26 @@ from .poke_utils import create_capture_probability, get_item_name
 class PokeCatcher:
     def __init__(self, parent):
         self.parent = parent
-        self.encountered_pokemons = TTLCache(maxsize=120, ttl=self.parent.get_api_rate_limit() * 2)
         self.log = logging.getLogger(__name__)
+        self.encountered_pokemons = TTLCache(maxsize=120, ttl=self.parent.map_objects.get_api_rate_limit() * 2)
+
+    def catch_all(self):
+        catch_attempt = 0
+        # if catching fails 10 times, maybe you are sofbanned.
+        # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
+        while self.catch_near_pokemon() and catch_attempt <= self.parent.config.max_catch_attempts:
+            # self.sleep(1)
+            catch_attempt += 1
+        if catch_attempt > self.parent.config.max_catch_attempts:
+            self.log.warn("You have reached the maximum amount of catch attempts. Gave up after %s times",
+                          catch_attempt)
 
     def catch_near_pokemon(self):
         if self.parent.should_catch_pokemon is False:
             return False
 
-        map_cells = self.parent.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells',
-                                                                                                         [])
+        map_cells = self.parent.map_objects.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {})\
+            .get('map_cells', [])
         pokemons = flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
         pokemons = filter(lambda p: (p['encounter_id'] not in self.encountered_pokemons), pokemons)
 
@@ -42,17 +53,6 @@ class PokeCatcher:
             catches_successful &= self.encounter_pokemon(target[0])
             # self.sleep(random.randrange(4, 8))
         return catches_successful
-
-    def catch_all(self):
-        catch_attempt = 0
-        # if catching fails 10 times, maybe you are sofbanned.
-        # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
-        while self.catch_near_pokemon() and catch_attempt <= self.parent.config.max_catch_attempts:
-            # self.sleep(1)
-            catch_attempt += 1
-        if catch_attempt > self.parent.config.max_catch_attempts:
-            self.log.warn("You have reached the maximum amount of catch attempts. Gave up after %s times",
-                          catch_attempt)
 
     def attempt_catch(self, encounter_id, spawn_point_id, capture_probability=None):
         catch_status = -1
@@ -81,7 +81,7 @@ class PokeCatcher:
             pokeball = self.parent.inventory.take_next_ball(capture_probability)
             self.log.info("Attempting catch with {0} at {1:.2f}% chance. Try Number: {2}".format(get_item_name(
                 pokeball), item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
-            self.parent.sleep(0.5)
+            self.parent.sleep(1.0)
             r = self.parent.api.catch_pokemon(
                 normalized_reticle_size=1.950,
                 pokeball=pokeball,
@@ -135,7 +135,7 @@ class PokeCatcher:
                           new_loc=None):  # take in a MapPokemon from MapCell.catchable_pokemons
         # Update Inventory to make sure we can catch this mon
         try:
-            self.parent.update_player_inventory()
+            self.parent.inventory.update_player_inventory()
             if not self.parent.inventory.can_attempt_catch():
                 self.log.info("No balls to catch %s, exiting encounter", self.parent.inventory)
                 return False
@@ -150,6 +150,7 @@ class PokeCatcher:
                                            player_latitude=position[0],
                                            player_longitude=position[1]) \
                 .get('responses', {}).get('ENCOUNTER', {})
+            self.parent.sleep(1.0)
             self.log.debug("Attempting to Start Encounter: %s", encounter)
             result = encounter.get('status', -1)
             if result == 1 and 'wild_pokemon' in encounter and 'capture_probability' in encounter:
@@ -170,7 +171,7 @@ class PokeCatcher:
             elif result == 7:
                 self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
                               pokemon.pokemon_type)
-                self.parent.cleanup_pokemon()
+                self.parent.release.cleanup_pokemon()
                 if not retry:
                     return self.encounter_pokemon(pokemon_data, retry=True, new_loc=new_loc)
             else:
@@ -182,7 +183,7 @@ class PokeCatcher:
 
     def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:
-            self.parent.update_player_inventory()
+            self.parent.inventory.update_player_inventory()
             if not self.parent.inventory.can_attempt_catch():
                 self.log.info("No balls to catch %s, exiting disk encounter", self.parent.inventory)
                 return False
@@ -205,7 +206,7 @@ class PokeCatcher:
             elif result == 5:
                 self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
                               POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
-                self.parent.cleanup_pokemon()
+                self.parent.release.cleanup_pokemon()
                 if not retry:
                     return self.disk_encounter_pokemon(lureinfo, retry=True)
             elif result == 2:
