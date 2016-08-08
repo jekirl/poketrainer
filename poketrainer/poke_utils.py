@@ -2,11 +2,9 @@ from __future__ import absolute_import
 
 import os
 
-from .pokemon import Pokemon
-
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Enum_Items
 
-
+from .pokemon import Pokemon
 
 
 def get_item_name(s_item_id):

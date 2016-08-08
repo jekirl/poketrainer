@@ -49,15 +49,15 @@ from pgoapi.exceptions import (AuthException, AuthTokenExpiredException,
                                ServerApiEndpointRedirectException,
                                ServerBusyOrOfflineException,
                                UnexpectedResponseException)
-
-
+from pgoapi.pgoapi import PGoApi as basePGoApi
 from pgoapi.protos.POGOProtos import Enums_pb2
 from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
+from pgoapi.rpc_api import RpcApi
 
 from .inventory import Inventory as Player_Inventory
-from .location import (distance_in_meters, filtered_forts,
-                       get_increments, get_neighbors, get_route)
+from .location import (distance_in_meters, filtered_forts, get_increments,
+                       get_neighbors, get_route)
 from .player import Player as Player
 from .player_stats import PlayerStats as PlayerStats
 from .poke_utils import (create_capture_probability, get_inventory_data,
@@ -65,10 +65,6 @@ from .poke_utils import (create_capture_probability, get_inventory_data,
 from .pokedex import pokedex
 from .pokemon import POKEMON_NAMES, Pokemon
 from .release.base import ReleaseMethodFactory
-
-from pgoapi.rpc_api import RpcApi
-from pgoapi.pgoapi import PGoApi as basePGoApi
-
 from .utilities import parse_api_endpoint
 
 if six.PY3:
