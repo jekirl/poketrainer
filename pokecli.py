@@ -52,8 +52,8 @@ def get_pos_by_name(location_name):
     geolocator = GoogleV3()
     loc = geolocator.geocode(location_name)
 
-    logger.info('Your given location: %s', loc.address.encode('utf-8'))
-    logger.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
+    logger.info('[LOGIN]\t-Your given location: %s', loc.address.encode('utf-8'))
+    logger.info('[LOGIN]\t-lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
 
     return (loc.latitude, loc.longitude, loc.altitude)
 
@@ -83,6 +83,7 @@ def init_config():
     # Read passed in Arguments
     parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
     parser.add_argument("-l", "--location", help="Location")
+    parser.add_argument("-e", "--encrypt_lib", help="encrypt lib, libencrypt.so/encrypt.dll", default="libencrypt.so")
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
     config = parser.parse_args()
     defaults = load.get('defaults', {})
@@ -102,7 +103,11 @@ def init_config():
 def main(position=None):
     # log settings
     # log format
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+    #if config["CONSOLE_OUTPUT"]["HEARTBEAT_DETAIL"] == "DETAILED":
+    logging.basicConfig(level=logging.INFO, format='\t| %(message)s')
+    #else:
+        #logging.basicConfig(level=logging.INFO, format='\t%(message)s')
+        #logger.info('========================================================')
     # log level for http request class
     logging.getLogger("requests").setLevel(logging.WARNING)
     # log level for main pgoapi class
@@ -114,6 +119,7 @@ def main(position=None):
     if not config:
         return
 
+
     if config["debug"]:
         logging.getLogger("requests").setLevel(logging.DEBUG)
         logging.getLogger("pgoapi").setLevel(logging.DEBUG)
@@ -124,13 +130,16 @@ def main(position=None):
             position_str = config["location"]
             # Could do with a better way of deciding how to split address
             position_split = position_str.split(', ')
-            logger.info('Your given location: %s', position_str)
+            logger.info('[LOGIN]\t- Your given location: %s', position_str)
             position = (float(position_split[0]), float(position_split[1]), 0.0)
         else:
             position = get_pos_by_name(config["location"])
 
     # instantiate pgoapi
     api = PGoApi(config)
+
+    # set signature!
+    api.activate_signature(config['encrypt_lib'])
 
     # provide player position on the earth
     api.set_position(*position)

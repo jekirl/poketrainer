@@ -5,7 +5,7 @@ __pycache__/
 auth_*
 # C extensions
 *.so
-
+Unknown6-master
 # Distribution / packaging
 .Python
 env/
@@ -96,3 +96,4 @@ web_config.json
 data_dumps/*.json
 .idea
 .listeners
+encrypt.dll

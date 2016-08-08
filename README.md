@@ -1,3 +1,8 @@
+# Post-Unknown6 changes:
+
+The current version of the bot currently requires the encrypt library. Hop on the #poketrainer slack to find out more.
+
+
 # Please do not sell the bot, or use it to sell accounts/power leveling or what have you. If you really can't help yourself from trying to make money on it, please donate a portion of your profits to [Kiva](https://www.kiva.org/).
 ## To the people that have done so already (heard from quite a few already), thank you for making the world a better place.
 
@@ -11,12 +16,12 @@
 
 ----
 
-[![Build Status](https://travis-ci.org/j-e-k/poketrainer.svg?branch=develop)](https://travis-ci.org/infinitewarp/poketrainer)
+[![Build Status](https://travis-ci.org/j-e-k/poketrainer.svg?branch=master)](https://travis-ci.org/infinitewarp/poketrainer)
 
 
  #### Rename `config.json.example` to `config.json`
 ```
-usage: python pokecli.py [-h] [-i CONFIG_INDEX] [-l LOCATION] [-d]
+usage: pokecli.py [-h] [-i CONFIG_INDEX] [-l LOCATION] [-e ENCRYPT_LIB] [-d]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -24,6 +29,8 @@ optional arguments:
                         Index of account in config.json
   -l LOCATION, --location LOCATION
                         Location
+  -e ENCRYPT_LIB, --encrypt-lib ENCRYPT_LIB
+                        encrypt lib, libencrypt.so/encrypt.dll
   -d, --debug           Debug Mode
 ```
 
@@ -52,6 +59,7 @@ Below the accounts you can change options in the `default` section. If you need 
    * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
 * `CAPTURE`
    * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
+   * `CATCH_TRASH` Instructs the bot never to catch any pokemon in your 'THROW_POKEMON_NAMES' list : (default: true (it will catch trash))
    * `MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY` minimum number of failed capture attempts before trying to use a Razz Berry (default: 3)
    * `USE_POKEBALL_IF_PERCENT` As long as using a pokeball would result in at least this percent of a chance to capture, use it (default: 50)
    * `USE_GREATBALL_IF_PERCENT` If using a pokeball wouldn't result in at least the above percent, use a greatball if the capture rate is above this percent (default: 50)
@@ -111,14 +119,23 @@ Below the accounts you can change options in the `default` section. If you need 
 There are more options, check the current config.json.example, many are self-explanatory.
 
 
+### Find out Item ID's
+For Chosing what Items to keep, get the names here, [AeonLucidProtos_ItemID](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Inventory/Item/ItemId.proto)
+For Choosing what pokemon to keep get the names here,[AeonLucidProtos_Pokemon](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Enums/PokemonId.proto)
+
+Put them in config. Type exactly as the name appears
+
+
 ## Requirements
- * Run `pip install -r requirements.txt`
- * Python 2.7 or 3.5
- * requests
- * protobuf
- * gpsoauth
- * geopy (only for pokecli demo)
- * s2sphere (only for pokecli demo)
+ * For windows you will probably need to install [Microsoft Visual C++ Compiler for Python 2.7](https://www.microsoft.com/en-us/download/details.aspx?id=44266) first
+ * Install git via your package manager or [download it for windows](https://git-scm.com/download/win)
+ * Python 2.7 or 3.5 [windows downloads](https://www.python.org/downloads/)
+ * Run `pip install -r requirements.txt` in the bots folder from your console
+     * requests
+     * protobuf
+     * gpsoauth
+     * geopy (only for pokecli demo)
+     * s2sphere (only for pokecli demo)
 
 ### Python 2 vs 3
 
@@ -157,13 +174,6 @@ The container is now running in the foregorund, and can be stopped by using `Ctr
 You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.
 
 
-
-### Find out Item ID's
-For Chosing what Items to keep, get the names here, [AeonLucidProtos_ItemID](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Inventory/Item/ItemId.proto)
-For Choosing what pokemon to keep get the names here,[AeonLucidProtos_Pokemon](https://github.com/AeonLucid/POGOProtos/blob/master/src/POGOProtos/Enums/PokemonId.proto)
-
-Put them in config. Type exactly as the name appears
-
 ### What's working:
 What's working:
  * A lot of things. Check out the example config to see some of the features. Catching Lured pokemon, sniping, regular pokemon, multiple kinds of navigation (google maps, walking, driving, customized speed), a web ui, auto transfers, auto evolves, auto power ups, auto egg incubation, inventory managament, multiple account botting. And much more, README to be updated soon.
@@ -178,6 +188,7 @@ What's working:
 
 
 ## Credits
+* [keyphact/UK6 team] https://github.com/keyphact/pgoapi for the unknown6 fix
 * [tejado](https://github.com/tejado) for the base of this
 * [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR
 * [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos
