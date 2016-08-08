@@ -98,3 +98,4 @@ data_dumps/*.json
 .listeners
 web-ui/vendor
 web-ui/node_modules
+encrypt.dll
