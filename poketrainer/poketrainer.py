@@ -50,7 +50,9 @@ class Poketrainer:
         self._error_threshold = 10
         self.start_time = time()
         self.exp_start = None
-        self._heartbeat_number = 5
+        self._heartbeat_number = 1  # setting this back to one because we make parse a full heartbeat during login!
+        self._heartbeat_frequency = 3  # 1 = always
+        self._full_heartbeat_frequency = 15  # 10 = as before (every 10th heartbeat)
         self._farm_mode_triggered = False
 
         # objects, order is important!
@@ -208,18 +210,19 @@ class Poketrainer:
 
     def _callback(self, gt):
         try:
-            if gt.exception:
-                raise gt.exception
-            result = gt.value
-            logger.info('Thread finished with result: %s', result)
-        except Exception as e:
-            logger.exception('Error in main loop %s, restarting at location: %s',
-                             e, self.get_position())
-            # restart after sleep
-            self.sleep(5)
-            self.reload_config()
-            self.reload_api(self.get_position())
-            self.start()
+            if not gt.exception:
+                result = gt.value
+                logger.info('Thread finished with result: %s', result)
+        except KeyboardInterrupt:
+            return
+
+        logger.exception('Error in main loop %s, restarting at location: %s',
+                         gt.exception, self.get_position())
+        # restart after sleep
+        self.sleep(30)
+        self.reload_config()
+        self.reload_api(self.get_position())
+        self.start()
 
     def start(self):
         self.thread = gevent.spawn(self._main_loop)
@@ -254,6 +257,12 @@ class Poketrainer:
 
     def _heartbeat(self, res=None, login_response=False):
         if res is None:
+            # limit the amount of heartbeats, every second is just too much in my opinion!
+            if (not self._heartbeat_number % self._heartbeat_frequency == 0 and
+                    not self._heartbeat_number % self._full_heartbeat_frequency == 0):
+                self._heartbeat_number += 1
+                return
+
             # making a standard call to update position, etc
             req = self.api.create_request()
             req.get_player()

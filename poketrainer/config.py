@@ -24,6 +24,7 @@ class Config:
 
         self.step_size = config.get("BEHAVIOR", {}).get("STEP_SIZE", 200)
         self.wander_steps = config.get("BEHAVIOR", {}).get("WANDER_STEPS", 0)
+        self.extra_wait = config.get("BEHAVIOR", {}).get("EXTRA_WAIT", 0.3)
         self.sleep_mult = config.get("BEHAVIOR", {}).get("SLEEP_MULT", 1.5)
         self.use_lucky_egg = config.get("BEHAVIOR", {}).get("AUTO_USE_LUCKY_EGG", False)
         self.use_google = config.get("BEHAVIOR", {}).get("USE_GOOGLE", False)

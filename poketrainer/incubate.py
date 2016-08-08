@@ -46,12 +46,12 @@ class Incubate:
 
     def attempt_start_incubation(self, egg, incubator):
         self.log.info("Start incubating %skm egg", egg['egg_km_walked_target'])
+        self.parent.sleep(0.2 + self.parent.config.extra_wait)
         incubate_res = self.parent.api.use_item_egg_incubator(item_id=incubator['id'], pokemon_id=egg['id']) \
             .get('responses', {}).get('USE_ITEM_EGG_INCUBATOR', {})
         status = incubate_res.get('result', -1)
         if status == 1:
             self.log.info("Incubation started with %skm egg !", egg['egg_km_walked_target'])
-            self.parent.sleep(1.0)
             self.parent.inventory.update_player_inventory()
             return True
         else:
@@ -62,6 +62,7 @@ class Incubate:
 
     def attempt_finish_incubation(self):
         self.log.info("Checking for hatched eggs")
+        self.parent.sleep(0.2 + self.parent.config.extra_wait)
         hatch_res = self.parent.api.get_hatched_eggs().get('responses', {}).get('GET_HATCHED_EGGS', {})
         status = hatch_res.get('success', -1)
         # self.sleep(3)
@@ -74,7 +75,6 @@ class Incubate:
                               hatch_res['candy_awarded'][i],
                               hatch_res['stardust_awarded'][i],
                               pokemon)
-            self.parent.sleep(1.0)
             return True
         else:
             self.log.debug("Could not get hatched eggs %s", hatch_res)

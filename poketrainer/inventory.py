@@ -175,7 +175,7 @@ class Inventory:
                         .get('responses', {}).get('RECYCLE_INVENTORY_ITEM', {})
                     response_code = res.get('result', -1)
                     if response_code == 1:
-                        self._parent.sleep(1.0)
+                    self._parent.sleep(0.2 + self._parent.config.extra_wait)
                         self._log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
                             item['item_id']), res.get('new_count', 0)))
                     else:
@@ -209,7 +209,7 @@ class Inventory:
 
     def get_caught_pokemons_old(self, inventory_items=None, as_json=False):
         if not inventory_items:
-            self._parent.sleep(0.2)
+            self._parent.sleep(0.2 + self._parent.config.extra_wait)
             inventory_items = self._parent.api.get_inventory() \
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         caught_pokemon = defaultdict(list)

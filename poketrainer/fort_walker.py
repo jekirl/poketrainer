@@ -30,7 +30,6 @@ class FortWalker:
         self.base_travel_link = ''
         self._error_counter = 0
         self._error_threshold = 10
-        self.new_forts = []
         self.all_cached_forts = []
         self.spinnable_cached_forts = []
         self.cache_is_sorted = self.parent.config.cache_is_sorted
@@ -56,7 +55,7 @@ class FortWalker:
                         self.log.info('===============================================')
                     # get new route
                     if not self._get_route(self.parent.config.experimental, self.parent.config.spin_all_forts,
-                                           self.parent.config.use_google):
+                                           self.parent.config.use_google, self.parent.config.enable_caching):
                         return
                     # if the route is not only forts, it contains a lot of points
                     # thus we show the total trip size here (after route is calculated) and not for every route-point
@@ -100,24 +99,39 @@ class FortWalker:
         self._walk(self.next_step)
         self.next_step = None
 
-    """ replaces old spin_all_forts_visible and spin_near_fort, but returns only the forts to spin """
+    """ replaces old spin_all_forts_visible, spin_near_fort and spin_all_cached_forts
+        but returns only the forts to spin """
 
-    def _get_route(self, experimental, spin_all_forts, use_google):
-        res = self.parent.map_objects.nearby_map_objects()
-        self.log.debug("nearby_map_objects: %s", res)
-        map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
-        forts = flatmap(lambda c: c.get('forts', []), map_cells)
-        # filter forts and sort by distance
-        destinations = filtered_forts(self.parent.get_orig_position(), self.parent.get_position(), forts,
-                                      self.parent.config.stay_within_proximity,
-                                      self.visited_forts)
+    def _get_route(self, experimental, spin_all_forts, use_google, enable_caching):
+        destinations = []
+        if self.use_cache and experimental and enable_caching:
+            destinations = self._sort_cached_forts()
+
+            if not destinations:
+                self.log.info('Turning on caching mode')
+                self._walk_back_to_origin()
+                self.use_cache = False
+                self.cache_is_sorted = False
+
         if not destinations:
-            self.log.debug("No fort to walk to! %s", res)
-            self.log.info('No more spinnable forts within proximity. Or server error')
-            self._error_counter += 1
-            self._walk_back_to_origin()
-            return False
-        self.new_forts = destinations
+            res = self.parent.map_objects.nearby_map_objects()
+            self.log.debug("nearby_map_objects: %s", res)
+            map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
+            forts = flatmap(lambda c: c.get('forts', []), map_cells)
+            # filter forts and sort by distance
+            destinations = filtered_forts(self.parent.get_orig_position(), self.parent.get_position(), forts,
+                                          self.parent.config.stay_within_proximity,
+                                          self.visited_forts)
+            if not destinations:
+                self.log.debug("No fort to walk to! %s", res)
+                self.log.info('No more spinnable forts within proximity. Or server error')
+                self._error_counter += 1
+                self._walk_back_to_origin()
+                return False
+            self._error_counter = 0
+
+            if enable_caching and experimental and not self.use_cache:
+                self._cache_forts(forts=destinations)
 
         posf = self.parent.get_position()
         self.base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (posf[0], posf[1])
@@ -175,7 +189,6 @@ class FortWalker:
                                       self.parent.config.stay_within_proximity,
                                       self.visited_forts)
         if destinations:
-            self.new_forts = destinations
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
             self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
@@ -189,12 +202,15 @@ class FortWalker:
                 if 'lure_info' in nearest_fort and self.parent.should_catch_pokemon:
                     self.parent.poke_catcher.disk_encounter_pokemon(nearest_fort['lure_info'])
 
+            self._error_counter = 0
+
         else:
             self.log.info('No spinnable forts within proximity. Or server returned no map objects.')
             self._error_counter += 1
             self._walk_back_to_origin()
 
     def do_fort_spin(self, fort, player_postion, fort_distance):
+        self.parent.sleep(0.2 + self.parent.config.extra_wait)
         res = self.parent.api.fort_search(fort_id=fort['id'], fort_latitude=fort['latitude'],
                                           fort_longitude=fort['longitude'],
                                           player_latitude=player_postion[0],
@@ -205,7 +221,6 @@ class FortWalker:
             result = res.pop('result', -1)
         if result == 1:
             self.log.info("Visiting fort... (http://maps.google.com/maps?q=%s,%s)", fort['latitude'], fort['longitude'])
-            self.parent.sleep(1.0)
             if "items_awarded" in res:
                 items = defaultdict(int)
                 for item in res['items_awarded']:
@@ -255,7 +270,7 @@ class FortWalker:
             with open(self.parent.config.cache_filename, 'wb') as handle:
                 pickle.dump(self.all_cached_forts, handle)
 
-    def cache_forts(self, forts):
+    def _cache_forts(self, forts):
         if not self.all_cached_forts:
             with open(self.parent.config.cache_filename, 'wb') as handle:
                 pickle.dump(forts, handle)
@@ -276,7 +291,7 @@ class FortWalker:
 
         self.log.info("Cached forts %s: ", len(self.all_cached_forts))
 
-    def sort_cached_forts(self):
+    def _sort_cached_forts(self):
         if len(self.all_cached_forts) > 0:
             if not self.cache_is_sorted:
                 self.log.info("Cache is unsorted, sorting now...")
@@ -306,8 +321,8 @@ class FortWalker:
                     else:
                         for fort in temp_all_cached:
                             if ((distance_in_meters((temp_last_element[0]['latitude'], temp_last_element[0]['longitude']),
-                                                    (fort[0]['latitude'], fort[0]['longitude'])) <= temp_max_float) and (
-                            not any(fort[0]['id'] == x[0]['id'] for x in temp_sorted))):
+                                                    (fort[0]['latitude'], fort[0]['longitude'])) <= temp_max_float) and
+                                    (not any(fort[0]['id'] == x[0]['id'] for x in temp_sorted))):
                                 temp_element = copy.deepcopy(fort)
                                 temp_max_float = distance_in_meters(
                                     (temp_last_element[0]['latitude'], temp_last_element[0]['longitude']),
@@ -327,24 +342,3 @@ class FortWalker:
         else:
             self.log.info("Cache is empty! Switching mode to cache forts")
             return False
-
-    def spin_all_cached_forts(self):
-        destinations = self.sort_cached_forts()
-
-        if not destinations:
-            self.log.info('Turning on caching mode')
-            self._walk_back_to_origin()
-            self.use_cache = False
-            self.cache_is_sorted = False
-            return False
-
-        for fort_data in destinations:
-            fort = fort_data[0]
-            self.log.info(
-                "Walking to fort at  http://maps.google.com/maps?q=%s,%s",
-                fort['latitude'], fort['longitude'])
-            self.walk_to((fort['latitude'], fort['longitude']), directly=False)
-            self.fort_search_pgoapi(fort, self.get_position(), distance_in_meters((fort['latitude'], fort['longitude']),
-                                                                                  (self._posf[0], self._posf[1])))
-
-        return True

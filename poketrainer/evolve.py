@@ -28,7 +28,7 @@ class Evolve:
     def attempt_evolve_pokemon(self, pokemon):
         if self.is_pokemon_eligible_for_evolution(pokemon=pokemon):
             self.log.info("Evolving pokemon: %s", pokemon)
-            self.parent.sleep(0.2)
+            self.parent.sleep(0.2 + self.parent.config.extra_wait)
             evo_res = self.parent.api.evolve_pokemon(pokemon_id=pokemon.id).get('responses', {}).get('EVOLVE_POKEMON', {})
             status = evo_res.get('result', -1)
             # self.sleep(3)
@@ -68,5 +68,5 @@ class Evolve:
             self.log.info(
                 "%s can evolve? %s! Need candy: %s. Have candy: %s. Favorite? %s. In keep list? %s. In evolution list? %s.",
                 pokemon.pokemon_type, eligible_to_evolve, candy_needed, candy_have, in_keep_list, is_favorite, in_evolution_list
-)
+            )
         return eligible_to_evolve

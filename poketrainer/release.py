@@ -22,8 +22,8 @@ class Release:
 
     def do_release_pokemon(self, pokemon):
         self.log.info("Releasing pokemon: %s", pokemon)
+        self.parent.sleep(1.0 + self.parent.config.extra_wait)
         if self.do_release_pokemon_by_id(pokemon.id):
-            self.parent.sleep(1.0)
             self.log.info("Successfully Released Pokemon %s", pokemon)
         else:
             self.log.info("Failed to release Pokemon %s", pokemon)

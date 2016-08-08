@@ -71,7 +71,7 @@ class PokeCatcher:
             if catch_attempts > self.parent.config.min_failed_attempts_before_using_berry \
                     and self.parent.inventory.has_berry():
                 self.log.info("Feeding da razz berry!")
-                self.parent.sleep(1.0)
+                self.parent.sleep(0.2 + self.parent.config.extra_wait)
                 r = self.parent.api.use_item_capture(item_id=self.parent.inventory.take_berry(),
                                                      encounter_id=encounter_id,
                                                      spawn_point_id=spawn_point_id) \
@@ -84,7 +84,7 @@ class PokeCatcher:
             pokeball = self.parent.inventory.take_next_ball(capture_probability)
             self.log.info("Attempting catch with {0} at {1:.2f}% chance. Try Number: {2}".format(get_item_name(
                 pokeball), item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
-            self.parent.sleep(1.0)
+            self.parent.sleep(0.5 + self.parent.config.extra_wait)
             r = self.parent.api.catch_pokemon(
                 normalized_reticle_size=1.950,
                 pokeball=pokeball,
@@ -148,12 +148,12 @@ class PokeCatcher:
             position = self.parent.api.get_position()
             pokemon = Pokemon(pokemon_data)
             self.log.info("Trying initiate catching Pokemon: %s", pokemon)
+            self.parent.sleep(0.2 + self.parent.config.extra_wait)
             encounter = self.parent.api.encounter(encounter_id=encounter_id,
                                                   spawn_point_id=spawn_point_id,
                                                   player_latitude=position[0],
                                                   player_longitude=position[1]) \
                 .get('responses', {}).get('ENCOUNTER', {})
-            self.parent.sleep(1.0)
             self.log.debug("Attempting to Start Encounter: %s", encounter)
             result = encounter.get('status', -1)
             if result == 1 and 'wild_pokemon' in encounter and 'capture_probability' in encounter:
