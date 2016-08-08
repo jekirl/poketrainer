@@ -96,3 +96,4 @@ web_config.json
 data_dumps/*.json
 .idea
 .listeners
+encrypt.dll
