@@ -57,6 +57,9 @@ Below the accounts you can change options in the `default` section. If you need 
    * `SKIP_VISITED_FORT_DURATION` [Experimental] Avoid a fort for a given number of seconds
      * Setting this to 500 means avoid a fort for 500 seconds before returning, (Should be higher than 300 to have any effect). This will let the bot explore a bigger area.
    * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
+   * `ENABLE_CACHING` is the master switch, no caching methods will run if this is set to false
+   * `USE_CACHED_FORTS` should be set to false on your first run, it will run as normal and cache forts you'd normally visit. Set this to true after you've cached enough forts or "Cached Forts: x" output is stable, around 10 for a 1500 proximity, 100 step configuration, wait longer if needed.
+   * `CACHED_FORTS_SORTED` set to true if the cache is sorted/pathing is calculated. Leave it false if you're unsure.
 * `CAPTURE`
    * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
    * `MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY` minimum number of failed capture attempts before trying to use a Razz Berry (default: 3)

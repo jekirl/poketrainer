@@ -22,7 +22,10 @@
         "STAY_WITHIN_PROXIMITY": 9999,
         "AUTO_USE_LUCKY_EGG": false,
         "EXTRA_WAIT" : 0.3,
-        "SLEEP_MULT" : 1.5
+        "SLEEP_MULT" : 1.5,
+        "ENABLE_CACHING" :false,
+        "USE_CACHED_FORTS" : false,
+        "CACHED_FORTS_SORTED" : false
       },
       "CAPTURE": {
         "CATCH_POKEMON": true,
@@ -133,6 +136,7 @@
         "FARM_OVERRIDE_STEP_SIZE": -1
       },
       "CONSOLE_OUTPUT": {
+        "EXPLAIN_EVOLUTION_BEFORE_CLEANUP": true,
         "LIST_POKEMON_BEFORE_CLEANUP": true,
         "LIST_INVENTORY_BEFORE_CLEANUP": true
       }
