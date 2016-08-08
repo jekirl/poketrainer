@@ -27,10 +27,11 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 
 import collections
 import struct
-import six
-from itertools import chain
 from bisect import bisect_left
-from six import PY2, iteritems
+from itertools import chain
+
+import six
+from six import iteritems
 
 if six.PY3:
     from builtins import map as imap

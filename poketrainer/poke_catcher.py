@@ -1,12 +1,15 @@
-import logging
+from __future__ import absolute_import
+
 import json
+import logging
 
 from cachetools import TTLCache
 
 from helper.utilities import flatmap
-from .pokemon import POKEMON_NAMES, Pokemon
+
 from .location import distance_in_meters
 from .poke_utils import create_capture_probability, get_item_name
+from .pokemon import POKEMON_NAMES, Pokemon
 
 
 class PokeCatcher:
@@ -146,9 +149,9 @@ class PokeCatcher:
             pokemon = Pokemon(pokemon_data)
             self.log.info("Trying initiate catching Pokemon: %s", pokemon)
             encounter = self.parent.api.encounter(encounter_id=encounter_id,
-                                           spawn_point_id=spawn_point_id,
-                                           player_latitude=position[0],
-                                           player_longitude=position[1]) \
+                                                  spawn_point_id=spawn_point_id,
+                                                  player_latitude=position[0],
+                                                  player_longitude=position[1]) \
                 .get('responses', {}).get('ENCOUNTER', {})
             self.parent.sleep(1.0)
             self.log.debug("Attempting to Start Encounter: %s", encounter)

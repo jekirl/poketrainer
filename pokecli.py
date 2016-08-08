@@ -29,13 +29,7 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
 import argparse
-import collections
-import json
 import logging
-import os
-import os.path
-import socket
-from time import sleep
 
 import gevent
 

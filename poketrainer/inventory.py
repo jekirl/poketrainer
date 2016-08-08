@@ -1,13 +1,15 @@
 from __future__ import absolute_import
 
-import logging
 import json
+import logging
 from collections import defaultdict
 from time import time
 
-from .pokemon import Pokemon
+from library.api.pgoapi.protos.POGOProtos.Inventory import \
+    Item_pb2 as Item_Enums
+
 from .poke_utils import get_item_name
-from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Item_Enums
+from .pokemon import Pokemon
 
 
 class Inventory:
@@ -161,9 +163,11 @@ class Inventory:
         for inventory_item in self.inventory_items:
             if "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
-                if (item['item_id'] in self._parent.config.min_items and
-                            "count" in item and
-                            item['count'] > self._parent.config.min_items[item['item_id']]):
+                if (
+                        item['item_id'] in self._parent.config.min_items and
+                        "count" in item and
+                        item['count'] > self._parent.config.min_items[item['item_id']]
+                ):
                     recycle_count = item['count'] - self._parent.config.min_items[item['item_id']]
                     item_count += item['count'] - recycle_count
                     self._log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
@@ -176,7 +180,7 @@ class Inventory:
                             item['item_id']), res.get('new_count', 0)))
                     else:
                         self._log.info("Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']),
-                                                                                response_code))
+                                                                                 response_code))
                 elif "count" in item:
                     item_count += item['count']
         if item_count > 0:
@@ -189,7 +193,7 @@ class Inventory:
                                                     self._parent.config.score_settings),
                               filter(lambda x: 'pokemon_data' in x and not x['pokemon_data'].get("is_egg", False),
                               map(lambda x: x.get('inventory_item_data', {}), self.inventory_items))),
-                          key=lambda x: x.score, reverse=True)
+                              key=lambda x: x.score, reverse=True)
         pokemon_list = filter(lambda x: not x.is_egg, pokemon_list)
         if as_json:
             return json.dumps(pokemon_list, default=lambda p: p.__dict__)  # reduce the data sent?
@@ -210,8 +214,8 @@ class Inventory:
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         caught_pokemon = defaultdict(list)
         for inventory_item in inventory_items:
-            if "pokemon_data" in inventory_item['inventory_item_data'] and not inventory_item['inventory_item_data'][
-                'pokemon_data'].get("is_egg", False):
+            if "pokemon_data" in inventory_item['inventory_item_data']\
+                    and not inventory_item['inventory_item_data']['pokemon_data'].get("is_egg", False):
                 # is a pokemon:
                 pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
                 pokemon = Pokemon(pokemon_data, self._parent.player_stats.level, self._parent.config.score_method,

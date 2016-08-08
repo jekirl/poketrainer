@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
 import logging
-from cachetools import TTLCache
 
-from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Item_Enums
 from library.api.pgoapi.protos.POGOProtos import Enums_pb2 as Enums
+from library.api.pgoapi.protos.POGOProtos.Inventory import \
+    Item_pb2 as Item_Enums
 
 
 class Config:
@@ -102,8 +102,7 @@ class Config:
                 self.farm_ignore_masterball_count):
             self.farm_items_enabled = False
             self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
-        elif self.farm_items_enabled and not (
-                    self.pokeball_farm_threshold < self.pokeball_continue_threshold):
+        elif self.farm_items_enabled and not self.pokeball_farm_threshold < self.pokeball_continue_threshold:
             self.farm_items_enabled = False
             self.log.warn("FARM_ITEMS has been disabled due to farming threshold being below the continue. " +
                           "Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")

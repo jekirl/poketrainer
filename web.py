@@ -5,9 +5,9 @@ import argparse
 import csv
 import json
 import os
+import zerorpc
 from collections import defaultdict
 
-import zerorpc
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
 
 from poketrainer.poke_lvl_data import TCPM_VALS
@@ -144,7 +144,6 @@ def get_api_rpc(username):
 
     c = zerorpc.Client()
     c.connect("tcp://127.0.0.1:%i" % sock_port)
-    #c = eventlet.connect(('127.0.0.1', sock_port))
     return c
 
 

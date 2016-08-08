@@ -1,6 +1,9 @@
+from __future__ import absolute_import
+
 import csv
 import re
-from os import path, sep as os_sep
+from os import sep as os_sep
+from os import path
 
 from six import iteritems
 

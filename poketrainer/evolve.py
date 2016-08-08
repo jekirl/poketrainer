@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import logging
 
 from .pokemon import Pokemon
@@ -46,7 +48,5 @@ class Evolve:
         candy_have = self.parent.inventory.pokemon_candy.get(
             self.parent.config.pokemon_evolution_family.get(pokemon.pokemon_id, None), -1)
         candy_needed = self.parent.config.pokemon_evolution.get(pokemon.pokemon_id, None)
-        return candy_have > candy_needed and \
-               pokemon.pokemon_id not in self.parent.config.keep_pokemon_ids \
-               and not pokemon.is_favorite \
-               and pokemon.pokemon_id in self.parent.config.pokemon_evolution
+        return candy_have > candy_needed and pokemon.pokemon_id not in self.parent.config.keep_pokemon_ids and not \
+            pokemon.is_favorite and pokemon.pokemon_id in self.parent.config.pokemon_evolution

@@ -1,9 +1,12 @@
+from __future__ import absolute_import
+
 import logging
 
 from helper.utilities import flatmap
-from .pokemon import POKEMON_NAMES
+
 from .location import distance_in_meters
 from .pokedex import pokedex
+from .pokemon import POKEMON_NAMES
 
 
 class Sniper:

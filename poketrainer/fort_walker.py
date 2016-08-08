@@ -1,13 +1,15 @@
+from __future__ import absolute_import
+
 import logging
 from collections import defaultdict
-from cachetools import TTLCache
 
 import six
+from cachetools import TTLCache
 
 from helper.exceptions import TooManyEmptyResponses
 from helper.utilities import flatmap
-from .location import (distance_in_meters, filtered_forts,
-                       get_increments, get_route)
+
+from .location import distance_in_meters, filtered_forts, get_route
 from .poke_utils import get_item_name
 
 

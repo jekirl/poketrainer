@@ -2,11 +2,12 @@ from __future__ import absolute_import
 
 import json
 from math import floor, sqrt
-from os import path, sep as os_sep
+from os import sep as os_sep
+from os import path
 
+from helper.utilities import all_in
 from poketrainer.game_master import GAME_MASTER, PokemonData
 from poketrainer.poke_lvl_data import POKEMON_LVL_DATA, TCPM_VALS, get_tcpm
-from helper.utilities import all_in
 
 POKEMON_NAMES = {}
 

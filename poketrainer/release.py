@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import logging
 
 from .release_methods.base import ReleaseMethodFactory

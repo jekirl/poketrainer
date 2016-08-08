@@ -5,46 +5,29 @@ import logging
 import os
 import os.path
 import socket
-from collections import defaultdict
-from itertools import chain
+import zerorpc
 from time import time
 
-import six
-from six import PY2, iteritems
 import gevent
-import zerorpc
-from cachetools import TTLCache
 from gevent.coros import BoundedSemaphore
+from six import PY2
 
+from helper.utilities import dict_merge
 from library import api
-from pgoapi.pgoapi import PGoApi
-# from library.api.pgoapi import protos
-from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Item_Enums
+from pgoapi.exceptions import AuthException
 
-from .inventory import Inventory
-from .player_stats import PlayerStats
-from .poke_utils import (create_capture_probability, get_item_name, get_pokemon_by_long_id)
-from .pokedex import pokedex
-
-from helper.exceptions import (AuthException, TooManyEmptyResponses)
-from helper.utilities import dict_merge, flatmap
-from .location import (distance_in_meters, filtered_forts,
-                       get_increments, get_location, get_neighbors, get_route)
-from .player import Player as Player
-from .pokemon import POKEMON_NAMES, Pokemon
 from .config import Config
-from .fort_walker import FortWalker
-from .poke_catcher import PokeCatcher
-from .map_objects import MapObjects
-from .incubate import Incubate
 from .evolve import Evolve
-from .sniper import Sniper
+from .fort_walker import FortWalker
+from .incubate import Incubate
+from .inventory import Inventory
+from .location import get_location
+from .map_objects import MapObjects
+from .player import Player as Player
+from .player_stats import PlayerStats
+from .poke_catcher import PokeCatcher
 from .release import Release
-
-if six.PY3:
-    from builtins import map as imap
-elif six.PY2:
-    from itertools import imap
+from .sniper import Sniper
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +83,7 @@ class Poketrainer:
         self.locker = None
 
     def sleep(self, t):
-        #eventlet.sleep(t * self.config.sleep_mult)
+        # eventlet.sleep(t * self.config.sleep_mult)
         gevent.sleep(t * self.config.sleep_mult)
 
     def _open_socket(self):
@@ -127,9 +110,9 @@ class Poketrainer:
         self.socket = gevent.spawn(s.run)
 
         # zerorpc requires gevent, thus we would need a solution for eventlets
-        #self.socket = self.thread_pool.spawn(wsgi.server, eventlet.listen(('127.0.0.1', sock_port)), self)
-        #self.socket = self.thread_pool.spawn(eventlet.serve, eventlet.listen(('127.0.0.1', sock_port)), self)
-        #alternative: GreenRPCService
+        # self.socket = self.thread_pool.spawn(wsgi.server, eventlet.listen(('127.0.0.1', sock_port)), self)
+        # self.socket = self.thread_pool.spawn(eventlet.serve, eventlet.listen(('127.0.0.1', sock_port)), self)
+        # alternative: GreenRPCService
 
     def _load_config(self):
         if self.config is None:
@@ -164,7 +147,7 @@ class Poketrainer:
 
     def _load_api(self, prev_location=None):
         if self.api is None:
-            self.api = PGoApi()
+            self.api = api.pgoapi.PGoApi()
             # set signature!
             self.api.activate_signature(
                 os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), self.cli_args['encrypt_lib'])
@@ -225,7 +208,6 @@ class Poketrainer:
 
     def _callback(self, gt):
         try:
-            #result = gt.wait()
             if gt.exception:
                 raise gt.exception
             result = gt.value
@@ -355,6 +337,7 @@ class Poketrainer:
             if settings.get('minimum_client_version', '0.0.0') > '0.31.0':
                 self.log.error("Minimum client version has changed... the bot needs to be updated! Will now stop!")
                 exit(0)
+            '''
             fort_settings = settings.get('fort_settings', {})
             inventory_settings = settings.get('inventory_settings', {})
             map_settings = settings.get('map_settings', {})
@@ -370,6 +353,7 @@ class Poketrainer:
             self.log.info('get_map_objects_max_refresh_seconds: %s', str(get_map_objects_max_refresh_seconds))
             self.log.info('get_map_objects_min_distance_meters: %s', str(get_map_objects_min_distance_meters))
             self.log.info('encounter_range_meters: %s', str(encounter_range_meters))
+            '''
 
         self._heartbeat_number += 1
         return res
