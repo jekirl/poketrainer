@@ -11,6 +11,7 @@
         "STEP_SIZE": 100,
         "WANDER_STEPS": 0,
         "EXPERIMENTAL": false,
+        "MAP_OBJECTS_RATE_LIMIT": 7.0,
         "MULTI_LOCATIONS": true,
         "MULTI_LOCATIONS_COORDS": [
             "2415 Trinity St, Los Angeles, CA",

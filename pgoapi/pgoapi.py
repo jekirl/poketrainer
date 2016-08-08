@@ -111,7 +111,7 @@ class PGoApi:
         self.inventory = Player_Inventory(self.percentages, [])
 
         self._last_got_map_objects = 0
-        self._map_objects_rate_limit = 5.0
+        self._map_objects_rate_limit = config.get("BEHAVIOR", {}).get("MAP_OBJECTS_RATE_LIMIT", 5.0)
         self.map_objects = {}
         self.encountered_pokemons = TTLCache(maxsize=120, ttl=self._map_objects_rate_limit * 2)
 
