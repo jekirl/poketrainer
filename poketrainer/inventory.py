@@ -171,11 +171,11 @@ class Inventory:
                     recycle_count = item['count'] - self._parent.config.min_items[item['item_id']]
                     item_count += item['count'] - recycle_count
                     self._log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
+                    self._parent.sleep(0.2 + self._parent.config.extra_wait)
                     res = self._parent.api.recycle_inventory_item(item_id=item['item_id'], count=recycle_count) \
                         .get('responses', {}).get('RECYCLE_INVENTORY_ITEM', {})
                     response_code = res.get('result', -1)
                     if response_code == 1:
-                    self._parent.sleep(0.2 + self._parent.config.extra_wait)
                         self._log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
                             item['item_id']), res.get('new_count', 0)))
                     else:
