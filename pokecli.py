@@ -43,7 +43,7 @@ from geopy.geocoders import GoogleV3
 from six import PY2, iteritems
 
 from listener import Listener
-from pgoapi import PGoApi
+from poketrainer.pgoapi import PGoApi
 
 logger = logging.getLogger(__name__)
 
