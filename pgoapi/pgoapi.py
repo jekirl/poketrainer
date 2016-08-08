@@ -29,8 +29,13 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 
 from __future__ import absolute_import
 
+import copy
+import hashlib
 import json
 import logging
+import os
+import pickle
+import sys
 from collections import defaultdict
 from itertools import chain
 from time import time
@@ -172,6 +177,7 @@ class PGoApi:
                                                                                      True)  # ignore masterballs in the continue tally
         self.FARM_OVERRIDE_STEP_SIZE = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_OVERRIDE_STEP_SIZE",
                                                                                 -1)  # should the step size be overriden when looking for more inventory, -1 to disable
+        self.EXPLAIN_EVOLUTION_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("EXPLAIN_EVOLUTION_BEFORE_CLEANUP", False)  # explain individual evolution criteria in console
         self.LIST_POKEMON_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
         self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
 
@@ -196,6 +202,14 @@ class PGoApi:
             self.FARM_ITEMS_ENABLED = False
             self.log.warn(
                 "FARM_ITEMS has been disabled due to farming threshold being below the continue. Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")
+
+        self.new_forts = []
+        self.cache_filename = './cache/cache ' + (hashlib.md5(config.get("location", "unavailable").encode())).hexdigest() + str(self.STAY_WITHIN_PROXIMITY)
+        self.all_cached_forts = []
+        self.spinnable_cached_forts = []
+        self.use_cache = self.config.get("BEHAVIOR", {}).get("USE_CACHED_FORTS", False)
+        self.cache_is_sorted = self.config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
+        self.enable_caching = self.config.get("BEHAVIOR", {}).get("ENABLE_CACHING", True)
 
     '''
     Blocking lock
@@ -454,13 +468,14 @@ class PGoApi:
         res = self.call()
         if not res or res.get("direction", -1) == 102:
             self.log.error("There were a problem responses for api call: %s. Restarting!!!", res)
+            self._auth_provider.get_access_token(force_refresh=True)
             raise AuthException("Token probably expired?")
         self.log.debug('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2, default=lambda obj: obj.decode('utf8'))))
 
         responses = res.get('responses', {})
         if 'GET_PLAYER' in responses:
             self.player = Player(responses.get('GET_PLAYER', {}).get('player_data', {}))
-            self.log.info("Player Info: {0}, Pokemon Caught in this run: {1}".format(self.player, self.pokemon_caught))
+            self.log.debug("Player Info: {0}, Pokemon Caught in this run: {1}".format(self.player, self.pokemon_caught))
 
         if 'GET_INVENTORY' in res.get('responses', {}):
             with open("data_dumps/%s.json" % self.config['username'], "w") as f:
@@ -474,7 +489,7 @@ class PGoApi:
             for inventory_item in self.inventory.inventory_items:
                 if "player_stats" in inventory_item['inventory_item_data']:
                     self.player_stats = PlayerStats(inventory_item['inventory_item_data']['player_stats'])
-                    self.log.info("Player Stats: {}".format(self.player_stats))
+                    self.log.info("Player Stats: {}".format(self.player_stats) + ' Pokemon Caught ' + str(self.pokemon_caught))
                     self.hourly_exp(self.player_stats.experience)
             if self.LIST_INVENTORY_BEFORE_CLEANUP:
                 self.log.info("Player Items Before Cleanup: %s", self.inventory)
@@ -566,7 +581,7 @@ class PGoApi:
                 distance_to_point = distance_in_meters(self._posf, next_point)
                 total_distance_traveled += distance_to_point
                 travel_link = '%s%s,%s' % (base_travel_link, next_point[0], next_point[1])
-                self.log.info("Travel Link: %s", travel_link)
+                self.log.info("Walking...")
                 self.set_position(*next_point)
                 self.heartbeat()
 
@@ -591,6 +606,7 @@ class PGoApi:
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
         if destinations:
+            self.new_forts = destinations
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
             self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
@@ -663,6 +679,7 @@ class PGoApi:
             self._error_counter += 1
             self.walk_back_to_origin()
             return False
+        self.new_forts = destinations
         if len(destinations) >= 20:
             destinations = destinations[:20]
         furthest_fort = destinations[0][0]
@@ -696,7 +713,7 @@ class PGoApi:
             self.log.info('No more spinnable forts within proximity. Returning back to origin')
             self.walk_back_to_origin()
             return False
-
+        self.new_forts = destinations
         for fort_data in destinations:
             self.walk_to_fort(fort_data)
 
@@ -720,7 +737,7 @@ class PGoApi:
             self.log.info("Nearby Pokemon: %s",
                           ", ".join(map(lambda x: POKEMON_NAMES[str(x['pokemon_id'])], pokemons)))
         else:
-            self.log.info("No nearby pokemon")
+            self.log.debug("No nearby pokemon")
         catches_successful = False
         for pokemon_distance in pokemon_distances:
             target = pokemon_distance
@@ -878,7 +895,7 @@ class PGoApi:
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         caught_pokemon = self.get_caught_pokemons(inventory_items)
         release_method = self.releaseMethodFactory.getReleaseMethod()
-        for pokemonId, pokemons in caught_pokemon.iteritems():
+        for pokemonId, pokemons in six.iteritems(caught_pokemon):
             pokemonsToRelease, pokemonsToKeep = release_method.getPokemonToRelease(pokemonId, pokemons)
 
             if self.config.get('POKEMON_CLEANUP', {}).get('TESTING_MODE', False):
@@ -904,6 +921,11 @@ class PGoApi:
                     # If we can't evolve this type of pokemon anymore, don't check others.
                     if not self.attempt_evolve_pokemon(pokemon):
                         break
+            elif self.EXPLAIN_EVOLUTION_BEFORE_CLEANUP:
+                self.log.info(
+                    'Not evolving %s because you have %s but need more than %s.',
+                    pokemons[0].pokemon_type, len(pokemons), self.MIN_SIMILAR_POKEMON
+                )
 
     def attempt_evolve_pokemon(self, pokemon):
         if self.is_pokemon_eligible_for_evolution(pokemon=pokemon):
@@ -929,12 +951,27 @@ class PGoApi:
             return False
 
     def is_pokemon_eligible_for_evolution(self, pokemon):
-        candy_have = self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None), -1)
+        candy_have = self.inventory.pokemon_candy.get(int(pokemon.family_id), -1)
         candy_needed = self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None)
-        return candy_have > candy_needed and \
-            pokemon.pokemon_id not in self.keep_pokemon_ids \
-            and not pokemon.is_favorite \
-            and pokemon.pokemon_id in self.POKEMON_EVOLUTION
+        in_keep_list = pokemon.pokemon_id in self.keep_pokemon_ids
+        is_favorite = pokemon.is_favorite
+        in_evolution_list = pokemon.pokemon_id in self.POKEMON_EVOLUTION
+
+        eligible_to_evolve = bool(
+            candy_needed and
+            candy_have > candy_needed and
+            not in_keep_list and
+            not is_favorite and
+            in_evolution_list
+        )
+
+        if self.EXPLAIN_EVOLUTION_BEFORE_CLEANUP:
+            self.log.info(
+                "%s can evolve? %s! Need candy: %s. Have candy: %s. Favorite? %s. In keep list? %s. In evolution list? %s.",
+                pokemon.pokemon_type, eligible_to_evolve, candy_needed, candy_have, in_keep_list, is_favorite, in_evolution_list
+            )
+
+        return eligible_to_evolve
 
     def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:
@@ -976,7 +1013,7 @@ class PGoApi:
             return False
 
     def do_catch_pokemon(self, encounter_id, spawn_point_id, capture_probability, pokemon):
-        self.log.info("Catching Pokemon: %s", pokemon)
+        self.log.debug("Catching Pokemon: %s", pokemon)
         catch_attempt = self.attempt_catch(encounter_id, spawn_point_id, capture_probability)
         capture_status = catch_attempt.get('status', -1)
         if capture_status == 1:
@@ -998,7 +1035,6 @@ class PGoApi:
             return False
         else:
             self.log.debug("Could not catch pokemon: %s", catch_attempt)
-            self.log.info("Could not catch pokemon:  %s", pokemon)
             self.log.info("Could not catch pokemon:  %s, status: %s", pokemon, capture_status)
             return False
 
@@ -1014,7 +1050,7 @@ class PGoApi:
             # begin encounter_id
             position = self.get_position()
             pokemon = Pokemon(pokemon_data)
-            self.log.info("Trying initiate catching Pokemon: %s", pokemon)
+            self.log.debug("Trying initiate catching Pokemon: %s", pokemon)
             self.gsleep(0.2)
             encounter = self.encounter(encounter_id=encounter_id,
                                        spawn_point_id=spawn_point_id,
@@ -1122,6 +1158,112 @@ class PGoApi:
             self.update_player_inventory()
             return False
 
+    def cache_forts(self, forts):
+        if not self.all_cached_forts:
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(forts, handle)
+
+            with open(self.cache_filename, 'rb') as handle:
+                self.all_cached_forts = pickle.load(handle)
+
+            self.log.info("Cache was empty... Dumping in new forts and initializing all_cached_forts")
+
+        else:
+            for fort in forts:
+                if not any(fort[0]['id'] == x[0]['id'] for x in self.all_cached_forts):
+                    self.all_cached_forts.insert(0, fort)
+                    self.log.info("Added new fort to cache")
+
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(self.all_cached_forts, handle)
+
+        self.log.info("Cached forts %s: ", len(self.all_cached_forts))
+
+    def setup_cache(self):
+        try:
+            self.log.debug("Opening cache file...")
+            with open(self.cache_filename, 'rb') as handle:
+                self.all_cached_forts = pickle.load(handle)
+
+        except Exception as e:
+            self.log.info("Could not find or open cache, making new cache... %s", e)
+            if not os.path.exists('./cache'):
+                os.makedirs('./cache')
+            try:
+                os.remove(self.cache_filename)
+            except OSError:
+                pass
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(self.all_cached_forts, handle)
+
+    def sort_cached_forts(self):
+        if len(self.all_cached_forts) > 0:
+            if not self.cache_is_sorted:
+                self.log.info("Cache is unsorted, sorting now...")
+                tempallcached = copy.deepcopy(self.all_cached_forts) # copy over original
+                tempsorted = [copy.deepcopy(tempallcached[0])] # the final list to copy to cache
+                tempelement = copy.deepcopy(tempallcached[0]) # cur element
+                tempbool = True
+
+                while (len(tempsorted) < len(self.all_cached_forts)): # sort all elements
+                    templastelement = copy.deepcopy(tempsorted[-1])
+                    tempelement = copy.deepcopy(tempsorted[0])
+                    tempmaxfloat = sys.float_info.max # start with max float to find min distance
+
+                    if(tempbool):
+                        for fort in tempallcached:
+                            if distance_in_meters((self._origPosF[0], self._origPosF[1]), (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat:
+                                tempelement = copy.deepcopy(fort)
+                                tempmaxfloat = distance_in_meters((self._origPosF[0], self._origPosF[1]), (fort[0]['latitude'], fort[0]['longitude']))
+
+                        tempsorted.pop(0)
+                        tempsorted.append(tempelement)
+                        tempallcached.remove(tempelement)
+                        tempbool = False
+                    else:
+                        for fort in tempallcached:
+                            if ((distance_in_meters((templastelement[0]['latitude'], templastelement[0]['longitude']),
+                                                    (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat) and (not any(fort[0]['id'] == x[0]['id'] for x in tempsorted))):
+                                tempelement = copy.deepcopy(fort)
+                                tempmaxfloat = distance_in_meters((templastelement[0]['latitude'], templastelement[0]['longitude']),
+                                                                  (fort[0]['latitude'], fort[0]['longitude']))
+                        tempallcached.remove(tempelement)
+                        tempsorted.append(tempelement)
+
+                self.spinnable_cached_forts = copy.deepcopy(tempsorted)
+                self.cache_is_sorted = True
+
+                with open(self.cache_filename, 'wb') as handle:
+                    pickle.dump(self.spinnable_cached_forts, handle)
+
+            if not self.spinnable_cached_forts:
+                self.spinnable_cached_forts = copy.deepcopy(self.all_cached_forts)
+            return self.spinnable_cached_forts
+        else:
+            self.log.info("Cache is empty! Switching mode to cache forts")
+            return False
+
+    def spin_all_cached_forts(self):
+        destinations = self.sort_cached_forts()
+
+        if not destinations:
+            self.log.info('Turning on caching mode')
+            self.walk_back_to_origin()
+            self.use_cache = False
+            self.cache_is_sorted = False
+            return False
+
+        for fort_data in destinations:
+            fort = fort_data[0]
+            self.log.info(
+                "Walking to fort at  http://maps.google.com/maps?q=%s,%s",
+                fort['latitude'], fort['longitude'])
+            self.walk_to((fort['latitude'], fort['longitude']), directly=False)
+            self.fort_search_pgoapi(fort, self.get_position(), distance_in_meters((fort['latitude'], fort['longitude']),
+                                                                                  (self._posf[0], self._posf[1])))
+
+        return True
+
     def login(self, provider, username, password, oauth2_refresh_token=None):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
             raise AuthException("Username/password not correctly specified")
@@ -1167,20 +1309,31 @@ class PGoApi:
     def main_loop(self):
         catch_attempt = 0
         self.heartbeat()
+        if self.enable_caching and self.experimental:
+            if not self.use_cache:
+                self.log.info('==== CACHING MODE: CACHE FORTS ====')
+            else:
+                self.log.info('==== CACHING MODE: ROUTE+SPIN CACHED FORTS ====')
+            self.setup_cache()
         while True:
             self.heartbeat()
             # self.gsleep(1)
 
-            if self.experimental and self.spin_all_forts:
-                self.spin_all_forts_visible()
+            if self.use_cache and self.experimental and self.enable_caching:
+                self.spin_all_cached_forts()
             else:
-                self.spin_near_fort()
-            # if catching fails 10 times, maybe you are sofbanned.
-            # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
-            while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
-                # self.gsleep(4)
-                catch_attempt += 1
-                pass
+                if self.experimental and self.spin_all_forts:
+                    self.spin_all_forts_visible()
+                else:
+                    self.spin_near_fort()
+                if self.enable_caching and self.experimental and not self.use_cache:
+                    self.cache_forts(forts=self.new_forts)
+                # if catching fails 10 times, maybe you are sofbanned.
+                # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
+                while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
+                    # self.gsleep(4)
+                    catch_attempt += 1
+                    pass
             if catch_attempt > self.max_catch_attempts:
                 self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times",
                               catch_attempt)
