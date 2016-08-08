@@ -60,5 +60,20 @@ class UnexpectedResponseException(Exception):
     pass
 
 
+class AuthTokenExpiredException(Exception):
+    pass
+
+
 class TooManyEmptyResponses(Exception):
     pass
+
+
+class ServerApiEndpointRedirectException(Exception):
+    def __init__(self):
+        self._api_endpoint = None
+
+    def get_redirected_endpoint(self):
+        return self._api_endpoint
+
+    def set_redirected_endpoint(self, api_endpoint):
+        self._api_endpoint = api_endpoint

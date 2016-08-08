@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import hashlib
 import logging
 
 from library.api.pgoapi.protos.POGOProtos import Enums_pb2 as Enums
@@ -9,13 +10,12 @@ from library.api.pgoapi.protos.POGOProtos.Inventory import \
 
 class Config:
 
-    def __init__(self, config):
+    def __init__(self, config, cli_args):
         self.log = logging.getLogger(__name__)
 
         self.__config_data = config
         self.config_data = config
         self.__password = self.config_data.pop("password", 'NA')
-        self.__password_used = False
 
         self.location = config["location"]
         self.auth_service = config["auth_service"]
@@ -85,10 +85,22 @@ class Config:
         self.farm_override_step_size = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_OVERRIDE_STEP_SIZE",
                                                                                 -1)  # should the step size be overriden when looking for more inventory, -1 to disable
         self._sanity_check_needy_item_farming()
+
+        self.explain_evolution_before_cleanup = config.get("CONSOLE_OUTPUT", {}).get("EXPLAIN_EVOLUTION_BEFORE_CLEANUP",
+                                                                                     True)  # explain individual evolution criteria in console
         self.list_pokemon_before_cleanup = config.get("CONSOLE_OUTPUT", {}).get("LIST_POKEMON_BEFORE_CLEANUP",
                                                                                 True)  # list pokemon in console
         self.list_inventory_before_cleanup = config.get("CONSOLE_OUTPUT", {}).get("LIST_INVENTORY_BEFORE_CLEANUP",
                                                                                   True)  # list inventory in console
+
+        if cli_args['location']:
+            start_location = cli_args['location']
+        else:
+            start_location = self.location
+        self.cache_filename = './cache/cache ' + (hashlib.md5(start_location.encode())).hexdigest() + str(self.stay_within_proximity)
+        self.use_cache = config.get("BEHAVIOR", {}).get("USE_CACHED_FORTS", False)
+        self.cache_is_sorted = config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
+        self.enable_caching = config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
 
     def _sanity_check_needy_item_farming(self):
         # Sanity checking, farm_items is Experimental, and we needn't do this if we're farming anyway
@@ -108,8 +120,4 @@ class Config:
                           "Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")
 
     def get_password(self):
-        # for security reasons, we only make the password available once
-        if not self.__password_used:
-            self.__password_used = True
-            return self.__password
-        return ''
+        return self.__password

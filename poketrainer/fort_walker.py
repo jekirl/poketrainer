@@ -1,6 +1,10 @@
 from __future__ import absolute_import
 
+import copy
 import logging
+import os
+import pickle
+import sys
 from collections import defaultdict
 
 import six
@@ -26,6 +30,11 @@ class FortWalker:
         self.base_travel_link = ''
         self._error_counter = 0
         self._error_threshold = 10
+        self.new_forts = []
+        self.all_cached_forts = []
+        self.spinnable_cached_forts = []
+        self.cache_is_sorted = self.parent.config.cache_is_sorted
+        self.use_cache = self.parent.config.use_cache
         self.log = logging.getLogger(__name__)
 
     """ will always only walk 1 step (i.e. waypoint), so we can accurately control the speed (via step_size) """
@@ -108,6 +117,7 @@ class FortWalker:
             self._error_counter += 1
             self._walk_back_to_origin()
             return False
+        self.new_forts = destinations
 
         posf = self.parent.get_position()
         self.base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (posf[0], posf[1])
@@ -155,6 +165,7 @@ class FortWalker:
             'lat': orig_posf[0],
             'long': orig_posf[1]
         }]
+        self.steps = []
 
     def spin_nearest_fort(self):
         map_cells = self.parent.map_objects.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {})\
@@ -164,6 +175,7 @@ class FortWalker:
                                       self.parent.config.stay_within_proximity,
                                       self.visited_forts)
         if destinations:
+            self.new_forts = destinations
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
             self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
@@ -224,4 +236,115 @@ class FortWalker:
             self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Error id: %s", fort['latitude'],
                           fort['longitude'], result)
             return False
+        return True
+
+    def setup_cache(self):
+        try:
+            self.log.debug("Opening cache file...")
+            with open(self.parent.config.cache_filename, 'rb') as handle:
+                self.all_cached_forts = pickle.load(handle)
+
+        except Exception as e:
+            self.log.debug("Could not find or open cache, making new cache... %s", e)
+            if not os.path.exists('./cache'):
+                os.makedirs('./cache')
+            try:
+                os.remove(self.parent.config.cache_filename)
+            except OSError:
+                pass
+            with open(self.parent.config.cache_filename, 'wb') as handle:
+                pickle.dump(self.all_cached_forts, handle)
+
+    def cache_forts(self, forts):
+        if not self.all_cached_forts:
+            with open(self.parent.config.cache_filename, 'wb') as handle:
+                pickle.dump(forts, handle)
+
+            with open(self.parent.config.cache_filename, 'rb') as handle:
+                self.all_cached_forts = pickle.load(handle)
+
+            self.log.info("Cache was empty... Dumping in new forts and initializing all_cached_forts")
+
+        else:
+            for fort in forts:
+                if not any(fort[0]['id'] == x[0]['id'] for x in self.all_cached_forts):
+                    self.all_cached_forts.insert(0, fort)
+                    self.log.info("Added new fort to cache")
+
+            with open(self.parent.config.cache_filename, 'wb') as handle:
+                pickle.dump(self.all_cached_forts, handle)
+
+        self.log.info("Cached forts %s: ", len(self.all_cached_forts))
+
+    def sort_cached_forts(self):
+        if len(self.all_cached_forts) > 0:
+            if not self.cache_is_sorted:
+                self.log.info("Cache is unsorted, sorting now...")
+                temp_all_cached = copy.deepcopy(self.all_cached_forts)  # copy over original
+                temp_sorted = [copy.deepcopy(temp_all_cached[0])]  # the final list to copy to cache
+                temp_element = copy.deepcopy(temp_all_cached[0])  # cur element
+                temp_bool = True
+
+                while (len(temp_sorted) < len(self.all_cached_forts)):  # sort all elements
+                    temp_last_element = copy.deepcopy(temp_sorted[-1])
+                    temp_element = copy.deepcopy(temp_sorted[0])
+                    temp_max_float = sys.float_info.max  # start with max float to find min distance
+
+                    if (temp_bool):
+                        for fort in temp_all_cached:
+                            orig_posf = self.parent.get_orig_position()
+                            if distance_in_meters((orig_posf[0], orig_posf[1]),
+                                                  (fort[0]['latitude'], fort[0]['longitude'])) <= temp_max_float:
+                                temp_element = copy.deepcopy(fort)
+                                temp_max_float = distance_in_meters((orig_posf[0], orig_posf[1]),
+                                                                    (fort[0]['latitude'], fort[0]['longitude']))
+
+                        temp_sorted.pop(0)
+                        temp_sorted.append(temp_element)
+                        temp_all_cached.remove(temp_element)
+                        temp_bool = False
+                    else:
+                        for fort in temp_all_cached:
+                            if ((distance_in_meters((temp_last_element[0]['latitude'], temp_last_element[0]['longitude']),
+                                                    (fort[0]['latitude'], fort[0]['longitude'])) <= temp_max_float) and (
+                            not any(fort[0]['id'] == x[0]['id'] for x in temp_sorted))):
+                                temp_element = copy.deepcopy(fort)
+                                temp_max_float = distance_in_meters(
+                                    (temp_last_element[0]['latitude'], temp_last_element[0]['longitude']),
+                                    (fort[0]['latitude'], fort[0]['longitude']))
+                        temp_all_cached.remove(temp_element)
+                        temp_sorted.append(temp_element)
+
+                self.spinnable_cached_forts = copy.deepcopy(temp_sorted)
+                self.cache_is_sorted = True
+
+                with open(self.parent.config.cache_filename, 'wb') as handle:
+                    pickle.dump(self.spinnable_cached_forts, handle)
+
+            if not self.spinnable_cached_forts:
+                self.spinnable_cached_forts = copy.deepcopy(self.all_cached_forts)
+            return self.spinnable_cached_forts
+        else:
+            self.log.info("Cache is empty! Switching mode to cache forts")
+            return False
+
+    def spin_all_cached_forts(self):
+        destinations = self.sort_cached_forts()
+
+        if not destinations:
+            self.log.info('Turning on caching mode')
+            self._walk_back_to_origin()
+            self.use_cache = False
+            self.cache_is_sorted = False
+            return False
+
+        for fort_data in destinations:
+            fort = fort_data[0]
+            self.log.info(
+                "Walking to fort at  http://maps.google.com/maps?q=%s,%s",
+                fort['latitude'], fort['longitude'])
+            self.walk_to((fort['latitude'], fort['longitude']), directly=False)
+            self.fort_search_pgoapi(fort, self.get_position(), distance_in_meters((fort['latitude'], fort['longitude']),
+                                                                                  (self._posf[0], self._posf[1])))
+
         return True

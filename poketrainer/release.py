@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import logging
 
+from six import iteritems
 from .release_methods.base import ReleaseMethodFactory
 
 
@@ -30,7 +31,7 @@ class Release:
     def cleanup_pokemon(self):
         caught_pokemon = self.parent.inventory.get_caught_pokemon_by_family()
         release_method = self.release_method_factory.getReleaseMethod()
-        for pokemon_family_id, pokemon_list in caught_pokemon.iteritems():
+        for pokemon_family_id, pokemon_list in iteritems(caught_pokemon):
             pokemon_to_release, pokemon_to_keep = release_method.getPokemonToRelease(pokemon_family_id, pokemon_list)
 
             if self.parent.config.pokemon_cleanup_testing_mode:

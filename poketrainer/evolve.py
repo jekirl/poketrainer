@@ -19,6 +19,11 @@ class Evolve:
                     # If we can't evolve this type of pokemon anymore, don't check others.
                     if not self.attempt_evolve_pokemon(pokemon):
                         break
+            elif self.parent.config.explain_evolution_before_cleanup:
+                self.log.info(
+                    'Not evolving %s because you have %s but need more than %s.',
+                    pokemons[0].pokemon_type, len(pokemons), self.parent.config.min_similar_pokemon
+                )
 
     def attempt_evolve_pokemon(self, pokemon):
         if self.is_pokemon_eligible_for_evolution(pokemon=pokemon):
@@ -45,8 +50,23 @@ class Evolve:
             return False
 
     def is_pokemon_eligible_for_evolution(self, pokemon):
-        candy_have = self.parent.inventory.pokemon_candy.get(
-            self.parent.config.pokemon_evolution_family.get(pokemon.pokemon_id, None), -1)
+        candy_have = self.parent.inventory.pokemon_candy.get(int(pokemon.family_id), -1)
         candy_needed = self.parent.config.pokemon_evolution.get(pokemon.pokemon_id, None)
-        return candy_have > candy_needed and pokemon.pokemon_id not in self.parent.config.keep_pokemon_ids and not \
-            pokemon.is_favorite and pokemon.pokemon_id in self.parent.config.pokemon_evolution
+        in_keep_list = pokemon.pokemon_id in self.parent.config.keep_pokemon_ids
+        is_favorite = pokemon.is_favorite
+        in_evolution_list = pokemon.pokemon_id in self.parent.config.pokemon_evolution
+
+        eligible_to_evolve = bool(
+            candy_needed and
+            candy_have > candy_needed and
+            not in_keep_list and
+            not is_favorite and
+            in_evolution_list
+        )
+
+        if self.parent.config.explain_evolution_before_cleanup:
+            self.log.info(
+                "%s can evolve? %s! Need candy: %s. Have candy: %s. Favorite? %s. In keep list? %s. In evolution list? %s.",
+                pokemon.pokemon_type, eligible_to_evolve, candy_needed, candy_have, in_keep_list, is_favorite, in_evolution_list
+)
+        return eligible_to_evolve

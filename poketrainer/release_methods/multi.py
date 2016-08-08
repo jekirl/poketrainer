@@ -1,6 +1,8 @@
 import copy
 import logging
 
+from six import iteritems
+
 import base
 from POGOProtos import Enums_pb2
 
@@ -27,7 +29,7 @@ class ReleaseMethod(base.ReleaseMethod):
         self.defaultConfig['RELEASE_METHOD'] = self.DEFAULT_RELEASE_METHOD
         self.defaultHandler = self.releaseMethodFactory.loadReleaseMethod(self.DEFAULT_RELEASE_METHOD, self.defaultConfig)
 
-        for pokemonName, pokemonConfig in self.multiConfig.get('POKEMON_CONFIGS', {}).iteritems():
+        for pokemonName, pokemonConfig in iteritems(self.multiConfig.get('POKEMON_CONFIGS', {})):
             pokeId = getattr(Enums_pb2, pokemonName)
             releaseMethod = pokemonConfig.get('RELEASE_METHOD', self.DEFAULT_RELEASE_METHOD)
             # initialize the config with the default config

@@ -177,6 +177,9 @@ class PGoApi:
         # small hack to not waste a call, we give back the response from our api call
         return response
 
+    def force_refresh_access_token(self):
+        self.get_auth_provider().get_access_token(force_refresh=True)
+
 
 class PGoApiRequest:
     def __init__(self, parent, position_lat, position_lng, position_alt):

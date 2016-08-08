@@ -138,7 +138,7 @@ class Poketrainer:
                 return False
 
                 # merge account section with defaults
-            self.config = Config(dict_merge(defaults, config))
+            self.config = Config(dict_merge(defaults, config), self.cli_args)
         return True
 
     def reload_config(self):
@@ -231,6 +231,12 @@ class Poketrainer:
             self.thread.kill()
 
     def _main_loop(self):
+        if self.config.enable_caching and self.config.experimental:
+            if not self.config.use_cache:
+                self.log.info('==== CACHING MODE: CACHE FORTS ====')
+            else:
+                self.log.info('==== CACHING MODE: ROUTE+SPIN CACHED FORTS ====')
+            self.fort_walker.setup_cache()
         while True:
             # acquire lock for this thread
             if self.thread_lock(persist=True):
@@ -240,8 +246,6 @@ class Poketrainer:
                     self.poke_catcher.catch_all()
                     self.fort_walker.loop()
                     self.fort_walker.spin_nearest_fort()
-
-                    self.thread_release()
                 finally:
                     # after we're done, release lock
                     self.persist_lock = False
@@ -259,6 +263,7 @@ class Poketrainer:
             res = req.call()
             if not res or res.get("direction", -1) == 102:
                 self.log.error("There were a problem responses for api call: %s. Restarting!!!", res)
+                self.api.force_refresh_access_token()
                 raise AuthException("Token probably expired?")
 
         self.log.debug(
