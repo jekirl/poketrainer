@@ -11,6 +11,11 @@
         "STEP_SIZE": 100,
         "WANDER_STEPS": 0,
         "EXPERIMENTAL": false,
+        "MULTI_LOCATIONS": true,
+        "MULTI_LOCATIONS_COORDS": [
+            "2415 Trinity St, Los Angeles, CA",
+            "345 E 51st St, Los Angeles, CA"
+        ],
         "SKIP_VISITED_FORT_DURATION": 600,
         "SPIN_ALL_FORTS": true,
         "STAY_WITHIN_PROXIMITY": 9999,

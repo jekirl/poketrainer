@@ -39,6 +39,7 @@ import gevent
 import six
 from cachetools import TTLCache
 from gevent.coros import BoundedSemaphore
+from geopy.geocoders import GoogleV3
 
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
@@ -133,6 +134,10 @@ class PGoApi:
         self.experimental = config.get("BEHAVIOR", {}).get("EXPERIMENTAL", False)
 
         self.STEP_SIZE = self._orig_step_size
+
+        self.MULTI_LOCATIONS = config.get("BEHAVIOR", {}).get("MULTI_LOCATIONS", False)
+        self.MULTI_LOCATIONS_COORDS = config.get("BEHAVIOR", {}).get("MULTI_LOCATIONS_COORDS", [])
+        self.MULTI_LOCATIONS_CURRENT = 0
 
         self.MIN_SIMILAR_POKEMON = config.get("POKEMON_CLEANUP", {}).get("MIN_SIMILAR_POKEMON", 1)  # Keep atleast one of everything.
         self.MAX_SIMILAR_POKEMON = config.get("POKEMON_CLEANUP", {}).get("MAX_SIMILAR_POKEMON", 999)  # Stop keeping them at some amount
@@ -318,6 +323,22 @@ class PGoApi:
 
     def get_position(self):
         return (self._position_lat, self._position_lng, self._position_alt)
+
+    def get_position_by_name(self, location_name):
+        geolocator = GoogleV3()
+        loc = geolocator.geocode(location_name)
+
+        return (loc.latitude, loc.longitude, loc.altitude)
+
+    def get_position_address(position):
+        if not position[2]:
+            position[2] = "12" # Set an altitude if one isnt set
+        position = str(position[0]) + ", " + str(position[1]) + ", " + str(position[2])
+        geolocator = GoogleV3()
+        loc = geolocator.geocode(position)
+        address = loc.address.encode('utf-8')
+
+        return address
 
     def set_position(self, lat, lng, alt):
         self.log.debug('Set Position - Lat: %s Long: %s Alt: %s', lat, lng, alt)
@@ -584,7 +605,26 @@ class PGoApi:
         self.log.info('===============================================')
 
     def walk_back_to_origin(self):
-        self.walk_to(self._origPosF)
+        if self.MULTI_LOCATIONS:
+            if len(self.MULTI_LOCATIONS_COORDS) > 0:
+                self.log.info('===============================================')
+                self.log.info('Walking to next origin point')
+
+                if self.MULTI_LOCATIONS_CURRENT == len(self.MULTI_LOCATIONS_COORDS):
+                    self.MULTI_LOCATIONS_CURRENT = 0
+                    self.walk_to(self._origPosF)
+                    return False
+
+                self.log.info('New Origin is: %s', self.MULTI_LOCATIONS_COORDS[self.MULTI_LOCATIONS_CURRENT])
+                self.log.info('===============================================')
+                self.walk_to(self.get_position_by_name(self.MULTI_LOCATIONS_COORDS[self.MULTI_LOCATIONS_CURRENT]))
+                self.MULTI_LOCATIONS_CURRENT += 1
+                return True
+        else:
+            self.log.info('===============================================')
+            self.log.info('Walking back to start')
+            self.walk_to(self._origPosF)
+            self.log.info('===============================================')
 
     def spin_nearest_fort(self):
         map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
