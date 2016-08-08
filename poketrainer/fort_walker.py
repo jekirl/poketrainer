@@ -43,8 +43,6 @@ class FortWalker:
                 if not (self.parent.config.experimental and self.parent.config.spin_all_forts and self.parent.config.use_google):
                     if not self.sub_route:
                         next_sub_loc = self.route.pop(0)
-                        posf = self.parent.get_position()
-                        self.base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (posf[0], posf[1])
                         route_data = get_route(
                             self.parent.get_position(), (next_sub_loc['lat'], next_sub_loc['long']),
                             self.parent.config.use_google, self.parent.config.gmaps_api_key,
@@ -81,6 +79,10 @@ class FortWalker:
             self._error_counter += 1
             self._walk_back_to_origin()
             return False
+
+        posf = self.parent.get_position()
+        self.base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (posf[0], posf[1])
+        self.total_distance_traveled = 0
 
         # honestly it makes no sense to use spin_all_forts without google, but i'm leaving it that way
         # wander_steps should only be used if we're not using google i guess

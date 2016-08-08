@@ -39,7 +39,7 @@ app.debug = True
 options = {}
 attacks = {}
 
-with open("GAME_ATTACKS_v0_1.tsv") as tsv:
+with open("resources" + os.sep + "GAME_ATTACKS_v0_1.tsv") as tsv:
     reader = csv.DictReader(tsv, delimiter='\t')
     for row in reader:
         attacks[int(row["Num"])] = row["Move"]
