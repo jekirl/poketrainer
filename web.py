@@ -7,7 +7,6 @@ import json
 import os
 from collections import defaultdict
 
-import eventlet
 import zerorpc
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
 

@@ -37,7 +37,6 @@ import os.path
 import socket
 from time import sleep
 
-import eventlet
 import gevent
 
 from poketrainer.poketrainer import Poketrainer
@@ -80,7 +79,6 @@ def main():
     # because the bot spawns 'threads' so it can start / stop we're making an infinite lop here
     while True:
         try:
-            #eventlet.sleep(1.0)
             gevent.sleep(1.0)
         except KeyboardInterrupt:
             logger.info('Exiting...')

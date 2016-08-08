@@ -10,8 +10,6 @@ from itertools import chain
 from time import time
 
 import six
-import eventlet
-from eventlet import wsgi, semaphore
 from six import PY2, iteritems
 import gevent
 import zerorpc
@@ -58,7 +56,6 @@ class Poketrainer:
 
         self.thread = None
         self.socket = None
-        self.thread_pool = eventlet.GreenPool()
         self.cli_args = args
         self.force_debug = args['debug']
 
@@ -99,7 +96,6 @@ class Poketrainer:
 
         # threading / locking
         self.sem = BoundedSemaphore(1)  # gevent
-        #self.sem = semaphore.Semaphore(1)  # eventlet
         self.persist_lock = False
         self.locker = None
 
@@ -209,7 +205,6 @@ class Poketrainer:
     def thread_lock(self, persist=False):
         if self.sem.locked():
             if self.locker == id(gevent.getcurrent()):
-            #if self.locker == id(eventlet.getcurrent()):
                 self.log.debug("Locker is -- %s. No need to re-lock", id(gevent.getcurrent()))
                 return False
             else:
@@ -245,7 +240,6 @@ class Poketrainer:
             self.start()
 
     def start(self):
-        #self.thread = self.thread_pool.spawn(self._main_loop)
         self.thread = gevent.spawn(self._main_loop)
 
         self.thread.link(self._callback)
