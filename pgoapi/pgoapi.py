@@ -468,6 +468,7 @@ class PGoApi:
         res = self.call()
         if not res or res.get("direction", -1) == 102:
             self.log.error("There were a problem responses for api call: %s. Restarting!!!", res)
+            self._auth_provider.get_access_token(force_refresh=True)
             raise AuthException("Token probably expired?")
         self.log.debug('Heartbeat dictionary: \n\r{}'.format(json.dumps(res, indent=2, default=lambda obj: obj.decode('utf8'))))
 
