@@ -21,10 +21,6 @@ class Sniper:
         return True
 
     def snipe_pokemon(self, lat, lng):
-        self.parent.cond_lock(persist=True)
-
-        self.parent.sleep(
-            2)  # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
         posf = self.parent.get_position()
         curr_lat = posf[0]
         curr_lng = posf[1]
@@ -41,7 +37,7 @@ class Sniper:
             self.log.debug("Teleported to sniping location %f, %f", lat, lng)
 
             # find pokemons in dest
-            map_cells = self.parent.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {})\
+            map_cells = self.parent.map_objects.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {})\
                 .get('map_cells', [])
             pokemons = flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
 
@@ -66,6 +62,3 @@ class Sniper:
             self.send_update_pos()
             posf = self.parent.get_position()
             self.log.debug("Teleported back to origin at %f, %f", posf[0], posf[1])
-            # self.sleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
-            self.parent.persist_lock = False
-            self.parent.cond_release()

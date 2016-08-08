@@ -68,7 +68,7 @@ class PokeCatcher:
             if catch_attempts > self.parent.config.min_failed_attempts_before_using_berry \
                     and self.parent.inventory.has_berry():
                 self.log.info("Feeding da razz berry!")
-                self.parent.sleep(0.2)
+                self.parent.sleep(1.0)
                 r = self.parent.api.use_item_capture(item_id=self.parent.inventory.take_berry(),
                                                      encounter_id=encounter_id,
                                                      spawn_point_id=spawn_point_id) \
@@ -163,7 +163,7 @@ class PokeCatcher:
                     # change loc for sniping
                     self.log.info("Teleporting to %f, %f before catching", new_loc[0], new_loc[1])
                     self.parent.api.set_position(new_loc[0], new_loc[1], 0.0)
-                    self.parent.send_update_pos()
+                    self.parent.sniper.send_update_pos()
                     # self.sleep(2)
 
                 self.encountered_pokemons[encounter_id] = pokemon_data
@@ -184,6 +184,7 @@ class PokeCatcher:
     def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:
             self.parent.inventory.update_player_inventory()
+            print(lureinfo)
             if not self.parent.inventory.can_attempt_catch():
                 self.log.info("No balls to catch %s, exiting disk encounter", self.parent.inventory)
                 return False

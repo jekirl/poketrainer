@@ -31,14 +31,28 @@ def get_route(start, end, use_google=False, gmaps_api_key="", walk_to_all_forts=
         else:
             d = directions_service.directions(origin, destination, mode="walking", units="metric")
         steps = d[0]['legs'][0]['steps']
-        final_steps = [
+        final_steps_google = [
             {
                 'lat': step['end_location']['lat'],
                 'long': step['end_location']['lng'],
                 'distance': step['distance']['value'],
             } for step in steps
         ]
-
+        final_steps = []
+        for step in final_steps_google:
+            # make sure our steps are not bigger than step_size
+            if step['distance'] <= step_size:
+                final_steps.append(step)
+            else:
+                step_increments = get_increments(start, destination, step_size)
+                previous_step = step_increments[0]
+                for step in step_increments[1:]:
+                    final_steps.append({
+                        'lat': step[0],
+                        'long': step[1],
+                        'distance': distance_in_meters(previous_step, step)
+                    })
+                    previous_step = step
         return {
             'total_distance': d[0]['legs'][0]['distance']['value'],
             'steps': final_steps
@@ -73,6 +87,7 @@ def get_increments(start, end, step_size=200):
     lonlats = g.npts(startlong, startlat, endlong, endlat,
                      1 + int(dist / step_size))
     # npts doesn't include start/end points, so append
+    lonlats.insert(0, (startlong, startlat))
     lonlats.append((endlong, endlat))
     return [(l[1], l[0], 0) for l in lonlats]  # reorder to be lat,long instead of long,lat
 

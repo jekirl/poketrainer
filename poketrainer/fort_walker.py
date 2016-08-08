@@ -15,12 +15,12 @@ class FortWalker:
     def __init__(self, parent):
         self.parent = parent
         self.visited_forts = TTLCache(maxsize=120, ttl=self.parent.config.skip_visited_fort_duration)
-        self.route = []
-        self.sub_route = []
-        self.use_sub_route = False
-        self.steps = []
+        self.route = {'steps': [], 'total_distance': 0}  # route should contain the complete path we're planning to go
+        self.route_only_forts = False
+        self.steps = []  # steps contain all steps to the next route target
         self.next_step = None
         self.total_distance_traveled = 0
+        self.total_trip_distance = 0
         self.base_travel_link = ''
         self._error_counter = 0
         self._error_threshold = 10
@@ -29,36 +29,62 @@ class FortWalker:
     """ will always only walk 1 step (i.e. waypoint), so we can accurately control the speed (via step_size) """
 
     def loop(self):
-        # TODO: make logging work as before
         if self._error_counter >= self._error_threshold:
             raise TooManyEmptyResponses('Too many errors in this run!!!')
         if not self.next_step:
             # if we don't have a waypoint atm, calculate new waypoints until location
             if not self.steps:
+                if self.total_distance_traveled > 0:
+                    self.log.info('Traveled %.2f meters of %.2f of the trip',
+                                  self.total_distance_traveled, self.total_trip_distance)
+
                 # create general route first
-                if not self.route:
+                if not self.route['steps']:
+                    # we have completed a previously set route
+                    if not self.route_only_forts and self.total_distance_traveled > 0:
+                        self.log.info('===============================================')
+                    # get new route
                     if not self._get_route(self.parent.config.experimental, self.parent.config.spin_all_forts,
                                            self.parent.config.use_google):
                         return
-                # if we don't 'spin all forts', we create a sub_route here because we don't have one already
-                if not (self.parent.config.experimental and self.parent.config.spin_all_forts and self.parent.config.use_google):
-                    if not self.sub_route:
-                        next_sub_loc = self.route.pop(0)
-                        route_data = get_route(
-                            self.parent.get_position(), (next_sub_loc['lat'], next_sub_loc['long']),
-                            self.parent.config.use_google, self.parent.config.gmaps_api_key,
-                            self.parent.config.experimental and self.parent.config.spin_all_forts
-                        )
+                    # if the route is not only forts, it contains a lot of points
+                    # thus we show the total trip size here (after route is calculated) and not for every route-point
+                    if not self.route_only_forts:
+                        posf = self.parent.get_position()
+                        self.base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (posf[0], posf[1])
+                        self.total_distance_traveled = 0
+                        self.total_trip_distance = self.route['total_distance']
                         self.log.info('===============================================')
-                        self.log.info(
-                            "Total trip distance will be: {0:.2f} meters".format(route_data['total_distance']))
-                        self.sub_route = route_data['steps']
-                    next_loc = self.sub_route.pop(0)
+                        self.log.info("Total trip distance will be: {0:.2f} meters".
+                                      format(self.total_trip_distance))
+
+                next_loc = self.route['steps'].pop(0)
+                # if the route is not only forts, we can just set one step at a time
+                if not self.route_only_forts:
+                    self.steps = [next_loc]
                 else:
-                    next_loc = self.route.pop(0)
-                    self.base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % self.parent.get_position()
-                self.steps = get_increments(self.parent.get_position(), (next_loc['lat'], next_loc['long']),
-                                                self.parent.step_size)
+                    # we have completed a previously set route
+                    if self.total_distance_traveled > 0:
+                        self.log.info('===============================================')
+                    # route contains only forts, so we actually get a sub-route here with individual steps
+                    route_data = get_route(
+                        self.parent.get_position(), (next_loc['lat'], next_loc['long']),
+                        self.parent.config.use_google, self.parent.config.gmaps_api_key,
+                        self.parent.config.experimental and self.parent.config.spin_all_forts,
+                        step_size=self.parent.step_size
+                    )
+                    posf = self.parent.get_position()
+                    self.base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (posf[0], posf[1])
+                    self.total_distance_traveled = 0
+                    self.total_trip_distance = route_data['total_distance']
+                    self.log.info('===============================================')
+                    self.log.info("Total trip distance will be: {0:.2f} meters"
+                                  .format(self.total_trip_distance))
+                    self.steps = route_data['steps']
+
+            if self.total_distance_traveled > 0:
+                self.log.info('Traveled %.2f meters of %.2f of the trip',
+                              self.total_distance_traveled, self.total_trip_distance)
             self.next_step = self.steps.pop(0)
         self._walk(self.next_step)
         self.next_step = None
@@ -96,26 +122,25 @@ class FortWalker:
                 self.parent.get_position(), (furthest_fort['latitude'], furthest_fort['longitude']),
                 use_google, self.parent.config.gmaps_api_key,
                 experimental and spin_all_forts,
-                map(lambda x: "via:%f,%f" % (x[0]['latitude'], x[0]['longitude']), destinations[1:])
+                map(lambda x: "via:%f,%f" % (x[0]['latitude'], x[0]['longitude']), destinations[1:]),
+                step_size=self.parent.step_size
             )
-            self.log.info('===============================================')
-            self.log.info("Total trip distance will be: {0:.2f} meters".format(route_data['total_distance']))
-            self.route = route_data['steps']
-            self.use_sub_route = False
+            self.route = route_data
+            self.route_only_forts = False
         else:
-            # convert the forts array to the same format as with google steps
-            self.route = [
+            self.route = {'steps': [
                 {
-                    'lat': fort_data[0]['latitude'],
-                    'long': fort_data[0]['longitude']
+                    'lat': float(fort_data[0]['latitude']),
+                    'long': float(fort_data[0]['longitude'])
                 } for fort_data in destinations
-                ]
-            self.use_sub_route = True
+            ], 'total_distance': 0}
+            self.route_only_forts = True
         return True
 
     """ replaces the old walking method inside of walk_to"""
 
     def _walk(self, next_point):
+        next_point = (next_point['lat'], next_point['long'], 0)
         distance_to_point = distance_in_meters(self.parent.get_position(), next_point)
         self.total_distance_traveled += distance_to_point
         travel_link = '%s%s,%s' % (self.base_travel_link, next_point[0], next_point[1])
@@ -142,8 +167,8 @@ class FortWalker:
             self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
 
             # Fort is close enough to change our route and walk to
-            if nearest_fort_dis > 40.00 <= self.parent.config.wander_steps > 0:
-                self.next_step = (destinations[0][0]['latitude'], destinations[0][0]['longitude'], 0)
+            if 0 < self.parent.config.wander_steps <= nearest_fort_dis > 40:
+                self.next_step = {'lat': destinations[0][0]['latitude'], 'long': destinations[0][0]['longitude']}
             elif nearest_fort_dis <= 40.00:
                 self.do_fort_spin(nearest_fort, player_postion=self.parent.api.get_position(),
                                   fort_distance=nearest_fort_dis)

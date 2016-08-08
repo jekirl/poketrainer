@@ -11,7 +11,7 @@ from time import time
 
 import six
 import eventlet
-from eventlet import wsgi
+from eventlet import wsgi, semaphore
 from six import PY2, iteritems
 import gevent
 import zerorpc
@@ -98,8 +98,10 @@ class Poketrainer:
         self.should_catch_pokemon = self.config.should_catch_pokemon
 
         # threading / locking
-        self.sem = BoundedSemaphore(1)
+        self.sem = BoundedSemaphore(1)  # gevent
+        #self.sem = semaphore.Semaphore(1)  # eventlet
         self.persist_lock = False
+        self.locker = None
 
     def sleep(self, t):
         #eventlet.sleep(t * self.config.sleep_mult)
@@ -127,8 +129,11 @@ class Poketrainer:
         s = zerorpc.Server(self)
         s.bind("tcp://127.0.0.1:%i" % sock_port)  # the free port should still be the same
         self.socket = gevent.spawn(s.run)
-        #self.socket = self.thread_pool.spawn(s.run)
+
+        # zerorpc requires gevent, thus we would need a solution for eventlets
         #self.socket = self.thread_pool.spawn(wsgi.server, eventlet.listen(('127.0.0.1', sock_port)), self)
+        #self.socket = self.thread_pool.spawn(eventlet.serve, eventlet.listen(('127.0.0.1', sock_port)), self)
+        #alternative: GreenRPCService
 
     def _load_config(self):
         if self.config is None:
@@ -201,38 +206,27 @@ class Poketrainer:
         - persist=True will ensure the lock will not be released until the user
           explicitly sets self.persist_lock=False.
     '''
-    def cond_lock(self, persist=False):
+    def thread_lock(self, persist=False):
         if self.sem.locked():
             if self.locker == id(gevent.getcurrent()):
+            #if self.locker == id(eventlet.getcurrent()):
                 self.log.debug("Locker is -- %s. No need to re-lock", id(gevent.getcurrent()))
-                return
+                return False
             else:
                 self.log.debug("Already locked by %s. Greenlet %s will wait...", self.locker, id(gevent.getcurrent()))
         self.sem.acquire()
         self.persist_lock = persist
-        self.log.debug("%s acquired lock (persist=%s)!", id(gevent.getcurrent()), persist)
         self.locker = id(gevent.getcurrent())
+        self.log.debug("%s acquired lock (persist=%s)!", self.locker, persist)
+        return True
 
     '''
     Releases the lock if needed and the user didn't persist it
     '''
-    def cond_release(self):
-        if self.sem.locked() and \
-                        self.locker == id(gevent.getcurrent()) and not self.persist_lock:
+    def thread_release(self):
+        if self.sem.locked() and self.locker == id(gevent.getcurrent()) and not self.persist_lock:
             self.log.debug("%s is now releasing lock", id(gevent.getcurrent()))
             self.sem.release()
-
-    # newest event always locks all previous events, no matter where they are, right?
-    # that's not cool
-    def call_old(self):
-        # before doing stuff
-        self.cond_lock()
-        try:
-            # getting id of current event
-            gevent_id = id(gevent.getcurrent())
-        finally:
-            # after we're done
-            self.cond_release()
 
     def _callback(self, gt):
         try:
@@ -245,13 +239,13 @@ class Poketrainer:
             logger.exception('Error in main loop %s, restarting at location: %s',
                              e, self.get_position())
             # restart after sleep
-            eventlet.sleep(5)
+            self.sleep(5)
             self.reload_config()
             self.reload_api(self.get_position())
             self.start()
 
     def start(self):
-        #self.thread = self.thread_pool.spawn(self.main_loop)
+        #self.thread = self.thread_pool.spawn(self._main_loop)
         self.thread = gevent.spawn(self._main_loop)
 
         self.thread.link(self._callback)
@@ -262,11 +256,20 @@ class Poketrainer:
 
     def _main_loop(self):
         while True:
-            self._heartbeat()
+            # acquire lock for this thread
+            if self.thread_lock(persist=True):
+                try:
+                    self._heartbeat()
 
-            self.poke_catcher.catch_all()
-            self.fort_walker.loop()
-            self.fort_walker.spin_nearest_fort()
+                    self.poke_catcher.catch_all()
+                    self.fort_walker.loop()
+                    self.fort_walker.spin_nearest_fort()
+
+                    self.thread_release()
+                finally:
+                    # after we're done, release lock
+                    self.persist_lock = False
+                    self.thread_release()
             self.sleep(1.0)
 
     def _heartbeat(self, res=None, login_response=False):
@@ -389,7 +392,16 @@ class Poketrainer:
     """ FOLLOWING ARE FUNCTIONS FOR THE WEB LISTENER """
 
     def release_pokemon_by_id(self, p_id):
-        return self.release.do_release_pokemon_by_id(p_id)
+        # acquire lock for this thread
+        if self.thread_lock(persist=True):
+            try:
+                return self.release.do_release_pokemon_by_id(p_id)
+            finally:
+                # after we're done, release lock
+                self.persist_lock = False
+                self.thread_release()
+        else:
+            return 'Only one Simultaneous request allowed'
 
     def current_location(self):
         self.log.info("Web got position: %s", self.get_position())
@@ -405,7 +417,16 @@ class Poketrainer:
         return self.player.to_json()
 
     def snipe_pokemon(self, lat, lng):
-        return self.sniper.snipe_pokemon(float(lat), float(lng))
+        # acquire lock for this thread
+        if self.thread_lock(persist=True):
+            try:
+                return self.sniper.snipe_pokemon(float(lat), float(lng))
+            finally:
+                # after we're done, release lock
+                self.persist_lock = False
+                self.thread_release()
+        else:
+            return 'Only one Simultaneous request allowed'
 
     def ping(self):
         self.log.info("Responding to ping")
