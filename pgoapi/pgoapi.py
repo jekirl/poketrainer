@@ -38,8 +38,8 @@ from time import time
 import gevent
 import six
 from cachetools import TTLCache
-from gevent.coros import BoundedSemaphore
 from geopy.geocoders import GoogleV3
+from gevent.coros import BoundedSemaphore
 
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
