@@ -9,6 +9,7 @@
       "BEHAVIOR": {
         "USE_GOOGLE": true,
         "STEP_SIZE": 100,
+        "MAP_OBJECTS_RATE_LIMIT": 7.0,
         "WANDER_STEPS": 0,
         "EXPERIMENTAL": false,
         "SKIP_VISITED_FORT_DURATION": 600,
