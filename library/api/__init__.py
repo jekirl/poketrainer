@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 
 __title__ = 'library_api_pgoapi'
 
-__commit__ = 'dffe1490065cd3f24762cc3a1f16316ba0ce7a9c'
-__commit_tree__ = 'https://github.com/tejado/pgoapi/tree/dffe1490065cd3f24762cc3a1f16316ba0ce7a9c'
-__author__ = 'tjado'
-__copyright__ = 'Copyright (c) 2016 tjado <https://github.com/tejado>'
+__commit__ = '06eaef1e0353d17f775f2d1765d6281a05be7654'
+__commit_tree__ = 'https://github.com/keyphact/pgoapi/tree/06eaef1e0353d17f775f2d1765d6281a05be7654'
+__author__ = 'keyphact'
+__copyright__ = 'Copyright (c) 2016 keyphact <https://github.com/keyphact/pgoapi>'
