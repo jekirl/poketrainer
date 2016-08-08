@@ -17,8 +17,9 @@ class FortWalker:
         self.visited_forts = TTLCache(maxsize=120, ttl=self.parent.config.skip_visited_fort_duration)
         self.route = []
         self.sub_route = []
-        self.waypoints = []
-        self.next_waypoint = None
+        self.use_sub_route = False
+        self.steps = []
+        self.next_step = None
         self.total_distance_traveled = 0
         self.base_travel_link = ''
         self._error_counter = 0
@@ -31,9 +32,9 @@ class FortWalker:
         # TODO: make logging work as before
         if self._error_counter >= self._error_threshold:
             raise TooManyEmptyResponses('Too many errors in this run!!!')
-        if not self.next_waypoint:
+        if not self.next_step:
             # if we don't have a waypoint atm, calculate new waypoints until location
-            if not self.waypoints:
+            if not self.steps:
                 # create general route first
                 if not self.route:
                     if not self._get_route(self.parent.config.experimental, self.parent.config.spin_all_forts,
@@ -56,11 +57,11 @@ class FortWalker:
                 else:
                     next_loc = self.route.pop(0)
                     self.base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % self.parent.get_position()
-                self.waypoints = get_increments(self.parent.get_position(), (next_loc['lat'], next_loc['long']),
+                self.steps = get_increments(self.parent.get_position(), (next_loc['lat'], next_loc['long']),
                                                 self.parent.step_size)
-            self.next_waypoint = self.waypoints.pop(0)
-        self._walk(self.next_waypoint)
-        self.next_waypoint = None
+            self.next_step = self.steps.pop(0)
+        self._walk(self.next_step)
+        self.next_step = None
 
     """ replaces old spin_all_forts_visible and spin_near_fort, but returns only the forts to spin """
 
@@ -100,6 +101,7 @@ class FortWalker:
             self.log.info('===============================================')
             self.log.info("Total trip distance will be: {0:.2f} meters".format(route_data['total_distance']))
             self.route = route_data['steps']
+            self.use_sub_route = False
         else:
             # convert the forts array to the same format as with google steps
             self.route = [
@@ -108,6 +110,7 @@ class FortWalker:
                     'long': fort_data[0]['longitude']
                 } for fort_data in destinations
                 ]
+            self.use_sub_route = True
         return True
 
     """ replaces the old walking method inside of walk_to"""
@@ -140,7 +143,7 @@ class FortWalker:
 
             # Fort is close enough to change our route and walk to
             if nearest_fort_dis > 40.00 <= self.parent.config.wander_steps > 0:
-                self.next_waypoint = (destinations[0][0]['latitude'], destinations[0][0]['longitude'], 0)
+                self.next_step = (destinations[0][0]['latitude'], destinations[0][0]['longitude'], 0)
             elif nearest_fort_dis <= 40.00:
                 self.do_fort_spin(nearest_fort, player_postion=self.parent.api.get_position(),
                                   fort_distance=nearest_fort_dis)
