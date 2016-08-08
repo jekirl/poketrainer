@@ -109,6 +109,8 @@ class PGoApi:
         use_masterball = config.get("CAPTURE", {}).get("USE_MASTERBALL", False)
         self.percentages = [pokeball_percent, greatball_percent, ultraball_percent, use_masterball]
 
+        self.NEVER_CATCH_NAMES = map(lambda x: getattr(Enums_pb2, x), config.get("CAPTURE", {}).get("NEVER_CATCH_NAMES", []))
+
         self.pokemon_caught = 0
         self.player = Player({})
         self.player_stats = PlayerStats({})
@@ -1045,6 +1047,7 @@ class PGoApi:
             if not self.inventory.can_attempt_catch():
                 self.log.info("No balls to catch %s, exiting encounter", self.inventory)
                 return False
+
             encounter_id = pokemon_data['encounter_id']
             spawn_point_id = pokemon_data['spawn_point_id']
             # begin encounter_id
