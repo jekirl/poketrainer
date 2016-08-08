@@ -17,10 +17,10 @@ class Inventory:
         self.max_potion = 0
         self.lucky_eggs = 0
         self.razz_berries = 0
-        self.pokeball_percent = (percentages[0] / 100)
-        self.greatball_percent = (percentages[1] / 100)
-        self.ultraball_percent = (percentages[2] / 100)
-        self.use_masterball = (percentages[3])
+        self.pokeball_percent = percentages[0] / 100.0
+        self.greatball_percent = percentages[1] / 100.0
+        self.ultraball_percent = percentages[2] / 100.0
+        self.use_masterball = percentages[3]
 
         self.pokemon_candy = defaultdict()
         self.eggs_available = []

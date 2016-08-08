@@ -181,14 +181,14 @@ _SPAWNPOINT = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='latitude', full_name='POGOProtos.Map.SpawnPoint.latitude', index=0,
       number=2, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='longitude', full_name='POGOProtos.Map.SpawnPoint.longitude', index=1,
       number=3, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),

@@ -107,7 +107,7 @@ _CAPTUREPROBABILITY = _descriptor.Descriptor(
     _descriptor.FieldDescriptor(
       name='reticle_difficulty_scale', full_name='POGOProtos.Data.Capture.CaptureProbability.reticle_difficulty_scale', index=2,
       number=12, type=1, cpp_type=5, label=1,
-      has_default_value=False, default_value=0,
+      has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
