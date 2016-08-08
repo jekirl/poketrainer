@@ -1,7 +1,8 @@
 import logging
 
-import base
 from pgoapi.protos.POGOProtos import Enums_pb2
+
+from . import base
 
 logger = logging.getLogger(__name__)
 

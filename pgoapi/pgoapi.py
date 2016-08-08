@@ -29,8 +29,13 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 
 from __future__ import absolute_import
 
+import copy
+import hashlib
 import json
 import logging
+import os
+import pickle
+import sys
 from collections import defaultdict
 from itertools import chain
 from time import time
@@ -42,8 +47,12 @@ from gevent.coros import BoundedSemaphore
 
 from pgoapi.auth_google import AuthGoogle
 from pgoapi.auth_ptc import AuthPtc
-from pgoapi.exceptions import (AuthException, ServerBusyOrOfflineException,
-                               TooManyEmptyResponses)
+from pgoapi.exceptions import (AuthException, AuthTokenExpiredException,
+                               NotLoggedInException,
+                               ServerApiEndpointRedirectException,
+                               ServerBusyOrOfflineException,
+                               TooManyEmptyResponses,
+                               UnexpectedResponseException)
 from pgoapi.inventory import Inventory as Player_Inventory
 from pgoapi.location import (distance_in_meters, filtered_forts,
                              get_increments, get_neighbors, get_route)
@@ -58,8 +67,7 @@ from pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Inventory
 from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.release.base import ReleaseMethodFactory
 from pgoapi.rpc_api import RpcApi
-
-from .utilities import f2i
+from pgoapi.utilities import parse_api_endpoint
 
 if six.PY3:
     from builtins import map as imap
@@ -71,14 +79,14 @@ logger = logging.getLogger(__name__)
 
 
 class PGoApi:
-    API_ENTRY = 'https://pgorelease.nianticlabs.com/plfe/rpc'
 
     def __init__(self, config):
 
         self.log = logging.getLogger(__name__)
+        self._api_endpoint = 'https://pgorelease.nianticlabs.com/plfe/rpc'
+        self._signature_lib = None
 
         self._auth_provider = None
-        self._api_endpoint = None
         self.config = config
         self.releaseMethodFactory = ReleaseMethodFactory(self.config)
         self._position_lat = 0  # int cooords
@@ -194,6 +202,14 @@ class PGoApi:
             self.log.warn(
                 "FARM_ITEMS has been disabled due to farming threshold being below the continue. Set 'CATCH_POKEMON' to 'false' to enable captureless traveling.")
 
+        self.new_forts = []
+        self.cache_filename = './cache/cache ' + (hashlib.md5(config.get("location", "unavailable").encode())).hexdigest() + str(self.STAY_WITHIN_PROXIMITY)
+        self.all_cached_forts = []
+        self.spinnable_cached_forts = []
+        self.use_cache = self.config.get("BEHAVIOR", {}).get("USE_CACHED_FORTS", False)
+        self.cache_is_sorted = self.config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
+        self.enable_caching = self.config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
+
     '''
     Blocking lock
         - only locks if current thread (greenlet) doesn't own the lock
@@ -224,6 +240,21 @@ class PGoApi:
     def gsleep(self, t):
         gevent.sleep(t * self.sleep_mult)
 
+    def activate_signature(self, lib_path):
+        self._signature_lib = lib_path
+
+    def get_signature_lib(self):
+        return self._signature_lib
+
+    def get_api_endpoint(self):
+        return self._api_endpoint
+
+    def set_api_endpoint(self, api_url):
+        if api_url.startswith("https"):
+            self._api_endpoint = api_url
+        else:
+            self._api_endpoint = parse_api_endpoint(api_url)
+
     def call(self):
         self.cond_lock()
         self.gsleep(self.config.get("BEHAVIOR", {}).get("EXTRA_WAIT", 0.3))
@@ -239,17 +270,49 @@ class PGoApi:
 
             request = RpcApi(self._auth_provider)
 
-            if self._api_endpoint:
-                api_endpoint = self._api_endpoint
-            else:
-                api_endpoint = self.API_ENTRY
+            if self.get_signature_lib() is not None:
+                request.activate_signature(self.get_signature_lib())
 
             self.log.debug('Execution of RPC')
             response = None
-            try:
-                response = request.request(api_endpoint, self._req_method_list[id(gevent.getcurrent())], player_position)
-            except ServerBusyOrOfflineException:
-                self.log.info('Server seems to be busy or offline - try again!')
+            execute = True
+
+            while execute:
+                execute = False
+
+                try:
+                    response = request.request(self.get_api_endpoint(), self._req_method_list[id(gevent.getcurrent())], player_position)
+                except AuthTokenExpiredException as e:
+                    """
+                    This exception only occures if the OAUTH service provider (google/ptc) didn't send any expiration date
+                    so that we are assuming, that the access_token is always valid until the API server states differently.
+                    """
+                    try:
+                        self.log.info('Access Token rejected! Requesting new one...')
+                        self._auth_provider.get_access_token(force_refresh=True)
+                    except:
+                        error = 'Request for new Access Token failed! Logged out...'
+                        self.log.error(error)
+                        raise NotLoggedInException(error)
+
+                    """ reexecute the call"""
+                    execute = True
+                except ServerApiEndpointRedirectException as e:
+                    self.log.info('API Endpoint redirect... re-execution of call')
+                    new_api_endpoint = e.get_redirected_endpoint()
+
+                    self._api_endpoint = parse_api_endpoint(new_api_endpoint)
+                    self.set_api_endpoint(self._api_endpoint)
+
+                    """ reexecute the call"""
+                    execute = True
+                except ServerBusyOrOfflineException as e:
+                    """ no execute = True here, as API retries on HTTP level should be done on a lower level, e.g. in rpc_api """
+                    self.log.info('Server seems to be busy or offline - try again!')
+                    self.log.debug('ServerBusyOrOfflineException details: %s', e)
+                except UnexpectedResponseException as e:
+                    self.log.error('Unexpected server response!')
+                    raise
 
             # cleanup after call execution
             self.log.debug('Cleanup of request!')
@@ -275,9 +338,9 @@ class PGoApi:
         if self._firstRun:
             self._firstRun = False
             self._origPosF = self._posf
-        self._position_lat = f2i(lat)
-        self._position_lng = f2i(lng)
-        self._position_alt = f2i(alt)
+        self._position_lat = lat
+        self._position_lng = lng
+        self._position_alt = alt
 
     def __getattr__(self, func):
         def function(**kwargs):
@@ -541,6 +604,7 @@ class PGoApi:
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
         if destinations:
+            self.new_forts = destinations
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
             self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
@@ -603,6 +667,7 @@ class PGoApi:
 
     def spin_all_forts_visible(self):
         res = self.nearby_map_objects()
+        self.log.debug("nearyby_map_objects: %s", res)
         map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
@@ -612,6 +677,7 @@ class PGoApi:
             self._error_counter += 1
             self.walk_back_to_origin()
             return False
+        self.new_forts = destinations
         if len(destinations) >= 20:
             destinations = destinations[:20]
         furthest_fort = destinations[0][0]
@@ -636,6 +702,7 @@ class PGoApi:
 
     def spin_near_fort(self):
         res = self.nearby_map_objects()
+        self.log.debug("nearyby_map_objects: %s", res)
         map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
@@ -644,7 +711,7 @@ class PGoApi:
             self.log.info('No more spinnable forts within proximity. Returning back to origin')
             self.walk_back_to_origin()
             return False
-
+        self.new_forts = destinations
         for fort_data in destinations:
             self.walk_to_fort(fort_data)
 
@@ -684,7 +751,7 @@ class PGoApi:
             gevent.sleep(1.0)
             self.map_objects = self.get_map_objects(
                 latitude=position[0], longitude=position[1],
-                since_timestamp_ms=[0] * len(neighbors),
+                since_timestamp_ms=[0, ] * len(neighbors),
                 cell_id=neighbors).call()
             self._last_got_map_objects = time()
         return self.map_objects
@@ -828,9 +895,9 @@ class PGoApi:
             inventory_items = self.get_inventory().call()\
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         caught_pokemon = self.get_caught_pokemons(inventory_items)
-        releaseMethod = self.releaseMethodFactory.getReleaseMethod()
-        for pokemonId, pokemons in caught_pokemon.iteritems():
-            pokemonsToRelease, pokemonsToKeep = releaseMethod.getPokemonToRelease(pokemonId, pokemons)
+        release_method = self.releaseMethodFactory.getReleaseMethod()
+        for pokemonId, pokemons in six.iteritems(caught_pokemon):
+            pokemonsToRelease, pokemonsToKeep = release_method.getPokemonToRelease(pokemonId, pokemons)
 
             if self.config.get('POKEMON_CLEANUP', {}).get('TESTING_MODE', False):
                 for pokemon in pokemonsToRelease:
@@ -882,7 +949,7 @@ class PGoApi:
     def is_pokemon_eligible_for_evolution(self, pokemon):
         candy_have = self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None), -1)
         candy_needed = self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None)
-        return candy_have > candy_needed and \
+        return candy_needed and candy_have > candy_needed and \
             pokemon.pokemon_id not in self.keep_pokemon_ids \
             and not pokemon.is_favorite \
             and pokemon.pokemon_id in self.POKEMON_EVOLUTION
@@ -1073,7 +1140,113 @@ class PGoApi:
             self.update_player_inventory()
             return False
 
-    def login(self, provider, username, password, cached=False):
+    def cache_forts(self, forts):
+        if not self.all_cached_forts:
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(forts, handle)
+
+            with open(self.cache_filename, 'rb') as handle:
+                self.all_cached_forts = pickle.load(handle)
+
+            self.log.info("Cache was empty... Dumping in new forts and initializing all_cached_forts")
+
+        else:
+            for fort in forts:
+                if not any(fort[0]['id'] == x[0]['id'] for x in self.all_cached_forts):
+                    self.all_cached_forts.insert(0, fort)
+                    self.log.info("Added new fort to cache")
+
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(self.all_cached_forts, handle)
+
+        self.log.info("Cached forts %s: ", len(self.all_cached_forts))
+
+    def setup_cache(self):
+        try:
+            self.log.debug("Opening cache file...")
+            with open(self.cache_filename, 'rb') as handle:
+                self.all_cached_forts = pickle.load(handle)
+
+        except Exception as e:
+            self.log.debug("Could not find or open cache, making new cache... %s", e)
+            if not os.path.exists('./cache'):
+                os.makedirs('./cache')
+            try:
+                os.remove(self.cache_filename)
+            except OSError:
+                pass
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(self.all_cached_forts, handle)
+
+    def sort_cached_forts(self):
+        if len(self.all_cached_forts) > 0:
+            if not self.cache_is_sorted:
+                self.log.info("Cache is unsorted, sorting now...")
+                tempallcached = copy.deepcopy(self.all_cached_forts) # copy over original
+                tempsorted = [copy.deepcopy(tempallcached[0])] # the final list to copy to cache
+                tempelement = copy.deepcopy(tempallcached[0]) # cur element
+                tempbool = True
+
+                while (len(tempsorted) < len(self.all_cached_forts)): # sort all elements
+                    templastelement = copy.deepcopy(tempsorted[-1])
+                    tempelement = copy.deepcopy(tempsorted[0])
+                    tempmaxfloat = sys.float_info.max # start with max float to find min distance
+
+                    if(tempbool):
+                        for fort in tempallcached:
+                            if distance_in_meters((self._origPosF[0], self._origPosF[1]), (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat:
+                                tempelement = copy.deepcopy(fort)
+                                tempmaxfloat = distance_in_meters((self._origPosF[0], self._origPosF[1]), (fort[0]['latitude'], fort[0]['longitude']))
+
+                        tempsorted.pop(0)
+                        tempsorted.append(tempelement)
+                        tempallcached.remove(tempelement)
+                        tempbool = False
+                    else:
+                        for fort in tempallcached:
+                            if ((distance_in_meters((templastelement[0]['latitude'], templastelement[0]['longitude']),
+                                                    (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat) and (not any(fort[0]['id'] == x[0]['id'] for x in tempsorted))):
+                                tempelement = copy.deepcopy(fort)
+                                tempmaxfloat = distance_in_meters((templastelement[0]['latitude'], templastelement[0]['longitude']),
+                                                                  (fort[0]['latitude'], fort[0]['longitude']))
+                        tempallcached.remove(tempelement)
+                        tempsorted.append(tempelement)
+
+                self.spinnable_cached_forts = copy.deepcopy(tempsorted)
+                self.cache_is_sorted = True
+
+                with open(self.cache_filename, 'wb') as handle:
+                    pickle.dump(self.spinnable_cached_forts, handle)
+
+            if not self.spinnable_cached_forts:
+                self.spinnable_cached_forts = copy.deepcopy(self.all_cached_forts)
+            return self.spinnable_cached_forts
+        else:
+            self.log.info("Cache is empty! Switching mode to cache forts")
+            return False
+
+    def spin_all_cached_forts(self):
+        destinations = self.sort_cached_forts()
+
+        if not destinations:
+            self.log.info('Turning on caching mode')
+            self.walk_back_to_origin()
+            self.use_cache = False
+            self.cache_is_sorted = False
+            return False
+
+        for fort_data in destinations:
+            fort = fort_data[0]
+            self.log.info(
+                "Walking to fort at  http://maps.google.com/maps?q=%s,%s",
+                fort['latitude'], fort['longitude'])
+            self.walk_to((fort['latitude'], fort['longitude']), directly=False)
+            self.fort_search_pgoapi(fort, self.get_position(), distance_in_meters((fort['latitude'], fort['longitude']),
+                                                                                  (self._posf[0], self._posf[1])))
+
+        return True
+
+    def login(self, provider, username, password, oauth2_refresh_token=None):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
             raise AuthException("Username/password not correctly specified")
 
@@ -1086,9 +1259,12 @@ class PGoApi:
 
         self.log.debug('Auth provider: %s', provider)
 
-        if not self._auth_provider.login(username, password):
-            self.log.info('Login process failed')
-            return False
+        if oauth2_refresh_token is not None:
+            self._auth_provider.set_refresh_token(oauth2_refresh_token)
+        elif username is not None and password is not None:
+            self._auth_provider.user_login(username, password)
+        else:
+            raise AuthException("Invalid Credential Input - Please provide username/password or an oauth2 refresh token")
 
         self.log.info('Starting RPC login sequence (app simulation)')
         # making a standard call, like it is also done by the client
@@ -1104,13 +1280,6 @@ class PGoApi:
             self.log.info('Login failed!')
             return False
 
-        if 'api_url' in response:
-            self._api_endpoint = ('https://{}/rpc'.format(response['api_url']))
-            self.log.debug('Setting API endpoint to: %s', self._api_endpoint)
-        else:
-            self.log.error('Login failed - unexpected server response!')
-            return False
-
         if 'auth_ticket' in response:
             self._auth_provider.set_ticket(response['auth_ticket'].values())
 
@@ -1122,20 +1291,31 @@ class PGoApi:
     def main_loop(self):
         catch_attempt = 0
         self.heartbeat()
+        if self.enable_caching and self.experimental:
+            if not self.use_cache:
+                self.log.info('==== CACHING MODE: CACHE FORTS ====')
+            else:
+                self.log.info('==== CACHING MODE: ROUTE+SPIN CACHED FORTS ====')
+            self.setup_cache()
         while True:
             self.heartbeat()
             # self.gsleep(1)
 
-            if self.experimental and self.spin_all_forts:
-                self.spin_all_forts_visible()
+            if self.use_cache and self.experimental and self.enable_caching:
+                self.spin_all_cached_forts()
             else:
-                self.spin_near_fort()
-            # if catching fails 10 times, maybe you are sofbanned.
-            # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
-            while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
-                # self.gsleep(4)
-                catch_attempt += 1
-                pass
+                if self.experimental and self.spin_all_forts:
+                    self.spin_all_forts_visible()
+                else:
+                    self.spin_near_fort()
+                if self.enable_caching and self.experimental and not self.use_cache:
+                    self.cache_forts(forts=self.new_forts)
+                # if catching fails 10 times, maybe you are sofbanned.
+                # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
+                while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
+                    # self.gsleep(4)
+                    catch_attempt += 1
+                    pass
             if catch_attempt > self.max_catch_attempts:
                 self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times",
                               catch_attempt)

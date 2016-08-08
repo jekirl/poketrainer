@@ -1,7 +1,6 @@
 """
 pgoapi - Pokemon Go API
 Copyright (c) 2016 tjado <https://github.com/tejado>
-Modifications Copyright (c) 2016 Brad Smith <https://github.com/infinitewarp>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,28 +21,43 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
 OR OTHER DEALINGS IN THE SOFTWARE.
 
 Author: tjado <https://github.com/tejado>
-Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
 from __future__ import absolute_import
 
+import base64
+import ctypes
 import logging
+import os
+import random
 import subprocess
 from importlib import import_module
 
 import requests
-from google.protobuf.message import DecodeError
+import six
+from google.protobuf import message
 
-from pgoapi.exceptions import (NotLoggedInException,
-                               ServerBusyOrOfflineException)
+import Signature_pb2
+from pgoapi.exceptions import (AuthTokenExpiredException, NotLoggedInException,
+                               ServerApiEndpointRedirectException,
+                               ServerBusyOrOfflineException,
+                               ServerSideAccessForbiddenException,
+                               ServerSideRequestThrottlingException,
+                               UnexpectedResponseException)
 from pgoapi.protobuf_to_dict import protobuf_to_dict
-from pgoapi.protos.POGOProtos.Networking.Envelopes_pb2 import (RequestEnvelope,
-                                                               ResponseEnvelope)
-from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
-from pgoapi.utilities import to_camel_case
+from pgoapi.utilities import (generateLocation1, generateLocation2,
+                              generateRequestHash, get_format_time_diff,
+                              get_time, to_camel_case)
+from POGOProtos.Networking.Envelopes_pb2 import (RequestEnvelope,
+                                                 ResponseEnvelope)
+from POGOProtos.Networking.Requests_pb2 import RequestType
 
 
 class RpcApi:
+
+    RPC_ID = 0
+    START_TIME = 0
+
     def __init__(self, auth_provider):
 
         self.log = logging.getLogger(__name__)
@@ -54,14 +68,34 @@ class RpcApi:
 
         self._auth_provider = auth_provider
 
+        """ mystic unknown6 - revolved by PokemonGoDev """
+        self._signature_gen = False
+        self._signature_lib = None
+
+        if RpcApi.START_TIME == 0:
+            RpcApi.START_TIME = get_time(ms=True)
+
+        if RpcApi.RPC_ID == 0:
+            RpcApi.RPC_ID = int(random.random() * 10 ** 18)
+            self.log.debug('Generated new random RPC Request id: %s', RpcApi.RPC_ID)
+
+    def activate_signature(self, lib_path):
+        try:
+            self._signature_gen = True
+            self._signature_lib = ctypes.cdll.LoadLibrary(lib_path)
+        except:
+            raise
+
     def get_rpc_id(self):
-        return 8145806132888207460
+        RpcApi.RPC_ID += 1
+        self.log.debug("Incremented RPC Request ID: %s", RpcApi.RPC_ID)
+
+        return RpcApi.RPC_ID
 
     def decode_raw(self, raw):
         output = error = None
         try:
-            process = subprocess.Popen(['protoc', '--decode_raw'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                       stderr=subprocess.PIPE)
+            process = subprocess.Popen(['protoc', '--decode_raw'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
             output, error = process.communicate(raw)
         except:
             output = "Couldn't find protoc in your environment OR other issue..."
@@ -79,8 +113,8 @@ class RpcApi:
         request_proto_serialized = request_proto_plain.SerializeToString()
         try:
             http_response = self._session.post(endpoint, data=request_proto_serialized)
-        except requests.exceptions.ConnectionError:
-            raise ServerBusyOrOfflineException
+        except requests.exceptions.ConnectionError as e:
+            raise ServerBusyOrOfflineException(e)
 
         return http_response
 
@@ -94,7 +128,46 @@ class RpcApi:
 
         response_dict = self._parse_main_response(response, subrequests)
 
+        self.check_authentication(response_dict)
+
+        """
+        some response validations
+        """
+        if isinstance(response_dict, dict):
+            status_code = response_dict.get('status_code', None)
+            if status_code == 102:
+                raise AuthTokenExpiredException()
+            elif status_code == 52:
+                raise ServerSideRequestThrottlingException("Request throttled by server... slow down man")
+            elif status_code == 53:
+                api_url = response_dict.get('api_url', None)
+                if api_url is not None:
+                    exception = ServerApiEndpointRedirectException()
+                    exception.set_redirected_endpoint(api_url)
+                    raise exception
+                else:
+                    raise UnexpectedResponseException()
+
         return response_dict
+
+    def check_authentication(self, response_dict):
+        if isinstance(response_dict, dict) and ('auth_ticket' in response_dict) and \
+           ('expire_timestamp_ms' in response_dict['auth_ticket']) and \
+           (self._auth_provider.is_new_ticket(response_dict['auth_ticket']['expire_timestamp_ms'])):
+
+            had_ticket = self._auth_provider.has_ticket()
+
+            auth_ticket = response_dict['auth_ticket']
+            self._auth_provider.set_ticket(
+                [auth_ticket['expire_timestamp_ms'], base64.standard_b64decode(auth_ticket['start']), base64.standard_b64decode(auth_ticket['end'])])
+
+            now_ms = get_time(ms=True)
+            h, m, s = get_format_time_diff(now_ms, auth_ticket['expire_timestamp_ms'], True)
+
+            if had_ticket:
+                self.log.debug('Replacing old Session Ticket with new one valid for %02d:%02d:%02d hours (%s < %s)', h, m, s, now_ms, auth_ticket['expire_timestamp_ms'])
+            else:
+                self.log.debug('Received Session Ticket valid for %02d:%02d:%02d hours (%s < %s)', h, m, s, now_ms, auth_ticket['expire_timestamp_ms'])
 
     def _build_main_request(self, subrequests, player_position=None):
         self.log.debug('Generating main RPC request...')
@@ -106,18 +179,90 @@ class RpcApi:
         if player_position is not None:
             request.latitude, request.longitude, request.altitude = player_position
 
-            # ticket = self._auth_provider.get_ticket()
-            # if ticket:
-            # request.auth_ticket.expire_timestamp_ms, request.auth_ticket.start, request.auth_ticket.end = ticket
-        # else:
-        request.auth_info.provider = self._auth_provider.get_name()
-        request.auth_info.token.contents = self._auth_provider.get_token()
-        request.auth_info.token.unknown2 = 59
+        request.altitude = random.randrange(1, 6)
+
+        """ generate sub requests before signature generation """
+        request = self._build_sub_requests(request, subrequests)
+
+        ticket = self._auth_provider.get_ticket()
+        if ticket:
+            self.log.debug('Found Session Ticket - using this instead of oauth token')
+            request.auth_ticket.expire_timestamp_ms, request.auth_ticket.start, request.auth_ticket.end = ticket
+
+            if self._signature_gen:
+                ticket_serialized = request.auth_ticket.SerializeToString()
+
+                sig = Signature_pb2.Signature()
+
+                sig.location_hash1 = generateLocation1(ticket_serialized, request.latitude, request.longitude, request.altitude)
+                sig.location_hash2 = generateLocation2(request.latitude, request.longitude, request.altitude)
+
+                for req in request.requests:
+                    hash = generateRequestHash(ticket_serialized, req.SerializeToString())
+                    sig.request_hash.append(hash)
+
+                sig.unk22 = os.urandom(32)
+                sig.timestamp = get_time(ms=True)
+                sig.timestamp_since_start = get_time(ms=True) - RpcApi.START_TIME
+
+                signature_proto = sig.SerializeToString()
+
+                u6 = request.unknown6.add()
+                u6.request_type = 6
+                u6.unknown2.unknown1 = self._generate_signature(signature_proto)
+        else:
+            self.log.debug('No Session Ticket found - using OAUTH Access Token')
+            request.auth_info.provider = self._auth_provider.get_name()
+            request.auth_info.token.contents = self._auth_provider.get_access_token()
+            request.auth_info.token.unknown2 = 59
 
         # unknown stuff
         request.unknown12 = 989
 
+        self.log.debug('Generated protobuf request: \n\r%s', request)
+
+        return request
+
+    def _generate_signature(self, signature_plain, lib_path="encrypt.so"):
+        if self._signature_lib is None:
+            self.activate_signature(lib_path)
+        self._signature_lib.argtypes = [ctypes.c_char_p, ctypes.c_size_t, ctypes.c_char_p, ctypes.c_size_t, ctypes.POINTER(ctypes.c_ubyte), ctypes.POINTER(ctypes.c_size_t)]
+        self._signature_lib.restype = ctypes.c_int
+
+        iv = os.urandom(32)
+
+        output_size = ctypes.c_size_t()
+
+        self._signature_lib.encrypt(signature_plain, len(signature_plain), iv, 32, None, ctypes.byref(output_size))
+        output = (ctypes.c_ubyte * output_size.value)()
+        self._signature_lib.encrypt(signature_plain, len(signature_plain), iv, 32, ctypes.byref(output), ctypes.byref(output_size))
+        signature = b''.join(list(map(lambda x: six.int2byte(x), output)))
+        return signature
+
+    def _build_main_request_orig(self, subrequests, player_position=None):
+        self.log.debug('Generating main RPC request...')
+
+        request = RequestEnvelope()
+        request.status_code = 2
+        request.request_id = self.get_rpc_id()
+
         request = self._build_sub_requests(request, subrequests)
+
+        if player_position is not None:
+            request.latitude, request.longitude, request.altitude = player_position
+
+        ticket = self._auth_provider.get_ticket()
+        if ticket:
+            self.log.debug('Found Session Ticket - using this instead of oauth token')
+            request.auth_ticket.expire_timestamp_ms, request.auth_ticket.start, request.auth_ticket.end = ticket
+        else:
+            self.log.debug('No Session Ticket found - using OAUTH Access Token')
+            request.auth_info.provider = self._auth_provider.get_name()
+            request.auth_info.token.contents = self._auth_provider.get_access_token()
+            request.auth_info.token.unknown2 = 59
+
+        # unknown stuff
+        request.unknown12 = 3352
 
         self.log.debug('Generated protobuf request: \n\r%s', request)
 
@@ -149,8 +294,14 @@ class RpcApi:
                                 r = getattr(subrequest_extension, key)
                                 r.append(i)
                             except Exception as e:
-                                self.log.warning('Argument %s with value %s unknown inside %s (Exception: %s)', key, i,
-                                                 proto_name, str(e))
+                                self.log.warning('Argument %s with value %s unknown inside %s (Exception: %s)', key, i, proto_name, e)
+                    elif isinstance(value, dict):
+                        for k in value.keys():
+                            try:
+                                r = getattr(subrequest_extension, key)
+                                setattr(r, k, value[k])
+                            except Exception as e:
+                                self.log.warning('Argument %s with value %s unknown inside %s (Exception: %s)', key, str(value), proto_name, e)
                     else:
                         try:
                             setattr(subrequest_extension, key, value)
@@ -160,8 +311,7 @@ class RpcApi:
                                 r = getattr(subrequest_extension, key)
                                 r.append(value)
                             except Exception as e:
-                                self.log.warning('Argument %s with value %s unknown inside %s (Exception: %s)', key,
-                                                 value, proto_name, str(e))
+                                self.log.warning('Argument %s with value %s unknown inside %s (Exception: %s)', key, value, proto_name, e)
 
                 subrequest = mainrequest.requests.add()
                 subrequest.request_type = entry_id
@@ -178,10 +328,15 @@ class RpcApi:
     def _parse_main_response(self, response_raw, subrequests):
         self.log.debug('Parsing main RPC response...')
 
-        if response_raw.status_code != 200:
-            self.log.warning('Unexpected HTTP server response - needs 200 got %s', response_raw.status_code)
+        if response_raw.status_code == 403:
+            raise ServerSideAccessForbiddenException("Seems your IP Address is banned or something else went badly wrong...")
+        elif response_raw.status_code == 502:
+            raise ServerBusyOrOfflineException("502: Bad Gateway")
+        elif response_raw.status_code != 200:
+            error = 'Unexpected HTTP server response - needs 200 got {}'.format(response_raw.status_code)
+            self.log.warning(error)
             self.log.debug('HTTP output: \n%s', response_raw.content.decode('utf-8'))
-            return False
+            raise UnexpectedResponseException(error)
 
         if response_raw.content is None:
             self.log.warning('Empty server response!')
@@ -190,14 +345,13 @@ class RpcApi:
         response_proto = ResponseEnvelope()
         try:
             response_proto.ParseFromString(response_raw.content)
-        except DecodeError as e:
-            self.log.warning('Could not parse response: %s', str(e))
+        except message.DecodeError as e:
+            self.log.warning('Could not parse response: %s', e)
             return False
 
         self.log.debug('Protobuf structure of rpc response:\n\r%s', response_proto)
         try:
-            self.log.debug('Decode raw over protoc (protoc has to be in your PATH):\n\r%s',
-                           self.decode_raw(response_raw.content).decode('utf-8'))
+            self.log.debug('Decode raw over protoc (protoc has to be in your PATH):\n\r%s', self.decode_raw(response_raw.content).decode('utf-8'))
         except:
             self.log.debug('Error during protoc parsing - ignored.')
 
@@ -251,4 +405,5 @@ class RpcApi:
 
             response_proto_dict['responses'][entry_name] = subresponse_return
             i += 1
+
         return response_proto_dict
