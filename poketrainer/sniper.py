@@ -1,0 +1,69 @@
+import logging
+
+from helper.utilities import flatmap
+from .pokemon import POKEMON_NAMES
+from .location import distance_in_meters
+
+
+class Sniper:
+    def __init__(self, parent):
+        self.parent = parent
+        self.log = logging.getLogger(__name__)
+
+    # instead of a full heartbeat, just update position.
+    # useful for sniping for example
+    def send_update_pos(self):
+        res = self.parent.api.get_player()
+        if not res or res.get("direction", -1) == 102:
+            self.log.error("There were a problem responses for api call: %s. Can't snipe!", res)
+            return False
+        return True
+
+    def snipe_pokemon(self, lat, lng):
+        self.parent.cond_lock(persist=True)
+
+        self.parent.sleep(
+            2)  # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
+        posf = self.parent.get_position()
+        curr_lat = posf[0]
+        curr_lng = posf[1]
+
+        try:
+            self.log.info("Sniping pokemon at %f, %f", lat, lng)
+            self.parent.wait_for_api_timer()
+
+            # move to snipe location
+            self.parent.api.set_position(lat, lng, 0.0)
+            if not self.send_update_pos():
+                return False
+
+            self.log.debug("Teleported to sniping location %f, %f", lat, lng)
+
+            # find pokemons in dest
+            map_cells = self.parent.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
+            pokemons = flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
+
+            # catch first pokemon:
+            pokemon_rarity_and_dist = [
+                (
+                    pokemon, pokedex.get_rarity_by_id(pokemon['pokemon_id']),
+                    distance_in_meters(self.parent.get_position(), (pokemon['latitude'], pokemon['longitude']))
+                )
+                for pokemon in pokemons]
+            pokemon_rarity_and_dist.sort(key=lambda x: x[1], reverse=True)
+
+            if pokemon_rarity_and_dist:
+                self.log.info("Rarest pokemon: : %s", POKEMON_NAMES[str(pokemon_rarity_and_dist[0][0]['pokemon_id'])])
+                return self.parent.poke_catcher.encounter_pokemon(pokemon_rarity_and_dist[0][0], new_loc=(curr_lat, curr_lng))
+            else:
+                self.log.info("No nearby pokemon. Can't snipe!")
+                return False
+
+        finally:
+            self.parent.api.set_position(curr_lat, curr_lng, 0.0)
+            self.send_update_pos()
+            posf = self.parent.get_position()
+            self.log.debug("Teleported back to origin at %f, %f", posf[0], posf[1])
+            # self.sleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
+            self.persist_lock = False
+            self.parent.cond_release()

@@ -40,7 +40,7 @@ from time import sleep
 import eventlet
 import gevent
 
-from poketrainer.poketrainer_wrapper import PoketrainerWrapper
+from poketrainer.poketrainer import Poketrainer
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ def main():
     if not args:
         return
 
-    poketrainer = PoketrainerWrapper(args)
+    poketrainer = Poketrainer(args)
     # auto-start bot
     poketrainer.start()
     # because the bot spawns 'threads' so it can start / stop we're making an infinite lop here

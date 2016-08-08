@@ -143,7 +143,7 @@ class FortWalker:
                 self.do_fort_spin(nearest_fort, player_postion=self.parent.api.get_position(),
                                   fort_distance=nearest_fort_dis)
                 if 'lure_info' in nearest_fort and self.parent.should_catch_pokemon:
-                    self.parent.catcher.disk_encounter_pokemon(nearest_fort['lure_info'])
+                    self.parent.poke_catcher.disk_encounter_pokemon(nearest_fort['lure_info'])
 
         else:
             self.log.info('No spinnable forts within proximity. Or server returned no map objects.')

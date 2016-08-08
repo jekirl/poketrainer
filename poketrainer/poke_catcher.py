@@ -9,7 +9,7 @@ from .location import distance_in_meters
 from .poke_utils import create_capture_probability, get_item_name
 
 
-class Catcher:
+class PokeCatcher:
     def __init__(self, parent):
         self.parent = parent
         self.encountered_pokemons = TTLCache(maxsize=120, ttl=self.parent.get_api_rate_limit() * 2)
