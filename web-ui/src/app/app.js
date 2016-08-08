@@ -9,6 +9,7 @@ angular.module('poketrainer', [
 	'Poketrainer.Service.User',
 	'Poketrainer.Service.Inventory',
 	'Poketrainer.Service.Pokemon',
+	'Poketrainer.Service.Socket',
 
 	/** States/Routes **/
 	'Poketrainer.State.Abstracts',

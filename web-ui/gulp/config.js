@@ -163,6 +163,7 @@ module.exports = (function () {
                 bowerPath + '/angular-google-maps/dist/angular-google-maps.js',
                 bowerPath + '/jquery.easy-pie-chart/dist/angular.easypiechart.js',
                 bowerPath + '/angular-datatables/dist/angular-datatables.js',
+                bowerPath + '/angular-socket-io/socket.js',
 
                 npmPath + '/chart.js/dist/Chart.js',
                 bowerPath + '/angular-chart.js/dist/angular-chart.js',
