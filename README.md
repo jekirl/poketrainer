@@ -54,6 +54,8 @@ Below the accounts you can change options in the `default` section. If you need 
    * `STEP_SIZE` corresponds to how many meters you want to move at most between server calls, set this around 4-6 for walking or 100-200 for really, really fast driving
    * `WANDER_STEPS` will set the distance a pokestop can be away before and still allow us to wander off the walk path. This allows you to get pokestops that aren't close to the sidewalk/road. If you don't set it we won't wander off the path.
    * `EXPERIMENTAL` will set the flag to use exeperimental features
+   * `MULTI_LOCATIONS` will enable the multi-locations functionality. Using this, the bot will be assigned a new location from the "MULTI_LOCATIONS_COORDS" list below when it runs out of PokeStops to visit. It works through the list one by one, eventually returning to your original location.
+   * `MULTI_LOCATIONS_COORDS` a list of locations that you would like the bot to move/walk to. Can be "Lat, Lon", an address, or any other location just like the one you set initially.
    * `SKIP_VISITED_FORT_DURATION` [Experimental] Avoid a fort for a given number of seconds
      * Setting this to 500 means avoid a fort for 500 seconds before returning, (Should be higher than 300 to have any effect). This will let the bot explore a bigger area.
    * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
