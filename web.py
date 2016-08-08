@@ -9,7 +9,7 @@ from collections import defaultdict
 
 import zerorpc
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
-from six import iteritems
+from werkzeug.exceptions import NotFound
 
 from pgoapi.poke_lvl_data import TCPM_VALS
 from pgoapi.pokemon import Pokemon
@@ -46,28 +46,16 @@ with open("GAME_ATTACKS_v0_1.tsv") as tsv:
         attacks[int(row["Num"])] = row["Move"]
 
 
-def init_config():
-    parser = argparse.ArgumentParser()
+def init_config(username):
     config_file = "config.json"
 
-    # If config file exists, load variables from json
-    load = {}
+    config_data = {}
     if os.path.isfile(config_file):
         with open(config_file) as data:
-            load.update(json.load(data))
+            config_data.update(json.load(data))
 
-    # Read passed in Arguments
-    def required(x):
-        return x not in load['accounts'][0].keys()
-    parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
-    config = parser.parse_args()
-    load = load['accounts'][config.__dict__['config_index']]
-    # Passed in arguments shoud trump
-    for key, value in iteritems(load):
-        if key not in config.__dict__ or not config.__dict__[key]:
-            config.__dict__[key] = value
-
-    return config.__dict__
+    filtered_data = filter(lambda x: x.get('username') == username, config_data.get('accounts', []))
+    return filtered_data[0]
 
 
 def set_columns_to_ignore(columns_to_ignore):
@@ -139,7 +127,8 @@ def get_api_rpc(username):
         data = f.read()
         data = json.loads(data if len(data) > 0 else '{}')
         if username not in data:
-            print("There is no bot running with the input username!")
+            # FIXME Use logger instead of print statements!
+            print("There is no bot running with username '%s'!" % username)
             return None
         sock_port = int(data[username])
 
@@ -148,13 +137,19 @@ def get_api_rpc(username):
     return c
 
 
+@app.route("/favicon.ico")
+def favicon():
+    # Explicitly handle favicon.ico so it doesn't route to the status function.
+    return NotFound()
+
+
 @app.route("/<username>")
 @app.route("/<username>/status")
 def status(username):
     c = get_api_rpc(username)
     if c is None:
-        return("There is no bot running with the input username!")
-    config = init_config()
+        return("There is no bot running with username '%s'!" % username)
+    config = init_config(username)
     options['SCORE_METHOD'] = config.get('POKEMON_CLEANUP', {}).get("SCORE_METHOD", "CP")
     options['IGNORE_COLUMNS'] = config.get("IGNORE_COLUMNS", [])
     set_columns_to_ignore(options['IGNORE_COLUMNS'])
@@ -251,32 +246,30 @@ def snipe(username, latlng):
 
 
 def init_web_config():
-    load = {
+    default_configs = {
         "hostname": "0.0.0.0",
         "port": 5000,
         "debug": True
     }
     config_file = "web_config.json"
+
     # If config file exists, load variables from json
     if os.path.isfile(config_file):
         with open(config_file) as data:
-            load.update(json.load(data))
+            default_configs.update(json.load(data))
+
     # Read passed in Arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--hostname", help="Server hostname/IP")
-    parser.add_argument("-p", "--port", help="Server TCP port number", type=int)
-    parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true')
+    parser.add_argument("-s", "--hostname", help="Server hostname/IP", default=default_configs['hostname'])
+    parser.add_argument("-p", "--port", help="Server TCP port number", type=int, default=default_configs['port'])
+    parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=default_configs['debug'])
     web_config = parser.parse_args()
-    # Passed in arguments should trump
-    for key, value in iteritems(load):
-        if key not in web_config.__dict__ or not web_config.__dict__[key]:
-            web_config.__dict__[key] = value
-    return web_config.__dict__
+    return web_config
 
 
 def main():
     web_config = init_web_config()
-    app.run(host=web_config["hostname"], port=web_config["port"], debug=web_config["debug"])
+    app.run(host=web_config.hostname, port=web_config.port, debug=web_config.debug)
 
 if __name__ == "__main__":
     main()
