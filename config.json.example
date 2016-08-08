@@ -130,6 +130,7 @@
         "FARM_OVERRIDE_STEP_SIZE": -1
       },
       "CONSOLE_OUTPUT": {
+        "EXPLAIN_EVOLUTION_BEFORE_CLEANUP": true,
         "LIST_POKEMON_BEFORE_CLEANUP": true,
         "LIST_INVENTORY_BEFORE_CLEANUP": true
       }

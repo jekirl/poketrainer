@@ -177,6 +177,7 @@ class PGoApi:
                                                                                      True)  # ignore masterballs in the continue tally
         self.FARM_OVERRIDE_STEP_SIZE = config.get("NEEDY_ITEM_FARMING", {}).get("FARM_OVERRIDE_STEP_SIZE",
                                                                                 -1)  # should the step size be overriden when looking for more inventory, -1 to disable
+        self.EXPLAIN_EVOLUTION_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("EXPLAIN_EVOLUTION_BEFORE_CLEANUP", True)  # explain individual evolution criteria in console
         self.LIST_POKEMON_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_POKEMON_BEFORE_CLEANUP", True)  # list pokemon in console
         self.LIST_INVENTORY_BEFORE_CLEANUP = config.get("CONSOLE_OUTPUT", {}).get("LIST_INVENTORY_BEFORE_CLEANUP", True)  # list inventory in console
 
@@ -919,6 +920,11 @@ class PGoApi:
                     # If we can't evolve this type of pokemon anymore, don't check others.
                     if not self.attempt_evolve_pokemon(pokemon):
                         break
+            elif self.EXPLAIN_EVOLUTION_BEFORE_CLEANUP:
+                self.log.info(
+                    'Not evolving %s because you have %s but need more than %s.',
+                    pokemons[0].pokemon_type, len(pokemons), self.MIN_SIMILAR_POKEMON
+                )
 
     def attempt_evolve_pokemon(self, pokemon):
         if self.is_pokemon_eligible_for_evolution(pokemon=pokemon):
@@ -944,12 +950,27 @@ class PGoApi:
             return False
 
     def is_pokemon_eligible_for_evolution(self, pokemon):
-        candy_have = self.inventory.pokemon_candy.get(self.POKEMON_EVOLUTION_FAMILY.get(pokemon.pokemon_id, None), -1)
+        candy_have = self.inventory.pokemon_candy.get(int(pokemon.family_id), -1)
         candy_needed = self.POKEMON_EVOLUTION.get(pokemon.pokemon_id, None)
-        return candy_needed and candy_have > candy_needed and \
-            pokemon.pokemon_id not in self.keep_pokemon_ids \
-            and not pokemon.is_favorite \
-            and pokemon.pokemon_id in self.POKEMON_EVOLUTION
+        in_keep_list = pokemon.pokemon_id in self.keep_pokemon_ids
+        is_favorite = pokemon.is_favorite
+        in_evolution_list = pokemon.pokemon_id in self.POKEMON_EVOLUTION
+
+        eligible_to_evolve = bool(
+            candy_needed and
+            candy_have > candy_needed and
+            not in_keep_list and
+            not is_favorite and
+            in_evolution_list
+        )
+
+        if self.EXPLAIN_EVOLUTION_BEFORE_CLEANUP:
+            self.log.info(
+                "%s can evolve? %s! Need candy: %s. Have candy: %s. Favorite? %s. In keep list? %s. In evolution list? %s.",
+                pokemon.pokemon_type, eligible_to_evolve, candy_needed, candy_have, in_keep_list, is_favorite, in_evolution_list
+            )
+
+        return eligible_to_evolve
 
     def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:
