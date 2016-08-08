@@ -12,9 +12,9 @@ from library.api.pgoapi.protos.POGOProtos.Inventory import Item_pb2 as Item_Enum
 
 class Inventory:
     def __init__(self, parent, inventory_items):
-        self.parent = parent
+        self._parent = parent
         self.inventory_items = inventory_items
-        self.log = logging.getLogger(__name__)
+        self._log = logging.getLogger(__name__)
         self._last_egg_use_time = 0
 
         self.ultra_balls = 0
@@ -27,10 +27,10 @@ class Inventory:
         self.max_potion = 0
         self.lucky_eggs = 0
         self.razz_berries = 0
-        self.pokeball_percent = self.parent.config.ball_priorities[0] / 100.0
-        self.greatball_percent = self.parent.config.ball_priorities[1] / 100.0
-        self.ultraball_percent = self.parent.config.ball_priorities[2] / 100.0
-        self.use_masterball = self.parent.config.ball_priorities[3]
+        self.pokeball_percent = self._parent.config.ball_priorities[0] / 100.0
+        self.greatball_percent = self._parent.config.ball_priorities[1] / 100.0
+        self.ultraball_percent = self._parent.config.ball_priorities[2] / 100.0
+        self.use_masterball = self._parent.config.ball_priorities[3]
 
         self.pokemon_candy = defaultdict()
         self.eggs_available = []
@@ -158,32 +158,32 @@ class Inventory:
         for inventory_item in self.inventory_items:
             if "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
-                if (item['item_id'] in self.parent.config.min_items and
+                if (item['item_id'] in self._parent.config.min_items and
                             "count" in item and
-                            item['count'] > self.parent.config.min_items[item['item_id']]):
-                    recycle_count = item['count'] - self.parent.config.min_items[item['item_id']]
+                            item['count'] > self._parent.config.min_items[item['item_id']]):
+                    recycle_count = item['count'] - self._parent.config.min_items[item['item_id']]
                     item_count += item['count'] - recycle_count
-                    self.log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
-                    res = self.parent.api.recycle_inventory_item(item_id=item['item_id'], count=recycle_count) \
+                    self._log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
+                    res = self._parent.api.recycle_inventory_item(item_id=item['item_id'], count=recycle_count) \
                         .get('responses', {}).get('RECYCLE_INVENTORY_ITEM', {})
                     response_code = res.get('result', -1)
                     if response_code == 1:
-                        self.parent.sleep(1.0)
-                        self.log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
+                        self._parent.sleep(1.0)
+                        self._log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
                             item['item_id']), res.get('new_count', 0)))
                     else:
-                        self.log.info("Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']),
+                        self._log.info("Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']),
                                                                                 response_code))
                 elif "count" in item:
                     item_count += item['count']
         if item_count > 0:
-            self.log.info("Inventory has {0}/{1} items".format(item_count, self.parent.player.max_item_storage))
+            self._log.info("Inventory has {0}/{1} items".format(item_count, self._parent.player.max_item_storage))
         return self.update_player_inventory()
 
     def get_caught_pokemon(self, as_json=False):
-        pokemon_list = sorted(map(lambda x: Pokemon(x['pokemon_data'], self.parent.player_stats.level,
-                                                    self.parent.config.score_method,
-                                                    self.parent.config.score_settings),
+        pokemon_list = sorted(map(lambda x: Pokemon(x['pokemon_data'], self._parent.player_stats.level,
+                                                    self._parent.config.score_method,
+                                                    self._parent.config.score_settings),
                               filter(lambda x: 'pokemon_data' in x and not x['pokemon_data'].get("is_egg", False),
                               map(lambda x: x.get('inventory_item_data', {}), self.inventory_items))),
                           key=lambda x: x.score, reverse=True)
@@ -202,8 +202,8 @@ class Inventory:
 
     def get_caught_pokemons_old(self, inventory_items=None, as_json=False):
         if not inventory_items:
-            self.parent.sleep(0.2)
-            inventory_items = self.parent.api.get_inventory() \
+            self._parent.sleep(0.2)
+            inventory_items = self._parent.api.get_inventory() \
                 .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
         caught_pokemon = defaultdict(list)
         for inventory_item in inventory_items:
@@ -211,8 +211,8 @@ class Inventory:
                 'pokemon_data'].get("is_egg", False):
                 # is a pokemon:
                 pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
-                pokemon = Pokemon(pokemon_data, self.parent.player_stats.level, self.parent.config.score_method,
-                                  self.parent.config.score_settings)
+                pokemon = Pokemon(pokemon_data, self._parent.player_stats.level, self._parent.config.score_method,
+                                  self._parent.config.score_settings)
 
                 if not pokemon.is_egg:
                     caught_pokemon[pokemon.pokemon_id].append(pokemon)
@@ -221,7 +221,7 @@ class Inventory:
         return caught_pokemon
 
     def update_player_inventory(self):
-        res = self.parent.api.get_inventory()
+        res = self._parent.api.get_inventory()
         if 'GET_INVENTORY' in res.get('responses', {}):
             self.inventory_items = res.get('responses', {}) \
                 .get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
@@ -229,20 +229,20 @@ class Inventory:
         return res
 
     def use_lucky_egg(self):
-        if self.parent.config.use_lucky_egg and \
+        if self._parent.config.use_lucky_egg and \
                 self.has_lucky_egg() and time() - self._last_egg_use_time > 30 * 60:
-            response = self.parent.api.use_item_xp_boost(item_id=Item_Enums.ITEM_LUCKY_EGG)
+            response = self._parent.api.use_item_xp_boost(item_id=Item_Enums.ITEM_LUCKY_EGG)
             result = response.get('responses', {}).get('USE_ITEM_XP_BOOST', {}).get('result', -1)
             if result == 1:
-                self.log.info("Ate a lucky egg! Yummy! :)")
+                self._log.info("Ate a lucky egg! Yummy! :)")
                 self.take_lucky_egg()
                 self._last_egg_use_time = time()
                 return True
             elif result == 3:
-                self.log.info("Lucky egg already active")
+                self._log.info("Lucky egg already active")
                 return False
             else:
-                self.log.info("Lucky Egg couldn't be used, status code %s", result)
+                self._log.info("Lucky Egg couldn't be used, status code %s", result)
                 return False
         else:
             return False
@@ -265,4 +265,7 @@ class Inventory:
         return self.__str__()
 
     def to_json(self):
-        return json.dumps(self, default=lambda o: o.__dict__)
+        return json.dumps(
+            dict((att, val) for att, val in self.__dict__.iteritems() if not att.startswith('_')),
+            default=lambda o: o.__dict__
+        )

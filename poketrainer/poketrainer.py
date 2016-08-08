@@ -392,7 +392,7 @@ class Poketrainer:
         return self.release.do_release_pokemon_by_id(p_id)
 
     def current_location(self):
-        self.log.info("Web got position: " + self.get_position())
+        self.log.info("Web got position: %s", self.get_position())
         return self.get_position()
 
     def get_caught_pokemons(self):
