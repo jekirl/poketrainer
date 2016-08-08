@@ -141,8 +141,6 @@ def get_api_rpc(username):
     c.connect("tcp://127.0.0.1:%i" % sock_port)
     return c
 
-
-<<<<<<< HEAD
 @app.route('/api/player/<username>/inventory', methods=['GET'])
 def get_inventory(username):
     s = get_api_rpc(username)
@@ -250,13 +248,11 @@ def get_pokemon(username):
     s = get_api_rpc(username)
     player = json.loads(s.get_caught_pokemons())
     return jsonify(player)
-=======
+
 @app.route("/favicon.ico")
 def favicon():
     # Explicitly handle favicon.ico so it doesn't route to the status function.
     return NotFound()
-
->>>>>>> refs/remotes/j-e-k/develop
 
 @app.route("/<username>")
 @app.route("/<username>/status")
@@ -384,11 +380,7 @@ def init_web_config():
 
 def main():
     web_config = init_web_config()
-<<<<<<< HEAD
-    app.run(host=web_config["hostname"], port=web_config["port"], debug=web_config["debug"], threaded=True)
-=======
-    app.run(host=web_config.hostname, port=web_config.port, debug=web_config.debug)
->>>>>>> refs/remotes/j-e-k/develop
+    app.run(host=web_config.hostname, port=web_config.port, debug=web_config.debug, threaded=True)
 
 if __name__ == "__main__":
     main()
