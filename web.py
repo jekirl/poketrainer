@@ -5,6 +5,7 @@ import argparse
 import csv
 import json
 import os
+import time
 from collections import defaultdict
 
 import zerorpc
@@ -217,7 +218,18 @@ def transfer(username, p_id):
         flash("Released")
     else:
         flash("Failed!")
-    return redirect(url_for('inventory', username=username))
+    time.sleep(2)
+    return redirect(url_for('status', username=username))
+
+
+@app.route("/<username>/evolve/<p_id>")
+def evolve(username, p_id):
+    c = get_api_rpc(username)
+    if c and c.evolve_pokemon_by_id(p_id) == 1:
+        flash("Evolved")
+    else:
+        flash("Failed!")
+    return redirect(url_for('pokemon', username=username))
 
 
 @app.route("/<username>/snipe/<latlng>")
