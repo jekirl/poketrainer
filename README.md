@@ -59,6 +59,7 @@ Below the accounts you can change options in the `default` section. If you need 
    * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
 * `CAPTURE`
    * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
+   * `CATCH_TRASH` Instructs the bot never to catch any pokemon in your 'THROW_POKEMON_NAMES' list : (default: true (it will catch trash))
    * `MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY` minimum number of failed capture attempts before trying to use a Razz Berry (default: 3)
    * `USE_POKEBALL_IF_PERCENT` As long as using a pokeball would result in at least this percent of a chance to capture, use it (default: 50)
    * `USE_GREATBALL_IF_PERCENT` If using a pokeball wouldn't result in at least the above percent, use a greatball if the capture rate is above this percent (default: 50)

@@ -95,3 +95,22 @@ class AuthGoogle(Auth):
                 self._access_token = None
                 self._login = False
                 raise AuthException("Could not receive a Google Access Token")
+    def login(self, username, password):
+        self.log.info('[LOGIN]\t- Google login for: {}'.format(username))
+        login = perform_master_login(username, password, self.GOOGLE_LOGIN_ANDROID_ID)
+        login = perform_oauth(username, login.get('Token', ''), self.GOOGLE_LOGIN_ANDROID_ID, self.GOOGLE_LOGIN_SERVICE,
+                              self.GOOGLE_LOGIN_APP,
+                              self.GOOGLE_LOGIN_CLIENT_SIG)
+
+        self._auth_token = login.get('Auth')
+
+        if self._auth_token is None:
+            self.log.info('[LOGIN]\t- Google Login failed.')
+            return False
+
+        self._login = True
+
+        self.log.info('[LOGIN]\t- Google Login successful.')
+        self.log.debug('Google Session Token: %s', self._auth_token[:25])
+
+        return True

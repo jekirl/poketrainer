@@ -59,6 +59,7 @@ class AuthPtc(Auth):
 
         if not isinstance(username, six.string_types) or not isinstance(password, six.string_types):
             raise AuthException("Username/password not correctly specified")
+        self.log.info('[LOGIN]\t- Login for: %s', username)
 
         head = {'User-Agent': 'niantic'}
         r = self._session.get(self.PTC_LOGIN_URL, headers=head)
@@ -95,6 +96,25 @@ class AuthPtc(Auth):
         self.log.info('PTC User Login successful.')
 
         self.get_access_token()
+        data1 = {
+            'client_id': 'mobile-app_pokemon-go',
+            'redirect_uri': 'https://www.nianticlabs.com/pokemongo/error',
+            'client_secret': self.PTC_LOGIN_CLIENT_SECRET,
+            'grant_type': 'refresh_token',
+            'code': ticket,
+        }
+
+        r2 = self._session.post(self.PTC_LOGIN_OAUTH, data=data1)
+        access_token = re.sub('&expires.*', '', r2.content.decode('utf-8'))
+        access_token = re.sub('.*access_token=', '', access_token)
+
+        if '-sso.pokemon.com' in access_token:
+            self.log.info('[LOGIN]\t- PTC Login successful')
+            self.log.debug('PTC Session Token: %s', access_token[:25])
+            self._auth_token = access_token
+        else:
+            self.log.info('[LOGIN]\t- Seems not to be a PTC Session Token... login failed :(')
+            return False
 
     def set_refresh_token(self, refresh_token):
         self.log.info('PTC Refresh Token provided by user')
