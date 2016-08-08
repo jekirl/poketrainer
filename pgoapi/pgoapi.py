@@ -29,8 +29,13 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 
 from __future__ import absolute_import
 
+import copy
 import json
 import logging
+import os
+import pickle
+import sys
+
 from collections import defaultdict
 from itertools import chain
 from time import time
@@ -180,6 +185,14 @@ class PGoApi:
         self.STAY_WITHIN_PROXIMITY = config.get("BEHAVIOR", {}).get("STAY_WITHIN_PROXIMITY", 9999999)  # Stay within proximity
         self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True)
         self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
+
+        self.new_forts = []
+        self.cache_filename = './cache/cache ' + str(config["location"]) + str(self.STAY_WITHIN_PROXIMITY)
+        self.all_cached_forts = []
+        self.spinnable_cached_forts = []
+        self.use_cache = self.config.get("BEHAVIOR", {}).get("USE_CACHED_FORTS", False)
+        self.cache_is_sorted = self.config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
+        self.enable_caching = self.config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
 
         # Sanity checking
         self.FARM_ITEMS_ENABLED = self.FARM_ITEMS_ENABLED and self.experimental and self.should_catch_pokemon  # Experimental, and we needn't do this if we're farming anyway
@@ -591,6 +604,7 @@ class PGoApi:
         forts = PGoApi.flatmap(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self._origPosF, self._posf, forts, self.STAY_WITHIN_PROXIMITY, self.visited_forts)
         if destinations:
+            self.new_forts = destinations
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
             self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
@@ -663,6 +677,7 @@ class PGoApi:
             self._error_counter += 1
             self.walk_back_to_origin()
             return False
+        self.new_forts = destinations
         if len(destinations) >= 20:
             destinations = destinations[:20]
         furthest_fort = destinations[0][0]
@@ -697,6 +712,7 @@ class PGoApi:
             self.walk_back_to_origin()
             return False
 
+        self.new_forts = destinations
         for fort_data in destinations:
             self.walk_to_fort(fort_data)
 
@@ -1122,7 +1138,108 @@ class PGoApi:
             self.update_player_inventory()
             return False
 
-    def login(self, provider, username, password, oauth2_refresh_token=None):
+    def cache_forts(self, forts):
+        if not self.all_cached_forts:
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(forts, handle)
+
+            with open(self.cache_filename, 'rb') as handle:
+                self.all_cached_forts = pickle.load(handle)
+
+            self.log.info("Cache was empty... Dumping in new forts and initializing all_cached_forts")
+
+        else:
+            for fort in forts:
+                if not any(fort[0]['id'] == x[0]['id'] for x in self.all_cached_forts):
+                    self.all_cached_forts.insert(0, fort)
+                    self.log.info("Added new fort to cache")
+
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(self.all_cached_forts, handle)
+
+        self.log.info("Cached forts %s: ", len(self.all_cached_forts))
+
+    def setup_cache(self):
+        try:
+            self.log.debug("Opening cache file...")
+            with open(self.cache_filename, 'rb') as handle:
+                self.all_cached_forts = pickle.load(handle)
+
+        except Exception as e:
+            self.log.debug("Could not find or open cache, making new cache... %s", e)
+            if not os.path.exists('./cache'):
+                os.makedirs('./cache')
+            try:
+                os.remove(self.cache_filename)
+            except OSError:
+                pass
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(self.all_cached_forts, handle)
+
+    def sort_cached_forts(self):
+        if not self.cache_is_sorted:
+            self.log.info("Cache is unsorted, sorting now...")
+            tempallcached = copy.deepcopy(self.all_cached_forts) # copy over original
+            tempsorted = [copy.deepcopy(tempallcached[0])] # the final list to copy to cache
+            tempelement = copy.deepcopy(tempallcached[0]) # cur element
+            tempbool = True
+
+            while (len(tempsorted) < len(self.all_cached_forts)): # sort all elements
+                templastelement = copy.deepcopy(tempsorted[-1])
+                tempelement = copy.deepcopy(tempsorted[0])
+                tempmaxfloat = sys.float_info.max # start with max float to find min distance
+
+                if(tempbool):
+                    for fort in tempallcached:
+                        if distance_in_meters((self._origPosF[0], self._origPosF[1]), (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat:
+                            tempelement = copy.deepcopy(fort)
+                            tempmaxfloat = distance_in_meters((self._origPosF[0], self._origPosF[1]), (fort[0]['latitude'], fort[0]['longitude']))
+
+                    tempsorted.pop(0)
+                    tempsorted.append(tempelement)
+                    tempallcached.remove(tempelement)
+                    tempbool = False
+                else:
+                    for fort in tempallcached:
+                        if ((distance_in_meters((templastelement[0]['latitude'], templastelement[0]['longitude']),
+                                                (fort[0]['latitude'], fort[0]['longitude'])) <= tempmaxfloat) and (not any(fort[0]['id'] == x[0]['id'] for x in tempsorted))):
+                            tempelement = copy.deepcopy(fort)
+                            tempmaxfloat = distance_in_meters((templastelement[0]['latitude'], templastelement[0]['longitude']),
+                                                              (fort[0]['latitude'], fort[0]['longitude']))
+                    tempallcached.remove(tempelement)
+                    tempsorted.append(tempelement)
+
+            self.spinnable_cached_forts = copy.deepcopy(tempsorted)
+            self.cache_is_sorted = True
+
+            with open(self.cache_filename, 'wb') as handle:
+                pickle.dump(self.spinnable_cached_forts, handle)
+
+        if not self.spinnable_cached_forts:
+            self.spinnable_cached_forts = copy.deepcopy(self.all_cached_forts)
+        return self.spinnable_cached_forts
+
+    def spin_all_cached_forts(self):
+        destinations = self.sort_cached_forts()
+
+        if not destinations:
+            self.log.info('No more spinnable forts within proximity. Turning on caching mode')
+            self.walk_back_to_origin()
+            self.use_cache = False
+            self.cache_is_sorted = False
+            return False
+
+        for fort_data in destinations:
+            fort = fort_data[0]
+            self.log.info(
+                "Walking to fort at  http://maps.google.com/maps?q=%s,%s",
+                fort['latitude'], fort['longitude'])
+            self.walk_to((fort['latitude'], fort['longitude']), directly=False)
+            self.fort_search_pgoapi(fort, self.get_position(), fort_data[1])
+
+        return True
+
+    def login(self, provider, username, password, oauth2_refresh_token=None, cached=False):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
             raise AuthException("Username/password not correctly specified")
 
@@ -1167,24 +1284,35 @@ class PGoApi:
     def main_loop(self):
         catch_attempt = 0
         self.heartbeat()
+        if self.enable_caching and self.experimental:
+            if not self.use_cache:
+                self.log.info('==== CACHING MODE: CACHE FORTS ====')
+            else:
+                self.log.info('==== CACHING MODE: ROUTE+SPIN CACHED FORTS ====')
+            self.setup_cache()
         while True:
             self.heartbeat()
             # self.gsleep(1)
 
-            if self.experimental and self.spin_all_forts:
-                self.spin_all_forts_visible()
+            if self.use_cache and self.experimental and self.enable_caching:
+                self.spin_all_cached_forts()
             else:
-                self.spin_near_fort()
-            # if catching fails 10 times, maybe you are sofbanned.
-            # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
-            while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
-                # self.gsleep(4)
-                catch_attempt += 1
-                pass
-            if catch_attempt > self.max_catch_attempts:
-                self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times",
-                              catch_attempt)
-            catch_attempt = 0
+                if self.experimental and self.spin_all_forts:
+                    self.spin_all_forts_visible()
+                else:
+                    self.spin_near_fort()
+                if self.enable_caching and self.experimental and not self.use_cache:
+                    self.cache_forts(forts=self.new_forts)
+                # if catching fails 10 times, maybe you are sofbanned.
+                # We can't actually use this as a basis for being softbanned. Pokemon Flee if you are softbanned (~stolencatkarma)
+                while self.catch_near_pokemon() and catch_attempt <= self.max_catch_attempts:
+                    # self.gsleep(4)
+                    catch_attempt += 1
+                    pass
+                if catch_attempt > self.max_catch_attempts:
+                    self.log.warn("You have reached the maximum amount of catch attempts. Giving up after %s times",
+                                  catch_attempt)
+                catch_attempt = 0
 
             if self._error_counter >= self._error_threshold:
                 raise TooManyEmptyResponses('Too many errors in this run!!!')
