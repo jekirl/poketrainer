@@ -9,6 +9,7 @@ from collections import defaultdict
 
 import zerorpc
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
+from flask_socketio import SocketIO, emit
 from werkzeug.exceptions import NotFound
 
 from pgoapi.poke_lvl_data import TCPM_VALS
@@ -169,7 +170,7 @@ def get_player(username):
     c = get_api_rpc(username)
     if c is None:
         return abort(400)
-    config = init_config()
+    config = init_config(username)
     options['SCORE_METHOD'] = config.get('POKEMON_CLEANUP', {}).get("SCORE_METHOD", "CP")
     player_json = json.loads(c.get_player_info())
     currency = player_json['player_data']['currencies'][1]['amount']
@@ -380,7 +381,8 @@ def init_web_config():
 
 def main():
     web_config = init_web_config()
-    app.run(host=web_config.hostname, port=web_config.port, debug=web_config.debug, threaded=True)
+    app.run(host=web_config.hostname, port=web_config.port, debug=web_config.debug)
+    #socketio.run(app,host=web_config.hostname, port=web_config.port, debug=web_config.debug)
 
 if __name__ == "__main__":
     main()
