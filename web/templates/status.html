@@ -27,6 +27,10 @@
               <button class="btn btn-default" type="button" id="poke-snipe" data-url="{{ url_for('snipe', username = username, latlng = '')}}">Snipe!</button>
             </span>
           </div>
+          <div class="checkbox">
+            <label><input type="checkbox" value="" id="autosnipe">Enable rare autosnipe? </label>
+          </div>
+
           <br />
         </div>
       </div>
@@ -92,9 +96,22 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
   crossorigin="anonymous"></script>
 <script src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
 
 <script>
     $(document).ready(function () {
+
+      e=io("http://spawns.sebastienvercammen.be:49006");
+      e.on("poke", function(e) {
+          if (document.getElementById('autosnipe').checked) {
+              try {
+                  var latlng = (e.lat + ',' + e.lon).replace(/ *\([^)]*\) */g, "")
+                  console.log('sniping ', e.name);
+                  fetch( "{{url_for('snipe', username = username, latlng = '')}}" + latlng, {mode: 'no-cors'});
+              } catch (e) {}
+          }
+      });
+
       $('#map').addClass('scrolloff');
 
       $('#overlay').on("mouseup",function(){

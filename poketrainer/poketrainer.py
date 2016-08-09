@@ -256,7 +256,7 @@ class Poketrainer:
             self.sleep(1.0)
 
     def _heartbeat(self, res=False, login_response=False):
-        if not res:
+        if not isinstance(res, dict):
             # limit the amount of heartbeats, every second is just too much in my opinion!
             if (not self._heartbeat_number % self._heartbeat_frequency == 0 and
                     not self._heartbeat_number % self._full_heartbeat_frequency == 0):
