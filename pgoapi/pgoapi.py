@@ -68,8 +68,11 @@ from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.release.base import ReleaseMethodFactory
 from pgoapi.rpc_api import RpcApi
 from pgoapi.utilities import parse_api_endpoint
+<<<<<<< HEAD
 <<<<<<< f427aec32d4f2ed74e08f2276eab3a2c89d93646
 =======
+=======
+>>>>>>> 1a2ee7da9f05acc7a79c6fc6a98df1fa0a27325e
 from pgoapi.snipe import DEFAULT_SNIPER
 from .utilities import f2i
 >>>>>>> wip
@@ -1340,7 +1343,6 @@ class PGoApi:
                 for pokemon_data in DEFAULT_SNIPER.poll_since():
                     while self.snipe_pokemon(*pokemon_data['loc']):
                         continue
-
             if self.use_cache and self.experimental and self.enable_caching:
                 self.spin_all_cached_forts()
             else:
