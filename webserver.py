@@ -7,20 +7,15 @@ import json
 import os
 from collections import defaultdict
 
+import gevent
+import socket
 import zerorpc
 from flask import Flask, flash, jsonify, redirect, render_template, url_for, request, send_from_directory
 from flask_socketio import SocketIO, emit
+from six import PY2
 
 from poketrainer.poke_lvl_data import TCPM_VALS
 from poketrainer.pokemon import Pokemon
-
-
-class Thread:
-    def __init__(self):
-        self.thread = None
-
-    def set_api(self, mainthread):
-        self.thread = mainthread
 
 
 class ReverseProxied(object):
@@ -44,12 +39,10 @@ app = Flask(__name__, template_folder="web-ui/dist", static_url_path='/web-ui/di
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 app.debug = True
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode="gevent")
 
 options = {}
 attacks = {}
-
-api = Thread()
 
 @app.route('/')
 def root():
@@ -70,9 +63,14 @@ def users():
         live_users = json.loads(live_users.encode() if len(live_users) > 0 else '{}')
 
         for username in live_users:
+            if username == 'web':
+                continue
             c = get_api_rpc(username)
             if c is None:
                 continue
+
+            # try to enable web pushing in a background 'thread'
+            gevent.spawn(c.enable_web_pushing)
             user = {'username': username}
             users.append(user)
     return jsonify(users)
@@ -359,12 +357,58 @@ def api_get(message):
 # should be called by the bot to send data to the clients
 @socketio.on('push', namespace='/api')
 def api_get(event, data):
-    emit('push', {event: data})
+    emit('push', {'event': data})
 
 
-def main(threads=None):
+class RpcSocket:
+    def __init__(self):
+        desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
+        s = socket.socket()
+        s.bind(("", 0))  # let the kernel find a free port
+        sock_port = s.getsockname()[1]
+        s.close()
+        data = {}
+
+        if os.path.isfile(desc_file):
+            with open(desc_file, 'r+') as f:
+                data = f.read()
+                if PY2:
+                    data = json.loads(data.encode() if len(data) > 0 else '{}')
+                else:
+                    data = json.loads(data if len(data) > 0 else '{}')
+        data['web'] = sock_port
+        with open(desc_file, "w+") as f:
+            f.write(json.dumps(data, indent=2))
+
+        s = zerorpc.Server(self)
+        s.bind("tcp://127.0.0.1:%i" % sock_port)  # the free port should still be the same
+        self.rpc_sock = gevent.spawn(s.run)
+        self.rpc_sock.link(self._callback)
+        print("Socket for bots started on: tcp://127.0.0.1:%i" % sock_port)
+
+    def _callback(self, gt):
+        try:
+            if not gt.exception:
+                result = gt.value
+                print('Scoket thread finished with result: %s', result)
+        except KeyboardInterrupt:
+            return
+
+        print('Error in socket thread %s', gt.exception)
+
+    def push(self, data):
+        # calling emit with socketio.emit() will broadcast messages when we're outside of an http request scope
+        print('received data from bot!')
+        socketio.emit('my event', {'data': data})
+
+
+def main():
     web_config = init_web_config()
-    api.set_api(threads)
+
+    rpc_socket_thread = RpcSocket()
+
+    # for some reason when we're using gevent, flask does not output a lot... we'll just notify here
+    print('Starting Webserver on ' + str(web_config["hostname"]) + ':' + str(web_config["port"]))
     socketio.run(app, host=web_config["hostname"], port=web_config["port"], debug=web_config["debug"])
 
 

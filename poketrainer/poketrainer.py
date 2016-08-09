@@ -78,6 +78,7 @@ class Poketrainer:
         # config values that might be changed during runtime
         self.step_size = self.config.step_size
         self.should_catch_pokemon = self.config.should_catch_pokemon
+        self.can_push_to_web = False
 
         # threading / locking
         self.sem = BoundedSemaphore(1)  # gevent
@@ -208,6 +209,29 @@ class Poketrainer:
             self.log.debug("%s is now releasing lock", id(gevent.getcurrent()))
             self.sem.release()
 
+    def push_to_web(self, data):
+        if not self.can_push_to_web:
+            self.log.info('cant push')
+            return
+        desc_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), ".listeners")
+        with open(desc_file) as f:
+            sockets = f.read()
+            sockets = json.loads(sockets if len(sockets) > 0 else '{}')
+            if 'web' not in sockets:
+                self.log.info('web not found for pushing')
+                self.can_push_to_web = False
+                return
+            sock_port = int(sockets['web'])
+        try:
+            c = zerorpc.Client()
+            c.connect("tcp://127.0.0.1:%i" % sock_port)
+            c.push(data)
+            self.log.info('pushed data to web')
+        except Exception as e:
+            self.log.error('Error trying to push to web, will now stop pushing')
+            self.can_push_to_web = False
+            raise Exception(e)
+
     def _callback(self, gt):
         try:
             if not gt.exception:
@@ -253,10 +277,12 @@ class Poketrainer:
                     # after we're done, release lock
                     self.persist_lock = False
                     self.thread_release()
+            # try to send data to a web process in the background
+            gevent.spawn(self.push_to_web, 'test' + str(self._heartbeat_number))
             self.sleep(1.0)
 
-    def _heartbeat(self, res=None, login_response=False):
-        if res is None:
+    def _heartbeat(self, res=False, login_response=False):
+        if not isinstance(res, dict):
             # limit the amount of heartbeats, every second is just too much in my opinion!
             if (not self._heartbeat_number % self._heartbeat_frequency == 0 and
                     not self._heartbeat_number % self._full_heartbeat_frequency == 0):
@@ -432,6 +458,10 @@ class Poketrainer:
                 self.thread_release()
         else:
             return 'Only one Simultaneous request allowed'
+
+    def enable_web_pushing(self):
+        self.log.info('Enabled pushing to web, caus web told us to!')
+        self.can_push_to_web = True
 
     def ping(self):
         self.log.info("Responding to ping")
