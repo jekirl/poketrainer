@@ -32,7 +32,7 @@ class ReverseProxied(object):
             environ['wsgi.url_scheme'] = scheme
         return self.app(environ, start_response)
 
-app = Flask(__name__, template_folder="web/templates")
+app = Flask(__name__, template_folder="web/templates", static_folder='web/static')
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 app.debug = True
