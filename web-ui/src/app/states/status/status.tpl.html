@@ -83,7 +83,7 @@
                   </thead>
                 <tbody>
                 <tr ng-repeat="pokemon in user.pokemon">
-                    <td data-order="{{ pokemon.creation_time_ms }}"><md-tooltip md-direction="right">Caught:{{ pokemon.creation_time_ms | date : 'medium' }}</md-tooltip><img style="max-height: 50px;" ng-src="/assets/images/pokemon/{{('000' + pokemon.pokemon_id).substr(-3)}}.png"></td>
+                    <td data-order="{{ pokemon.creation_time_ms }}"><md-tooltip md-direction="right">Caught:{{ pokemon.creation_time_ms | date : 'medium' }}</md-tooltip><img style="max-height: 50px;" ng-src="assets/images/pokemon/{{('000' + pokemon.pokemon_id).substr(-3)}}.png"></td>
                     <td data-order="{{pokemon.pokemon_id}}">{{pokemon.pokemon_id}}</td>
                     <td>{{pokemon.name}}</td>
                     <td data-order="{{pokemon.level}}">{{pokemon.level | number}}</td>
