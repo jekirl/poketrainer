@@ -25,6 +25,7 @@ class FortWalker:
         self.route_only_forts = False
         self.steps = []  # steps contain all steps to the next route target
         self.next_step = None
+        self.wandering = False
         self.total_distance_traveled = 0
         self.total_trip_distance = 0
         self.base_travel_link = ''
@@ -172,6 +173,7 @@ class FortWalker:
         travel_link = '%s%s,%s' % (self.base_travel_link, next_point[0], next_point[1])
         self.log.info("Travel Link: %s", travel_link)
         self.parent.api.set_position(*next_point)
+        self.wandering = False
 
     def _walk_back_to_origin(self):
         orig_posf = self.parent.get_orig_position()
@@ -198,8 +200,9 @@ class FortWalker:
             self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
 
             # Fort is close enough to change our route and walk to
-            if 0 < self.parent.config.wander_steps <= nearest_fort_dis > 40:
+            if not self.wandering and nearest_fort_dis < self.parent.config.wander_steps and nearest_fort_dis > 40:
                 self.next_step = {'lat': destinations[0][0]['latitude'], 'long': destinations[0][0]['longitude']}
+                self.wandering = True
             elif nearest_fort_dis <= 40.00:
                 self.do_fort_spin(nearest_fort, player_postion=self.parent.api.get_position(),
                                   fort_distance=nearest_fort_dis)
