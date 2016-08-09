@@ -11,7 +11,7 @@ import six
 from cachetools import TTLCache
 
 from helper.exceptions import TooManyEmptyResponses
-from helper.utilities import flatmap
+from helper.utilities import flat_map
 
 from .location import distance_in_meters, filtered_forts, get_route
 from .poke_utils import get_item_name
@@ -25,6 +25,7 @@ class FortWalker:
         self.route_only_forts = False
         self.steps = []  # steps contain all steps to the next route target
         self.next_step = None
+        self.wander_steps = []  # only set when we want to wander
         self.total_distance_traveled = 0
         self.total_trip_distance = 0
         self.base_travel_link = ''
@@ -42,6 +43,11 @@ class FortWalker:
         if self._error_counter >= self._error_threshold:
             raise TooManyEmptyResponses('Too many errors in this run!!!')
         if not self.next_step:
+            # if wander_step was set, we will create a route to this point ignoring google
+            if self.wander_steps:
+                self.next_step = self.wander_steps.pop(0)
+                self.wander_steps = []
+
             # if we don't have a waypoint atm, calculate new waypoints until location
             if not self.steps:
                 if self.total_distance_traveled > 0:
@@ -117,7 +123,7 @@ class FortWalker:
             res = self.parent.map_objects.nearby_map_objects()
             self.log.debug("nearby_map_objects: %s", res)
             map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
-            forts = flatmap(lambda c: c.get('forts', []), map_cells)
+            forts = flat_map(lambda c: c.get('forts', []), map_cells)
             # filter forts and sort by distance
             destinations = filtered_forts(self.parent.get_orig_position(), self.parent.get_position(), forts,
                                           self.parent.config.stay_within_proximity,
@@ -170,21 +176,25 @@ class FortWalker:
         distance_to_point = distance_in_meters(self.parent.get_position(), next_point)
         self.total_distance_traveled += distance_to_point
         travel_link = '%s%s,%s' % (self.base_travel_link, next_point[0], next_point[1])
-        self.log.info("Travel Link: %s", travel_link)
+        self.log.info("Walking %.1fm: %s", distance_to_point, travel_link)
         self.parent.api.set_position(*next_point)
 
     def _walk_back_to_origin(self):
         orig_posf = self.parent.get_orig_position()
-        self.route = [{
-            'lat': orig_posf[0],
-            'long': orig_posf[1]
-        }]
+        self.route = {'steps': [
+            {
+                'lat': orig_posf[0],
+                'long': orig_posf[1]
+            }
+        ], 'total_distance': 0}
         self.steps = []
+        # though this is wrong, it ensures we're calculating a new path no matter the settings
+        self.route_only_forts = True
 
     def spin_nearest_fort(self):
         map_cells = self.parent.map_objects.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {})\
             .get('map_cells', [])
-        forts = flatmap(lambda c: c.get('forts', []), map_cells)
+        forts = flat_map(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self.parent.get_orig_position(), self.parent.get_position(), forts,
                                       self.parent.config.stay_within_proximity,
                                       self.visited_forts)
@@ -194,8 +204,14 @@ class FortWalker:
             self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
 
             # Fort is close enough to change our route and walk to
-            if 0 < self.parent.config.wander_steps <= nearest_fort_dis > 40:
-                self.next_step = {'lat': destinations[0][0]['latitude'], 'long': destinations[0][0]['longitude']}
+            if not self.wander_steps and nearest_fort_dis < self.parent.config.wander_steps and nearest_fort_dis > 40:
+                # create route directly to fort, disabling google
+                route_data = get_route(
+                    self.parent.get_position(), (destinations[0][0]['latitude'], destinations[0][0]['longitude']),
+                    use_google=False, gmaps_api_key='', walk_to_all_forts=False, waypoints=None,
+                    step_size=self.parent.step_size
+                )
+                self.wander_steps = route_data['steps']
             elif nearest_fort_dis <= 40.00:
                 self.do_fort_spin(nearest_fort, player_postion=self.parent.api.get_position(),
                                   fort_distance=nearest_fort_dis)

@@ -19,7 +19,7 @@ RUN pip install -r requirements.txt
 RUN wget http://pgoapi.com/pgoencrypt.tar.gz
 RUN tar -xf pgoencrypt.tar.gz
 RUN make -C /pgoencrypt/src
-RUN mv /pgoencrypt/src/libencrypt.so /lib
+RUN mv /pgoencrypt/src/libencrypt.so /
 #launch script
 RUN chmod +x docker_launch.sh
 ENTRYPOINT [ "bash", "docker_launch.sh" ]
