@@ -1,0 +1,7 @@
+<md-content class="md-padding">
+    <div class="page-header">
+        <h1>Pok&eacute;mon <small>({{ pokemons.length }})</small></h1>
+    </div>
+    <md-progress-circular ng-if="isLoading" md-mode="indeterminate"></md-progress-circular>
+    <pre>{{pokemons | json}}</pre>
+</md-content>

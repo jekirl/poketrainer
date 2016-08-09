@@ -24,6 +24,7 @@ cache/
 *.egg-info/
 .installed.cfg
 *.egg
+static/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -85,6 +86,10 @@ ENV/
 
 # Spyder project settings
 .spyderproject
+
+# Node
+web-ui/vendor
+web-ui/node_modules
 
 # Rope project settings
 .ropeproject
