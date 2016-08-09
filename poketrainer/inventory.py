@@ -207,26 +207,6 @@ class Inventory:
             return json.dumps(pokemon_list, default=lambda p: p.__dict__)  # reduce the data sent?
         return pokemon_list
 
-    def get_caught_pokemons_old(self, inventory_items=None, as_json=False):
-        if not inventory_items:
-            self._parent.sleep(0.2 + self._parent.config.extra_wait)
-            inventory_items = self._parent.api.get_inventory() \
-                .get('responses', {}).get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
-        caught_pokemon = defaultdict(list)
-        for inventory_item in inventory_items:
-            if "pokemon_data" in inventory_item['inventory_item_data']\
-                    and not inventory_item['inventory_item_data']['pokemon_data'].get("is_egg", False):
-                # is a pokemon:
-                pokemon_data = inventory_item['inventory_item_data']['pokemon_data']
-                pokemon = Pokemon(pokemon_data, self._parent.player_stats.level, self._parent.config.score_method,
-                                  self._parent.config.score_settings)
-
-                if not pokemon.is_egg:
-                    caught_pokemon[pokemon.pokemon_id].append(pokemon)
-        if as_json:
-            return json.dumps(caught_pokemon, default=lambda p: p.__dict__)  # reduce the data sent?
-        return caught_pokemon
-
     def update_player_inventory(self):
         res = self._parent.api.get_inventory()
         if 'GET_INVENTORY' in res.get('responses', {}):
