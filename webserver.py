@@ -296,8 +296,6 @@ def api_disconnect():
 def get_status(message):
     username = message['username']
     c = get_api_rpc(username)
-    if c is None:
-        return abort(400)
     config = init_config()
     options['SCORE_METHOD'] = config.get('POKEMON_CLEANUP', {}).get("SCORE_METHOD", "CP")
     player_json = {}

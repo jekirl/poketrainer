@@ -16,6 +16,21 @@ angular.module('Poketrainer.State.Status', [
 
         $stateProvider.state('public.status', {
             url: '/status/:username',
+            resolve: {
+                userData: ['$q', '$stateParams', 'User', function resolveUserData($q, $stateParams, User){
+                    var d = $q.defer();
+
+                    User.get({
+                        username: $stateParams.username
+                    }, function resolveSuccess(userData){
+                        d.resolve(userData);
+                    }, function resolveError(error){
+                        d.reject(error);
+                    });
+
+                    return d.promise;
+                }]
+            },
             controller: 'StatusController',
             templateUrl: 'states/status/status.tpl.html'
         })
@@ -26,7 +41,7 @@ angular.module('Poketrainer.State.Status', [
         Navigation.primary.register("Users", "public.users", 30, 'md md-event-available', 'public.users');
     })
 
-    .controller('StatusController', function StatusController($scope, $stateParams, User, PokeSocket) {
+    .controller('StatusController', function StatusController($scope, $stateParams, User, userData, PokeSocket) {
         
         PokeSocket.emit('status', { username: $stateParams.username });
         
@@ -34,7 +49,7 @@ angular.module('Poketrainer.State.Status', [
             console.log(data);
         });
         
-        /*
+        
         $scope.user = userData;
         $scope.user.xpPercent = Math.floor($scope.user.level_xp/$scope.user.goal_xp*100);
         $scope.user.uniquePokedexPercent = Math.floor($scope.user.unique_pokedex_entries / 151 * 100);
@@ -96,7 +111,7 @@ angular.module('Poketrainer.State.Status', [
             lineCap:'circle'
         };
         
-        */
+        
 
     })
 ;
