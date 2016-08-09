@@ -175,11 +175,15 @@ class FortWalker:
 
     def _walk_back_to_origin(self):
         orig_posf = self.parent.get_orig_position()
-        self.route = [{
-            'lat': orig_posf[0],
-            'long': orig_posf[1]
-        }]
+        self.route = {'steps': [
+            {
+                'lat': orig_posf[0],
+                'long': orig_posf[1]
+            }
+        ], 'total_distance': 0}
         self.steps = []
+        # though this is wrong, it ensures we're calculating a new path no matter the settings
+        self.route_only_forts = True
 
     def spin_nearest_fort(self):
         map_cells = self.parent.map_objects.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {})\
