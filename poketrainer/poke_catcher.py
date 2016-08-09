@@ -157,7 +157,9 @@ class PokeCatcher:
             self.log.debug("Attempting to Start Encounter: %s", encounter)
             result = encounter.get('status', -1)
             if result == 1 and 'wild_pokemon' in encounter and 'capture_probability' in encounter:
-                pokemon = Pokemon(encounter.get('wild_pokemon', {}).get('pokemon_data', {}))
+                pokemon = Pokemon(encounter.get('wild_pokemon', {}).get('pokemon_data', {}),
+                                  self.parent.player_stats.level,
+                                  self.parent.config.score_method, self.parent.config.score_settings)
                 capture_probability = create_capture_probability(encounter.get('capture_probability', {}))
                 self.log.debug("Attempt Encounter Capture Probability: %s",
                                json.dumps(encounter, indent=4, sort_keys=True))
@@ -187,7 +189,6 @@ class PokeCatcher:
     def disk_encounter_pokemon(self, lureinfo, retry=False):
         try:
             self.parent.inventory.update_player_inventory()
-            print(lureinfo)
             if not self.parent.inventory.can_attempt_catch():
                 self.log.info("No balls to catch %s, exiting disk encounter", self.parent.inventory)
                 return False
