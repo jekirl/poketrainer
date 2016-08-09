@@ -28,4 +28,4 @@ class AutoSniper(object):
             r = requests.post(self.fetch_url, json=payload)
         except Exception as e:
             print("Failed to post encounter: %s with error %s" % (payload,e))
-DEFAULT_SNIPER = AutoSniper("") # CHECK SLACK FOR LATEST AUTO SNIPER DEV WORK, SUPER ALPHA ATM
+DEFAULT_SNIPER = AutoSniper("http://autosnipe1.ngrok.io/pokemon") # CHECK SLACK FOR LATEST AUTO SNIPER DEV WORK, SUPER ALPHA ATM
