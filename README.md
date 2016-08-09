@@ -60,6 +60,16 @@ Below the accounts you can change options in the `default` section. If you need 
    * `ENABLE_CACHING` is the master switch, no caching methods will run if this is set to false
    * `USE_CACHED_FORTS` should be set to false on your first run, it will run as normal and cache forts you'd normally visit. Set this to true after you've cached enough forts or "Cached Forts: x" output is stable, around 10 for a 1500 proximity, 100 step configuration, wait longer if needed.
    * `CACHED_FORTS_SORTED` set to true if the cache is sorted/pathing is calculated. Leave it false if you're unsure.
+* `SNIPER`
+   * `ENABLE` master toggle, set to true if you want to snipe pokemon across the world
+   * `SNIPING MODE` 0 is location mode, catch rarest pokemon at a location, 1 is pokemon mode, sort database for the pokemons you want to catch
+   * `SNIPING_MODES` modes explained above
+   * `TARGET_POKEMON` Pokemon you want to snipe, will ignore the rest ["DRAGONITE","OTHER","MEW2KING"] etc
+   * `POKEMON_CP_REQ` ONLY FOR POKEMON MODE, minimum CP requirement
+   * `POKEMON_IV_REQ` ONLY FOR POKEMON MODE, minimum IV requirement
+   * `USE_POKESNIPERS.COM` use pokesnipers.com database, note they use cloudflare, your access token is 30 minutes or so, not too sure but will find a fix later
+
+
 * `CAPTURE`
    * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
    * `MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY` minimum number of failed capture attempts before trying to use a Razz Berry (default: 3)
