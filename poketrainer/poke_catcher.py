@@ -147,7 +147,7 @@ class PokeCatcher:
             # begin encounter_id
             position = self.parent.api.get_position()
             pokemon = Pokemon(pokemon_data)
-            self.log.info("Trying initiate catching Pokemon: %s", pokemon)
+            self.log.info("Trying initiate catching Pokemon: %s", pokemon.pokemon_type)
             self.parent.sleep(0.2 + self.parent.config.extra_wait)
             encounter = self.parent.api.encounter(encounter_id=encounter_id,
                                                   spawn_point_id=spawn_point_id,
@@ -194,7 +194,7 @@ class PokeCatcher:
                 return False
             encounter_id = lureinfo['encounter_id']
             fort_id = lureinfo['fort_id']
-            position = self.parent.get_position
+            position = self.parent.get_position()
             self.log.debug("At Fort with lure %s".encode('utf-8', 'ignore'), lureinfo)
             self.log.info("At Fort with Lure AND Active Pokemon %s",
                           POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
