@@ -28,9 +28,9 @@ angular.module('Poketrainer.State.Status', [
 
     .controller('StatusController', function StatusController($scope, $stateParams, User, PokeSocket) {
         
-        PokeSocket.emit('get', { username: $stateParams.username });
+        PokeSocket.emit('status', { username: $stateParams.username });
         
-        PokeSocket.on('get', function (data) {
+        PokeSocket.on('status', function (data) {
             console.log(data);
         });
         
