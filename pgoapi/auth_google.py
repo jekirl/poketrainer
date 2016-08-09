@@ -46,7 +46,7 @@ class AuthGoogle(Auth):
 
         self._refresh_token = None
 
-    def user_login(self, username, password):
+    def user_login(self, username, password, proxy=None):
         self.log.info('Google User Login for: {}'.format(username))
 
         if not isinstance(username, six.string_types) or not isinstance(password, six.string_types):
