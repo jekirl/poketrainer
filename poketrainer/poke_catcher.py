@@ -5,7 +5,7 @@ import logging
 
 from cachetools import TTLCache
 
-from helper.utilities import flatmap
+from helper.utilities import flat_map
 
 from .location import distance_in_meters
 from .poke_utils import create_capture_probability, get_item_name
@@ -35,7 +35,7 @@ class PokeCatcher:
 
         map_cells = self.parent.map_objects.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {})\
             .get('map_cells', [])
-        pokemons = flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
+        pokemons = flat_map(lambda c: c.get('catchable_pokemons', []), map_cells)
         pokemons = filter(lambda p: (p['encounter_id'] not in self.encountered_pokemons), pokemons)
 
         # catch first pokemon:

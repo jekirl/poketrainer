@@ -11,7 +11,7 @@ import six
 from cachetools import TTLCache
 
 from helper.exceptions import TooManyEmptyResponses
-from helper.utilities import flatmap
+from helper.utilities import flat_map
 
 from .location import distance_in_meters, filtered_forts, get_route
 from .poke_utils import get_item_name
@@ -117,7 +117,7 @@ class FortWalker:
             res = self.parent.map_objects.nearby_map_objects()
             self.log.debug("nearby_map_objects: %s", res)
             map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
-            forts = flatmap(lambda c: c.get('forts', []), map_cells)
+            forts = flat_map(lambda c: c.get('forts', []), map_cells)
             # filter forts and sort by distance
             destinations = filtered_forts(self.parent.get_orig_position(), self.parent.get_position(), forts,
                                           self.parent.config.stay_within_proximity,
@@ -188,7 +188,7 @@ class FortWalker:
     def spin_nearest_fort(self):
         map_cells = self.parent.map_objects.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {})\
             .get('map_cells', [])
-        forts = flatmap(lambda c: c.get('forts', []), map_cells)
+        forts = flat_map(lambda c: c.get('forts', []), map_cells)
         destinations = filtered_forts(self.parent.get_orig_position(), self.parent.get_position(), forts,
                                       self.parent.config.stay_within_proximity,
                                       self.visited_forts)

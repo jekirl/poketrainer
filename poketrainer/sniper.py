@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import logging
 
-from helper.utilities import flatmap
+from helper.utilities import flat_map
 
 from .location import distance_in_meters
 from .pokedex import pokedex
@@ -42,7 +42,7 @@ class Sniper:
             # find pokemons in dest
             map_cells = self.parent.map_objects.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {})\
                 .get('map_cells', [])
-            pokemons = flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
+            pokemons = flat_map(lambda c: c.get('catchable_pokemons', []), map_cells)
 
             # catch first pokemon:
             pokemon_rarity_and_dist = [
