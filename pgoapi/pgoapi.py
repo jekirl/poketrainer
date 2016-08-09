@@ -1403,16 +1403,16 @@ class PGoApi:
                 except Exception as e:
                     self.log.info("Error sniping, database probably empty: %s", e)
                     pass
-                # try:
-                if self.use_pokesnipers:
-                    for pokemon_data in DEFAULT_SNIPER.poll_since_2():
-                        self.log.info("Checking pokesnipers.com database")
-                        #print pokemon_data
-                        if not self.snipe_pokemon(lat = pokemon_data['loc'][0], lng = pokemon_data['loc'][1], mode = 0):
-                                break
-                # except Exception as e:
-                #     self.log.info("Error sniping, pokesnipers is protected by cloudflare, you might be blocked: %s", e)
-                #     pass
+                try:
+                    if self.use_pokesnipers:
+                        for pokemon_data in DEFAULT_SNIPER.poll_since_2():
+                            self.log.info("Checking pokesnipers.com database")
+                            #print pokemon_data
+                            if not self.snipe_pokemon(lat = pokemon_data['loc'][0], lng = pokemon_data['loc'][1], mode = 0):
+                                    break
+                except Exception as e:
+                    self.log.info("Error sniping, pokesnipers is protected by cloudflare, you might be blocked: %s", e)
+                    pass
 
             if self.use_cache and self.experimental and self.enable_caching:
                 self.spin_all_cached_forts()
