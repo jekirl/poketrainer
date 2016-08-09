@@ -1,0 +1,16 @@
+<md-sidenav ng-hide="state==='public.users'" md-is-locked-open="$mdMedia('gt-sm')" class="md-whiteframe-4dp" md-component-id="left" flex>
+    <md-list>
+        <md-list-item ui-sref="public.status(params)">
+            <md-icon>home</md-icon>
+            <p>STATUS</p>
+        </md-list-item>
+        <md-list-item ui-sref="public.pokemons(params)">
+            <md-icon>home</md-icon>
+            <p>POKEMON</p>
+        </md-list-item>
+        <md-list-item ui-sref="public.inventory(params)">
+            <md-icon>home</md-icon>
+            <p>INVENTORY</p>
+        </md-list-item>
+    </md-list>
+</md-sidenav>
