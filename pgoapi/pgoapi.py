@@ -85,6 +85,7 @@ class PGoApi:
         self.log = logging.getLogger(__name__)
         self._api_endpoint = 'https://pgorelease.nianticlabs.com/plfe/rpc'
         self._signature_lib = None
+        self._req_proxy = None
 
         self._auth_provider = None
         self.config = config
@@ -269,7 +270,7 @@ class PGoApi:
 
             player_position = self.get_position()
 
-            request = RpcApi(self._auth_provider)
+            request = RpcApi(self._auth_provider, self._req_proxy)
 
             if self.get_signature_lib() is not None:
                 request.activate_signature(self.get_signature_lib())
@@ -342,6 +343,10 @@ class PGoApi:
         self._position_lat = lat
         self._position_lng = lng
         self._position_alt = alt
+
+    def set_proxy(self, proxy):
+        self.log.debug('Set Proxy - Proxy: %s', proxy)
+        self._req_proxy = {"http" : proxy, "https" : proxy}
 
     def __getattr__(self, func):
         def function(**kwargs):
@@ -1265,7 +1270,7 @@ class PGoApi:
 
         return True
 
-    def login(self, provider, username, password, oauth2_refresh_token=None):
+    def login(self, provider, username, password, proxy, oauth2_refresh_token=None):
         if not isinstance(username, basestring) or not isinstance(password, basestring):
             raise AuthException("Username/password not correctly specified")
 
@@ -1281,7 +1286,7 @@ class PGoApi:
         if oauth2_refresh_token is not None:
             self._auth_provider.set_refresh_token(oauth2_refresh_token)
         elif username is not None and password is not None:
-            self._auth_provider.user_login(username, password)
+            self._auth_provider.user_login(username, password, proxy)
         else:
             raise AuthException("Invalid Credential Input - Please provide username/password or an oauth2 refresh token")
 

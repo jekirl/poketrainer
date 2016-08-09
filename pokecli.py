@@ -85,6 +85,7 @@ def init_config():
     parser.add_argument("-l", "--location", help="Location")
     parser.add_argument("-e", "--encrypt_lib", help="encrypt lib, libencrypt.so/encrypt.dll", default="libencrypt.so")
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
+    parser.add_argument("-p", "--proxy", help="Use Proxy, proxy_ip:port", default=None)
     config = parser.parse_args()
     defaults = load.get('defaults', {})
     account = load['accounts'][config.__dict__['config_index']]
@@ -132,6 +133,10 @@ def main(position=None):
     # provide player position on the earth
     api.set_position(*position)
 
+    # set proxy
+    if config["proxy"]:
+        api.set_proxy(config["proxy"])
+
     desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
     sock_port = 0
     s = socket.socket()
@@ -156,7 +161,7 @@ def main(position=None):
     gevent.spawn(s.run)
 
     # retry login every 30 seconds if any errors
-    while not api.login(config["auth_service"], config["username"], config["password"]):
+    while not api.login(config["auth_service"], config["username"], config["password"], config["proxy"]):
         logger.error('Retrying Login in 30 seconds')
         sleep(30)
 
