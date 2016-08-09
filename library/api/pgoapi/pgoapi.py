@@ -136,8 +136,7 @@ class PGoApi:
         request.get_hatched_eggs()
         request.get_inventory()
         request.check_awarded_badges()
-        #request.download_settings(hash="54b359c97e46900f87211ef6e6dd0b7f2a3ea1f5")
-        request.download_settings(hash="05daf51635c82611d1aac95c0b051d3ec088a930")
+        request.download_settings(hash="54b359c97e46900f87211ef6e6dd0b7f2a3ea1f5")
 
         response = request.call()
 

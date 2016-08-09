@@ -351,10 +351,15 @@ class Poketrainer:
             if settings.get('minimum_client_version', '0.0.0') > '0.31.0':
                 self.log.error("Minimum client version has changed... the bot needs to be updated! Will now stop!")
                 exit(0)
-            '''
+            map_settings = settings.get('map_settings', {})
+
+            get_map_objects_min_refresh_seconds = map_settings.get('get_map_objects_min_refresh_seconds', 0.0)  # std. 5.0
+            if get_map_objects_min_refresh_seconds != self.map_objects.get_api_rate_limit():
+                self.map_objects.update_rate_limit(get_map_objects_min_refresh_seconds)
+
+            """
             fort_settings = settings.get('fort_settings', {})
             inventory_settings = settings.get('inventory_settings', {})
-            map_settings = settings.get('map_settings', {})
 
             get_map_objects_max_refresh_seconds = map_settings.get('get_map_objects_max_refresh_seconds', 30.0)
             get_map_objects_min_distance_meters = map_settings.get('get_map_objects_min_distance_meters', 10.0)
@@ -363,11 +368,19 @@ class Poketrainer:
             pokemon_visible_range = map_settings.get('pokemon_visible_range', 70.0)
             get_map_objects_min_refresh_seconds = map_settings.get('get_map_objects_min_refresh_seconds', 5.0)
             google_maps_api_key = map_settings.get('google_maps_api_key', '')
+
+            self.log.info('complete settings: %s', responses.get('DOWNLOAD_SETTINGS', {}))
+
+            self.log.info('minimum_client_version: %s', str(settings.get('minimum_client_version', '0.0.0')))
+
+            self.log.info('poke_nav_range_meters: %s', str(poke_nav_range_meters))
+            self.log.info('pokemon_visible_range: %s', str(pokemon_visible_range))
+
             self.log.info('get_map_objects_min_refresh_seconds: %s', str(get_map_objects_min_refresh_seconds))
             self.log.info('get_map_objects_max_refresh_seconds: %s', str(get_map_objects_max_refresh_seconds))
             self.log.info('get_map_objects_min_distance_meters: %s', str(get_map_objects_min_distance_meters))
             self.log.info('encounter_range_meters: %s', str(encounter_range_meters))
-            '''
+            """
 
         self._heartbeat_number += 1
         return res
