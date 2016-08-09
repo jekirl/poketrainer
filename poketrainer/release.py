@@ -1,8 +1,9 @@
 from __future__ import absolute_import
 
+from six import iteritems
+
 from helper.colorlogger import create_logger
 
-from six import iteritems
 from .release_methods.base import ReleaseMethodFactory
 
 

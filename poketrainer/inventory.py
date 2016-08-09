@@ -1,14 +1,13 @@
 from __future__ import absolute_import
 
 import json
-
 from collections import defaultdict
 from time import time
 
+from helper.colorlogger import create_logger
 from library.api.pgoapi.protos.POGOProtos.Inventory import \
     Item_pb2 as Item_Enums
 
-from helper.colorlogger import create_logger
 from .poke_utils import get_item_name
 from .pokemon import Pokemon
 
@@ -192,8 +191,8 @@ class Inventory:
         pokemon_list = sorted(map(lambda x: Pokemon(x['pokemon_data'], self._parent.player_stats.level,
                                                     self._parent.config.score_method,
                                                     self._parent.config.score_settings),
-                              filter(lambda x: 'pokemon_data' in x and not x['pokemon_data'].get("is_egg", False),
-                              map(lambda x: x.get('inventory_item_data', {}), self.inventory_items))),
+                                  filter(lambda x: 'pokemon_data' in x and not x['pokemon_data'].get("is_egg", False),
+                                         map(lambda x: x.get('inventory_item_data', {}), self.inventory_items))),
                               key=lambda x: x.score, reverse=True)
         pokemon_list = filter(lambda x: not x.is_egg, pokemon_list)
         if as_json:

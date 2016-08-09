@@ -30,8 +30,8 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 
 import argparse
 import logging
-import colorlog
 
+import colorlog
 import gevent
 
 from poketrainer.poketrainer import Poketrainer
@@ -54,7 +54,7 @@ def init_arguments():
 def main():
     # log settings
     # log format
-    
+
     colorlog.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s]  %(log_color)s[%(levelname)5s] %(reset)s%(message)s')
     # log level for http request class
     colorlog.getLogger("requests").setLevel(logging.WARNING)

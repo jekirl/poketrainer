@@ -1,11 +1,10 @@
 from __future__ import absolute_import
 
 import json
-import logging
-from helper.colorlogger import create_logger
 
 from cachetools import TTLCache
 
+from helper.colorlogger import create_logger
 from helper.utilities import flat_map
 
 from .location import distance_in_meters

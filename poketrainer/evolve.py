@@ -1,9 +1,8 @@
 from __future__ import absolute_import
 
-import logging
-import colorlog
-        # self.log = logging.getLogger(__name__)
+# self.log = logging.getLogger(__name__)
 from helper.colorlogger import create_logger
+
 from .pokemon import Pokemon
 
 
@@ -12,7 +11,7 @@ class Evolve:
         self.parent = parent
         # self.log = logging.getLogger(__name__)
         self.log = create_logger(__name__, 'cyan')
-        
+
     def attempt_evolve(self):
         caught_pokemon = self.parent.inventory.get_caught_pokemon_by_family()
         for pokemons in caught_pokemon.values():

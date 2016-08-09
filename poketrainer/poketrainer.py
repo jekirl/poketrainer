@@ -217,7 +217,7 @@ class Poketrainer:
             return
 
         self.log.exception('Error in main loop %s, restarting at location: %s',
-                         gt.exception, self.get_position())
+                           gt.exception, self.get_position())
         # restart after sleep
         self.sleep(30)
         self.reload_config()
