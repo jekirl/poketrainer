@@ -24,6 +24,7 @@ cache/
 *.egg-info/
 .installed.cfg
 *.egg
+web-ui/node_modules
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -92,6 +93,8 @@ ENV/
 # Personal load details
 config.json
 web_config.json
+libencrypt.so
+encrypt.dll
 .listeners
 .DS_Store
 data_dumps/*.json

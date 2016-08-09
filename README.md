@@ -1,7 +1,8 @@
 # Post-Unknown6 changes:
 
-The current version of the bot currently requires the encrypt library. Hop on the #poketrainer slack to find out more.
-
+# The current version of the bot currently requires the encrypt library. Hop on the #poketrainer slack to find out more.
+### Long story short, you need to make `libencrypt.so` or `encrypt.dll` by finding the `c_code` folder of one of the `unknown6` repositories and running `make clean; make`. You then put the built files into the same folder as pokecli.py and run it with:
+```python pokecli.py -i ACCOUNT_INDEx -e YOUR_ENCRYPT_LIB_NAME_GOES_HERE.DLL.SO```
 
 # Please do not sell the bot, or use it to sell accounts/power leveling or what have you. If you really can't help yourself from trying to make money on it, please donate a portion of your profits to [Kiva](https://www.kiva.org/).
 ## To the people that have done so already (heard from quite a few already), thank you for making the world a better place.
@@ -57,9 +58,6 @@ Below the accounts you can change options in the `default` section. If you need 
    * `SKIP_VISITED_FORT_DURATION` [Experimental] Avoid a fort for a given number of seconds
      * Setting this to 500 means avoid a fort for 500 seconds before returning, (Should be higher than 300 to have any effect). This will let the bot explore a bigger area.
    * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
-   * `ENABLE_CACHING` is the master switch, no caching methods will run if this is set to false
-   * `USE_CACHED_FORTS` should be set to false on your first run, it will run as normal and cache forts you'd normally visit. Set this to true after you've cached enough forts or "Cached Forts: x" output is stable, around 10 for a 1500 proximity, 100 step configuration, wait longer if needed.
-   * `CACHED_FORTS_SORTED` set to true if the cache is sorted/pathing is calculated. Leave it false if you're unsure.
 * `CAPTURE`
    * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
    * `MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY` minimum number of failed capture attempts before trying to use a Razz Berry (default: 3)
@@ -128,7 +126,6 @@ Put them in config. Type exactly as the name appears
  * For windows you will probably need to install [Microsoft Visual C++ Compiler for Python 2.7](https://www.microsoft.com/en-us/download/details.aspx?id=44266) first
  * Install git via your package manager or [download it for windows](https://git-scm.com/download/win)
  * Python 2.7 or 3.5 [windows downloads](https://www.python.org/downloads/)
-     * Note: Python 3.5 support is somewhat experimental. Most things work, but it may not be as stable as using Python 2.7.
  * Run `pip install -r requirements.txt` in the bots folder from your console
      * requests
      * protobuf
@@ -160,7 +157,6 @@ If you are not updating the Python code, you do not need to install or use tox.
 
 ### pokecli with Docker (optional)
 Build and run container:
-libencrypt.so must be built and placed in the root of the poketrainer directory.
 ```
 cd poketrainer/
 docker build -t pokecli -f container/Dockerfile .
@@ -172,13 +168,6 @@ using `docker inspect poketrainer`.
 The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`.
 
 You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.  	
-#### Dockerhub
-Building the container on the local system can be time consuming. Alternatively one can run the automated build created by Dockerhub. 
-Download the example config file and modify as you see fit. No need to checkout the git repo on the machine, only the configuration is needed.
-Currently this docker build is based on develop, but this will be updated as the needed changes are merged to master.
-```
-docker run -ti name poketrainer -v /path/to/config.json:/config.json -p 5000:5000 fallenpixel/poketrainer  -i 0
-```
 
 
 ### What's working:
@@ -195,7 +184,7 @@ What's working:
 
 
 ## Credits
-* [keyphact/UK6 team](https://github.com/keyphact/pgoapi) for the unknown6 fix
+* [keyphact/UK6 team] https://github.com/keyphact/pgoapi for the unknown6 fix
 * [tejado](https://github.com/tejado) for the base of this
 * [elliottcarlson](https://github.com/elliottcarlson) for the Google Auth PR
 * [AeonLucid](https://github.com/AeonLucid/POGOProtos) for improved protos

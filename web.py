@@ -5,14 +5,14 @@ import argparse
 import csv
 import json
 import os
+import zerorpc
 from collections import defaultdict
 
-import zerorpc
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
 from werkzeug.exceptions import NotFound
 
-from pgoapi.poke_lvl_data import TCPM_VALS
-from pgoapi.pokemon import Pokemon
+from poketrainer.poke_lvl_data import TCPM_VALS
+from poketrainer.pokemon import Pokemon
 
 
 class ReverseProxied(object):
@@ -32,7 +32,7 @@ class ReverseProxied(object):
             environ['wsgi.url_scheme'] = scheme
         return self.app(environ, start_response)
 
-app = Flask(__name__, template_folder="templates")
+app = Flask(__name__, template_folder="web/templates")
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 app.debug = True
@@ -40,7 +40,7 @@ app.debug = True
 options = {}
 attacks = {}
 
-with open("GAME_ATTACKS_v0_1.tsv") as tsv:
+with open("resources" + os.sep + "GAME_ATTACKS_v0_1.tsv") as tsv:
     reader = csv.DictReader(tsv, delimiter='\t')
     for row in reader:
         attacks[int(row["Num"])] = row["Move"]
