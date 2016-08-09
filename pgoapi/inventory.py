@@ -53,8 +53,8 @@ class Inventory:
                 self.lucky_eggs = item_count
             elif item_id == Inventory_Enum.ITEM_RAZZ_BERRY:
                 self.razz_berries = item_count
-            pokemon_family = inventory_item['inventory_item_data'].get('pokemon_family', {})
-            self.pokemon_candy[pokemon_family.get('family_id', -1)] = pokemon_family.get('candy', -1)
+            candy = inventory_item['inventory_item_data'].get('candy', {})
+            self.pokemon_candy[candy.get('family_id', -1)] = candy.get('candy', -1)
             pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
             if pokemon_data.get('is_egg', False) and not pokemon_data.get('egg_incubator_id', False):
                 self.eggs_available.append(pokemon_data)
@@ -145,12 +145,12 @@ class Inventory:
         return Inventory_Enum.ITEM_RAZZ_BERRY
 
     def __str__(self):
-        str_ = "PokeBalls: {0}, GreatBalls: {1}, MasterBalls: {2}, UltraBalls: {3} \n " \
+        str_ = "PokeBalls: {0}, GreatBalls: {1}, UltraBalls: {2}, MasterBalls: {3} \n " \
                "Potion: {4}, Super Potion: {5}, Max Potion {6}, Hyper Potion {7}, Lucky Eggs {8}, Razz Berries {9}"
         return str_.format(self.poke_balls,
                            self.great_balls,
-                           self.master_balls,
                            self.ultra_balls,
+                           self.master_balls,
                            self.potion,
                            self.super_potion,
                            self.max_potion,
