@@ -8,7 +8,7 @@ import os
 import zerorpc
 from collections import defaultdict
 
-from flask import Flask, flash, jsonify, redirect, render_template, url_for
+from flask import Flask, flash, jsonify, redirect, render_template, url_for, Response
 from werkzeug.exceptions import NotFound
 
 from poketrainer.poke_lvl_data import TCPM_VALS
@@ -141,6 +141,21 @@ def get_api_rpc(username):
 def favicon():
     # Explicitly handle favicon.ico so it doesn't route to the status function.
     return NotFound()
+
+
+@app.route("/static/pokemon/<imagename>")
+def static_pokemon(imagename):
+    path = os.path.abspath(os.path.dirname(__file__)) + "/web/static/pokemon/" + imagename
+    if not os.path.isfile(path):
+        return NotFound
+
+    contents = ""
+    try:
+        contents = open(path).read()
+    except IOError:
+        pass
+
+    return Response(contents, mimetype="image/png")
 
 
 @app.route("/<username>")
