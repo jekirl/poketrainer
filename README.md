@@ -172,6 +172,14 @@ using `docker inspect poketrainer`.
 The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`.
 
 You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.  	
+#### Dockerhub
+Building the container on the local system can be time consuming. Alternatively one can run the automated build created by Dockerhub. 
+Download the example config file and modify as you see fit. No need to checkout the git repo on the machine, only the configuration is needed.
+Currently this docker build is based on develop, but this will be updated as the needed changes are merged to master.
+```
+docker run -ti name poketrainer -v /path/to/config.json:/config.json -p 5000:5000 fallenpixel/poketrainer  -i 0
+```
+
 
 ### What's working:
 What's working:
