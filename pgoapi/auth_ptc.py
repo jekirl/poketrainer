@@ -61,7 +61,7 @@ class AuthPtc(Auth):
             raise AuthException("Username/password not correctly specified")
 
         head = {'User-Agent': 'niantic'}
-        self._req_proxy = {"http" : proxy, "https" : proxy}
+        self._req_proxy = {"http": proxy, "https": proxy}
         r = self._session.get(self.PTC_LOGIN_URL, headers=head, proxies=self._req_proxy)
 
         try:

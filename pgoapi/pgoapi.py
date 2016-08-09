@@ -346,7 +346,7 @@ class PGoApi:
 
     def set_proxy(self, proxy):
         self.log.debug('Set Proxy - Proxy: %s', proxy)
-        self._req_proxy = {"http" : proxy, "https" : proxy}
+        self._req_proxy = {"http": proxy, "https": proxy}
 
     def __getattr__(self, func):
         def function(**kwargs):
