@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import logging
+import colorlog
 
 from .pokemon import Pokemon
 
@@ -8,7 +9,13 @@ from .pokemon import Pokemon
 class Evolve:
     def __init__(self, parent):
         self.parent = parent
-        self.log = logging.getLogger(__name__)
+        # self.log = logging.getLogger(__name__)
+
+        handler = colorlog.StreamHandler()
+        handler.setFormatter(colorlog.ColoredFormatter('%(asctime)s [%(module)10s] [%(levelname)5s] %(cyan)s%(message)s'))
+        self.log = colorlog.getLogger(__name__)
+        self.log.propagate = False
+        self.log.addHandler(handler)
 
     def attempt_evolve(self):
         caught_pokemon = self.parent.inventory.get_caught_pokemon_by_family()

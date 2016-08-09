@@ -30,6 +30,7 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 
 import argparse
 import logging
+import colorlog
 
 import gevent
 
@@ -53,15 +54,15 @@ def init_arguments():
 def main():
     # log settings
     # log format
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+    colorlog.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
     # log level for http request class
-    logging.getLogger("requests").setLevel(logging.WARNING)
+    colorlog.getLogger("requests").setLevel(logging.WARNING)
     # log level for pgoapi class
-    logging.getLogger("pgoapi").setLevel(logging.WARNING)
+    colorlog.getLogger("pgoapi").setLevel(logging.WARNING)
     # log level for main bot class
-    logging.getLogger("poketrainer").setLevel(logging.INFO)
+    colorlog.getLogger("poketrainer").setLevel(logging.INFO)
     # log level for internal pgoapi class
-    logging.getLogger("rpc_api").setLevel(logging.INFO)
+    colorlog.getLogger("rpc_api").setLevel(logging.INFO)
 
     args = init_arguments()
     if not args:

@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import logging
+import colorlog
 
 from six import iteritems
 from .release_methods.base import ReleaseMethodFactory
@@ -9,7 +10,14 @@ from .release_methods.base import ReleaseMethodFactory
 class Release:
     def __init__(self, parent):
         self.parent = parent
-        self.log = logging.getLogger(__name__)
+        # self.log = logging.getLogger(__name__)
+        handler = colorlog.StreamHandler()
+        handler.setFormatter(colorlog.ColoredFormatter('%(asctime)s [%(module)10s] [%(levelname)5s] %(yellow)s%(message)s'))
+        self.log = colorlog.getLogger(__name__)
+        self.log.propagate = False
+        self.log.addHandler(handler)
+
+        
 
         self.release_method_factory = ReleaseMethodFactory(self.parent.config.config_data)
 

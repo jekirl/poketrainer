@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import json
 import logging
+import colorlog
 
 from cachetools import TTLCache
 
@@ -15,8 +16,14 @@ from .pokemon import POKEMON_NAMES, Pokemon
 class PokeCatcher:
     def __init__(self, parent):
         self.parent = parent
-        self.log = logging.getLogger(__name__)
+        # self.log = logging.getLogger(__name__)
         self.encountered_pokemons = TTLCache(maxsize=120, ttl=self.parent.map_objects.get_api_rate_limit() * 2)
+
+        handler = colorlog.StreamHandler()
+        handler.setFormatter(colorlog.ColoredFormatter('%(asctime)s [%(module)10s] [%(levelname)5s] %(green)s%(message)s'))
+        self.log = colorlog.getLogger(__name__)
+        self.log.propagate = False
+        self.log.addHandler(handler)
 
     def catch_all(self):
         catch_attempt = 0
