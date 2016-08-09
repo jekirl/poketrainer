@@ -17,15 +17,12 @@ angular.module('Poketrainer.State.Status', [
         $stateProvider.state('public.status', {
             url: '/status/:username',
             resolve: {
-                userData: ['$q', '$stateParams', 'User', function resolveUserData($q, $stateParams, User){
+                userData: ['$q', '$stateParams', 'PokeSocket', function resolveUserData($q, $stateParams, PokeSocket){
+                    PokeSocket.emit('status', { username: $stateParams.username });
                     var d = $q.defer();
 
-                    User.get({
-                        username: $stateParams.username
-                    }, function resolveSuccess(userData){
-                        d.resolve(userData);
-                    }, function resolveError(error){
-                        d.reject(error);
+                    PokeSocket.on('status', function (message) {
+                        d.resolve(angular.fromJson(message.data));
                     });
 
                     return d.promise;
@@ -43,14 +40,14 @@ angular.module('Poketrainer.State.Status', [
 
     .controller('StatusController', function StatusController($scope, $stateParams, User, userData, PokeSocket) {
         
-        PokeSocket.emit('status', { username: $stateParams.username });
+        //PokeSocket.emit('status', { username: $stateParams.username });
         
-        PokeSocket.on('status', function (data) {
-            console.log(data);
-        });
-        
+        //PokeSocket.on('status', function (data) {
+        //    console.log(data);
+        //});
         
         $scope.user = userData;
+        
         $scope.user.xpPercent = Math.floor($scope.user.level_xp/$scope.user.goal_xp*100);
         $scope.user.uniquePokedexPercent = Math.floor($scope.user.unique_pokedex_entries / 151 * 100);
         $scope.user.pokemonInvPercent = Math.floor($scope.user.pokemon.length / $scope.user.pokemon_capacity  * 100);

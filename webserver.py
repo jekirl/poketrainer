@@ -341,7 +341,7 @@ def get_status(message):
     player['stardust'] = currency
     player['item_capacity'] = player_json['player_data']['max_item_storage']
     player['pokemon_capacity'] = player_json['player_data']['max_pokemon_storage']
-    emit('status', {'data': jsonify(player), 'status': status})
+    emit('status', {'data': json.dumps(player), 'status': status})
     
 # can be called by the web-ui to get data from a bot
 @socketio.on('get', namespace='/api')
