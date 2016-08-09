@@ -25,7 +25,7 @@ module.exports = (function () {
         debug = (argv.profile.toLowerCase() === "debug");
     }
     
-    var baseUrl = '/';
+    var baseUrl = '';
 
     // If we're not running the mockup version,
     // do not include the JS files.
