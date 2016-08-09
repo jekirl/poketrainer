@@ -1,8 +1,6 @@
 from __future__ import absolute_import
 
-import colorlog
 import copy
-import logging
 import os
 import pickle
 import sys
@@ -13,6 +11,7 @@ from cachetools import TTLCache
 
 from helper.exceptions import TooManyEmptyResponses
 from helper.utilities import flat_map
+from helper.colorlogger import create_logger
 
 from .location import distance_in_meters, filtered_forts, get_route
 from .poke_utils import get_item_name
@@ -37,13 +36,8 @@ class FortWalker:
         self.cache_is_sorted = self.parent.config.cache_is_sorted
         self.use_cache = self.parent.config.use_cache
 
-        # self.log = logging.getLogger(__name__)
-        handler = colorlog.StreamHandler()
-        handler.setFormatter(colorlog.ColoredFormatter('%(asctime)s [%(module)10s] [%(levelname)5s] %(blue)s%(message)s'
-        ))
-        self.log = colorlog.getLogger(__name__)
-        self.log.propagate = False
-        self.log.addHandler(handler)
+        self.log = create_logger(__name__, 'blue')
+        
 
     """ will always only walk 1 step (i.e. waypoint), so we can accurately control the speed (via step_size) """
 

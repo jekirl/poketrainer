@@ -1,13 +1,14 @@
 from __future__ import absolute_import
 
 import json
-import logging
+
 from collections import defaultdict
 from time import time
 
 from library.api.pgoapi.protos.POGOProtos.Inventory import \
     Item_pb2 as Item_Enums
 
+from helper.colorlogger import create_logger
 from .poke_utils import get_item_name
 from .pokemon import Pokemon
 
@@ -16,7 +17,7 @@ class Inventory:
     def __init__(self, parent, inventory_items):
         self._parent = parent
         self.inventory_items = inventory_items
-        self._log = logging.getLogger(__name__)
+        self._log = create_logger(__name__, 'purple')
         self._last_egg_use_time = 0
 
         self.ultra_balls = 0

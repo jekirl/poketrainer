@@ -54,13 +54,12 @@ def init_arguments():
 def main():
     # log settings
     # log format
-    colorlog.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+    
+    colorlog.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s]  %(log_color)s[%(levelname)5s] %(reset)s%(message)s')
     # log level for http request class
     colorlog.getLogger("requests").setLevel(logging.WARNING)
     # log level for pgoapi class
     colorlog.getLogger("pgoapi").setLevel(logging.WARNING)
-    # log level for main bot class
-    colorlog.getLogger("poketrainer").setLevel(logging.INFO)
     # log level for internal pgoapi class
     colorlog.getLogger("rpc_api").setLevel(logging.INFO)
 

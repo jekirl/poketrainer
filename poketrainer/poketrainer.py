@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 
-import json
 import logging
+import colorlog
+import json
 import os
 import os.path
 import socket
@@ -13,6 +14,7 @@ from gevent.coros import BoundedSemaphore
 from six import PY2
 
 from helper.utilities import dict_merge
+from helper.colorlogger import create_logger
 from library import api
 from pgoapi.exceptions import AuthException
 
@@ -29,8 +31,6 @@ from .poke_catcher import PokeCatcher
 from .release import Release
 from .sniper import Sniper
 
-logger = logging.getLogger(__name__)
-
 
 class Poketrainer:
     """ Public functions (without _**) are callable by the webservice! """
@@ -42,7 +42,7 @@ class Poketrainer:
         self.cli_args = args
         self.force_debug = args['debug']
 
-        self.log = logging.getLogger(__name__)
+        self.log = create_logger(__name__, 'cyan')
 
         # timers, counters and triggers
         self.pokemon_caught = 0
@@ -130,13 +130,13 @@ class Poketrainer:
             config = load.get('accounts', [])[self.cli_args['config_index']]
 
             if self.cli_args['debug'] or config.get('debug', False):
-                logging.getLogger("requests").setLevel(logging.DEBUG)
-                logging.getLogger("pgoapi").setLevel(logging.DEBUG)
-                logging.getLogger("poketrainer").setLevel(logging.DEBUG)
-                logging.getLogger("rpc_api").setLevel(logging.DEBUG)
+                colorlog.getLogger("requests").setLevel(logging.DEBUG)
+                colorlog.getLogger("pgoapi").setLevel(logging.DEBUG)
+                colorlog.getLogger("poketrainer").setLevel(logging.DEBUG)
+                colorlog.getLogger("rpc_api").setLevel(logging.DEBUG)
 
             if config.get('auth_service', '') not in ['ptc', 'google']:
-                logger.error("Invalid Auth service specified for account %s! ('ptc' or 'google')", config.get('username', 'NA'))
+                self.log.error("Invalid Auth service specified for account %s! ('ptc' or 'google')", config.get('username', 'NA'))
                 return False
 
                 # merge account section with defaults
@@ -171,7 +171,7 @@ class Poketrainer:
             while not login:
                 login = self.api.login(self.config.auth_service, self.config.username, self.config.get_password())
                 if not login:
-                    logger.error('Login error, retrying Login in 30 seconds')
+                    self.log.error('Login error, retrying Login in 30 seconds')
                     self.sleep(30)
             self.log.info('Login successful')
             self._heartbeat(login, True)
@@ -212,11 +212,11 @@ class Poketrainer:
         try:
             if not gt.exception:
                 result = gt.value
-                logger.info('Thread finished with result: %s', result)
+                self.log.info('Thread finished with result: %s', result)
         except KeyboardInterrupt:
             return
 
-        logger.exception('Error in main loop %s, restarting at location: %s',
+        self.log.exception('Error in main loop %s, restarting at location: %s',
                          gt.exception, self.get_position())
         # restart after sleep
         self.sleep(30)
