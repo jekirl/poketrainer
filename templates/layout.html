@@ -29,11 +29,19 @@
   {% endblock head %}
 </head>
 <body>
-  {% set navigation_bar = [
-    ("status", 'status', 'Status'),
-    ("inventory", 'inventory', 'Inventory'),
-    ("pokemon", 'pokemon', 'Pokémon')
-  ] -%}
+
+  {% if username == null %}
+    {% set navigation_bar = [
+      ("accounts", "accounts", "Account List")
+    ] -%}
+  {% else %}
+    {% set navigation_bar = [
+      ("accounts", "accounts", "Account List"),
+      ("status", 'status', 'Status'),
+      ("inventory", 'inventory', 'Inventory'),
+      ("pokemon", 'pokemon', 'Pokémon')
+    ] -%}
+  {% endif %}
   {# we cant create links for routes that are not set yet, future pages:
     ("eggs", 'eggs', 'Eggs'),
     ("journal", 'journal', 'Journal')

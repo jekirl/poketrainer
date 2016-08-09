@@ -45,6 +45,23 @@ with open("GAME_ATTACKS_v0_1.tsv") as tsv:
     for row in reader:
         attacks[int(row["Num"])] = row["Move"]
 
+def get_player_data(username):
+    c = get_api_rpc(username)
+    player = {}
+    if c is None:
+        return player
+
+    player_json = json.loads(c.get_player_info())
+    
+    for item in items:
+        item = item['inventory_item_data']
+        if 'player_stats' in item:
+            player = item['player_stats']
+    player['username'] = player_json['player_data']['username']
+    player['level_xp'] = player.get('experience', 0) - player.get('prev_level_xp', 0)
+    player['hourly_exp'] = player.get("hourly_exp", 0)  # Not showing up in inv or player data
+    player['goal_xp'] = player.get('next_level_xp', 0) - player.get('prev_level_xp', 0)
+    return player
 
 def init_config(username):
     config_file = "config.json"
@@ -119,7 +136,6 @@ def set_columns_to_ignore(columns_to_ignore):
         elif column.lower() == 'transfer':
             options['ignore_transfer'] = 'display: none;'
 
-
 def get_api_rpc(username):
     desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
     sock_port = 0
@@ -136,6 +152,20 @@ def get_api_rpc(username):
     c.connect("tcp://127.0.0.1:%i" % sock_port)
     return c
 
+@app.route("/")
+def users():
+    users = []
+
+    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+    with open(desc_file) as f:
+        live_users = f.read()
+        live_users = json.loads(live_users.encode() if len(live_users) > 0 else '{}')
+
+        for username in live_users:
+            user_data = get_player_data(username)
+            users.append(user_data)
+
+    return render_template('users.html', users=users)
 
 @app.route("/favicon.ico")
 def favicon():
@@ -185,7 +215,6 @@ def status(username):
     player['goal_xp'] = player.get('next_level_xp', 0) - player.get('prev_level_xp', 0)
     return render_template('status.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, username=username, options=options)
 
-
 @app.route("/<username>/pokemon")
 def pokemon(username):
     s = get_api_rpc(username)
@@ -218,7 +247,6 @@ def transfer(username, p_id):
     else:
         flash("Failed!")
     return redirect(url_for('inventory', username=username))
-
 
 @app.route("/<username>/snipe/<latlng>")
 def snipe(username, latlng):
