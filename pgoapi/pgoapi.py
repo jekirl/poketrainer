@@ -68,14 +68,14 @@ from pgoapi.protos.POGOProtos.Networking.Requests_pb2 import RequestType
 from pgoapi.release.base import ReleaseMethodFactory
 from pgoapi.rpc_api import RpcApi
 from pgoapi.utilities import parse_api_endpoint
-<<<<<<< HEAD
-<<<<<<< f427aec32d4f2ed74e08f2276eab3a2c89d93646
-=======
-=======
->>>>>>> 1a2ee7da9f05acc7a79c6fc6a98df1fa0a27325e
+#<<<<<<< HEAD
+#<<<<<<< f427aec32d4f2ed74e08f2276eab3a2c89d93646
+#=======
+#=======
+#>>>>>>> 1a2ee7da9f05acc7a79c6fc6a98df1fa0a27325e
 from pgoapi.snipe import DEFAULT_SNIPER
 from .utilities import f2i
->>>>>>> wip
+#>>>>>>> wip
 
 if six.PY3:
     from builtins import map as imap
@@ -219,6 +219,13 @@ class PGoApi:
         self.cache_is_sorted = self.config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
         self.enable_caching = self.config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
 
+        self.enable_snipe = self.config.get("SNIPER", {}).get("ENABLE", False)
+        self.sniping_mode = self.config.get("SNIPER", {}).get("SNIPING_MODE", 0)
+        self.sniping_modes = self.config.get("SNIPER", {}).get("SNIPING_MODES", ["LOCATION","POKEMON"])
+        self.snipe_targets = self.config.get("SNIPER", {}).get("TARGET_POKEMON", [])
+        self.snipe_cp_over = self.config.get("SNIPER", {}).get("POKEMON_CP_REQ", 0)
+        self.snipe_iv_over = self.config.get("SNIPER", {}).get("POKEMON_IV_REQ", 0)
+        self.use_pokesnipers = self.config.get("SNIPER", {}).get("USE_POKESNIPERS.COM", False)
     '''
     Blocking lock
         - only locks if current thread (greenlet) doesn't own the lock
@@ -383,54 +390,97 @@ class PGoApi:
             return False
         return True
 
-    def snipe_pokemon(self, lat, lng):
-        self.cond_lock(persist=True)
-        try:
-            self.gsleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
-            curr_lat = self._posf[0]
-            curr_lng = self._posf[1]
+    def snipe_pokemon(self, data = [],  lat = 0, lng = 0, mode = 0):
+        if mode == 0:
+            self.cond_lock(persist=True)
+            try:
+                self.gsleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
+                curr_lat = self._posf[0]
+                curr_lng = self._posf[1]
 
-            self.log.info("Sniping pokemon at %f, %f", lat, lng)
-            self.log.info("Waiting for API limit timer ...")
-            while time() - self._last_got_map_objects < self._map_objects_rate_limit:
-                self.gsleep(0.1)
+                self.log.info("Sniping pokemon at %f, %f", lat, lng)
+                self.log.info("Waiting for API limit timer ...")
+                while time() - self._last_got_map_objects < self._map_objects_rate_limit:
+                    self.gsleep(0.1)
 
-            # move to snipe location
-            self.set_position(lat, lng, 0.0)
-            if not self.send_update_pos():
-                return False
+                # move to snipe location
+                self.set_position(lat, lng, 0.0)
+                if not self.send_update_pos():
+                    return False
 
-            self.log.debug("Teleported to sniping location %f, %f", lat, lng)
+                self.log.debug("Teleported to sniping location %f, %f", lat, lng)
 
-            # find pokemons in dest
-            map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
-            pokemons = PGoApi.flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
+                # find pokemons in dest
+                map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
+                pokemons = PGoApi.flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
 
-            # catch first pokemon:
-            origin = (self._posf[0], self._posf[1])
-            pokemon_rarity_and_dist = [
-                (
-                    pokemon, pokedex.get_rarity_by_id(pokemon['pokemon_id']),
-                    distance_in_meters(origin, (pokemon['latitude'], pokemon['longitude']))
-                )
-                for pokemon in pokemons]
-            pokemon_rarity_and_dist.sort(key=lambda x: x[1], reverse=True)
+                # catch first pokemon:
+                origin = (self._posf[0], self._posf[1])
+                pokemon_rarity_and_dist = [
+                    (
+                        pokemon, pokedex.get_rarity_by_id(pokemon['pokemon_id']),
+                        distance_in_meters(origin, (pokemon['latitude'], pokemon['longitude']))
+                    )
+                    for pokemon in pokemons]
+                pokemon_rarity_and_dist.sort(key=lambda x: x[1], reverse=True)
 
-            if pokemon_rarity_and_dist:
-                self.log.info("Rarest pokemon: : %s", POKEMON_NAMES[str(pokemon_rarity_and_dist[0][0]['pokemon_id'])])
-                return self.encounter_pokemon(pokemon_rarity_and_dist[0][0], new_loc=(curr_lat, curr_lng))
-            else:
-                self.log.info("No nearby pokemon. Can't snipe!")
-                return False
+                if pokemon_rarity_and_dist:
+                    self.log.info("Rarest pokemon: : %s", POKEMON_NAMES[str(pokemon_rarity_and_dist[0][0]['pokemon_id'])])
+                    return self.encounter_pokemon(pokemon_rarity_and_dist[0][0], new_loc=(curr_lat, curr_lng))
+                else:
+                    self.log.info("No nearby pokemon. Can't snipe!")
+                    return False
 
-        finally:
-            self.set_position(curr_lat, curr_lng, 0.0)
-            self.send_update_pos()
-            self.log.debug("Teleported back to origin at %f, %f", self._posf[0], self._posf[1])
-            # self.gsleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
-            self.persist_lock = False
-            self.cond_release()
+            finally:
+                self.set_position(curr_lat, curr_lng, 0.0)
+                self.send_update_pos()
+                self.log.debug("Teleported back to origin at %f, %f", self._posf[0], self._posf[1])
+                # self.gsleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
+                self.persist_lock = False
+                self.cond_release()
+        else:
+            self.cond_lock(persist=True)
+            try:
+                if len(data) > 0:
+                    self.gsleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
+                    curr_lat = self._posf[0]
+                    curr_lng = self._posf[1]
 
+                    lat = data['Point'][1]
+                    lng = data['Point'][0]
+
+                    self.log.info("Sniping %s at %f, %f",  pokedex.get_name_by_id(data['pokemon_ID']), lat, lng)
+                    self.log.info("Waiting for API limit timer ...")
+                    while time() - self._last_got_map_objects < self._map_objects_rate_limit:
+                        self.gsleep(0.1)
+
+                    # move to snipe location
+                    self.set_position(lat, lng, 0.0)
+                    if not self.send_update_pos():
+                        return False
+
+                    self.log.debug("Teleported to sniping location %f, %f", lat, lng)
+
+                    # find pokemons in dest
+                    map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
+                    pokemons = PGoApi.flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
+
+                    # catch first pokemon:
+                    origin = (self._posf[0], self._posf[1])
+                    for pokemon in pokemons:
+                        if pokemon['id'] == data['Id']:
+                            return self.encounter_pokemon(pokemon, new_loc=(curr_lat, curr_lng))
+                else:
+                    self.log.info("Error: No data sent to sniper")
+                    return False
+
+            finally:
+                self.set_position(curr_lat, curr_lng, 0.0)
+                self.send_update_pos()
+                self.log.debug("Teleported back to origin at %f, %f", self._posf[0], self._posf[1])
+                # self.gsleep(2) # might not be needed, used to prevent main thread from issuing a waiting-for-lock server query too quickly
+                self.persist_lock = False
+                self.cond_release()
     def hourly_exp(self, exp):
         # This check is to prevent a bug with the exp not always coming in corretly on the first response
         # (it often comes in as 0 initially, thereby messing up the whole XP/hour stat)
@@ -1339,10 +1389,31 @@ class PGoApi:
         while True:
             self.heartbeat()
             # self.gsleep(1)
-            if self.config.get("AUTO_SNIPE",False):
-                for pokemon_data in DEFAULT_SNIPER.poll_since():
-                    while self.snipe_pokemon(*pokemon_data['loc']):
-                        continue
+            if self.enable_snipe:
+                try:
+                    for pokemon_data in DEFAULT_SNIPER.poll_since():
+                        self.log.info("Checking default database")
+                        #print pokemon_data
+                        if self.sniping_mode == 0:
+                            if not self.snipe_pokemon(lat = pokemon_data['loc'][0], lng = pokemon_data['loc'][1], mode = 0):
+                                break
+                        else:
+                            if pokemon_data['iv'] >= self.snipe_iv_over or pokemon_data['cp'] >= self.snipe_cp_over or pokedex.get_name_by_id(pokemon_data['pokemon_id']) in self.snipe_targets:
+                                self.snipe_pokemon(data = pokemon_data, mode = 1)
+                except Exception as e:
+                    self.log.info("Error sniping, database probably empty: %s", e)
+                    pass
+                # try:
+                if self.use_pokesnipers:
+                    for pokemon_data in DEFAULT_SNIPER.poll_since_2():
+                        self.log.info("Checking pokesnipers.com database")
+                        #print pokemon_data
+                        if not self.snipe_pokemon(lat = pokemon_data['loc'][0], lng = pokemon_data['loc'][1], mode = 0):
+                                break
+                # except Exception as e:
+                #     self.log.info("Error sniping, pokesnipers is protected by cloudflare, you might be blocked: %s", e)
+                #     pass
+
             if self.use_cache and self.experimental and self.enable_caching:
                 self.spin_all_cached_forts()
             else:

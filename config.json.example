@@ -21,6 +21,15 @@
         "USE_CACHED_FORTS" : false,
         "CACHED_FORTS_SORTED" : false
       },
+      "SNIPER": {
+        "ENABLE": false,
+        "SNIPING MODE": 0,
+        "SNIPING_MODES": ["LOCATION","POKEMON"],
+        "TARGET_POKEMON": ["DRAGONITE"],
+        "POKEMON_CP_REQ": 1000,
+        "POKEMON_IV_REQ": 90,
+        "USE_POKESNIPERS.COM": false
+      },
       "CAPTURE": {
         "CATCH_POKEMON": true,
         "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 3,
