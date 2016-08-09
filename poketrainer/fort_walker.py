@@ -25,7 +25,7 @@ class FortWalker:
         self.route_only_forts = False
         self.steps = []  # steps contain all steps to the next route target
         self.next_step = None
-        self.wandering = False
+        self.wander_steps = []  # only set when we want to wander
         self.total_distance_traveled = 0
         self.total_trip_distance = 0
         self.base_travel_link = ''
@@ -43,6 +43,11 @@ class FortWalker:
         if self._error_counter >= self._error_threshold:
             raise TooManyEmptyResponses('Too many errors in this run!!!')
         if not self.next_step:
+            # if wander_step was set, we will create a route to this point ignoring google
+            if self.wander_steps:
+                self.next_step = self.wander_steps.pop(0)
+                self.wander_steps = []
+
             # if we don't have a waypoint atm, calculate new waypoints until location
             if not self.steps:
                 if self.total_distance_traveled > 0:
@@ -171,9 +176,8 @@ class FortWalker:
         distance_to_point = distance_in_meters(self.parent.get_position(), next_point)
         self.total_distance_traveled += distance_to_point
         travel_link = '%s%s,%s' % (self.base_travel_link, next_point[0], next_point[1])
-        self.log.info("Travel Link: %s", travel_link)
+        self.log.info("Walking %.1fm: %s", distance_to_point, travel_link)
         self.parent.api.set_position(*next_point)
-        self.wandering = False
 
     def _walk_back_to_origin(self):
         orig_posf = self.parent.get_orig_position()
@@ -200,9 +204,14 @@ class FortWalker:
             self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
 
             # Fort is close enough to change our route and walk to
-            if not self.wandering and nearest_fort_dis < self.parent.config.wander_steps and nearest_fort_dis > 40:
-                self.next_step = {'lat': destinations[0][0]['latitude'], 'long': destinations[0][0]['longitude']}
-                self.wandering = True
+            if not self.wander_steps and nearest_fort_dis < self.parent.config.wander_steps and nearest_fort_dis > 40:
+                # create route directly to fort, disabling google
+                route_data = get_route(
+                    self.parent.get_position(), (destinations[0][0]['latitude'], destinations[0][0]['longitude']),
+                    use_google=False, gmaps_api_key='', walk_to_all_forts=False, waypoints=None,
+                    step_size=self.parent.step_size
+                )
+                self.wander_steps = route_data['steps']
             elif nearest_fort_dis <= 40.00:
                 self.do_fort_spin(nearest_fort, player_postion=self.parent.api.get_position(),
                                   fort_distance=nearest_fort_dis)
