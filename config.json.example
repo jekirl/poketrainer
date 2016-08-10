@@ -17,7 +17,7 @@
         "AUTO_USE_LUCKY_EGG": false,
         "EXTRA_WAIT" : 0.3,
         "SLEEP_MULT" : 1.5,
-        "ENABLE_CACHING" :false,
+        "ENABLE_CACHING" : false,
         "USE_CACHED_FORTS" : false,
         "CACHED_FORTS_SORTED" : false
       },
@@ -130,9 +130,14 @@
         "FARM_OVERRIDE_STEP_SIZE": -1
       },
       "CONSOLE_OUTPUT": {
-        "EXPLAIN_EVOLUTION_BEFORE_CLEANUP": true,
-        "LIST_POKEMON_BEFORE_CLEANUP": true,
-        "LIST_INVENTORY_BEFORE_CLEANUP": true
+        "EXPLAIN_EVOLUTION_BEFORE_CLEANUP": false,
+        "LIST_POKEMON_BEFORE_CLEANUP": false,
+        "LIST_INVENTORY_BEFORE_CLEANUP": true,
+        "SHOW_STEPS": true,
+        "SHOW_TRAVEL_LINK_WITH_STEPS": true,
+        "SHOW_DISTANCE_TRAVELED": true,
+        "SHOW_NEAREST_FORT_DISTANCE": true,
+        "NOTIFY_NO_NEARBY_POKEMON": false
       }
     },
     {
