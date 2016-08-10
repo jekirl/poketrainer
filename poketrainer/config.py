@@ -99,14 +99,22 @@ class Config:
         self.show_nearest_fort_distance = config.get("CONSOLE_OUTPUT", {}).get("SHOW_NEAREST_FORT_DISTANCE", True)
         self.notify_no_nearby_pokemon = config.get("CONSOLE_OUTPUT", {}).get("NOTIFY_NO_NEARBY_POKEMON", False)
 
+        self.log_colors = config.get("CONSOLE_OUTPUT", {}).get("COLORLOG",
+                                                               {"FORT_WALKER": "blue",
+                                                                "POKE_CATCHER": "green",
+                                                                "RELEASE": "cyan",
+                                                                "EVOLVE": "cyan",
+                                                                "POKETRAINER": "yellow",
+                                                                "INVENTORY": "purple"})
+        
         if cli_args['location']:
             start_location = cli_args['location']
         else:
             start_location = self.location
-        self.cache_filename = './cache/cache ' + (hashlib.md5(start_location.encode())).hexdigest() + str(self.stay_within_proximity)
-        self.use_cache = config.get("BEHAVIOR", {}).get("USE_CACHED_FORTS", False)
-        self.cache_is_sorted = config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
-        self.enable_caching = config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
+            self.cache_filename = './cache/cache ' + (hashlib.md5(start_location.encode())).hexdigest() + str(self.stay_within_proximity)
+            self.use_cache = config.get("BEHAVIOR", {}).get("USE_CACHED_FORTS", False)
+            self.cache_is_sorted = config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
+            self.enable_caching = config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
 
     def _sanity_check_needy_item_farming(self):
         # Sanity checking, farm_items is Experimental, and we needn't do this if we're farming anyway
@@ -114,10 +122,10 @@ class Config:
                                    self.experimental and
                                    self.should_catch_pokemon)
         if (self.farm_items_enabled and
-                self.farm_ignore_pokeball_count and
-                self.farm_ignore_greatball_count and
-                self.farm_ignore_ultraball_count and
-                self.farm_ignore_masterball_count):
+            self.farm_ignore_pokeball_count and
+            self.farm_ignore_greatball_count and
+            self.farm_ignore_ultraball_count and
+            self.farm_ignore_masterball_count):
             self.farm_items_enabled = False
             self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
         elif self.farm_items_enabled and not self.pokeball_farm_threshold < self.pokeball_continue_threshold:

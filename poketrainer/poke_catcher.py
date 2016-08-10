@@ -17,7 +17,7 @@ class PokeCatcher:
         self.parent = parent
         self.encountered_pokemons = TTLCache(maxsize=120, ttl=self.parent.map_objects.get_api_rate_limit() * 2)
 
-        self.log = create_logger(__name__, 'green')
+        self.log = create_logger(__name__, self.parent.config.log_colors["poke_catcher".upper()])
 
     def catch_all(self):
         catch_attempt = 0

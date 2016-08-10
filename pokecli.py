@@ -36,7 +36,7 @@ import gevent
 
 from poketrainer.poketrainer import Poketrainer
 
-logger = create_logger(__name__)
+logger = create_logger(__name__, color='red')
 
 
 def init_arguments():

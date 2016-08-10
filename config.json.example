@@ -137,8 +137,16 @@
         "SHOW_TRAVEL_LINK_WITH_STEPS": true,
         "SHOW_DISTANCE_TRAVELED": true,
         "SHOW_NEAREST_FORT_DISTANCE": true,
-        "NOTIFY_NO_NEARBY_POKEMON": false
-      }
+        "NOTIFY_NO_NEARBY_POKEMON": false,
+        "COLORLOG": {
+            "FORT_WALKER": "blue",
+            "POKE_CATCHER": "green",
+            "RELEASE": "cyan",
+            "EVOLVE": "cyan",
+            "POKETRAINER": "yellow",
+            "INVENTORY": "purple"
+            }            
+        }
     },
     {
       "auth_service": "ptc",

@@ -42,7 +42,6 @@ class Poketrainer:
         self.cli_args = args
         self.force_debug = args['debug']
 
-        self.log = create_logger(__name__, 'cyan')
 
         # timers, counters and triggers
         self.pokemon_caught = 0
@@ -58,7 +57,12 @@ class Poketrainer:
         # objects, order is important!
         self.config = None
         self._load_config()
+
+        print(__name__)
+        self.log = create_logger(__name__, self.config.log_colors["poketrainer".upper()])
+        
         self._open_socket()
+        
 
         self.player = Player({})
         self.player_stats = PlayerStats({})

@@ -36,7 +36,7 @@ class FortWalker:
         self.cache_is_sorted = self.parent.config.cache_is_sorted
         self.use_cache = self.parent.config.use_cache
 
-        self.log = create_logger(__name__, 'blue')
+        self.log = create_logger(__name__, self.parent.config.log_colors["fort_walker".upper()])
 
     """ will always only walk 1 step (i.e. waypoint), so we can accurately control the speed (via step_size) """
 

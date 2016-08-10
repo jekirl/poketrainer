@@ -9,7 +9,7 @@ class Evolve:
     def __init__(self, parent):
         self.parent = parent
 
-        self.log = create_logger(__name__, 'cyan')
+        self.log = create_logger(__name__, self.parent.config.log_colors["evolve".upper()])
 
     def attempt_evolve(self):
         caught_pokemon = self.parent.inventory.get_caught_pokemon_by_family()

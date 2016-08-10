@@ -11,7 +11,7 @@ class Release:
     def __init__(self, parent):
         self.parent = parent
 
-        self.log = create_logger(__name__, 'yellow')
+        self.log = create_logger(__name__, self.parent.config.log_colors["release".upper()])
 
         self.release_method_factory = ReleaseMethodFactory(self.parent.config.config_data)
 
