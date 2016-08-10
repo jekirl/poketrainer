@@ -31,9 +31,9 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 import argparse
 import logging
 
-from helper.colorlogger import create_logger
 import gevent
 
+from helper.colorlogger import create_logger
 from poketrainer.poketrainer import Poketrainer
 
 logger = create_logger(__name__, color='red')

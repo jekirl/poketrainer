@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-
 from helper.colorlogger import create_logger
 from helper.utilities import flat_map
 

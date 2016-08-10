@@ -42,7 +42,6 @@ class Poketrainer:
         self.cli_args = args
         self.force_debug = args['debug']
 
-
         # timers, counters and triggers
         self.pokemon_caught = 0
         self._error_counter = 0
@@ -60,9 +59,8 @@ class Poketrainer:
 
         print(__name__)
         self.log = create_logger(__name__, self.config.log_colors["poketrainer".upper()])
-        
+
         self._open_socket()
-        
 
         self.player = Player({})
         self.player_stats = PlayerStats({})
@@ -304,7 +302,7 @@ class Poketrainer:
             if self.config.list_inventory_before_cleanup:
                 self.log.info("Player Inventory: %s", self.inventory)
             if not login_response:
-                #self.log.debug(self.inventory.cleanup_inventory())
+                # self.log.debug(self.inventory.cleanup_inventory())
                 self.inventory.cleanup_inventory()
                 self.log.info("Player Inventory after cleanup: %s", self.inventory)
             if self.config.list_pokemon_before_cleanup:

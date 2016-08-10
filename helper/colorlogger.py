@@ -1,5 +1,7 @@
-import colorlog
 import logging
+
+import colorlog
+
 
 def create_logger(name, color='reset', log_level=logging.INFO, log_colors={
         'DEBUG': 'white',

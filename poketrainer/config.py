@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
 import hashlib
-from helper.colorlogger import create_logger
 
+from helper.colorlogger import create_logger
 from library.api.pgoapi.protos.POGOProtos import Enums_pb2 as Enums
 from library.api.pgoapi.protos.POGOProtos.Inventory import \
     Item_pb2 as Item_Enums
@@ -106,7 +106,7 @@ class Config:
                                                                 "EVOLVE": "cyan",
                                                                 "POKETRAINER": "yellow",
                                                                 "INVENTORY": "purple"})
-        
+
         if cli_args['location']:
             start_location = cli_args['location']
         else:
@@ -121,11 +121,7 @@ class Config:
         self.farm_items_enabled = (self.farm_items_enabled and
                                    self.experimental and
                                    self.should_catch_pokemon)
-        if (self.farm_items_enabled and
-            self.farm_ignore_pokeball_count and
-            self.farm_ignore_greatball_count and
-            self.farm_ignore_ultraball_count and
-            self.farm_ignore_masterball_count):
+        if (self.farm_items_enabled and self.farm_ignore_pokeball_count and self.farm_ignore_greatball_count and self.farm_ignore_ultraball_count and self.farm_ignore_masterball_count):
             self.farm_items_enabled = False
             self.log.warn("FARM_ITEMS has been disabled due to all Pokeball counts being ignored.")
         elif self.farm_items_enabled and not self.pokeball_farm_threshold < self.pokeball_continue_threshold:

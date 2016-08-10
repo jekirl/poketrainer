@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 
-from helper.colorlogger import create_logger
 from time import time
+
+from helper.colorlogger import create_logger
 
 from .location import get_neighbors
 

@@ -17,7 +17,7 @@ class Inventory:
         self._parent = parent
         self.inventory_items = inventory_items
         self._last_egg_use_time = 0
-        
+
         self._log = create_logger(__name__, self._parent.config.log_colors["inventory".upper()])
 
         self.ultra_balls = 0
