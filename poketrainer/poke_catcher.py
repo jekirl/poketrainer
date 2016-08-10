@@ -114,6 +114,7 @@ class PokeCatcher:
         if capture_status == 1:
             self.log.debug("Caught Pokemon: : %s", catch_attempt)
             self.log.info("Caught Pokemon:  %s", pokemon)
+            self.parent.push_to_web('pokemon', 'caught', pokemon.to_json())
             self.parent.pokemon_caught += 1
             return True
         elif capture_status == 3:

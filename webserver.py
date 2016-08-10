@@ -4,6 +4,7 @@ from __future__ import print_function
 import argparse
 import csv
 import json
+import logging
 import os
 from collections import defaultdict
 
@@ -16,6 +17,9 @@ from six import PY2
 
 from poketrainer.poke_lvl_data import TCPM_VALS
 from poketrainer.pokemon import Pokemon
+
+logger = logging.getLogger(__name__)
+logging.getLogger("zerorpc").setLevel(logging.WARNING)
 
 
 # we can remove this class and the use of it if we really don't create URLs with flask anymore
@@ -73,10 +77,21 @@ class RpcSocket:
 
         print('Error in socket thread %s', gt.exception)
 
-    def push(self, data):
+    def push(self, username, event, action, data):
         # calling emit with socketio.emit() will broadcast messages when we're outside of an http request scope
-        print('received data from bot!')
-        socketio.emit('status', {'data': data}, namespace='/poketrainer')
+        print('received data from bot: ', username, ', ', event, ':', action, ', omitting data')
+
+        push_template = dict()
+        push_template['room'] = ''
+        push_template['username'] = username
+        push_template['event'] = event
+        push_template['action'] = action
+        push_template['data'] = data
+
+        push_template['room'] = 'global'
+        socketio.emit('push', push_template, namespace='/poketrainer', room='global')
+        push_template['room'] = username
+        socketio.emit('push', push_template, namespace='/poketrainer', room=username)
 
 
 def init_config():

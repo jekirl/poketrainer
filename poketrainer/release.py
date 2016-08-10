@@ -25,6 +25,7 @@ class Release:
         self.parent.sleep(1.0 + self.parent.config.extra_wait)
         if self.do_release_pokemon_by_id(pokemon.id):
             self.log.info("Successfully Released Pokemon %s", pokemon)
+            self.parent.push_to_web('pokemon', 'released', pokemon.to_json())
         else:
             self.log.info("Failed to release Pokemon %s", pokemon)
 
