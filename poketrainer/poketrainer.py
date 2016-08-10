@@ -348,7 +348,7 @@ class Poketrainer:
 
         if 'DOWNLOAD_SETTINGS' in responses:
             settings = responses.get('DOWNLOAD_SETTINGS', {}).get('settings', {})
-            if settings.get('minimum_client_version', '0.0.0') > '0.31.0':
+            if settings.get('minimum_client_version', '0.0.0') > '0.33.0':
                 self.log.error("Minimum client version has changed... the bot needs to be updated! Will now stop!")
                 exit(0)
             map_settings = settings.get('map_settings', {})
@@ -427,6 +427,7 @@ class Poketrainer:
             try:
                 return self.sniper.snipe_pokemon(float(lat), float(lng))
             finally:
+                self._heartbeat()
                 # after we're done, release lock
                 self.persist_lock = False
                 self.thread_release()
