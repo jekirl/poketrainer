@@ -11,7 +11,7 @@
         <div class="container-fluid">
           Level XP: {{player["level_xp"]}} / {{player["goal_xp"]}}
           <div class="progress">
-            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["level_xp"] / player["goal_xp"] * 100)|int }}%;">
+            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: {{ (player["experience"] / player["next_level_xp"] * 100)|int }}%;">
               {{ (player["level_xp"] / player["goal_xp"] * 100)|int }}%
             </div>
           </div>

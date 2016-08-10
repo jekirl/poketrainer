@@ -24,7 +24,6 @@ cache/
 *.egg-info/
 .installed.cfg
 *.egg
-web-ui/node_modules
 src
 
 # PyInstaller
@@ -106,6 +105,3 @@ encrypt.dll
 data_dumps/*.json
 .idea
 .listeners
-web-ui/vendor
-web-ui/node_modules
-encrypt.dll
