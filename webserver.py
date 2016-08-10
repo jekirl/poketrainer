@@ -399,7 +399,7 @@ class RpcSocket:
     def push(self, data):
         # calling emit with socketio.emit() will broadcast messages when we're outside of an http request scope
         print('received data from bot!')
-        socketio.emit('my event', {'data': data})
+        socketio.emit('status', {'data': data}, namespace='/api')
 
 
 def main():
