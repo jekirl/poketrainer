@@ -44,6 +44,15 @@ socketio = SocketIO(app, async_mode="gevent")
 options = {}
 attacks = {}
 
+
+def _thread_callback(gt):
+    if not gt.exception:
+        result = gt.value
+        print('Connected to bot and enabled pushing with result: %s', result)
+    else:
+        print('Error connecting to bot %s', gt.exception)
+
+
 @app.route('/')
 def root():
   return app.send_static_file('index.html')
@@ -62,6 +71,7 @@ def users():
         live_users = f.read()
         live_users = json.loads(live_users.encode() if len(live_users) > 0 else '{}')
 
+        threads = {}
         for username in live_users:
             if username == 'web':
                 continue
@@ -69,10 +79,13 @@ def users():
             if c is None:
                 continue
 
-            # try to enable web pushing in a background 'thread'
-            gevent.spawn(c.enable_web_pushing)
+            print("try to enable web pushing in a background 'thread' for %s", username)
+            threads[username] = gevent.spawn(c.enable_web_pushing)
+            threads[username].link(_thread_callback)
+            print("continue...")
             user = {'username': username}
             users.append(user)
+    print("got all users")
     return jsonify(users)
     
 @app.route('/api/player/<username>', methods=['GET'])
@@ -409,7 +422,8 @@ def main():
 
     # for some reason when we're using gevent, flask does not output a lot... we'll just notify here
     print('Starting Webserver on ' + str(web_config["hostname"]) + ':' + str(web_config["port"]))
-    socketio.run(app, host=web_config["hostname"], port=web_config["port"], debug=web_config["debug"])
+    # Debug mode will not use gevent and thus breaks the socket
+    socketio.run(app, host=web_config["hostname"], port=web_config["port"], log_output=web_config["debug"], debug=False)
 
 
 if __name__ == '__main__':

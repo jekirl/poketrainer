@@ -9,6 +9,7 @@ import zerorpc
 from collections import defaultdict
 
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
+from flask_socketio import SocketIO, emit
 from werkzeug.exceptions import NotFound
 
 from poketrainer.poke_lvl_data import TCPM_VALS
@@ -36,6 +37,11 @@ app = Flask(__name__, template_folder="web/templates", static_folder='web/static
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 app.debug = True
+
+@app.after_request
+def add_header(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 options = {}
 attacks = {}
@@ -136,12 +142,118 @@ def get_api_rpc(username):
     c.connect("tcp://127.0.0.1:%i" % sock_port)
     return c
 
+@app.route('/api/player/<username>/inventory', methods=['GET'])
+def get_inventory(username):
+    s = get_api_rpc(username)
+    inventory = json.loads(s.get_inventory())
+    return jsonify(inventory)
+
+@app.route("/api/player")
+def users():
+    users = []
+
+    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+    with open(desc_file) as f:
+        live_users = f.read()
+        live_users = json.loads(live_users.encode() if len(live_users) > 0 else '{}')
+
+        for username in live_users:
+            c = get_api_rpc(username)
+            if c is None:
+                continue
+            user = {'username': username}
+            users.append(user)
+    return jsonify(users)
+
+@app.route('/api/player/<username>', methods=['GET'])
+def get_player(username):
+    c = get_api_rpc(username)
+    if c is None:
+        return abort(400)
+    config = init_config(username)
+    options['SCORE_METHOD'] = config.get('POKEMON_CLEANUP', {}).get("SCORE_METHOD", "CP")
+    player_json = json.loads(c.get_player_info())
+    currency = player_json['player_data']['currencies'][1]['amount']
+    latlng = c.current_location()
+
+    items = json.loads(c.get_inventory())['inventory_items']
+    pokemons_data = []
+    candy = defaultdict(int)
+    for item in items:
+        item = item['inventory_item_data']
+        pokemon = item.get("pokemon_data", {})
+        if "pokemon_id" in pokemon:
+            pokemons_data.append(pokemon)
+        if 'player_stats' in item:
+            player = item['player_stats']
+        if "pokemon_family" in item:
+            filled_family = str(item['pokemon_family']['family_id']).zfill(4)
+            candy[filled_family] += item['pokemon_family'].get("candy", 0)
+    # add candy back into pokemon json
+    pokemons = []
+    for pokemon in pokemons_data:
+        pkmn = Pokemon(pokemon, player['level'], options['SCORE_METHOD'])
+        pkmn.candy = candy[pkmn.family_id]
+        pkmn.set_max_cp(TCPM_VALS[int(player['level'] * 2 + 1)])
+        pkmn.score = format(pkmn.score, '.2f').rstrip('0').rstrip('.')  # makes the value more presentable to the user
+        seriPoke = json.loads(pkmn.to_json()) # this makes the pokemon class serializable although its kinda hacky
+        pokemons.append(seriPoke)
+    player['username'] = player_json['player_data']['username']
+    player['level_xp'] = player.get('experience', 0) - player.get('prev_level_xp', 0)
+    player['hourly_exp'] = player.get("hourly_exp", 0)  # Not showing up in inv or player data
+    player['goal_xp'] = player.get('next_level_xp', 0) - player.get('prev_level_xp', 0)
+    player['pokemon'] = pokemons
+    player['attacks'] = attacks
+    player['latitude'] = latlng[0]
+    player['longitude'] = latlng[1]
+    player['candy'] = candy
+    player['stardust'] = currency
+    player['item_capacity'] = player_json['player_data']['max_item_storage']
+    player['pokemon_capacity'] = player_json['player_data']['max_pokemon_storage']
+    #s = get_api_rpc(username)
+    #player = json.loads(s.get_player_info())
+    #player_stats = json.loads(s.get_player_stats())
+    #latlng = s.current_location()
+    #items = json.loads(s.get_inventory())['inventory_items']
+    #config = init_config()
+    #options['SCORE_METHOD'] = config.get('POKEMON_CLEANUP', {}).get("SCORE_METHOD", "CP")
+    #pokemons_data = []
+    #candy = defaultdict(int)
+    #for item in items:
+    #    item = item['inventory_item_data']
+    #    pokemon = item.get("pokemon_data", {})
+    #    if "pokemon_id" in pokemon:
+    #        pokemons_data.append(pokemon)
+    #    if "pokemon_family" in item:
+    #        filled_family = str(item['pokemon_family']['family_id']).zfill(4)
+    #        candy[filled_family] += item['pokemon_family'].get("candy", 0)
+    #pokemons = []
+    #for pokemon in pokemons_data:
+    #    pkmn = Pokemon(pokemon, player['level'], options['SCORE_METHOD'])
+    #    pkmn.candy = candy[pkmn.family_id]
+    #    pkmn.set_max_cp(TCPM_VALS[int(player['level'] * 2 + 1)])
+    #    pkmn.score = format(pkmn.score, '.2f').rstrip('0').rstrip('.')  # makes the value more presentable to the user
+    #    pokemons.append(pkmn.to_json())
+    #player['item_capacity'] = player['max_item_storage']
+    #player['pokemon_capacity'] = player['max_item_storage']
+    #player['latitude'] = latlng[0]
+    #player['longitude'] = latlng[1]
+    #player['player_stats'] = player_stats
+    #player['pokemon'] = pokemons
+    #player['attacks'] = attacks
+    return jsonify(player)
+
+
+@app.route('/api/player/<username>/pokemon', methods=['GET'])
+def get_pokemon(username):
+    s = get_api_rpc(username)
+    player = json.loads(s.get_caught_pokemons())
+    return jsonify(player)
 
 @app.route("/favicon.ico")
 def favicon():
     # Explicitly handle favicon.ico so it doesn't route to the status function.
     return NotFound()
-
 
 @app.route("/<username>")
 @app.route("/<username>/status")
@@ -272,6 +384,7 @@ def init_web_config():
 def main():
     web_config = init_web_config()
     app.run(host=web_config.hostname, port=web_config.port, debug=web_config.debug)
+    #socketio.run(app,host=web_config.hostname, port=web_config.port, debug=web_config.debug)
 
 if __name__ == "__main__":
     main()
