@@ -168,6 +168,7 @@ If you are not updating the Python code, you do not need to install or use tox.
 
 
 ### pokecli with Docker (optional)
+Build and run container:
 
 ```
 cd poketrainer/
