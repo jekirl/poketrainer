@@ -9,15 +9,12 @@ angular.module('Poketrainer.State.Users', [
                 Users: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveUsers($q, $stateParams, PokeSocket, SocketEvent){
                     var d = $q.defer();
 
-                    var userEventCb = function userEventCb(message) {
+                    PokeSocket.once(SocketEvent.UserList, function userEventCb(message) {
                         if(angular.isUndefined(message) || !message.success || !angular.isArray(message.users)){
                             return;
                         }
-                        PokeSocket.removeListener(SocketEvent.UserList, userEventCb);
-                        d.resolve(angular.fromJson(message.users));
-                    };
-
-                    PokeSocket.on(SocketEvent.UserList, userEventCb);
+                        d.resolve(message.users);
+                    });
 
                     // Emit the event to our socket
                     // after listening for it.
@@ -45,7 +42,7 @@ angular.module('Poketrainer.State.Users', [
                 return;
             }
 
-            d.resolve(angular.fromJson(message.users));
+            $scope.users = message.users;
         };
 
         // Make sure to listen for new events

@@ -20,12 +20,9 @@ angular.module('Poketrainer.State.Status', [
                 userData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveUserData($q, $stateParams, PokeSocket, SocketEvent){
                     var d = $q.defer();
 
-                    var userStatusCb = function (message) {
-                        PokeSocket.removeListener(SocketEvent.UserStatus, userStatusCb);
+                    PokeSocket.once(SocketEvent.UserStatus, function (message) {
                         d.resolve(angular.fromJson(message.data));
-                    };
-
-                    PokeSocket.on(SocketEvent.UserStatus, userStatusCb);
+                    });
                     PokeSocket.emit(SocketEvent.UserStatus, { username: $stateParams.username });
 
                     return d.promise;
