@@ -430,7 +430,7 @@ class Poketrainer:
                 # after we're done, release lock
                 self.persist_lock = False
                 self.thread_release()
-                self._heartbeat()
+                self.map_objects.wait_for_api_timer()
         else:
             return 'Only one Simultaneous request allowed'
 
