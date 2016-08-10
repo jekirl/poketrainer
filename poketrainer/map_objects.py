@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-import logging
+from helper.colorlogger import create_logger
 from time import time
 
 from .location import get_neighbors
@@ -9,7 +9,7 @@ from .location import get_neighbors
 class MapObjects:
     def __init__(self, parent):
         self.parent = parent
-        self.log = logging.getLogger(__name__)
+        self.log = create_logger(__name__)
 
         self._map_objects_rate_limit = 5.0
         self._last_got_map_objects = 0

@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import hashlib
-import logging
+from helper.colorlogger import create_logger
 
 from library.api.pgoapi.protos.POGOProtos import Enums_pb2 as Enums
 from library.api.pgoapi.protos.POGOProtos.Inventory import \
@@ -11,7 +11,7 @@ from library.api.pgoapi.protos.POGOProtos.Inventory import \
 class Config:
 
     def __init__(self, config, cli_args):
-        self.log = logging.getLogger(__name__)
+        self.log = create_logger(__name__)
 
         self.__config_data = config
         self.config_data = config

@@ -1,6 +1,5 @@
 from __future__ import absolute_import
 
-# self.log = logging.getLogger(__name__)
 from helper.colorlogger import create_logger
 
 from .pokemon import Pokemon
@@ -9,7 +8,7 @@ from .pokemon import Pokemon
 class Evolve:
     def __init__(self, parent):
         self.parent = parent
-        # self.log = logging.getLogger(__name__)
+
         self.log = create_logger(__name__, 'cyan')
 
     def attempt_evolve(self):

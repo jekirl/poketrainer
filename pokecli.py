@@ -31,12 +31,12 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 import argparse
 import logging
 
-import colorlog
+from helper.colorlogger import create_logger
 import gevent
 
 from poketrainer.poketrainer import Poketrainer
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__)
 
 
 def init_arguments():
@@ -55,13 +55,13 @@ def main():
     # log settings
     # log format
 
-    colorlog.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s]  %(log_color)s[%(levelname)5s] %(reset)s%(message)s')
+    #colorlog.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s]  %(log_color)s[%(levelname)5s] %(reset)s%(message)s')
     # log level for http request class
-    colorlog.getLogger("requests").setLevel(logging.WARNING)
+    create_logger("requests").setLevel(logging.WARNING)
     # log level for pgoapi class
-    colorlog.getLogger("pgoapi").setLevel(logging.WARNING)
+    create_logger("pgoapi").setLevel(logging.WARNING)
     # log level for internal pgoapi class
-    colorlog.getLogger("rpc_api").setLevel(logging.INFO)
+    create_logger("rpc_api").setLevel(logging.INFO)
 
     args = init_arguments()
     if not args:
