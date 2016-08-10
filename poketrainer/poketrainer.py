@@ -431,9 +431,9 @@ class Poketrainer:
                 return self.sniper.snipe_pokemon(float(lat), float(lng))
             finally:
                 # after we're done, release lock
+                self.map_objects.wait_for_api_timer()
                 self.persist_lock = False
                 self.thread_release()
-                self.map_objects.wait_for_api_timer()
         else:
             return 'Only one Simultaneous request allowed'
 
