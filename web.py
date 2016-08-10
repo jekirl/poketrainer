@@ -32,7 +32,7 @@ class ReverseProxied(object):
             environ['wsgi.url_scheme'] = scheme
         return self.app(environ, start_response)
 
-app = Flask(__name__, template_folder="web/templates")
+app = Flask(__name__, template_folder="web/templates", static_folder='web/static')
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 app.debug = True
@@ -181,7 +181,9 @@ def status(username):
         pokemons.append(pkmn)
     player['username'] = player_json['player_data']['username']
     player['level_xp'] = player.get('experience', 0) - player.get('prev_level_xp', 0)
-    player['hourly_exp'] = player.get("hourly_exp", 0)  # Not showing up in inv or player data
+    with open('./data_dumps/' + str(username) + '.json') as json_data:
+        d = json.load(json_data)['GET_PLAYER']['player_data']['hourly_exp']
+    player['hourly_exp'] = d  # Not showing up in inv or player data
     player['goal_xp'] = player.get('next_level_xp', 0) - player.get('prev_level_xp', 0)
     return render_template('status.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, username=username, options=options)
 

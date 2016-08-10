@@ -41,6 +41,9 @@ class Inventory:
         self.setup_inventory()
 
     def setup_inventory(self):
+        self.eggs_available = []
+        self.incubators_available = []
+        self.incubators_busy = []
         for inventory_item in self.inventory_items:
             item = inventory_item['inventory_item_data'].get('item', {})
             item_id = item.get('item_id', -1)
@@ -67,13 +70,10 @@ class Inventory:
                 self.razz_berries = item_count
             candy = inventory_item['inventory_item_data'].get('candy', {})
             self.pokemon_candy[candy.get('family_id', -1)] = candy.get('candy', -1)
-            self.eggs_available = []
             pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
             if pokemon_data.get('is_egg', False) and not pokemon_data.get('egg_incubator_id', False):
                 self.eggs_available.append(pokemon_data)
             egg_incubators = inventory_item['inventory_item_data'].get('egg_incubators', {}).get('egg_incubator', [])
-            self.incubators_available = []
-            self.incubators_busy = []
             for incubator in egg_incubators:
                 if "pokemon_id" in incubator:
                     self.incubators_busy.append(incubator)
