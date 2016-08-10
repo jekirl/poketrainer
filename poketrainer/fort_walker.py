@@ -51,8 +51,7 @@ class FortWalker:
             # if we don't have a waypoint atm, calculate new waypoints until location
             if not self.steps:
                 if self.total_distance_traveled > 0:
-                    self.log.info('Traveled %.2f meters of %.2f of the trip',
-                                  self.total_distance_traveled, self.total_trip_distance)
+                    self.log.info('Traveled %.2f meters of %.2f of the trip', self.total_distance_traveled, self.total_trip_distance)
 
                 # create general route first
                 if not self.route['steps']:
@@ -99,7 +98,7 @@ class FortWalker:
                     self.steps = route_data['steps']
 
             if self.total_distance_traveled > 0:
-                self.log.info('Traveled %.2f meters of %.2f of the trip',
+                self.log.debug('Traveled %.2f meters of %.2f of the trip',
                               self.total_distance_traveled, self.total_trip_distance)
             self.next_step = self.steps.pop(0)
         self._walk(self.next_step)
@@ -201,7 +200,7 @@ class FortWalker:
         if destinations:
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]
-            self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
+            self.log.debug("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
 
             # Fort is close enough to change our route and walk to
             if not self.wander_steps and nearest_fort_dis < self.parent.config.wander_steps and nearest_fort_dis > 40:
