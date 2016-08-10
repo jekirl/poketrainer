@@ -41,7 +41,14 @@ angular.module('Poketrainer.State.Status', [
     })
 
     .controller('StatusController', function StatusController($scope, $stateParams, PokeSocket, userData, SocketEvent) {
+        // Debug only! Remove this after everything works
+        PokeSocket.on(SocketEvent.Join, function (data){
+            console.log("Join response: ", data);
+        });
+
+        // Join specific user room
         PokeSocket.emit(SocketEvent.Join, {room: $stateParams.username});
+        console.log("Joined! ", SocketEvent.Join, $stateParams.username);
 
         //PokeSocket.on('status', function (data) {
         //    console.log(data);
