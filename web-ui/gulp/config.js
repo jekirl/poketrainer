@@ -8,7 +8,7 @@ module.exports = (function () {
     var vendorPath = "./vendor";
     var bowerPath = vendorPath + "/bower";
     var npmPath = "./node_modules";
-    var distPath = ".././static";
+    var distPath = "./dist";
     var assetsPath = projectPath + "/assets";
     var assetsDistPath = distPath + "/assets";
 

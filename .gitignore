@@ -90,7 +90,6 @@ ENV/
 # Node
 web-ui/vendor
 web-ui/node_modules
-static/assets/images/pokemon
 
 # Rope project settings
 .ropeproject
