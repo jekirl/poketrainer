@@ -24,6 +24,8 @@ cache/
 *.egg-info/
 .installed.cfg
 *.egg
+web-ui/node_modules
+src
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -86,12 +88,19 @@ ENV/
 # Spyder project settings
 .spyderproject
 
+# Node
+web-ui/vendor
+web-ui/node_modules
+static/assets/images/pokemon
+
 # Rope project settings
 .ropeproject
 
 # Personal load details
 config.json
 web_config.json
+libencrypt.so
+encrypt.dll
 .listeners
 .DS_Store
 data_dumps/*.json

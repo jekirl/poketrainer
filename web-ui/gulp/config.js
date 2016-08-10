@@ -8,7 +8,7 @@ module.exports = (function () {
     var vendorPath = "./vendor";
     var bowerPath = vendorPath + "/bower";
     var npmPath = "./node_modules";
-    var distPath = "./dist";
+    var distPath = ".././static";
     var assetsPath = projectPath + "/assets";
     var assetsDistPath = distPath + "/assets";
 
@@ -25,7 +25,7 @@ module.exports = (function () {
         debug = (argv.profile.toLowerCase() === "debug");
     }
     
-    var baseUrl = '/';
+    var baseUrl = '';
 
     // If we're not running the mockup version,
     // do not include the JS files.
