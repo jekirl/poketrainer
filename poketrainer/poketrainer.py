@@ -317,7 +317,7 @@ class Poketrainer:
                 posf = self.get_position()
                 responses['lat'] = posf[0]
                 responses['lng'] = posf[1]
-                responses['hourly_exp'] = self.player_stats.run_hourly_exp
+                responses['GET_PLAYER']['player_data']['hourly_exp'] = self.player_stats.run_hourly_exp
                 f.write(json.dumps(responses, indent=2, default=lambda obj: obj.decode('utf8')))
 
             # Farm precon
@@ -427,10 +427,10 @@ class Poketrainer:
             try:
                 return self.sniper.snipe_pokemon(float(lat), float(lng))
             finally:
-                self._heartbeat()
                 # after we're done, release lock
                 self.persist_lock = False
                 self.thread_release()
+                self._heartbeat()
         else:
             return 'Only one Simultaneous request allowed'
 

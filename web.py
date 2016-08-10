@@ -181,7 +181,9 @@ def status(username):
         pokemons.append(pkmn)
     player['username'] = player_json['player_data']['username']
     player['level_xp'] = player.get('experience', 0) - player.get('prev_level_xp', 0)
-    player['hourly_exp'] = player.get("hourly_exp", 0)  # Not showing up in inv or player data
+    with open('./data_dumps/'+str(username)+'.json') as json_data:
+        d = json.load(json_data)['GET_PLAYER']['player_data']['hourly_exp']
+    player['hourly_exp'] = d  # Not showing up in inv or player data
     player['goal_xp'] = player.get('next_level_xp', 0) - player.get('prev_level_xp', 0)
     return render_template('status.html', pokemons=pokemons, player=player, currency="{:,d}".format(currency), candy=candy, latlng=latlng, attacks=attacks, username=username, options=options)
 
