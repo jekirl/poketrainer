@@ -24,7 +24,6 @@ cache/
 *.egg-info/
 .installed.cfg
 *.egg
-web-ui/node_modules
 src
 
 # PyInstaller
@@ -91,7 +90,6 @@ ENV/
 # Node
 web-ui/vendor
 web-ui/node_modules
-static/assets/images/pokemon
 
 # Rope project settings
 .ropeproject
@@ -106,6 +104,3 @@ encrypt.dll
 data_dumps/*.json
 .idea
 .listeners
-web-ui/vendor
-web-ui/node_modules
-encrypt.dll

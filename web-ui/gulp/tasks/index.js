@@ -51,9 +51,11 @@ function compileIndex() {
 				cssStream
 			),
 			{
+				relative: true,
 				ignorePath: [
 					distPath,
 					distPath.replace("./", ""),
+					distPath.replace("./", "../"),
 					'src'
 				]
 			}
