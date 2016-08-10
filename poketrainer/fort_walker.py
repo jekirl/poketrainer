@@ -50,7 +50,7 @@ class FortWalker:
             else:
                 # if we don't have a waypoint atm, calculate new waypoints until location
                 if not self.steps:
-                    if self.parent.config.show_distance_traveled and self.total_distance_traveled > 0:
+                    if self.parent.config.show_distance_traveled and self.total_distance_traveled > 0 and self.route_only_forts:
                         self.log.info('Traveled %.2f meters of %.2f of the trip', self.total_distance_traveled, self.total_trip_distance)
 
                     # create general route first
