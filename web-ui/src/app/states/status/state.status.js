@@ -20,9 +20,11 @@ angular.module('Poketrainer.State.Status', [
                 userData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveUserData($q, $stateParams, PokeSocket, SocketEvent){
                     var d = $q.defer();
 
-                    PokeSocket.once(SocketEvent.UserStatus, function (message) {
+                    var userStatusCb = function userStatusCb(message) {
                         d.resolve(angular.fromJson(message.data));
-                    });
+                    };
+
+                    PokeSocket.on(SocketEvent.UserStatus, userStatusCb);
                     PokeSocket.emit(SocketEvent.UserStatus, { username: $stateParams.username });
 
                     return d.promise;
@@ -40,8 +42,7 @@ angular.module('Poketrainer.State.Status', [
 
     .controller('StatusController', function StatusController($scope, $stateParams, PokeSocket, userData, SocketEvent) {
         PokeSocket.emit(SocketEvent.Join, {room: $stateParams.username});
-        //PokeSocket.emit('status', { username: $stateParams.username });
-        
+
         //PokeSocket.on('status', function (data) {
         //    console.log(data);
         //});
