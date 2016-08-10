@@ -291,7 +291,7 @@ def on_join(data):
     room = data['room']
     join_room(room)
     print(request.sid + ' has joined room ' + room)
-    emit('leave', {'success': True, 'message': 'successfully joined room ' + room})
+    emit('join', {'success': True, 'message': 'successfully joined room ' + room})
 
 
 @socketio.on('leave')
