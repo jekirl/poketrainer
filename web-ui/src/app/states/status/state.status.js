@@ -16,7 +16,7 @@ angular.module('Poketrainer.State.Status', [
 
         $stateProvider.state('public.status', {
             url: '/status/:username',
-            resolve: {
+            /*resolve: {
                 userData: ['$q', '$stateParams', 'PokeSocket', function resolveUserData($q, $stateParams, PokeSocket){
                     PokeSocket.emit('status', { username: $stateParams.username });
                     var d = $q.defer();
@@ -27,7 +27,7 @@ angular.module('Poketrainer.State.Status', [
 
                     return d.promise;
                 }]
-            },
+            },*/
             controller: 'StatusController',
             templateUrl: 'states/status/status.tpl.html'
         })
@@ -38,7 +38,7 @@ angular.module('Poketrainer.State.Status', [
         Navigation.primary.register("Users", "public.users", 30, 'md md-event-available', 'public.users');
     })
 
-    .controller('StatusController', function StatusController($scope, $stateParams, User, userData, PokeSocket) {
+    .controller('StatusController', function StatusController($scope, $stateParams, User, PokeSocket) {
         
         //PokeSocket.emit('status', { username: $stateParams.username });
         

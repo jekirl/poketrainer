@@ -2,6 +2,7 @@ angular.module('poketrainer', [
 	'poketrainer.Module.Templates',
 
 	/** Internal Modules **/
+	'Poketrainer.Module.SocketEventEmitter',
 
 	/** Internal Services **/
 	'Poketrainer.Service.Config',
