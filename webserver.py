@@ -269,7 +269,7 @@ def connect():
             user = {'username': username}
             users.append(user)
     print('Client connected', request.sid)
-    emit('connect', {'success': true, 'users': users})
+    emit('connect', {'success': True, 'users': users})
 
 
 @socketio.on('disconnect', namespace='/poketrainer')
