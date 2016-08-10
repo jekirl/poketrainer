@@ -11,12 +11,12 @@ from library.api.pgoapi.protos.POGOProtos.Inventory import \
 from .poke_utils import get_item_name
 from .pokemon import Pokemon
 
+_log = create_logger(__name__, 'purple')
 
 class Inventory:
     def __init__(self, parent, inventory_items):
         self._parent = parent
         self.inventory_items = inventory_items
-        self._log = create_logger(__name__, 'purple')
         self._last_egg_use_time = 0
 
         self.ultra_balls = 0
@@ -170,21 +170,21 @@ class Inventory:
                 ):
                     recycle_count = item['count'] - self._parent.config.min_items[item['item_id']]
                     item_count += item['count'] - recycle_count
-                    self._log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
+                    _log.info("Recycling {0} {1}(s)".format(recycle_count, get_item_name(item['item_id'])))
                     self._parent.sleep(0.2 + self._parent.config.extra_wait)
                     res = self._parent.api.recycle_inventory_item(item_id=item['item_id'], count=recycle_count) \
                         .get('responses', {}).get('RECYCLE_INVENTORY_ITEM', {})
                     response_code = res.get('result', -1)
                     if response_code == 1:
-                        self._log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
+                        _log.info("{0}(s) recycled successfully. New count: {1}".format(get_item_name(
                             item['item_id']), res.get('new_count', 0)))
                     else:
-                        self._log.info("Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']),
+                        _log.info("Failed to recycle {0}, Code: {1}".format(get_item_name(item['item_id']),
                                                                                  response_code))
                 elif "count" in item:
                     item_count += item['count']
         if item_count > 0:
-            self._log.info("Inventory has {0}/{1} items".format(item_count, self._parent.player.max_item_storage))
+            _log.info("Inventory has {0}/{1} items".format(item_count, self._parent.player.max_item_storage))
         return self.update_player_inventory()
 
     def get_caught_pokemon(self, as_json=False):
@@ -221,15 +221,15 @@ class Inventory:
             response = self._parent.api.use_item_xp_boost(item_id=Item_Enums.ITEM_LUCKY_EGG)
             result = response.get('responses', {}).get('USE_ITEM_XP_BOOST', {}).get('result', -1)
             if result == 1:
-                self._log.info("Ate a lucky egg! Yummy! :)")
+                _log.info("Ate a lucky egg! Yummy! :)")
                 self.take_lucky_egg()
                 self._last_egg_use_time = time()
                 return True
             elif result == 3:
-                self._log.info("Lucky egg already active")
+                _log.info("Lucky egg already active")
                 return False
             else:
-                self._log.info("Lucky Egg couldn't be used, status code %s", result)
+                _log.info("Lucky Egg couldn't be used, status code %s", result)
                 return False
         else:
             return False

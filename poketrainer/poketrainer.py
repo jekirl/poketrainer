@@ -300,7 +300,8 @@ class Poketrainer:
             if self.config.list_inventory_before_cleanup:
                 self.log.info("Player Inventory: %s", self.inventory)
             if not login_response:
-                self.log.debug(self.inventory.cleanup_inventory())
+                #self.log.debug(self.inventory.cleanup_inventory())
+                self.inventory.cleanup_inventory()
                 self.log.info("Player Inventory after cleanup: %s", self.inventory)
             if self.config.list_pokemon_before_cleanup:
                 self.log.info(os.linesep.join(map(str, self.inventory.get_caught_pokemon())))

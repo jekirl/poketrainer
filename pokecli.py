@@ -55,13 +55,13 @@ def main():
     # log settings
     # log format
 
-    #colorlog.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s]  %(log_color)s[%(levelname)5s] %(reset)s%(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] s%(message)s')
     # log level for http request class
-    create_logger("requests").setLevel(logging.WARNING)
+    create_logger("requests", log_level=logging.WARNING)
     # log level for pgoapi class
-    create_logger("pgoapi").setLevel(logging.WARNING)
+    create_logger("pgoapi", log_level=logging.WARNING)
     # log level for internal pgoapi class
-    create_logger("rpc_api").setLevel(logging.INFO)
+    create_logger("rpc_api", log_level=logging.INFO)
 
     args = init_arguments()
     if not args:
