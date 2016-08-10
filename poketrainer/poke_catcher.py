@@ -47,8 +47,8 @@ class PokeCatcher:
             self.log.debug("Nearby pokemon: : %s", pokemon_distances)
             self.log.info("Nearby Pokemon: %s",
                           ", ".join(map(lambda x: POKEMON_NAMES[str(x['pokemon_id'])], pokemons)))
-        else:
-            self.log.debug("No nearby pokemon")
+        elif self.parent.config.notify_no_nearby_pokemon:
+            self.log.info("No nearby pokemon")
         catches_successful = False
         for pokemon_distance in pokemon_distances:
             target = pokemon_distance
