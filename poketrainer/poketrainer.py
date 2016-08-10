@@ -209,7 +209,10 @@ class Poketrainer:
             self.log.debug("%s is now releasing lock", id(gevent.getcurrent()))
             self.sem.release()
 
-    def push_to_web(self, data):
+    def push_to_web(self, event, action, data):
+        gevent.spawn(self._do_push_to_web, event, action, data)
+
+    def _do_push_to_web(self, event, action, data):
         if not self.can_push_to_web:
             self.log.info('cant push')
             return
@@ -225,7 +228,7 @@ class Poketrainer:
         try:
             c = zerorpc.Client()
             c.connect("tcp://127.0.0.1:%i" % sock_port)
-            c.push(data)
+            c.push(self.config.username, event, action, data)
             self.log.info('pushed data to web')
         except Exception as e:
             self.log.error('Error trying to push to web, will now stop pushing')
@@ -278,7 +281,6 @@ class Poketrainer:
                     self.persist_lock = False
                     self.thread_release()
             # try to send data to a web process in the background
-            gevent.spawn(self.push_to_web, 'test' + str(self._heartbeat_number))
             self.sleep(1.0)
 
     def _heartbeat(self, res=False, login_response=False):

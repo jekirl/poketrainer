@@ -39,6 +39,7 @@ class Evolve:
                 # I don' think we need additional stats for evolved pokemon. Since we do not do anything with it.
                 # evolved_pokemon.pokemon_additional_data = self.game_master.get(pokemon.pokemon_id, PokemonData())
                 self.log.info("Evolved to %s", evolved_pokemon)
+                self.parent.push_to_web('pokemon', 'evolved', evolved_pokemon.to_json())
                 self.parent.inventory.update_player_inventory()
                 return True
             else:

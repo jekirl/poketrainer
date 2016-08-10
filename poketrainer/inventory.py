@@ -79,6 +79,7 @@ class Inventory:
                     self.incubators_busy.append(incubator)
                 else:
                     self.incubators_available.append(incubator)
+        self._parent.push_to_web('inventory', 'updated', self.to_json())
 
     def can_attempt_catch(self):
         return self.poke_balls + self.great_balls + self.ultra_balls + self.master_balls > 0
