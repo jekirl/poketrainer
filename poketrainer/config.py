@@ -88,11 +88,16 @@ class Config:
         self._sanity_check_needy_item_farming()
 
         self.explain_evolution_before_cleanup = config.get("CONSOLE_OUTPUT", {}).get("EXPLAIN_EVOLUTION_BEFORE_CLEANUP",
-                                                                                     True)  # explain individual evolution criteria in console
+                                                                                     False)  # explain individual evolution criteria in console
         self.list_pokemon_before_cleanup = config.get("CONSOLE_OUTPUT", {}).get("LIST_POKEMON_BEFORE_CLEANUP",
-                                                                                True)  # list pokemon in console
+                                                                                False)  # list pokemon in console
         self.list_inventory_before_cleanup = config.get("CONSOLE_OUTPUT", {}).get("LIST_INVENTORY_BEFORE_CLEANUP",
                                                                                   True)  # list inventory in console
+        self.show_steps = config.get("CONSOLE_OUTPUT", {}).get("SHOW_STEPS", True)  # show steps walked in console
+        self.show_travel_link_with_steps = config.get("CONSOLE_OUTPUT", {}).get("SHOW_TRAVEL_LINK_WITH_STEPS", True)
+        self.show_distance_traveled = config.get("CONSOLE_OUTPUT", {}).get("SHOW_DISTANCE_TRAVELED", True)
+        self.show_nearest_fort_distance = config.get("CONSOLE_OUTPUT", {}).get("SHOW_NEAREST_FORT_DISTANCE", True)
+        self.notify_no_nearby_pokemon = config.get("CONSOLE_OUTPUT", {}).get("NOTIFY_NO_NEARBY_POKEMON", False)
 
         if cli_args['location']:
             start_location = cli_args['location']

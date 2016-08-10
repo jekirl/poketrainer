@@ -317,7 +317,7 @@ class Poketrainer:
                 posf = self.get_position()
                 responses['lat'] = posf[0]
                 responses['lng'] = posf[1]
-                responses['hourly_exp'] = self.player_stats.run_hourly_exp
+                responses['GET_PLAYER']['player_data']['hourly_exp'] = self.player_stats.run_hourly_exp
                 f.write(json.dumps(responses, indent=2, default=lambda obj: obj.decode('utf8')))
 
             # Farm precon
@@ -348,7 +348,7 @@ class Poketrainer:
 
         if 'DOWNLOAD_SETTINGS' in responses:
             settings = responses.get('DOWNLOAD_SETTINGS', {}).get('settings', {})
-            if settings.get('minimum_client_version', '0.0.0') > '0.31.0':
+            if settings.get('minimum_client_version', '0.0.0') > '0.33.0':
                 self.log.error("Minimum client version has changed... the bot needs to be updated! Will now stop!")
                 exit(0)
             map_settings = settings.get('map_settings', {})
@@ -430,6 +430,7 @@ class Poketrainer:
                 # after we're done, release lock
                 self.persist_lock = False
                 self.thread_release()
+                self.map_objects.wait_for_api_timer()
         else:
             return 'Only one Simultaneous request allowed'
 

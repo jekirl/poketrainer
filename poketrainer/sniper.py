@@ -64,4 +64,4 @@ class Sniper:
             self.parent.api.set_position(curr_lat, curr_lng, 0.0)
             self.send_update_pos()
             posf = self.parent.get_position()
-            self.log.debug("Teleported back to origin at %f, %f", posf[0], posf[1])
+            self.log.info("Teleported back to origin at %f, %f", posf[0], posf[1])
