@@ -60,8 +60,7 @@
             <th style="{{options["ignore_attkIV"]}}">Att IV</th>
             <th style="{{options["ignore_staIV"]}}">Sta IV</th>
             <th style="{{options["ignore_defIV"]}}">Def IV</th>
-            <th style="{{options["ignore_move1"]}}">Move 1</th>
-            <th style="{{options["ignore_move2"]}}">Move 2</th>
+            <th style="{{options["ignore_move1"]}}">Moves</th>
             <th style="{{options["ignore_transfer"]}}">Transfer</th>
           </thead>
           {% for pokemon in pokemons %}
@@ -82,8 +81,7 @@
               <td style="{{options["ignore_attkIV"]}}" data-order="{{pokemon.individual_attack}}">{{pokemon.individual_attack}}</td>
               <td style="{{options["ignore_staIV"]}}" data-order="{{pokemon.individual_stamina}}">{{pokemon.individual_stamina}}</td>
               <td style="{{options["ignore_defIV"]}}" data-order="{{pokemon.individual_defense}}">{{pokemon.individual_defense}}</td>
-              <td style="{{options["ignore_move1"]}}">{{attacks[pokemon.move_1]}}</td>
-              <td style="{{options["ignore_move2"]}}">{{attacks[pokemon.move_2]}}</td>
+              <td style="{{options["ignore_moves"]}};white-space:nowrap;">{{attacks[pokemon.move_1]}}<br/>{{attacks[pokemon.move_2]}}</td>
               <td style="{{options["ignore_transfer"]}}"><a href="{{ url_for('transfer', username = username, p_id = pokemon.id)}}">Transfer</a></td>
           </tr>
           {% endfor %}

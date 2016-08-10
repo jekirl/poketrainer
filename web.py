@@ -75,8 +75,7 @@ def set_columns_to_ignore(columns_to_ignore):
     options['ignore_attkIV'] = ''
     options['ignore_staIV'] = ''
     options['ignore_defIV'] = ''
-    options['ignore_move1'] = ''
-    options['ignore_move2'] = ''
+    options['ignore_moves'] = ''
     options['ignore_transfer'] = ''
 
     for column in columns_to_ignore:
