@@ -41,8 +41,8 @@ angular.module('Poketrainer.State.Status', [
         Navigation.primary.register("Users", "public.users", 30, 'md md-event-available', 'public.users');
     })
 
-    .controller('StatusController', function StatusController($scope, $stateParams, PokeSocket, userData) {
-        
+    .controller('StatusController', function StatusController($scope, $stateParams, PokeSocket, userData, SocketEvent) {
+        PokeSocket.emit(SocketEvent.Join, {room: $stateParams.username});
         //PokeSocket.emit('status', { username: $stateParams.username });
         
         //PokeSocket.on('status', function (data) {

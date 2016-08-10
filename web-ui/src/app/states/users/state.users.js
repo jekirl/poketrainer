@@ -37,6 +37,7 @@ angular.module('Poketrainer.State.Users', [
     })
 
     .controller('UsersController', function UsersController($scope, Users, PokeSocket, SocketEvent) {
+        PokeSocket.emit(SocketEvent.Join, {room: 'global'});
         $scope.users = Users;
 
         var userEventCb = function userEventCb(message) {
