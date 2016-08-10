@@ -97,8 +97,7 @@ class Config:
         self.show_travel_link_with_steps = config.get("CONSOLE_OUTPUT", {}).get("SHOW_TRAVEL_LINK_WITH_STEPS", True)
         self.show_distance_traveled = config.get("CONSOLE_OUTPUT", {}).get("SHOW_DISTANCE_TRAVELED", True)
         self.show_nearest_fort_distance = config.get("CONSOLE_OUTPUT", {}).get("SHOW_NEAREST_FORT_DISTANCE", True)
-        self.notify_no_nearby_pokemon = config.get("CONSOLE_OUTPUT", {}).get("NOTIFY_NO_NEARBY_POKEMON",False)
-
+        self.notify_no_nearby_pokemon = config.get("CONSOLE_OUTPUT", {}).get("NOTIFY_NO_NEARBY_POKEMON", False)
 
         if cli_args['location']:
             start_location = cli_args['location']
