@@ -111,7 +111,18 @@ Below the accounts you can change options in the `default` section. If you need 
    * `FARM_IGNORE_POKEBALL_COUNT`: `Boolean`, Whether to include this ball in counting. Same goes for `GREATBALL`, `ULTRABALL`, and `MASTERBALL`. Masterball is ignored by default.
    * `FARM_OVERRIDE_STEP_SIZE`: `Integer`, When it goes into farming mode, the bot assumes this step size to potentially speed up resource gathering. _This might lead to softbans._ Setting to `-1` disables this feature. Disabled by default for safety.
    * If `EXPERIMENTAL` OR `CATCH_POKEMON` are false, this configuration will disable itself.
+* `CONSOLE_OUTPUT` Options for configuring logging messages
+   * `COLORLOG` A dictionary for the various modules that support colored logging. Currently this is implemented in the following modules: poketrainer, fort_walker, poke_catcher, release, evolve, and inventory. Valid color options are as follows, shamelessly copied from the readme.md from `colorlog`.
+   The following escape codes are made available for use in the format string:
 
+   - `{color}`, `fg_{color}`, `bg_{color}`: Foreground and background colors.
+   - `bold`, `bold_{color}`, `fg_bold_{color}`, `bg_bold_{color}`: Bold/bright colors.
+   - `reset`: Clear all formatting (both foreground and background colors).
+
+   The availible color names are `black`, `red`, `green`, `yellow`, `blue`,
+   `purple`, `cyan` and `white`. Multiple escape codes can be used at once by
+   joining them with commas.
+   
 There are more options, check the current config.json.example, many are self-explanatory.
 
 
