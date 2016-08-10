@@ -120,9 +120,9 @@ Below the accounts you can change options in the `default` section. If you need 
        - `bold`, `bold_{color}`, `fg_bold_{color}`, `bg_bold_{color}`: Bold/bright colors.
        - `reset`: Clear all formatting (both foreground and background colors).
 
-       - The availible color names are `black`, `red`, `green`, `yellow`, `blue`,
-         `purple`, `cyan` and `white`. Multiple escape codes can be used at once by
-         joining them with commas.     
+       - The availible color names are `"black"`, `"red"`, `"green"`, `"yellow"`, `"blue"`,
+         `"purple"`, `"cyan"` and `"white"`. Multiple escape codes can be used at once by
+         joining them with commas.  (ex. `"black,bg_white"`)   
    
 There are more options, check the current config.json.example, many are self-explanatory.
 
