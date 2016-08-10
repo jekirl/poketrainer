@@ -58,8 +58,10 @@ angular.module('poketrainer', [
 
 	})
 
-	.run(function pokeTrainerRun ($state) {
-
+	.run(function pokeTrainerRun ($state, $rootScope) {
+		$rootScope.$on('inventory:updated', function(data){
+			console.log("Inventory!! :D ")
+		})
 	})
 
 ;
