@@ -17,13 +17,15 @@ angular.module('Poketrainer.State.Status', [
         $stateProvider.state('public.status', {
             url: '/status/:username',
             resolve: {
-                userData: ['$q', '$stateParams', 'PokeSocket', function resolveUserData($q, $stateParams, PokeSocket){
-                    PokeSocket.emit('status', { username: $stateParams.username });
+                userData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveUserData($q, $stateParams, PokeSocket, SocketEvent){
                     var d = $q.defer();
 
-                    PokeSocket.on('status', function (message) {
+                    var userStatusCb = function userStatusCb(message) {
                         d.resolve(angular.fromJson(message.data));
-                    });
+                    };
+
+                    PokeSocket.on(SocketEvent.UserStatus, userStatusCb);
+                    PokeSocket.emit(SocketEvent.UserStatus, { username: $stateParams.username });
 
                     return d.promise;
                 }]
@@ -38,10 +40,16 @@ angular.module('Poketrainer.State.Status', [
         Navigation.primary.register("Users", "public.users", 30, 'md md-event-available', 'public.users');
     })
 
-    .controller('StatusController', function StatusController($scope, $stateParams, User, userData, PokeSocket) {
-        
-        //PokeSocket.emit('status', { username: $stateParams.username });
-        
+    .controller('StatusController', function StatusController($scope, $stateParams, PokeSocket, userData, SocketEvent) {
+        // Debug only! Remove this after everything works
+        PokeSocket.on(SocketEvent.Join, function (data){
+            console.log("Join response: ", data);
+        });
+
+        // Join specific user room
+        PokeSocket.emit(SocketEvent.Join, {room: $stateParams.username});
+        console.log("Joined! ", SocketEvent.Join, $stateParams.username);
+
         //PokeSocket.on('status', function (data) {
         //    console.log(data);
         //});

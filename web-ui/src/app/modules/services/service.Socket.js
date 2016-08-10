@@ -1,9 +1,14 @@
 angular.module('Poketrainer.Service.Socket', ['btford.socket-io'])
-    .factory('PokeSocket', ['socketFactory', function (socketFactory) {
+    .factory('PokeSocket', function (socketFactory, $location) {
+        //var path = $location.url().replace(/\/+$/g, '') + '/socket.io';
+        var path = '/socket.io';
+
         return socketFactory({
             ioSocket: io.connect(
-                window.location.protocol + '//' + window.location.host + '/api',
-                {path: window.location.pathname.replace(/\/+$/g, '') + '/socket.io'}
+                window.location.protocol + '//' + window.location.host + '/poketrainer',
+                {
+                    path: path
+                }
             )
         });
-    }]);
+    });

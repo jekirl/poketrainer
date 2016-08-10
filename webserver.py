@@ -286,15 +286,15 @@ def get(message):
     emit('get', {'success': True, 'data': response})
 
 
-@socketio.on('join')
+@socketio.on('join', namespace='/poketrainer')
 def on_join(data):
     room = data['room']
     join_room(room)
     print(request.sid + ' has joined room ' + room)
-    emit('leave', {'success': True, 'message': 'successfully joined room ' + room})
+    emit('join', {'success': True, 'message': 'successfully joined room ' + room})
 
 
-@socketio.on('leave')
+@socketio.on('leave', namespace='/poketrainer')
 def on_leave(data):
     room = data['room']
     leave_room(room)

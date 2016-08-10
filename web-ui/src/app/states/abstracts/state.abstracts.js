@@ -23,21 +23,8 @@ angular.module('Poketrainer.State.Abstracts', [
         ;
     })
 
-    .controller('NavigationController', function NavigationController($rootScope, $scope, $state, $stateParams, $mdSidenav, Navigation, PokeSocket){
+    .controller('NavigationController', function NavigationController($rootScope, $scope, $state, $stateParams, $mdSidenav, Navigation){
         $scope.navigation = Navigation.primary.get();
-
-        
-        PokeSocket.on('status', function (message) {
-            console.log(message);
-        });
-        
-        PokeSocket.on('my response', function (message) {
-            console.log(message);
-        });
-        
-        PokeSocket.on('connect', function () {
-            console.log("connected");
-        });
 
         $scope.params = $state.params;
         $scope.state = $state.current.name;

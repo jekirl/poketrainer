@@ -2,13 +2,14 @@ angular.module('poketrainer', [
 	'poketrainer.Module.Templates',
 
 	/** Internal Modules **/
+	'Poketrainer.Module.SocketEventEmitter',
 
 	/** Internal Services **/
 	'Poketrainer.Service.Config',
 	'Poketrainer.Service.Navigation',
-	'Poketrainer.Service.User',
 	'Poketrainer.Service.Inventory',
 	'Poketrainer.Service.Pokemon',
+	'Poketrainer.Service.SocketEvent',
 	'Poketrainer.Service.Socket',
 
 	/** States/Routes **/
@@ -57,8 +58,10 @@ angular.module('poketrainer', [
 
 	})
 
-	.run(function pokeTrainerRun ($state) {
-
+	.run(function pokeTrainerRun ($state, $rootScope) {
+		$rootScope.$on('inventory:updated', function(data){
+			console.log("Inventory!! :D ")
+		})
 	})
 
 ;
