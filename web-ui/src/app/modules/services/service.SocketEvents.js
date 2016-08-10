@@ -3,6 +3,7 @@ angular.module('Poketrainer.Service.SocketEvent', [])
         return {
             _prefix: "socket:",
             UserList: 'connect',
+            UserStatus: 'status',
             Data: 'push'
         }
     });

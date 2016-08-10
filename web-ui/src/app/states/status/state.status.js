@@ -16,18 +16,21 @@ angular.module('Poketrainer.State.Status', [
 
         $stateProvider.state('public.status', {
             url: '/status/:username',
-            /*resolve: {
-                userData: ['$q', '$stateParams', 'PokeSocket', function resolveUserData($q, $stateParams, PokeSocket){
-                    PokeSocket.emit('status', { username: $stateParams.username });
+            resolve: {
+                userData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveUserData($q, $stateParams, PokeSocket, SocketEvent){
                     var d = $q.defer();
 
-                    PokeSocket.on('status', function (message) {
+                    var userStatusCb = function (message) {
+                        PokeSocket.removeListener(SocketEvent.UserStatus, userStatusCb);
                         d.resolve(angular.fromJson(message.data));
-                    });
+                    };
+
+                    PokeSocket.on(SocketEvent.UserStatus, userStatusCb);
+                    PokeSocket.emit(SocketEvent.UserStatus, { username: $stateParams.username });
 
                     return d.promise;
                 }]
-            },*/
+            },
             controller: 'StatusController',
             templateUrl: 'states/status/status.tpl.html'
         })
@@ -38,7 +41,7 @@ angular.module('Poketrainer.State.Status', [
         Navigation.primary.register("Users", "public.users", 30, 'md md-event-available', 'public.users');
     })
 
-    .controller('StatusController', function StatusController($scope, $stateParams, User, PokeSocket) {
+    .controller('StatusController', function StatusController($scope, $stateParams, PokeSocket, userData) {
         
         //PokeSocket.emit('status', { username: $stateParams.username });
         

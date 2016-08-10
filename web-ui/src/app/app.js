@@ -7,7 +7,6 @@ angular.module('poketrainer', [
 	/** Internal Services **/
 	'Poketrainer.Service.Config',
 	'Poketrainer.Service.Navigation',
-	'Poketrainer.Service.User',
 	'Poketrainer.Service.Inventory',
 	'Poketrainer.Service.Pokemon',
 	'Poketrainer.Service.SocketEvent',
