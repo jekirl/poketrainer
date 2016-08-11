@@ -2,7 +2,7 @@
     <h1>Bots</h1>
     <md-list>
         <md-list-item ng-repeat="user in users">
-            <a ui-sref="public.status({username: user.username})">{{ user.username }} </a>
+            <a ui-sref="public.status({username: user.username})">{{ user.username }} - {{ user.status }} </a>
         </md-list-item>
     </md-list>
 </md-content>

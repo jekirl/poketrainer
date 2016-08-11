@@ -465,6 +465,7 @@ class Poketrainer:
     def enable_web_pushing(self):
         self.log.info('Enabled pushing to web, caus web told us to!')
         self.can_push_to_web = True
+        return self.can_push_to_web
 
     def ping(self):
         self.log.info("Responding to ping")
