@@ -235,12 +235,12 @@ class Inventory:
             return False
 
     def __str__(self):
-        str_ = "PokeBalls: {0}, GreatBalls: {1}, MasterBalls: {2}, UltraBalls: {3} \n " \
+        str_ = "PokeBalls: {0}, GreatBalls: {1}, UltraBalls: {2}, MasterBalls: {3} \n " \
                "Potion: {4}, Super Potion: {5}, Max Potion {6}, Hyper Potion {7}, Lucky Eggs {8}, Razz Berries {9}"
         return str_.format(self.poke_balls,
                            self.great_balls,
-                           self.master_balls,
                            self.ultra_balls,
+                           self.master_balls,
                            self.potion,
                            self.super_potion,
                            self.max_potion,
