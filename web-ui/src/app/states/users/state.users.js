@@ -17,7 +17,13 @@ angular.module('Poketrainer.State.Users', [
                         d.resolve(message.users);
                     };
 
+                    var userEventUpdate = function userEventUpdate(message) {
+                        console.log('got: ', message);
+                    };
+
+
                     PokeSocket.on(SocketEvent.UserList, userEventCb);
+                    PokeSocket.on(SocketEvent.UserStatus, userEventUpdate);
 
                     // Emit the event to our socket
                     // after listening for it.
@@ -48,7 +54,13 @@ angular.module('Poketrainer.State.Users', [
             $scope.users = message.users;
         };
 
+        var userEventUpdate = function userEventUpdate(message) {
+            // for some reason this event will not contain the actual emitted data?
+            console.log(message);
+        };
+
         // Make sure to listen for new events
         $scope.$on(SocketEvent._prefix + SocketEvent.UserList, userEventCb);
+        $scope.$on(SocketEvent._prefix + SocketEvent.UserStatus, userEventUpdate);
     })
 ;

@@ -24,8 +24,8 @@ angular.module('Poketrainer.State.Status', [
                         d.resolve(angular.fromJson(message.data));
                     };
 
-                    PokeSocket.on(SocketEvent.UserStatus, userStatusCb);
-                    PokeSocket.emit(SocketEvent.UserStatus, { username: $stateParams.username });
+                    PokeSocket.on(SocketEvent.UserData, userStatusCb);
+                    PokeSocket.emit(SocketEvent.UserData, { username: $stateParams.username });
 
                     return d.promise;
                 }]

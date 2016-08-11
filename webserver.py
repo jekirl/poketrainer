@@ -67,7 +67,7 @@ class RpcSocket:
         s.bind("tcp://127.0.0.1:%i" % sock_port)  # the free port should still be the same
         self.rpc_sock = gevent.spawn(s.run)
         self.rpc_sock.link(self._callback)
-        self.log.info("Socket for push started on: tcp://127.0.0.1:%i", sock_port)
+        self.log.debug("Socket for push started on: tcp://127.0.0.1:%i", sock_port)
 
     def _callback(self, gt):
         try:
@@ -96,6 +96,65 @@ class RpcSocket:
         socketio.emit('push', push_template, namespace='/poketrainer', room=username)
 
 
+class BotUsers(object):
+    def __init__(self):
+        self.users = []
+        self.load()
+
+    def get(self, username):
+        for user in self.users:
+            if user.username == username:
+                return user
+        return {}
+        # return self.users.get(username, {})
+
+    def load(self):
+        desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+        with open(desc_file) as f:
+            live_users = f.read()
+            live_users = json.loads(live_users.encode() if len(live_users) > 0 else '{}')
+            for username in live_users:
+                if username == 'web':
+                    continue
+                user = BotConnection(username, int(live_users[username]))
+                self.users.append(user)
+
+    def __iter__(self):
+        return self.users.__iter__()
+
+    def to_list(self):
+        return [user.__dict__ for user in self.users]
+
+
+class BotConnection(object):
+    def __init__(self, username, sock_port):
+        self.username = username
+        self.status = 'unknown'
+        self.sock_port = sock_port
+
+    def get_api_rpc(self):
+        c = zerorpc.Client()
+        c.connect("tcp://127.0.0.1:%i" % self.sock_port)
+        return c
+
+    def test_connection(self):
+        running = False
+        c = self.get_api_rpc()
+        try:
+            running = c.enable_web_pushing()
+            logger.debug('Enabled pushing in bot %s', self.username)
+        except Exception as e:
+            logger.error('Error connecting to bot %s: %s', self.username, e)
+        if running:
+            self.status = 'online'
+        else:
+            self.status = 'offline'
+        socketio.emit('user_status', {'username': self.username, 'status': self.status}, namespace='/poketrainer')
+
+    def __str__(self):
+        return self.username
+
+
 def init_config():
     parser = argparse.ArgumentParser()
     config_file = "config.json"
@@ -119,30 +178,6 @@ def init_config():
             config.__dict__[key] = value
 
     return config.__dict__
-
-
-def _thread_callback(gt):
-    if not gt.exception:
-        result = gt.value
-        logger.debug('Connected to bot and enabled pushing with result: %s', result)
-    else:
-        logger.error('Error connecting to bot %s', gt.exception)
-
-
-def get_api_rpc(username):
-    desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
-    sock_port = 0
-    with open(desc_file) as f:
-        data = f.read()
-        data = json.loads(data if len(data) > 0 else '{}')
-        if username not in data:
-            logger.error("There is no bot running with the input username!")
-            return None
-        sock_port = int(data[username])
-
-    c = zerorpc.Client()
-    c.connect("tcp://127.0.0.1:%i" % sock_port)
-    return c
 
 app = Flask(__name__, static_folder='web-ui/dist', static_url_path='')
 app.wsgi_app = ReverseProxied(app.wsgi_app)
@@ -170,35 +205,10 @@ def static_proxy(filename):
     return send_from_directory('', filename)
 
 
-@app.route("/api/player")
-def users():
-    users = []
-
-    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
-    with open(desc_file) as f:
-        live_users = f.read()
-        live_users = json.loads(live_users.encode() if len(live_users) > 0 else '{}')
-
-        threads = {}
-        for username in live_users:
-            if username == 'web':
-                continue
-            c = get_api_rpc(username)
-            if c is None:
-                continue
-
-            logger.debug("Trying to enable web pushing in a background 'thread' for %s", username)
-            threads[username] = gevent.spawn(c.enable_web_pushing)
-            threads[username].link(_thread_callback)
-            user = {'username': username}
-            users.append(user)
-    return jsonify(users)
-
-
-@socketio.on('status', namespace='/poketrainer')
+@socketio.on('user_data', namespace='/poketrainer')
 def get_status(message):
     username = message['username']
-    c = get_api_rpc(username)
+    c = BotUsers().get(username).get_api_rpc()
     config = init_config()
     options['SCORE_METHOD'] = config.get('POKEMON_CLEANUP', {}).get("SCORE_METHOD", "CP")
     player_json = {}
@@ -244,33 +254,19 @@ def get_status(message):
     player['stardust'] = currency
     player['item_capacity'] = player_json['player_data']['max_item_storage']
     player['pokemon_capacity'] = player_json['player_data']['max_pokemon_storage']
-    emit('status', {'data': json.dumps(player), 'status': status})
+    emit('user_data', {'data': json.dumps(player), 'status': status})
 
 
 @socketio.on('connect', namespace='/poketrainer')
 def connect():
-    users = []
+    users = BotUsers()
 
-    desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
-    with open(desc_file) as f:
-        live_users = f.read()
-        live_users = json.loads(live_users.encode() if len(live_users) > 0 else '{}')
+    for user in users.__iter__():
+        logger.debug("Trying to enable web pushing in a background 'thread' for %s", user.username)
+        socketio.start_background_task(user.test_connection)
 
-        threads = {}
-        for username in live_users:
-            if username == 'web':
-                continue
-            c = get_api_rpc(username)
-            if c is None:
-                continue
-
-            logger.debug("Trying to enable web pushing in a background 'thread' for %s", username)
-            threads[username] = gevent.spawn(c.enable_web_pushing)
-            threads[username].link(_thread_callback)
-            user = {'username': username}
-            users.append(user)
     logger.debug('Client connected %s', request.sid)
-    emit('connect', {'success': True, 'users': users})
+    emit('connect', {'success': True, 'users': users.to_list()})
 
 
 @socketio.on('disconnect', namespace='/poketrainer')
@@ -281,9 +277,9 @@ def disconnect():
 # TODO: this is not used yet, but we need something like this to 'pull' actual data from a bot
 @socketio.on('get', namespace='/poketrainer')
 def get(message):
-    s = get_api_rpc(message['username'])
+    #s = get_api_rpc(message['username'])
     response = {}
-    response = json.loads(s.get_caught_pokemons())
+    #response = json.loads(s.get_caught_pokemons())
     emit('get', {'success': True, 'data': response})
 
 
