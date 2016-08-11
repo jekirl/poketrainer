@@ -19,7 +19,7 @@ with open(_names_file_path) as jsonfile:
 class Pokemon(object):
     # Used for calculating the pokemon level
     # source http://pokemongo.gamepress.gg/cp-multiplier
-    CPM_calculation_increments = [
+    cpm_calculation_increments = [
         {
             'max_level': 1,
             'cpm_sqrt_increase_per_level': 0.008836,
@@ -152,13 +152,13 @@ class Pokemon(object):
         if not isinstance(pokemon_details, PokemonData) or not isinstance(tcpm, float):
             return 0
 
-        baseAttk = int(pokemon_details.BaseAttack)
-        baseDef = int(pokemon_details.BaseDefense)
-        baseStamina = int(pokemon_details.BaseStamina)
+        base_attk = int(pokemon_details.BaseAttack)
+        base_def = int(pokemon_details.BaseDefense)
+        base_stamina = int(pokemon_details.BaseStamina)
 
-        attk = (baseAttk + self.individual_attack) * tcpm
-        defense = (baseDef + self.individual_defense) * tcpm
-        stamina = (baseStamina + self.individual_stamina) * tcpm
+        attk = (base_attk + self.individual_attack) * tcpm
+        defense = (base_def + self.individual_defense) * tcpm
+        stamina = (base_stamina + self.individual_stamina) * tcpm
 
         return int(max(10, floor(sqrt(stamina) * attk * sqrt(defense) / 10)))
 
@@ -192,13 +192,13 @@ class Pokemon(object):
             evolved_poke_data = GAME_MASTER.get(self.pokemon_id + i, PokemonData())
             self.max_evolve_cp = self.calc_cp(max_tcpm, evolved_poke_data)
 
-        pokeLvl = POKEMON_LVL_DATA[self.cpm_total].pokemon_lvl
-        self.power_up_result = self.calc_cp(TCPM_VALS[pokeLvl], poke_game_data) - self.cp
+        poke_lvl = POKEMON_LVL_DATA[self.cpm_total].pokemon_lvl
+        self.power_up_result = self.calc_cp(TCPM_VALS[poke_lvl], poke_game_data) - self.cp
 
     def get_level_by_cpm(self, cpm_total):
         prev_max_level = 0
         prev_max_level_cpm = 0
-        for cpm_increment in self.CPM_calculation_increments:
+        for cpm_increment in self.cpm_calculation_increments:
             max_level = cpm_increment['max_level']
             cpm_sqrt_increase_per_level = cpm_increment['cpm_sqrt_increase_per_level']
             if "max_level_cpm" in cpm_increment:
@@ -218,7 +218,7 @@ class Pokemon(object):
     def get_cpm_by_level(self, level):
         prev_max_level = 0
         prev_max_level_cpm = 0
-        for cpm_increment in self.CPM_calculation_increments:
+        for cpm_increment in self.cpm_calculation_increments:
             max_level = cpm_increment['max_level']
             cpm_sqrt_increase_per_level = cpm_increment['cpm_sqrt_increase_per_level']
             if level <= max_level:  # we are below the max level of current cpm iteration
