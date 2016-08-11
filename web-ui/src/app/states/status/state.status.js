@@ -157,6 +157,10 @@ angular.module('Poketrainer.State.Status', [
         //PokeSocket.on('status', function (data) {
         //    console.log(data);
         //});
+        
+        $scope.$on('inventory:updated', function(event, data) { 
+            $scope.inventory = data;
+        });
 
         $scope.player = playerData;
         $scope.playerStats = playerStatsData;
