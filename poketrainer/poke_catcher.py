@@ -175,7 +175,7 @@ class PokeCatcher:
                 self.encountered_pokemons[encounter_id] = pokemon_data
 
                 if pokemon.pokemon_id not in self.parent.config.never_catch_names:
-                    return self.parent.config.do_catch_pokemon(encounter_id, spawn_point_id, capture_probability, pokemon)
+                    return self.do_catch_pokemon(encounter_id, spawn_point_id, capture_probability, pokemon)
                 else:
                     self.log.info("Ignoring %s", pokemon.pokemon_type)
                     return False
@@ -216,7 +216,7 @@ class PokeCatcher:
                 self.log.debug("Attempt Encounter: %s", json.dumps(resp, indent=4, sort_keys=True))
 
                 if pokemon.pokemon_id not in self.parent.config.never_catch_names:
-                    return self.parent.config.do_catch_pokemon(encounter_id, fort_id, capture_probability, pokemon)
+                    return self.do_catch_pokemon(encounter_id, fort_id, capture_probability, pokemon)
                 else:
                     self.log.info("Ignoring %s", pokemon.pokemon_type)
                     return False
