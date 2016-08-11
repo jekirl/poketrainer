@@ -131,7 +131,7 @@ class PokeCatcher:
             return False
         else:
             self.log.debug("Could not catch pokemon: %s", catch_attempt)
-            self.log.info("Could not catch pokemon:  %s, status: %s", pokemon, catch_status)
+            self.log.info("Could not catch pokemon:  %s, status: %s", pokemon, capture_status)
             return False
 
     def encounter_pokemon(self, pokemon_data, retry=False,
