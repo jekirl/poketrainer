@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import copy
-import logging
 import os
 import pickle
 import sys
@@ -10,6 +9,7 @@ from collections import defaultdict
 import six
 from cachetools import TTLCache
 
+from helper.colorlogger import create_logger
 from helper.exceptions import TooManyEmptyResponses
 from helper.utilities import flat_map
 
@@ -38,7 +38,8 @@ class FortWalker:
         self.spinnable_cached_forts = []
         self.cache_is_sorted = self.parent.config.cache_is_sorted
         self.use_cache = self.parent.config.use_cache
-        self.log = logging.getLogger(__name__)
+
+        self.log = create_logger(__name__, self.parent.config.log_colors["fort_walker".upper()])
 
     """ will always only walk 1 step (i.e. waypoint), so we can accurately control the speed (via step_size) """
 

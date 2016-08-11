@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
 import json
-import logging
 from collections import defaultdict
 from time import time
 
+from helper.colorlogger import create_logger
 from library.api.pgoapi.protos.POGOProtos.Inventory import \
     Item_pb2 as Item_Enums
 
@@ -16,8 +16,9 @@ class Inventory:
     def __init__(self, parent, inventory_items):
         self._parent = parent
         self.inventory_items = inventory_items
-        self._log = logging.getLogger(__name__)
         self._last_egg_use_time = 0
+
+        self._log = create_logger(__name__, self._parent.config.log_colors["inventory".upper()])
 
         self.ultra_balls = 0
         self.great_balls = 0
@@ -191,8 +192,8 @@ class Inventory:
         pokemon_list = sorted(map(lambda x: Pokemon(x['pokemon_data'], self._parent.player_stats.level,
                                                     self._parent.config.score_method,
                                                     self._parent.config.score_settings),
-                              filter(lambda x: 'pokemon_data' in x and not x['pokemon_data'].get("is_egg", False),
-                              map(lambda x: x.get('inventory_item_data', {}), self.inventory_items))),
+                                  filter(lambda x: 'pokemon_data' in x and not x['pokemon_data'].get("is_egg", False),
+                                         map(lambda x: x.get('inventory_item_data', {}), self.inventory_items))),
                               key=lambda x: x.score, reverse=True)
         pokemon_list = filter(lambda x: not x.is_egg, pokemon_list)
         if as_json:
@@ -207,8 +208,9 @@ class Inventory:
             return json.dumps(pokemon_list, default=lambda p: p.__dict__)  # reduce the data sent?
         return pokemon_list
 
-    def update_player_inventory(self):
-        res = self._parent.api.get_inventory()
+    def update_player_inventory(self, res=None):
+        if res is None:
+            res = self._parent.api.get_inventory()
         if 'GET_INVENTORY' in res.get('responses', {}):
             self.inventory_items = res.get('responses', {}) \
                 .get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
