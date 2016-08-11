@@ -254,7 +254,7 @@ class FortWalker:
                 self.log.info("Fort spun, yielding: %s",
                               reward)
             else:
-                self.log.info("Fort spun, but did not yield any rewards. Possible soft ban?")
+                self.log.warning("Fort spun, but did not yield any rewards. Possible soft ban?")
             self.visited_forts[fort['id']] = fort
         elif result == 4:
             self.log.debug("Fort spun but Your inventory is full : %s", res)
