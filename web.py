@@ -219,7 +219,7 @@ def transfer(username, p_id):
         flash("Released")
     else:
         flash("Failed!")
-    return redirect(url_for('inventory', username=username))
+    return redirect(url_for('status', username=username))
 
 
 @app.route("/<username>/snipe/<latlng>")
