@@ -249,7 +249,9 @@ class FortWalker:
                     reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
                 self.log.info("Fort spun, yielding: %s",
                               reward)
-                self.parent.push_to_web('fort', 'spun', reward)
+                self.parent.push_to_web('fort', 'spun', {
+                    'reward': reward, 'location': {'lat': fort['latitude'], 'long': fort['longitude']}
+                })
             else:
                 self.log.info("Fort spun, but did not yield any rewards. Possible soft ban?")
             self.visited_forts[fort['id']] = fort
