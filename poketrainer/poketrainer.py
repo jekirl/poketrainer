@@ -256,7 +256,7 @@ class Poketrainer:
                     self.persist_lock = False
                     self.thread_release()
             #self.log.info("COMPLETED A _main_loop")
-            #self.sleep(0.1)
+            self.sleep(1.0)
 
     def _heartbeat(self, res=False, login_response=False):
         if not isinstance(res, dict):
