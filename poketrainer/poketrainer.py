@@ -57,7 +57,6 @@ class Poketrainer:
         self.config = None
         self._load_config()
 
-        print(__name__)
         self.log = create_logger(__name__, self.config.log_colors["poketrainer".upper()])
 
         self._open_socket()
