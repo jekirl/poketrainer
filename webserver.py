@@ -220,7 +220,7 @@ def get_status(message):
     currency = player_json['player_data']['currencies'][1]['amount']
     latlng = c.current_location()
 
-    items = json.loads(c.get_inventory())['inventory_items']
+    items = json.loads(c.get_raw_inventory())
     pokemons_data = []
     candy = defaultdict(int)
     for item in items:
@@ -274,13 +274,31 @@ def disconnect():
     logger.debug('Client disconnected %s', request.sid)
 
 
-# TODO: this is not used yet, but we need something like this to 'pull' actual data from a bot
-@socketio.on('get', namespace='/poketrainer')
+@socketio.on('pull', namespace='/poketrainer')
 def get(message):
-    #s = get_api_rpc(message['username'])
-    response = {}
-    #response = json.loads(s.get_caught_pokemons())
-    emit('get', {'success': True, 'data': response})
+    username = message['username']
+    types = message['types']
+    c = BotUsers().get(username).get_api_rpc()
+    if 'location' in types:
+        response = c.current_location()
+        logger.debug('emitting location')
+        emit('pull', {'success': True, 'type': 'location', 'data': response})
+    if 'player' in types:
+        response = c.get_player()
+        logger.debug('emitting player')
+        emit('pull', {'success': True, 'type': 'player', 'data': response})
+    if 'player_stats' in types:
+        response = c.get_player_stats()
+        logger.debug('emitting player_stats')
+        emit('pull', {'success': True, 'type': 'player_stats', 'data': response})
+    if 'inventory' in types:
+        response = c.get_inventory()
+        logger.debug('emitting inventory')
+        emit('pull', {'success': True, 'type': 'inventory', 'data': response})
+    if 'pokemon' in types:
+        response = c.get_caught_pokemons()
+        logger.debug('emitting pokemon')
+        emit('pull', {'success': True, 'type': 'pokemon', 'data': response})
 
 
 @socketio.on('join', namespace='/poketrainer')

@@ -44,7 +44,8 @@ class Pokemon(object):
     ]
 
     def __init__(self, pokemon_data, player_level=0,
-                 score_method="CP", score_settings=dict()):
+                 score_method="CP", score_settings=dict(),
+                 candy=0):
         self.pokemon_data = pokemon_data
         self.creation_time_ms = pokemon_data.get('creation_time_ms', 0)
         self.stamina = pokemon_data.get('stamina', 0)
@@ -72,7 +73,7 @@ class Pokemon(object):
             self.name = self.nickname
         else:
             self.name = self.pokemon_type
-        self.candy = 0
+        self.candy = candy
         self.move_1 = pokemon_data.get('move_1', 0)
         self.move_2 = pokemon_data.get('move_2', 0)
 

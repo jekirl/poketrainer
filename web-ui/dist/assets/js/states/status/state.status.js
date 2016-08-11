@@ -21,11 +21,24 @@ angular.module('Poketrainer.State.Status', [
                     var d = $q.defer();
 
                     var userStatusCb = function userStatusCb(message) {
+                        console.log('got userStatus... ', message)
                         d.resolve(angular.fromJson(message.data));
                     };
 
+                    var userDataCb = function userStatusCb(message) {
+                        console.log('received from pull-request: ', message.type, ': ', message.data);
+                        //d.resolve(angular.fromJson(message.data));
+                    };
+
                     PokeSocket.on(SocketEvent.UserData, userStatusCb);
+                    console.log('emitting request for UserData');
                     PokeSocket.emit(SocketEvent.UserData, { username: $stateParams.username });
+
+                    PokeSocket.on(SocketEvent.Request, userDataCb);
+                    PokeSocket.emit(SocketEvent.Request, {
+                        username: $stateParams.username,
+                        types: ['location', 'player', 'player_stats', 'inventory', 'pokemon']
+                    });
 
                     return d.promise;
                 }]

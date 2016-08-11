@@ -101,17 +101,6 @@
 <script>
     $(document).ready(function () {
 
-      e=io("http://spawns.sebastienvercammen.be:49006");
-      e.on("poke", function(e) {
-          if (document.getElementById('autosnipe').checked) {
-              try {
-                  var latlng = (e.lat + ',' + e.lon).replace(/ *\([^)]*\) */g, "")
-                  console.log('sniping ', e.name);
-                  fetch( "{{url_for('snipe', username = username, latlng = '')}}" + latlng, {mode: 'no-cors'});
-              } catch (e) {}
-          }
-      });
-
       $('#map').addClass('scrolloff');
 
       $('#overlay').on("mouseup",function(){
