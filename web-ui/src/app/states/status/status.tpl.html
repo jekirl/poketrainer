@@ -9,7 +9,8 @@
                 <div class="panel-heading">
                     <h3 class="panel-title">
                         Level {{ playerStats.level }}, XP:<br>
-                        {{ (playerStats.experience - playerStats.prev_level_xp) | number }}/{{ (playerStats.next_level_xp - playerStats.prev_level_xp) | number }}</h3>
+                        {{ (playerStats.experience - playerStats.prev_level_xp) | number }}/{{ (playerStats.next_level_xp - playerStats.prev_level_xp) | number }}
+                    </h3>
                 </div>
                 <div class="panel-body">
                     <span class="chart" easypiechart percent="playerStats.xpPercent" options="expLvlOptions">
@@ -139,65 +140,118 @@
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
     <div class="modal fade" id="inventoryModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title">Inventory</h4>
                 </div>
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <table class="row-border hover">
-                                <thead>
-                                    <th>Amount</th>
-                                    <th>Item</th>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{{inventory.poke_balls}}</td>
-                                        <td>Poke Balls</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{inventory.great_balls}}</td>
-                                        <td>Great Balls</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{inventory.ultra_balls}}</td>
-                                        <td>Ultra Balls</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{inventory.master_balls}}</td>
-                                        <td>Master Balls</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{inventory.potion}}</td>
-                                        <td>Potion</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{inventory.super_potion}}</td>
-                                        <td>Super Potion</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{inventory.hyper_potion}}</td>
-                                        <td>Hyper Potion</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{inventory.max_potion}}</td>
-                                        <td>Max Potion</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{inventory.lucky_eggs}}</td>
-                                        <td>Lucky Eggs</td>
-                                    </tr>
-                                    <tr>
-                                        <td>{{inventory.razz_berries}}</td>
-                                        <td>Razz Berries</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                      </div>
+                    <div class="row m-b-10">
+                        
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/1.png">
+                                <h4>Poke Ball</h4>
+                                <h4>{{inventory.poke_balls}}</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/2.png">
+                                <h4>Great Ball</h4>
+                                <h4>{{inventory.great_balls}}</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/3.png">
+                                <h4>Ultra Ball</h4>
+                                <h4>{{inventory.ultra_balls}}</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/4.png">
+                                <h4>Master Ball</h4>
+                                <h4>{{inventory.master_balls}}</h4>
+                            </div>
+                        </div>
+                        
                     </div>
+                    <div class="row m-b-10">
+                    
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/101.png">
+                                <h4>Potion</h4>
+                                <h4>{{inventory.potion}}</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/102.png">
+                                <h4>Super Potion</h4>
+                                <h4>{{inventory.super_potion}}</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/103.png">
+                                <h4>Hyper Potion</h4>
+                                <h4>{{inventory.hyper_potion}}</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/104.png">
+                                <h4>Max Potion</h4>
+                                <h4>{{inventory.max_potion}}</h4>
+                            </div>
+                        </div>
+                    
+                    </div>
+                    <div class="row m-b-10">
+                    
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/201.png">
+                                <h4>Revive</h4>
+                                <h4>{{inventory.revive}}</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/202.png">
+                                <h4>Max Revive</h4>
+                                <h4>{{inventory.max_revive}}</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/301.png">
+                                <h4>Lucky Egg</h4>
+                                <h4>{{inventory.lucky_eggs}}</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="p-l-10 p-r-10 text-center">
+                                <img class="img-responsive" style="max-height: 100px;margin: 0 auto;" ng-src="assets/images/items/701.png">
+                                <h4>Razz Berries</h4>
+                                <h4>{{inventory.razz_berries}}</h4>
+                            </div>
+                        </div>
+                    
+                    </div>    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -215,17 +269,17 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12">
-                            <h3>Player:</h3>
+                            <h4>Player:</h4>
                             <pre class="m-t-16">{{player | json}}</pre>
-                            <h3>Player:</h3>
+                            <h4>Player:</h4>
                             <pre class="m-t-16">{{playerStats | json}}</pre>
-                            <h3>Player Stats:</h3>
+                            <h4>Player Stats:</h4>
                             <pre class="m-t-16">{{playerStats | json}}</pre>
-                            <h3>Inventory:</h3>
+                            <h4>Inventory:</h4>
                             <pre class="m-t-16">{{inventory | json}}</pre>
-                            <h3>Pokemon:</h3>
+                            <h4>Pokemon:</h4>
                             <pre class="m-t-16">{{pokemon | json}}</pre>
-                            <h3>Attacks:</h3>
+                            <h4>Attacks:</h4>
                             <pre class="m-t-16">{{attacks | json}}</pre>
                       </div>
                     </div>
