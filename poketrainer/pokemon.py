@@ -69,7 +69,7 @@ class Pokemon(object):
 
         # Used in Web.py
         if self.nickname is not "":
-            self.name = self.nickname
+            self.name = self.nickname.decode('utf-8')
         else:
             self.name = self.pokemon_type
         self.candy = 0
