@@ -1,4 +1,6 @@
 coverage
 flake8
+flake8-builtins
+pep8-naming
 isort
 nose

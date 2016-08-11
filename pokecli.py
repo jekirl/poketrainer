@@ -29,62 +29,25 @@ Modifications by: Brad Smith <https://github.com/infinitewarp>
 """
 
 import argparse
-import collections
-import json
 import logging
-import os
-import os.path
-import socket
-from time import sleep
 
 import gevent
-import zerorpc
-from geopy.geocoders import GoogleV3
-from six import PY2, iteritems
 
-from listener import Listener
-from pgoapi import PGoApi
+from helper.colorlogger import create_logger
+from poketrainer.poketrainer import Poketrainer
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__, color='red')
 
 
-def get_pos_by_name(location_name):
-    geolocator = GoogleV3()
-    loc = geolocator.geocode(location_name)
-
-    logger.info('Your given location: %s', loc.address.encode('utf-8'))
-    logger.info('lat/long/alt: %s %s %s', loc.latitude, loc.longitude, loc.altitude)
-
-    return (loc.latitude, loc.longitude, loc.altitude)
-
-
-def dict_merge(dct, merge_dct):
-    for k, v in iteritems(merge_dct):
-        if (
-            k in dct and isinstance(dct[k], dict) and
-            isinstance(merge_dct[k], collections.Mapping)
-        ):
-            dict_merge(dct[k], merge_dct[k])
-        else:
-            dct[k] = merge_dct[k]
-    return dct
-
-
-def init_config():
+def init_arguments():
     parser = argparse.ArgumentParser()
-    config_file = "config.json"
-
-    # If config file exists, load variables from json
-    load = {}
-    if os.path.isfile(config_file):
-        with open(config_file) as data:
-            load.update(json.load(data))
-
     # Read passed in Arguments
-    parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
-    parser.add_argument("-l", "--location", help="Location")
+    parser.add_argument("-i", "--config_index", help="Index of account to start in config.json", default=0, type=int)
+    parser.add_argument("-l", "--location",
+                        help="Location. Only applies if an account was selected through config_index parameter")
     parser.add_argument("-e", "--encrypt_lib", help="encrypt lib, libencrypt.so/encrypt.dll", default="libencrypt.so")
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
+<<<<<<< HEAD
     parser.add_argument("-p", "--proxy", help="Use Proxy, proxy_ip:port", default=None)
     config = parser.parse_args()
     defaults = load.get('defaults', {})
@@ -102,20 +65,29 @@ def init_config():
 
 
 def main(position=None):
+=======
+    arguments = parser.parse_args()
+    return arguments.__dict__
+
+
+def main():
+>>>>>>> j-e-k/develop
     # log settings
     # log format
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
-    # log level for http request class
-    logging.getLogger("requests").setLevel(logging.WARNING)
-    # log level for main pgoapi class
-    logging.getLogger("pgoapi").setLevel(logging.INFO)
-    # log level for internal pgoapi class
-    logging.getLogger("rpc_api").setLevel(logging.INFO)
 
-    config = init_config()
-    if not config:
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] s%(message)s')
+    # log level for http request class
+    create_logger("requests", log_level=logging.WARNING)
+    # log level for pgoapi class
+    create_logger("pgoapi", log_level=logging.WARNING)
+    # log level for internal pgoapi class
+    create_logger("rpc_api", log_level=logging.INFO)
+
+    args = init_arguments()
+    if not args:
         return
 
+<<<<<<< HEAD
     if config["debug"]:
         logging.getLogger("requests").setLevel(logging.DEBUG)
         logging.getLogger("pgoapi").setLevel(logging.DEBUG)
@@ -171,19 +143,19 @@ def main(position=None):
         sleep(30)
 
     # main loop
+=======
+    poketrainer = Poketrainer(args)
+    # auto-start bot
+    poketrainer.start()
+    # because the bot spawns 'threads' so it can start / stop we're making an infinite lop here
+>>>>>>> j-e-k/develop
     while True:
         try:
-            api.main_loop()
-        except Exception as e:
-            logger.exception('Error in main loop %s, restarting at location: %s', e, api._posf)
-            # restart after sleep
-            sleep(30)
-            try:
-                main(api._posf)
-            except KeyboardInterrupt:
-                raise
-            except:
-                pass
+            gevent.sleep(1.0)
+        except KeyboardInterrupt:
+            logger.info('Exiting...')
+            exit(0)
+
 
 if __name__ == '__main__':
     main()
