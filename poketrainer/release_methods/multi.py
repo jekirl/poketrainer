@@ -4,7 +4,7 @@ import logging
 from six import iteritems
 
 import base
-from POGOProtos import Enums_pb2
+from library.api.pgoapi.protos.POGOProtos import Enums_pb2
 
 logger = logging.getLogger(__name__)
 
