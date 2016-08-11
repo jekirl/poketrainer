@@ -65,7 +65,7 @@ Below the accounts you can change options in the `default` section. If you need 
    * `USE_GREATBALL_IF_PERCENT` If using a pokeball wouldn't result in at least the above percent, use a greatball if the capture rate is above this percent (default: 50)
    * `USE_ULTRABALL_IF_PERCENT` If using a greatball wouldn't result in at least the above percent, use an ultraball if the capture rate is above this percent (default: 50)
    * `USE_MASTERBALL` Using a masterball should in theory automatically result in a capture. If set to true, attempt to use a masterball if none of the above percentages are met. If this is set to false and none of the above percentages are met, default back to an ultraball (default: false)
-   * `LOL` Add pokemon names to this list to never bother to start an encounter. Just leave the list blank to disable. (default: "RATTATA", "ZUBAT")
+   * `NEVER_CATCH_NAMES` Add pokemon names to this list to never bother to start an encounter. Just leave the list blank to disable. (default: "RATTATA", "ZUBAT")
 * `EGG_INCUBATION`
    * `ENABLE` enables automatic use of incubators (default: true)
    * `USE_DISPOSABLE_INCUBATORS` enables use of disposable (3-times use) incubators (default: false)
