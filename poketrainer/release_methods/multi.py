@@ -11,35 +11,35 @@ logger = logging.getLogger(__name__)
 
 class ReleaseMethod(base.ReleaseMethod):
 
-    def processConfig(self, config):
+    def process_config(self, config):
         self.config = config
-        self.releaseMethodFactory = base.ReleaseMethodFactory({})
-        self.baseConfig = copy.deepcopy(config)
-        if 'RELEASE_METHOD_MULTI' in self.baseConfig:
-            del self.baseConfig['RELEASE_METHOD_MULTI']
+        self.release_method_factory = base.ReleaseMethodFactory({})
+        self.base_config = copy.deepcopy(config)
+        if 'RELEASE_METHOD_MULTI' in self.base_config:
+            del self.base_config['RELEASE_METHOD_MULTI']
 
         self.handlers = {}
-        self.multiConfig = config.get('RELEASE_METHOD_MULTI', {})
-        self.DEFAULT_RELEASE_METHOD = self.multiConfig.get('MULTI_DEFAULT_RELEASE_METHOD', "CLASSIC")
+        self.multi_config = config.get('RELEASE_METHOD_MULTI', {})
+        self.default_release_method = self.multi_config.get('MULTI_DEFAULT_RELEASE_METHOD', "CLASSIC")
 
         # build default config and override with the config values in its section in base config then override with
         # config values in its section in the multi config
-        self.defaultConfig = copy.deepcopy(self.baseConfig)
-        self.defaultConfig = base.filtered_dict_merge(self.defaultConfig, self.multiConfig, "POKEMON_CONFIGS")
-        self.defaultConfig['RELEASE_METHOD'] = self.DEFAULT_RELEASE_METHOD
-        self.defaultHandler = self.releaseMethodFactory.loadReleaseMethod(self.DEFAULT_RELEASE_METHOD, self.defaultConfig)
+        self.default_config = copy.deepcopy(self.base_config)
+        self.default_config = base.filtered_dict_merge(self.default_config, self.multi_config, "POKEMON_CONFIGS")
+        self.default_config['RELEASE_METHOD'] = self.default_release_method
+        self.default_handler = self.release_method_factory.load_release_method(self.default_release_method, self.default_config)
 
-        for pokemonName, pokemonConfig in iteritems(self.multiConfig.get('POKEMON_CONFIGS', {})):
-            pokeId = getattr(Enums_pb2, pokemonName)
-            releaseMethod = pokemonConfig.get('RELEASE_METHOD', self.DEFAULT_RELEASE_METHOD)
+        for pokemon_name, pokemon_config in iteritems(self.multi_config.get('POKEMON_CONFIGS', {})):
+            poke_id = getattr(Enums_pb2, pokemon_name)
+            release_method = pokemon_config.get('RELEASE_METHOD', self.default_release_method)
             # initialize the config with the default config
-            cfg = copy.deepcopy(self.defaultConfig)
+            cfg = copy.deepcopy(self.default_config)
             # apply pokemon specific overrides
-            cfg = base.filtered_dict_merge(cfg, pokemonConfig)
-            self.handlers[pokeId] = self.releaseMethodFactory.loadReleaseMethod(releaseMethod, cfg)
+            cfg = base.filtered_dict_merge(cfg, pokemon_config)
+            self.handlers[poke_id] = self.release_method_factory.load_release_method(release_method, cfg)
 
-    def getPokemonToRelease(self, pokemonId, pokemons):
-        if pokemonId in self.handlers:
-            return self.handlers[pokemonId].getPokemonToRelease(pokemonId, pokemons)
+    def get_pokemon_to_release(self, pokemon_id, pokemons):
+        if pokemon_id in self.handlers:
+            return self.handlers[pokemon_id].get_pokemon_to_release(pokemon_id, pokemons)
         else:
-            return self.defaultHandler.getPokemonToRelease(pokemonId, pokemons)
+            return self.default_handler.get_pokemon_to_release(pokemon_id, pokemons)
