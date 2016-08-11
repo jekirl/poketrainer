@@ -33,9 +33,10 @@ import logging
 
 import gevent
 
+from helper.colorlogger import create_logger
 from poketrainer.poketrainer import Poketrainer
 
-logger = logging.getLogger(__name__)
+logger = create_logger(__name__, color='red')
 
 
 def init_arguments():
@@ -53,15 +54,14 @@ def init_arguments():
 def main():
     # log settings
     # log format
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] s%(message)s')
     # log level for http request class
-    logging.getLogger("requests").setLevel(logging.WARNING)
+    create_logger("requests", log_level=logging.WARNING)
     # log level for pgoapi class
-    logging.getLogger("pgoapi").setLevel(logging.WARNING)
-    # log level for main bot class
-    logging.getLogger("poketrainer").setLevel(logging.INFO)
+    create_logger("pgoapi", log_level=logging.WARNING)
     # log level for internal pgoapi class
-    logging.getLogger("rpc_api").setLevel(logging.INFO)
+    create_logger("rpc_api", log_level=logging.INFO)
 
     args = init_arguments()
     if not args:
