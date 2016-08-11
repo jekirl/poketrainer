@@ -216,7 +216,8 @@ angular.module('Poketrainer.State.Status', [
                             scaleControl: false,
                             scrollwheel: false,
                             disableDoubleClickZoom: true,
-                            disableDefaultUI: true
+                            disableDefaultUI: true,
+                            draggable: false,
                         }
                      };
         
