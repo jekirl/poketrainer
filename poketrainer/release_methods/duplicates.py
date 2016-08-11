@@ -1,5 +1,5 @@
 import base
-from POGOProtos import Enums_pb2
+from library.api.pgoapi.protos.POGOProtos import Enums_pb2
 
 
 class ReleaseMethod(base.ReleaseMethod):
