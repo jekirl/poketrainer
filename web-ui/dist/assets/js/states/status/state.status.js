@@ -3,7 +3,9 @@ angular.module('Poketrainer.State.Status', [
     'uiGmapgoogle-maps',
     'chart.js',
     'easypiechart',
-    'datatables'
+    'datatables',
+    'ui-leaflet',
+    'nemLogging'
 ])
 
     .config(function config($stateProvider, uiGmapGoogleMapApiProvider) {
@@ -158,28 +160,19 @@ angular.module('Poketrainer.State.Status', [
         //    console.log(data);
         //});
         
-        $scope.polyline = {
-            path: [{
-                      latitude: locationData[0],
-                      longitude: locationData[1]
-                  }],
-            stroke: {
-                  color: '#F44336',
-                  weight: 4
-              }
-        };
-        
         $scope.$on('inventory:updated', function(event, data) { 
             $scope.inventory = data;
         });
  
-        $scope.$on('position:update', function(event, data) { 
-            $scope.map.center.latitude = data[0];
-            $scope.map.center.longitude = data[1];
-            $scope.marker.coords.latitude = data[0];
-            $scope.marker.coords.longitude = data[1];
-            var newLocation = {latitude: data[0],longitude: data[1]};
-            $scope.polyline.path.push(newLocation);
+        var positionUpdates = 0;
+        $scope.$on('position:update', function(event, data) {
+            positionUpdates++;
+            if (positionUpdates % 5 == 0) {
+                $scope.markers.bot.lat = data[0];
+                $scope.markers.bot.lng = data[1];
+                var newLocation = {lat: data[0], lng: data[1]};
+                $scope.paths.main.latlngs.push(newLocation);
+            }
         });
 
         $scope.player = playerData;
@@ -205,32 +198,34 @@ angular.module('Poketrainer.State.Status', [
         $scope.user.uniquePokedexPercent = Math.floor($scope.user.unique_pokedex_entries / 151 * 100);
         $scope.user.pokemonInvPercent = Math.floor($scope.user.pokemon.length / $scope.user.pokemon_capacity  * 100);*/
 
-        $scope.map = { 
-                        center: {
-                            latitude: locationData[0],
-                            longitude: locationData[1]
-                        }, 
-                        zoom: 15,
-                        options: {
-                            zoomControl: false,
-                            scaleControl: false,
-                            scrollwheel: false,
-                            disableDoubleClickZoom: true,
-                            disableDefaultUI: true,
-                            draggable: false,
+        $scope.map = { center: {
+                            lat: locationData[0],
+                            lng: locationData[1],
+                            zoom: 15
                         }
                      };
         
-        $scope.marker = {
-            id: 0,
-            coords: {
-                latitude: locationData[0],
-                longitude: locationData[1]
-            },
-            options: {
-                label: $scope.player.username
+        $scope.markers = {
+            bot: {
+                lat: locationData[0],
+                lng: locationData[1],
+                message: $scope.player.username,
+                focus: true,
+                draggable: false
             }
-        };
+        }
+        
+        $scope.paths = {
+            main: {
+                color: '#F44336',
+                weight: 4,
+                latlngs: [
+                    { lat: locationData[0], lng: locationData[1] }
+                ],
+            }
+        }
+        
+        
 
         $scope.expLvlOptions = {
             animate:{
