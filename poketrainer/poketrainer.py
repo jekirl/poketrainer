@@ -247,15 +247,16 @@ class Poketrainer:
             if self.thread_lock(persist=True):
                 try:
                     self._heartbeat()
-
-                    self.poke_catcher.catch_all()
                     self.fort_walker.loop()
                     self.fort_walker.spin_nearest_fort()
+                    self.poke_catcher.catch_all()
+
                 finally:
                     # after we're done, release lock
                     self.persist_lock = False
                     self.thread_release()
-            self.sleep(1.0)
+            #self.log.info("COMPLETED A _main_loop")
+            #self.sleep(0.1)
 
     def _heartbeat(self, res=False, login_response=False):
         if not isinstance(res, dict):
