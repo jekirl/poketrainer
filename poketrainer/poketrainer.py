@@ -316,7 +316,7 @@ class Poketrainer:
             # update objects
             inventory_items = responses.get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
             self.inventory = Inventory(self, inventory_items)
-            for inventory_item in self.inventory.inventory_items:
+            for inventory_item in inventory_items:
                 if "player_stats" in inventory_item['inventory_item_data']:
                     self.player_stats = PlayerStats(
                         inventory_item['inventory_item_data']['player_stats'],
@@ -440,14 +440,26 @@ class Poketrainer:
         self.log.info("Web got position: %s", self.get_position())
         return self.get_position()
 
-    def get_caught_pokemons(self):
-        return self.inventory.get_caught_pokemon_by_family(as_json=True)
+    def get_player(self):
+        return self.player.__dict__
+
+    def get_player_stats(self):
+        return self.player_stats.__dict__
 
     def get_inventory(self):
-        return self.inventory.to_json()
+        return self.inventory.to_dict()
+
+    def get_caught_pokemons(self):
+        return self.inventory.get_caught_pokemon(as_dict=True)
 
     def get_player_info(self):
         return self.player.to_json()
+
+    def get_raw_inventory(self):
+        return json.dumps(self.inventory.get_raw_inventory_items())
+
+    def get_caught_pokemons_json(self):
+        return self.inventory.get_caught_pokemon_by_family(as_json=True)
 
     def snipe_pokemon(self, lat, lng):
         # acquire lock for this thread
