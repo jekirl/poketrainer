@@ -173,7 +173,13 @@ class PokeCatcher:
                     # self.sleep(2)
 
                 self.encountered_pokemons[encounter_id] = pokemon_data
-                return self.do_catch_pokemon(encounter_id, spawn_point_id, capture_probability, pokemon)
+
+                if pokemon.pokemon_id not in self.parent.config.never_catch_names:
+                    return self.parent.config.do_catch_pokemon(encounter_id, spawn_point_id, capture_probability, pokemon)
+                else:
+                    self.log.info("Ignoring %s", pokemon.pokemon_type)
+                    return False
+
             elif result == 7:
                 self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
                               pokemon.pokemon_type)
@@ -208,7 +214,13 @@ class PokeCatcher:
                 pokemon = Pokemon(resp.get('pokemon_data', {}))
                 capture_probability = create_capture_probability(resp.get('capture_probability', {}))
                 self.log.debug("Attempt Encounter: %s", json.dumps(resp, indent=4, sort_keys=True))
-                return self.do_catch_pokemon(encounter_id, fort_id, capture_probability, pokemon)
+
+                if pokemon.pokemon_id not in self.parent.config.never_catch_names:
+                    return self.parent.config.do_catch_pokemon(encounter_id, fort_id, capture_probability, pokemon)
+                else:
+                    self.log.info("Ignoring %s", pokemon.pokemon_type)
+                    return False
+
             elif result == 5:
                 self.log.info("Couldn't catch %s Your pokemon bag was full, attempting to clear and re-try",
                               POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))

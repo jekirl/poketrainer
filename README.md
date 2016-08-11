@@ -65,6 +65,7 @@ Below the accounts you can change options in the `default` section. If you need 
    * `USE_GREATBALL_IF_PERCENT` If using a pokeball wouldn't result in at least the above percent, use a greatball if the capture rate is above this percent (default: 50)
    * `USE_ULTRABALL_IF_PERCENT` If using a greatball wouldn't result in at least the above percent, use an ultraball if the capture rate is above this percent (default: 50)
    * `USE_MASTERBALL` Using a masterball should in theory automatically result in a capture. If set to true, attempt to use a masterball if none of the above percentages are met. If this is set to false and none of the above percentages are met, default back to an ultraball (default: false)
+   * `LOL` Add pokemon names to this list to never bother to start an encounter. Just leave the list blank to disable. (default: "RATTATA", "ZUBAT")
 * `EGG_INCUBATION`
    * `ENABLE` enables automatic use of incubators (default: true)
    * `USE_DISPOSABLE_INCUBATORS` enables use of disposable (3-times use) incubators (default: false)
@@ -122,8 +123,8 @@ Below the accounts you can change options in the `default` section. If you need 
 
        - The availible color names are `"black"`, `"red"`, `"green"`, `"yellow"`, `"blue"`,
          `"purple"`, `"cyan"` and `"white"`. Multiple escape codes can be used at once by
-         joining them with commas.  (ex. `"black,bg_white"`)   
-   
+         joining them with commas.  (ex. `"black,bg_white"`)
+
 There are more options, check the current config.json.example, many are self-explanatory.
 
 
@@ -179,7 +180,7 @@ using `docker inspect poketrainer`.
 
 The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`.
 
-You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.  	
+You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.
 
 
 ### What's working:

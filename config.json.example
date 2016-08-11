@@ -19,7 +19,11 @@
         "USE_POKEBALL_IF_PERCENT": 70,
         "USE_GREATBALL_IF_PERCENT": 25,
         "USE_ULTRABALL_IF_PERCENT": 5,
-        "USE_MASTERBALL": false
+        "USE_MASTERBALL": false,
+        "NEVER_CATCH_NAMES": [
+                "RATTATA",
+                "ZUBAT"
+            ]
       },
       "EGG_INCUBATION": {
         "ENABLE": true,
@@ -204,11 +208,11 @@
             "EVOLVE": "cyan",
             "POKETRAINER": "yellow",
             "INVENTORY": "purple"
-            }            
+            }
         }
-    
-    
-    
+
+
+
     }
   ],
   "defaults": {
