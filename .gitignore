@@ -90,6 +90,9 @@ ENV/
 web-ui/vendor
 web-ui/node_modules
 
+# should be removed after the web-ui goes live
+web-ui/dist/
+
 # Rope project settings
 .ropeproject
 

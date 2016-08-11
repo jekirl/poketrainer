@@ -17,27 +17,116 @@ angular.module('Poketrainer.State.Status', [
         $stateProvider.state('public.status', {
             url: '/status/:username',
             resolve: {
-                userData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveUserData($q, $stateParams, PokeSocket, SocketEvent){
+                locationData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveLocationData($q, $stateParams, PokeSocket, SocketEvent){
                     var d = $q.defer();
 
-                    var userStatusCb = function userStatusCb(message) {
-                        console.log('got userStatus... ', message)
+                    var locationDataCb = function locationDataCb(message) {
+                        if(angular.isUndefined(message) || !message.success || message.type != 'location'){
+                            return;
+                        }
+                        console.log('received: ', message.type, ': ', message.data);
                         d.resolve(angular.fromJson(message.data));
                     };
 
-                    var userDataCb = function userStatusCb(message) {
-                        console.log('received from pull-request: ', message.type, ': ', message.data);
-                        //d.resolve(angular.fromJson(message.data));
-                    };
-
-                    PokeSocket.on(SocketEvent.UserData, userStatusCb);
-                    console.log('emitting request for UserData');
-                    PokeSocket.emit(SocketEvent.UserData, { username: $stateParams.username });
-
-                    PokeSocket.on(SocketEvent.Request, userDataCb);
+                    PokeSocket.on(SocketEvent.Request, locationDataCb);
                     PokeSocket.emit(SocketEvent.Request, {
                         username: $stateParams.username,
-                        types: ['location', 'player', 'player_stats', 'inventory', 'pokemon']
+                        types: ['location']
+                    });
+
+                    return d.promise;
+                }],
+                inventoryData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveInventoryData($q, $stateParams, PokeSocket, SocketEvent){
+                    var d = $q.defer();
+
+                    var inventoryDataCb = function inventoryDataCb(message) {
+                        if(angular.isUndefined(message) || !message.success || message.type != 'inventory'){
+                            return;
+                        }
+                        console.log('received: ', message.type, ': ', message.data);
+                        d.resolve(angular.fromJson(message.data));
+                    };
+
+                    PokeSocket.on(SocketEvent.Request, inventoryDataCb);
+                    PokeSocket.emit(SocketEvent.Request, {
+                        username: $stateParams.username,
+                        types: ['inventory']
+                    });
+
+                    return d.promise;
+                }],
+                playerData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolvePlayerData($q, $stateParams, PokeSocket, SocketEvent){
+                    var d = $q.defer();
+
+                    var playerDataCb = function playerDataCb(message) {
+                        if(angular.isUndefined(message) || !message.success || message.type != 'player'){
+                            return;
+                        }
+                        console.log('received: ', message.type, ': ', message.data);
+                        d.resolve(angular.fromJson(message.data));
+                    };
+
+                    PokeSocket.on(SocketEvent.Request, playerDataCb);
+                    PokeSocket.emit(SocketEvent.Request, {
+                        username: $stateParams.username,
+                        types: ['player']
+                    });
+
+                    return d.promise;
+                }],
+                playerStatsData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolvePlayerStatsData($q, $stateParams, PokeSocket, SocketEvent){
+                    var d = $q.defer();
+
+                    var playerStatsDataCb = function playerStatsDataCb(message) {
+                        if(angular.isUndefined(message) || !message.success || message.type != 'player_stats'){
+                            return;
+                        }
+                        console.log('received: ', message.type, ': ', message.data);
+                        d.resolve(angular.fromJson(message.data));
+                    };
+
+                    PokeSocket.on(SocketEvent.Request, playerStatsDataCb);
+                    PokeSocket.emit(SocketEvent.Request, {
+                        username: $stateParams.username,
+                        types: ['player_stats']
+                    });
+
+                    return d.promise;
+                }],
+                pokemonData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolvePokemonData($q, $stateParams, PokeSocket, SocketEvent){
+                    var d = $q.defer();
+
+                    var pokemonDataCb = function pokemonDataCb(message) {
+                        if(angular.isUndefined(message) || !message.success || message.type != 'pokemon'){
+                            return;
+                        }
+                        console.log('received: ', message.type, ': ', message.data);
+                        d.resolve(angular.fromJson(message.data));
+                    };
+
+                    PokeSocket.on(SocketEvent.Request, pokemonDataCb);
+                    PokeSocket.emit(SocketEvent.Request, {
+                        username: $stateParams.username,
+                        types: ['pokemon']
+                    });
+
+                    return d.promise;
+                }],
+                attacksData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveAttacksData($q, $stateParams, PokeSocket, SocketEvent){
+                    var d = $q.defer();
+
+                    var attacksDataCb = function attacksDataCb(message) {
+                        if(angular.isUndefined(message) || !message.success || message.type != 'attacks'){
+                            return;
+                        }
+                        console.log('received: ', message.type, ': ', message.data);
+                        d.resolve(angular.fromJson(message.data));
+                    };
+
+                    PokeSocket.on(SocketEvent.Request, attacksDataCb);
+                    PokeSocket.emit(SocketEvent.Request, {
+                        username: $stateParams.username,
+                        types: ['attacks']
                     });
 
                     return d.promise;
@@ -53,7 +142,9 @@ angular.module('Poketrainer.State.Status', [
         Navigation.primary.register("Users", "public.users", 30, 'md md-event-available', 'public.users');
     })
 
-    .controller('StatusController', function StatusController($scope, $stateParams, PokeSocket, userData, SocketEvent) {
+    .controller('StatusController', function StatusController($scope, $stateParams, PokeSocket,
+                                                              locationData, inventoryData, playerData, playerStatsData,
+                                                              pokemonData, attacksData, SocketEvent) {
         // Debug only! Remove this after everything works
         PokeSocket.on(SocketEvent.Join, function (data){
             console.log("Join response: ", data);
@@ -66,22 +157,53 @@ angular.module('Poketrainer.State.Status', [
         //PokeSocket.on('status', function (data) {
         //    console.log(data);
         //});
-        
-        $scope.user = userData;
-        
-        $scope.user.xpPercent = Math.floor($scope.user.level_xp/$scope.user.goal_xp*100);
-        $scope.user.uniquePokedexPercent = Math.floor($scope.user.unique_pokedex_entries / 151 * 100);
-        $scope.user.pokemonInvPercent = Math.floor($scope.user.pokemon.length / $scope.user.pokemon_capacity  * 100);
 
-        $scope.map = { center: { latitude: userData.latitude, longitude: userData.longitude }, zoom: 14, scrollwheel: false };
+        $scope.player = playerData;
+        $scope.playerStats = playerStatsData;
+        $scope.inventory = inventoryData;
+        $scope.pokemon = pokemonData;
+        $scope.attacks = attacksData;
+
+
+        $scope.user = {};
+
+        $scope.playerStats.xpPercent = Math.floor(
+            ($scope.playerStats.experience - $scope.playerStats.prev_level_xp)
+            /($scope.playerStats.next_level_xp - $scope.playerStats.prev_level_xp)
+            *100
+        );
+        $scope.playerStats.uniquePokedexPercent = Math.floor($scope.playerStats.unique_pokedex_entries / 151 * 100);
+        $scope.playerStats.pokemonInvPercent = Math.floor($scope.pokemon.length / $scope.player.max_pokemon_storage  * 100);
+        $scope.playerStats.itemsInvPercent = Math.floor($scope.inventory.item_count / $scope.player.max_item_storage  * 100);
+
+
+        /*$scope.user.xpPercent = Math.floor($scope.user.level_xp/$scope.user.goal_xp*100);
+        $scope.user.uniquePokedexPercent = Math.floor($scope.user.unique_pokedex_entries / 151 * 100);
+        $scope.user.pokemonInvPercent = Math.floor($scope.user.pokemon.length / $scope.user.pokemon_capacity  * 100);*/
+
+        $scope.map = { 
+                        center: {
+                            latitude: locationData[0],
+                            longitude: locationData[1]
+                        }, 
+                        zoom: 14,
+                        options: {
+                            zoomControl: false,
+                            scaleControl: false,
+                            scrollwheel: false,
+                            disableDoubleClickZoom: true,
+                            disableDefaultUI: true
+                        }
+                     };
+        
         $scope.marker = {
             id: 0,
             coords: {
-                latitude: $scope.user.latitude,
-                longitude: $scope.user.longitude
+                latitude: locationData[0],
+                longitude: locationData[1]
             },
             options: {
-                label: $scope.user.username
+                label: $scope.player.username
             }
         };
 

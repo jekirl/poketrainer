@@ -54,10 +54,6 @@ angular.module('Poketrainer.State.Abstracts', [
             $scope.navigation = Navigation.sidebar.get(toState.name);
             $scope.state = toState.name;
         });
-
-        $scope.toggleSidebar = function () {
-            $mdSidenav('left').toggle();
-        }
     })
 
 ;

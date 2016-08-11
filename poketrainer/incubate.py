@@ -69,7 +69,7 @@ class Incubate:
         if status == 1:
             self.parent.inventory.update_player_inventory()
             for i, pokemon_id in enumerate(hatch_res['pokemon_id']):
-                pokemon = get_pokemon_by_long_id(pokemon_id, self.parent.inventory.inventory_items)
+                pokemon = get_pokemon_by_long_id(pokemon_id, self.parent.inventory.get_raw_inventory_items())
                 self.log.info("Egg Hatched! XP +%s, Candy +%s, Stardust +%s, %s",
                               hatch_res['experience_awarded'][i],
                               hatch_res['candy_awarded'][i],

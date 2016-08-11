@@ -450,7 +450,7 @@ class Poketrainer:
         return self.inventory.to_dict()
 
     def get_caught_pokemons(self):
-        return self.inventory.get_caught_pokemon_by_family(False, True)
+        return self.inventory.get_caught_pokemon(as_dict=True)
 
     def get_player_info(self):
         return self.player.to_json()

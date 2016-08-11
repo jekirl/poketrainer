@@ -19,6 +19,7 @@ class Inventory:
         self._log = logging.getLogger(__name__)
         self._last_egg_use_time = 0
 
+        self.item_count = 0
         self.ultra_balls = 0
         self.great_balls = 0
         self.poke_balls = 0
@@ -44,10 +45,12 @@ class Inventory:
         self.eggs_available = []
         self.incubators_available = []
         self.incubators_busy = []
+        self.item_count = 0
         for inventory_item in self._inventory_items:
             item = inventory_item['inventory_item_data'].get('item', {})
             item_id = item.get('item_id', -1)
             item_count = item.get('count', 0)
+            self.item_count += item_count
             if item_id == Item_Enums.ITEM_POTION:
                 self.potion = item_count
             elif item_id == Item_Enums.ITEM_SUPER_POTION:
@@ -188,26 +191,26 @@ class Inventory:
             self._log.info("Inventory has {0}/{1} items".format(item_count, self._parent.player.max_item_storage))
         return self.update_player_inventory()
 
-    def get_caught_pokemon(self, as_json=False):
+    def get_caught_pokemon(self, as_json=False, as_dict=False):
         pokemon_list = sorted(map(lambda x: Pokemon(x['pokemon_data'], self._parent.player_stats.level,
                                                     self._parent.config.score_method,
                                                     self._parent.config.score_settings,
-                                                    self.pokemon_candy[x['pokemon_data'].get('pokemon_id', -1)]),
+                                                    self.pokemon_candy[x['pokemon_data'].get('pokemon_id', -1)]
+                                                    ),
                               filter(lambda x: 'pokemon_data' in x and not x['pokemon_data'].get("is_egg", False),
                               map(lambda x: x.get('inventory_item_data', {}), self._inventory_items))),
                               key=lambda x: x.score, reverse=True)
         pokemon_list = filter(lambda x: not x.is_egg, pokemon_list)
         if as_json:
             return json.dumps(pokemon_list, default=lambda p: p.__dict__)  # reduce the data sent?
+        if as_dict:
+            return [pokemon.__dict__ for pokemon in pokemon_list]
         return pokemon_list
 
-    def get_caught_pokemon_by_family(self, as_json=False, as_data=False):
+    def get_caught_pokemon_by_family(self, as_json=False, as_dict=False):
         pokemon_list = defaultdict(list)
-        for pokemon in self.get_caught_pokemon():
-            if as_data:
-                pokemon_list[pokemon.pokemon_id].append(pokemon.__dict__)
-            else:
-                pokemon_list[pokemon.pokemon_id].append(pokemon)
+        for pokemon in self.get_caught_pokemon(as_dict=as_dict):
+            pokemon_list[pokemon.pokemon_id].append(pokemon)
         if as_json:
             return json.dumps(pokemon_list, default=lambda p: p.__dict__)  # reduce the data sent?
         return pokemon_list

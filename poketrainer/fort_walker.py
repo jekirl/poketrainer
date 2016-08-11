@@ -180,6 +180,7 @@ class FortWalker:
                 travel_link = ': %s%s,%s' % (self.base_travel_link, next_point[0], next_point[1])
             self.log.info("Walking %.1fm%s", distance_to_point, travel_link)
         self.parent.api.set_position(*next_point)
+        self.parent.push_to_web('position', 'update', next_point)
 
     def _walk_back_to_origin(self):
         orig_posf = self.parent.get_orig_position()
