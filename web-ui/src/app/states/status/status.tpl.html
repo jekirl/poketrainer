@@ -1,8 +1,5 @@
-<md-content class="md-padding">
-    <div class="page-header">
-        <h1>Status: {{ user.username }} <small>Level: {{ user.level }} | Stardust: {{ user.stardust | number }}</small></h1>
-    </div>
-    <ui-gmap-google-map center='map.center' zoom='map.zoom'>
+<md-content class="md-padding" style="position:relative;height:100%;width:100%;">
+    <ui-gmap-google-map center='map.center' zoom='map.zoom' options='map.options'>
         <ui-gmap-marker coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id">
         </ui-gmap-marker>
     </ui-gmap-google-map>
@@ -56,56 +53,75 @@
             </div>
         </div>
     </div>
-    <div class="row m-t-16">
-        <div class="col-md-12">
-
-            <table datatable="ng" class="row-border hover">
-                <thead>
-                    <th>Recent</th>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Lvl</th>
-                    <th>Score</th>
-                    <th>IV</th>
-                    <th>CP</th>
-                    <th>Max CP</th>
-                    <th>Candies</th>
-                    <th>Candy Needed</th>
-                    <th>Dust Needed</th>
-                    <th>Power Up</th>
-                    <th>Stamina</th>
-                    <th>Att IV</th>
-                    <th>Sta IV</th>
-                    <th>Def IV</th>
-                    <th>Move 1</th>
-                    <th>Move 2</th>
-                    <th>Transfer</th>
-                  </thead>
-                <tbody>
-                <tr ng-repeat="pokemon in user.pokemon">
-                    <td data-order="{{ pokemon.creation_time_ms }}"><md-tooltip md-direction="right">Caught:{{ pokemon.creation_time_ms | date : 'medium' }}</md-tooltip><img style="max-height: 50px;" ng-src="assets/images/pokemon/{{('000' + pokemon.pokemon_id).substr(-3)}}.png"></td>
-                    <td data-order="{{pokemon.pokemon_id}}">{{pokemon.pokemon_id}}</td>
-                    <td>{{pokemon.name}}</td>
-                    <td data-order="{{pokemon.level}}">{{pokemon.level | number}}</td>
-                    <td data-order="{{pokemon.score}}">{{pokemon.score | number}}</td>
-                    <td data-order="{{pokemon.iv|number}}">IV: {{  pokemon.iv | number:0 }}%</td>
-                    <td data-order="{{pokemon.cp}}">CP: {{ pokemon.cp | number}}</td>
-                    <td data-order="{{pokemon.max_evolve_cp}}">CP: {{pokemon.max_evolve_cp | number}}</td>
-                    <td data-order="{{pokemon.candy}}">Candy: {{pokemon.candy | number}}</td>
-                    <td data-order="{{pokemon.candy_needed_to_max_evolve}}">Candy: {{pokemon.candy_needed_to_max_evolve | number}}</td>
-                    <td data-order="{{pokemon.dust_needed_to_max_evolve}}">Dust: {{pokemon.dust_needed_to_max_evolve | number}}</td>
-                    <td data-order="{{pokemon.power_up_result}}">CP: {{pokemon.power_up_result | number}}</td>
-                    <td data-order="{{pokemon.stamina}}">Stamina: {{pokemon.stamina | number}}</td>
-                    <td data-order="{{pokemon.individual_attack}}">Att IV: {{pokemon.individual_attack}}</td>
-                    <td data-order="{{pokemon.individual_stamina}}">Sta IV: {{pokemon.individual_stamina}}</td>
-                    <td data-order="{{pokemon.individual_defense}}">Def IV: {{pokemon.individual_defense}}</td>
-                    <td>{{user.attacks[pokemon.move_1]}}</td>
-                    <td>{{user.attacks[pokemon.move_2]}}</td>
-                    <td><a ng-click="transfer(user.username,pokemon.id)">Transfer</a></td>
-                </tr>
-                </tbody>
-            </table>
-      </div>
-    </div>
-    <pre class="m-t-16">{{user | json}}</pre>
+    
+    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#pokemonModal" style="position:absolute;">
+        Pokemon
+    </button>
+    <div class="modal fade" id="pokemonModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Pokemon</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table datatable="ng" class="row-border hover">
+                                <thead>
+                                    <th>Recent</th>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Lvl</th>
+                                    <th>Score</th>
+                                    <th>IV</th>
+                                    <th>CP</th>
+                                    <th>Max CP</th>
+                                    <th>Candies</th>
+                                    <th>Candy Needed</th>
+                                    <th>Dust Needed</th>
+                                    <th>Power Up</th>
+                                    <th>Stamina</th>
+                                    <th>Att IV</th>
+                                    <th>Sta IV</th>
+                                    <th>Def IV</th>
+                                    <th>Move 1</th>
+                                    <th>Move 2</th>
+                                    <th>Transfer</th>
+                                  </thead>
+                                <tbody>
+                                <tr ng-repeat="pokemon in user.pokemon">
+                                    <td data-order="{{ pokemon.creation_time_ms }}"><md-tooltip md-direction="right">Caught:{{ pokemon.creation_time_ms | date : 'medium' }}</md-tooltip><img style="max-height: 50px;" ng-src="assets/images/pokemon/{{('000' + pokemon.pokemon_id).substr(-3)}}.png"></td>
+                                    <td data-order="{{pokemon.pokemon_id}}">{{pokemon.pokemon_id}}</td>
+                                    <td>{{pokemon.name}}</td>
+                                    <td data-order="{{pokemon.level}}">{{pokemon.level | number}}</td>
+                                    <td data-order="{{pokemon.score}}">{{pokemon.score | number}}</td>
+                                    <td data-order="{{pokemon.iv|number}}">IV: {{  pokemon.iv | number:0 }}%</td>
+                                    <td data-order="{{pokemon.cp}}">CP: {{ pokemon.cp | number}}</td>
+                                    <td data-order="{{pokemon.max_evolve_cp}}">CP: {{pokemon.max_evolve_cp | number}}</td>
+                                    <td data-order="{{pokemon.candy}}">Candy: {{pokemon.candy | number}}</td>
+                                    <td data-order="{{pokemon.candy_needed_to_max_evolve}}">Candy: {{pokemon.candy_needed_to_max_evolve | number}}</td>
+                                    <td data-order="{{pokemon.dust_needed_to_max_evolve}}">Dust: {{pokemon.dust_needed_to_max_evolve | number}}</td>
+                                    <td data-order="{{pokemon.power_up_result}}">CP: {{pokemon.power_up_result | number}}</td>
+                                    <td data-order="{{pokemon.stamina}}">Stamina: {{pokemon.stamina | number}}</td>
+                                    <td data-order="{{pokemon.individual_attack}}">Att IV: {{pokemon.individual_attack}}</td>
+                                    <td data-order="{{pokemon.individual_stamina}}">Sta IV: {{pokemon.individual_stamina}}</td>
+                                    <td data-order="{{pokemon.individual_defense}}">Def IV: {{pokemon.individual_defense}}</td>
+                                    <td>{{user.attacks[pokemon.move_1]}}</td>
+                                    <td>{{user.attacks[pokemon.move_2]}}</td>
+                                    <td><a ng-click="transfer(user.username,pokemon.id)">Transfer</a></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                      </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    <button ng-click="hide = !hide">Show debug</button>
+    <pre class="m-t-16" ng-show="hide">{{user | json}}</pre>
 </md-content>

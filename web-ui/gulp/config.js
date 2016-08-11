@@ -147,6 +147,7 @@ module.exports = (function () {
                 bowerPath + '/datatables/media/js/jquery.dataTables.js',
 
                 /** Bootstrap **/
+                bowerPath + '/bootstrap/dist/js/bootstrap.js',
 
                 /** Angular Stuff **/
                 bowerPath + '/angular/angular.js',
