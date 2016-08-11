@@ -1,6 +1,7 @@
 import unittest
 
-from poketrainer.pokemon import Pokemon
+from pgoapi.pokemon import Pokemon
+
 
 mock_caught_eevee = {
     'move_1': 221,
