@@ -59,9 +59,11 @@ class RpcSocket:
                     data = json.loads(data.encode() if len(data) > 0 else '{}')
                 else:
                     data = json.loads(data if len(data) > 0 else '{}')
+                f.close()
         data['web'] = sock_port
         with open(desc_file, "w+") as f:
             f.write(json.dumps(data, indent=2))
+            f.close()
 
         s = zerorpc.Server(self)
         s.bind("tcp://127.0.0.1:%i" % sock_port)  # the free port should still be the same
@@ -118,12 +120,13 @@ class BotUsers(object):
                     continue
                 user = BotConnection(username, int(live_users[username]))
                 self.users.append(user)
+            f.close()
 
     def __iter__(self):
         return self.users.__iter__()
 
     def to_list(self):
-        return [user.__dict__ for user in self.users]
+        return [user.to_dict() for user in self.users]
 
 
 class BotConnection(object):
@@ -131,11 +134,13 @@ class BotConnection(object):
         self.username = username
         self.status = 'unknown'
         self.sock_port = sock_port
+        self._bot_rpc = None
 
     def get_api_rpc(self):
-        c = zerorpc.Client()
-        c.connect("tcp://127.0.0.1:%i" % self.sock_port)
-        return c
+        if not self._bot_rpc:
+            self._bot_rpc = zerorpc.Client()
+            self._bot_rpc.connect("tcp://127.0.0.1:%i" % self.sock_port)
+        return self._bot_rpc
 
     def test_connection(self):
         running = False
@@ -144,7 +149,13 @@ class BotConnection(object):
             running = c.enable_web_pushing()
             logger.debug('Enabled pushing in bot %s', self.username)
         except Exception as e:
-            logger.error('Error connecting to bot %s: %s', self.username, e)
+            if self._bot_rpc:
+                self._bot_rpc.close()
+                self._bot_rpc = None
+                logger.info('Error connecting to bot %s, retrying', self.username)
+                return self.test_connection()
+            else:
+                logger.error('Error connecting to bot %s: %s', self.username, e)
         if running:
             self.status = 'online'
         else:
@@ -153,6 +164,9 @@ class BotConnection(object):
 
     def __str__(self):
         return self.username
+
+    def to_dict(self):
+        return dict((att, val) for att, val in self.__dict__.iteritems() if not att.startswith('_'))
 
 
 def init_config():
@@ -184,6 +198,7 @@ app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
 app.debug = True
 socketio = SocketIO(app, async_mode="gevent")
+bot_users = BotUsers()
 
 options = {}
 attacks = {}
@@ -207,14 +222,11 @@ def static_proxy(filename):
 
 @socketio.on('connect', namespace='/poketrainer')
 def connect():
-    users = BotUsers()
-
-    for user in users.__iter__():
+    for user in bot_users.__iter__():
         logger.debug("Trying to enable web pushing in a background 'thread' for %s", user.username)
         socketio.start_background_task(user.test_connection)
-
     logger.debug('Client connected %s', request.sid)
-    emit('connect', {'success': True, 'users': users.to_list()})
+    emit('connect', {'success': True, 'users': bot_users.to_list()})
 
 
 @socketio.on('disconnect', namespace='/poketrainer')
@@ -226,7 +238,7 @@ def disconnect():
 def get(message):
     username = message['username']
     types = message['types']
-    c = BotUsers().get(username).get_api_rpc()
+    c = bot_users.get(username).get_api_rpc()
     if 'location' in types:
         response = c.current_location()
         logger.debug('emitting location')

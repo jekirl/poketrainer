@@ -79,6 +79,7 @@ class Poketrainer:
         self.step_size = self.config.step_size
         self.should_catch_pokemon = self.config.should_catch_pokemon
         self.can_push_to_web = False
+        self.web_rpc = None
 
         # threading / locking
         self.sem = BoundedSemaphore(1)  # gevent
@@ -104,9 +105,11 @@ class Poketrainer:
                     data = json.loads(data.encode() if len(data) > 0 else '{}')
                 else:
                     data = json.loads(data if len(data) > 0 else '{}')
+                f.close()
         data[self.config.username] = sock_port
         with open(desc_file, "w+") as f:
             f.write(json.dumps(data, indent=2))
+            f.close()
 
         s = zerorpc.Server(self)
         s.bind("tcp://127.0.0.1:%i" % sock_port)  # the free port should still be the same
@@ -216,23 +219,27 @@ class Poketrainer:
         if not self.can_push_to_web:
             self.log.info('cant push')
             return
-        desc_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), ".listeners")
-        with open(desc_file) as f:
-            sockets = f.read()
-            sockets = json.loads(sockets if len(sockets) > 0 else '{}')
-            if 'web' not in sockets:
-                self.log.info('web not found for pushing')
-                self.can_push_to_web = False
-                return
-            sock_port = int(sockets['web'])
+        if not self.web_rpc:
+            desc_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), ".listeners")
+            with open(desc_file) as f:
+                sockets = f.read()
+                sockets = json.loads(sockets if len(sockets) > 0 else '{}')
+                if 'web' not in sockets:
+                    self.log.info('web not found for pushing')
+                    self.can_push_to_web = False
+                    return
+                sock_port = int(sockets['web'])
+                f.close()
+            self.web_rpc = zerorpc.Client()
+            self.web_rpc.connect("tcp://127.0.0.1:%i" % sock_port)
         try:
-            c = zerorpc.Client()
-            c.connect("tcp://127.0.0.1:%i" % sock_port)
-            c.push(self.config.username, event, action, data)
+            self.web_rpc.push(self.config.username, event, action, data)
             self.log.info('pushed data to web')
         except Exception as e:
             self.log.error('Error trying to push to web, will now stop pushing')
             self.can_push_to_web = False
+            self.web_rpc.close()
+            self.web_rpc = None
             raise Exception(e)
 
     def _callback(self, gt):
