@@ -207,8 +207,9 @@ class Inventory:
             return json.dumps(pokemon_list, default=lambda p: p.__dict__)  # reduce the data sent?
         return pokemon_list
 
-    def update_player_inventory(self):
-        res = self._parent.api.get_inventory()
+    def update_player_inventory(self, res=None):
+        if res is None:
+            res = self._parent.api.get_inventory()
         if 'GET_INVENTORY' in res.get('responses', {}):
             self.inventory_items = res.get('responses', {}) \
                 .get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])

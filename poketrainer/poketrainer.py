@@ -286,7 +286,7 @@ class Poketrainer:
         if 'GET_INVENTORY' in responses:
 
             # update objects
-            self.inventory.update_player_inventory()
+            self.inventory.update_player_inventory(res=res)
             for inventory_item in self.inventory.inventory_items:
                 if "player_stats" in inventory_item['inventory_item_data']:
                     self.player_stats = PlayerStats(
