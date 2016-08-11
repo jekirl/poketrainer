@@ -111,7 +111,7 @@ class PokeCatcher:
     def do_catch_pokemon(self, encounter_id, spawn_point_id, capture_probability, pokemon):
         self.log.info("Catching Pokemon: %s", pokemon)
         catch_attempt = self.attempt_catch(encounter_id, spawn_point_id, capture_probability)
-        capture_status = catch_attempt.get('status', -1)
+        capture_status = catch_attempt.get('status', -5)
         if capture_status == 1:
             self.log.debug("Caught Pokemon: : %s", catch_attempt)
             self.log.info("Caught Pokemon:  %s", pokemon)
@@ -131,7 +131,6 @@ class PokeCatcher:
             return False
         else:
             self.log.debug("Could not catch pokemon: %s", catch_attempt)
-            self.log.info("Could not catch pokemon:  %s", pokemon)
             self.log.info("Could not catch pokemon:  %s, status: %s", pokemon, capture_status)
             return False
 
