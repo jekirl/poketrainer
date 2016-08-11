@@ -158,8 +158,28 @@ angular.module('Poketrainer.State.Status', [
         //    console.log(data);
         //});
         
+        $scope.polyline = {
+            path: [{
+                      latitude: locationData[0],
+                      longitude: locationData[1]
+                  }],
+            stroke: {
+                  color: '#F44336',
+                  weight: 4
+              }
+        };
+        
         $scope.$on('inventory:updated', function(event, data) { 
             $scope.inventory = data;
+        });
+ 
+        $scope.$on('position:update', function(event, data) { 
+            $scope.map.center.latitude = data[0];
+            $scope.map.center.longitude = data[1];
+            $scope.marker.coords.latitude = data[0];
+            $scope.marker.coords.longitude = data[1];
+            var newLocation = {latitude: data[0],longitude: data[1]};
+            $scope.polyline.path.push(newLocation);
         });
 
         $scope.player = playerData;
@@ -190,7 +210,7 @@ angular.module('Poketrainer.State.Status', [
                             latitude: locationData[0],
                             longitude: locationData[1]
                         }, 
-                        zoom: 14,
+                        zoom: 15,
                         options: {
                             zoomControl: false,
                             scaleControl: false,
