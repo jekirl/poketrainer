@@ -1,5 +1,9 @@
 .angular-google-map-container {
-  height: 300px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
 }
 .chart {
   position: relative;
@@ -22,4 +26,11 @@
   content: '%';
   margin-left: 0.1em;
   font-size: .8em;
+}
+
+@media (min-width: 768px) {
+  .modal-xl {
+    width: 90%;
+   max-width:1200px;
+  }
 }
