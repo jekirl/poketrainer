@@ -109,11 +109,6 @@ def main():
     if config["proxy"]:
         api.set_proxy(config["proxy"])
 
-    # only ptc accounts!
-    if config["proxy"] and config["auth_service"] != 'ptc':
-        logger.error("Currently proxy only works with ptc accounts.")
-        return None
-
     desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
     sock_port = 0
     s = socket.socket()
