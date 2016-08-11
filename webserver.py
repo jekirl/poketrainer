@@ -43,6 +43,8 @@ class ReverseProxied(object):
 
 class RpcSocket:
     def __init__(self):
+        self.log = logging.getLogger(__name__)
+
         desc_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".listeners")
         s = socket.socket()
         s.bind(("", 0))  # let the kernel find a free port
@@ -65,21 +67,21 @@ class RpcSocket:
         s.bind("tcp://127.0.0.1:%i" % sock_port)  # the free port should still be the same
         self.rpc_sock = gevent.spawn(s.run)
         self.rpc_sock.link(self._callback)
-        print("Socket for bots started on: tcp://127.0.0.1:%i" % sock_port)
+        self.log.info("Socket for push started on: tcp://127.0.0.1:%i", sock_port)
 
     def _callback(self, gt):
         try:
             if not gt.exception:
                 result = gt.value
-                print('Scoket thread finished with result: %s', result)
+                self.log.debug('Scoket thread finished with result: %s', result)
         except KeyboardInterrupt:
             return
 
-        print('Error in socket thread %s', gt.exception)
+        self.log.error('Error in socket thread %s', gt.exception)
 
     def push(self, username, event, action, data):
         # calling emit with socketio.emit() will broadcast messages when we're outside of an http request scope
-        print('received data from bot: ', username, ', ', event, ':', action, ', omitting data')
+        self.log.debug('received data from bot: %s, %s, %s, (omitting data)', username, event, action)
 
         push_template = dict()
         push_template['room'] = ''
@@ -122,9 +124,9 @@ def init_config():
 def _thread_callback(gt):
     if not gt.exception:
         result = gt.value
-        print('Connected to bot and enabled pushing with result: %s', result)
+        logger.debug('Connected to bot and enabled pushing with result: %s', result)
     else:
-        print('Error connecting to bot %s', gt.exception)
+        logger.error('Error connecting to bot %s', gt.exception)
 
 
 def get_api_rpc(username):
@@ -134,7 +136,7 @@ def get_api_rpc(username):
         data = f.read()
         data = json.loads(data if len(data) > 0 else '{}')
         if username not in data:
-            print("There is no bot running with the input username!")
+            logger.error("There is no bot running with the input username!")
             return None
         sock_port = int(data[username])
 
@@ -185,13 +187,11 @@ def users():
             if c is None:
                 continue
 
-            print("try to enable web pushing in a background 'thread' for %s", username)
+            logger.debug("Trying to enable web pushing in a background 'thread' for %s", username)
             threads[username] = gevent.spawn(c.enable_web_pushing)
             threads[username].link(_thread_callback)
-            print("continue...")
             user = {'username': username}
             users.append(user)
-    print("got all users")
     return jsonify(users)
 
 
@@ -264,17 +264,18 @@ def connect():
             if c is None:
                 continue
 
+            logger.debug("Trying to enable web pushing in a background 'thread' for %s", username)
             threads[username] = gevent.spawn(c.enable_web_pushing)
             threads[username].link(_thread_callback)
             user = {'username': username}
             users.append(user)
-    print('Client connected', request.sid)
+    logger.debug('Client connected %s', request.sid)
     emit('connect', {'success': True, 'users': users})
 
 
 @socketio.on('disconnect', namespace='/poketrainer')
 def disconnect():
-    print('Client disconnected', request.sid)
+    logger.debug('Client disconnected %s', request.sid)
 
 
 # TODO: this is not used yet, but we need something like this to 'pull' actual data from a bot
@@ -290,7 +291,7 @@ def get(message):
 def on_join(data):
     room = data['room']
     join_room(room)
-    print(request.sid + ' has joined room ' + room)
+    logger.debug('%s has joined room %s', request.sid, room)
     emit('join', {'success': True, 'message': 'successfully joined room ' + room})
 
 
@@ -298,7 +299,7 @@ def on_join(data):
 def on_leave(data):
     room = data['room']
     leave_room(room)
-    print(request.sid + ' has left room ' + room)
+    logger.debug('%s has left room %s', request.sid, room)
     emit('leave', {'success': True, 'message': 'successfully left room ' + room})
 
 
@@ -317,12 +318,17 @@ def init_web_config():
 
 
 def main():
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s: [%(levelname)5s] %(message)s')
+
     web_config = init_web_config()
+
+    if not web_config["debug"]:
+        logging.getLogger(__name__).setLevel(logging.INFO)
 
     rpc_socket_thread = RpcSocket()
 
     # for some reason when we're using gevent, flask does not output a lot... we'll just notify here
-    print('Starting Webserver on ' + str(web_config["hostname"]) + ':' + str(web_config["port"]))
+    logger.info('Starting Webserver on %s:%s', str(web_config["hostname"]), str(web_config["port"]))
     # Debug mode will not use gevent and thus breaks the socket
     socketio.run(app, host=web_config["hostname"], port=web_config["port"], log_output=web_config["debug"], debug=False)
 

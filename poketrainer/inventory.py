@@ -79,7 +79,7 @@ class Inventory:
                     self.incubators_busy.append(incubator)
                 else:
                     self.incubators_available.append(incubator)
-        self._parent.push_to_web('inventory', 'updated', self)
+        self._parent.push_to_web('inventory', 'updated', self.to_dict())
 
     def can_attempt_catch(self):
         return self.poke_balls + self.great_balls + self.ultra_balls + self.master_balls > 0
@@ -252,8 +252,11 @@ class Inventory:
     def __repr__(self):
         return self.__str__()
 
+    def to_dict(self):
+        return dict((att, val) for att, val in self.__dict__.iteritems() if not att.startswith('_'))
+
     def to_json(self):
         return json.dumps(
-            dict((att, val) for att, val in self.__dict__.iteritems() if not att.startswith('_')),
+            self.to_dict(),
             default=lambda o: o.__dict__
         )
