@@ -32,7 +32,8 @@
     "jquery.easy-pie-chart": "^2.1.6",
     "angular-datatables": "^0.5.4",
     "angular-socket-io": "^0.7.0",
-    "socket.io-client": "^1.4.8"
+    "socket.io-client": "^1.4.8",
+    "ui-leaflet": "^1.0.1"
   },
   "devDependencies": {},
   "overrides": {}
