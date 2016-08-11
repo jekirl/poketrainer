@@ -16,6 +16,9 @@ from helper.utilities import flat_map
 from .location import distance_in_meters, filtered_forts, get_route
 from .poke_utils import get_item_name
 
+if six.PY3:
+    from past.builtins import map
+
 
 class FortWalker:
     def __init__(self, parent):
