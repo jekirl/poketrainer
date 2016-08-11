@@ -20,7 +20,7 @@ if six.PY3:
     from past.builtins import map
 
 
-class FortWalker:
+class FortWalker(object):
     def __init__(self, parent):
         self.parent = parent
         self.visited_forts = TTLCache(maxsize=120, ttl=self.parent.config.skip_visited_fort_duration)

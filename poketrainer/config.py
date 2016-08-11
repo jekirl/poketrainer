@@ -8,7 +8,7 @@ from library.api.pgoapi.protos.POGOProtos.Inventory import \
     Item_pb2 as Item_Enums
 
 
-class Config:
+class Config(object):
 
     def __init__(self, config, cli_args):
         self.log = logging.getLogger(__name__)

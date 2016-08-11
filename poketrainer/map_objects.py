@@ -6,7 +6,7 @@ from time import time
 from .location import get_neighbors
 
 
-class MapObjects:
+class MapObjects(object):
     def __init__(self, parent):
         self.parent = parent
         self.log = logging.getLogger(__name__)

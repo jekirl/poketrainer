@@ -5,7 +5,7 @@ import logging
 from .pokemon import Pokemon
 
 
-class Evolve:
+class Evolve(object):
     def __init__(self, parent):
         self.parent = parent
         self.log = logging.getLogger(__name__)

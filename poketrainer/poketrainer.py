@@ -32,7 +32,7 @@ from .sniper import Sniper
 logger = logging.getLogger(__name__)
 
 
-class Poketrainer:
+class Poketrainer(object):
     """ Public functions (without _**) are callable by the webservice! """
 
     def __init__(self, args):
