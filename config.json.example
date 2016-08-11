@@ -5,7 +5,7 @@
       "username": "test@gmail.com",
       "password": "password",
       "location": "University of Southern California, Los Angeles, CA",
-      "GMAPS_API_KEY": "some api key here",
+      "GMAPS_API_KEY": ["some api key here"],
       "BEHAVIOR": {
         "USE_GOOGLE": true,
         "STEP_SIZE": 100,

@@ -12,6 +12,7 @@ if six.PY3:
 
 g = pyproj.Geod(ellps='WGS84')
 geolocator = GoogleV3()
+i = 0
 
 
 def get_location(search):
@@ -21,10 +22,16 @@ def get_location(search):
 
 # http://python-gmaps.readthedocs.io/en/latest/gmaps.html#module-gmaps.directions
 def get_route(start, end, use_google=False, gmaps_api_key="", walk_to_all_forts=False, waypoints=[], step_size=200):
+    global i
+    if i % len(gmaps_api_key) != 0:
+        i += 1
+    else:
+        i = 1
+
     origin = (start[0], start[1])
     destination = (end[0], end[1])
     if use_google:
-        directions_service = Directions(api_key=gmaps_api_key)
+        directions_service = Directions(api_key=gmaps_api_key[i - 1])
         if walk_to_all_forts and waypoints:
             d = directions_service.directions(origin, destination, mode="walking", units="metric",
                                               optimize_waypoints=True, waypoints=waypoints)
