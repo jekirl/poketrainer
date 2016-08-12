@@ -10,7 +10,7 @@
         "USE_GOOGLE": false,
         "STEP_SIZE": 5,
         "EXTRA_WAIT" : 0.8,
-        "SLEEP_MULT" : 2.0,
+        "SLEEP_MULT" : 2.0
       },
       "CAPTURE": {
         "CATCH_POKEMON": true,
