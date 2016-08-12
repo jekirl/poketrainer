@@ -2,12 +2,15 @@
 # original by @sontek
 # modified by @stolencatkarma
 
-import requests
 import time
-import pylru
-from dateutil import parser
 from datetime import datetime
 from multiprocessing import Process
+
+import requests
+
+import pylru
+from dateutil import parser
+
 # EDIT ONLY THESE TWO THINGS
 users = [
     'webpyusername1',
