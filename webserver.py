@@ -142,18 +142,18 @@ class BotConnection(object):
             self._bot_rpc.connect("tcp://127.0.0.1:%i" % self.sock_port)
         return self._bot_rpc
 
-    def test_connection(self):
+    def test_connection(self, retry=False):
         running = False
         c = self.get_api_rpc()
         try:
             running = c.enable_web_pushing()
             logger.debug('Enabled pushing in bot %s', self.username)
         except Exception as e:
-            if self._bot_rpc:
+            if self._bot_rpc and not retry:
                 self._bot_rpc.close()
                 self._bot_rpc = None
                 logger.info('Error connecting to bot %s, retrying', self.username)
-                return self.test_connection()
+                return self.test_connection(retry=True)
             else:
                 logger.error('Error connecting to bot %s: %s', self.username, e)
         if running:

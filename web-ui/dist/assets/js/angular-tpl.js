@@ -5,6 +5,18 @@ try {
   module = angular.module('poketrainer.Module.Templates', []);
 }
 module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('states/pokemons/pokemons.tpl.html',
+    '<md-content class="md-padding"><div class="page-header"><h1>Pok&eacute;mon <small>({{ pokemons.length }})</small></h1></div><md-progress-circular ng-if="isLoading" md-mode="indeterminate"></md-progress-circular><pre>{{pokemons | json}}</pre></md-content>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('poketrainer.Module.Templates');
+} catch (e) {
+  module = angular.module('poketrainer.Module.Templates', []);
+}
+module.run(['$templateCache', function($templateCache) {
   $templateCache.put('states/abstracts/header.tpl.html',
     '<md-toolbar layout="row"><div class="md-toolbar-tools"><h2><span>PokéTrainer</span></h2><span flex=""></span><md-button ui-sref="public.users()" class="md-raised" aria-label="Bots">Bots Overview</md-button></div></md-toolbar>');
 }]);
@@ -29,20 +41,8 @@ try {
   module = angular.module('poketrainer.Module.Templates', []);
 }
 module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('states/inventory/inventory.tpl.html',
-    '<md-content class="md-padding"><div class="page-header"><h1>Inventory <small>({{ inventory.length }})</small></h1></div><md-progress-circular ng-if="isLoading" md-mode="indeterminate"></md-progress-circular><pre>{{inventory | json}}</pre></md-content>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('poketrainer.Module.Templates');
-} catch (e) {
-  module = angular.module('poketrainer.Module.Templates', []);
-}
-module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('states/pokemons/pokemons.tpl.html',
-    '<md-content class="md-padding"><div class="page-header"><h1>Pok&eacute;mon <small>({{ pokemons.length }})</small></h1></div><md-progress-circular ng-if="isLoading" md-mode="indeterminate"></md-progress-circular><pre>{{pokemons | json}}</pre></md-content>');
+  $templateCache.put('states/users/users.tpl.html',
+    '<md-content id="content" class="container"><h1>Bots</h1><md-list><md-list-item ng-repeat="user in users"><a ui-sref="public.status({username: user.username})">{{ user.username }} - {{ user.status }}</a></md-list-item></md-list></md-content>');
 }]);
 })();
 
@@ -65,7 +65,7 @@ try {
   module = angular.module('poketrainer.Module.Templates', []);
 }
 module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('states/users/users.tpl.html',
-    '<md-content id="content" class="container"><h1>Bots</h1><md-list><md-list-item ng-repeat="user in users"><a ui-sref="public.status({username: user.username})">{{ user.username }} - {{ user.status }}</a></md-list-item></md-list></md-content>');
+  $templateCache.put('states/inventory/inventory.tpl.html',
+    '<md-content class="md-padding"><div class="page-header"><h1>Inventory <small>({{ inventory.length }})</small></h1></div><md-progress-circular ng-if="isLoading" md-mode="indeterminate"></md-progress-circular><pre>{{inventory | json}}</pre></md-content>');
 }]);
 })();
