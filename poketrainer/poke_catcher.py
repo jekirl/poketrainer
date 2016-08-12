@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 
 import json
-import logging
 
 from cachetools import TTLCache
 
+from helper.colorlogger import create_logger
 from helper.utilities import flat_map
 
 from .location import distance_in_meters
@@ -12,11 +12,12 @@ from .poke_utils import create_capture_probability, get_item_name
 from .pokemon import POKEMON_NAMES, Pokemon
 
 
-class PokeCatcher:
+class PokeCatcher(object):
     def __init__(self, parent):
         self.parent = parent
-        self.log = logging.getLogger(__name__)
         self.encountered_pokemons = TTLCache(maxsize=120, ttl=self.parent.map_objects.get_api_rate_limit() * 2)
+
+        self.log = create_logger(__name__, self.parent.config.log_colors["poke_catcher".upper()])
 
     def catch_all(self):
         catch_attempt = 0
@@ -131,7 +132,6 @@ class PokeCatcher:
             return False
         else:
             self.log.debug("Could not catch pokemon: %s", catch_attempt)
-            self.log.info("Could not catch pokemon:  %s", pokemon)
             self.log.info("Could not catch pokemon:  %s, status: %s", pokemon, capture_status)
             return False
 

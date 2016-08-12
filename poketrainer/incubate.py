@@ -1,14 +1,14 @@
 from __future__ import absolute_import
 
-import logging
+from helper.colorlogger import create_logger
 
 from .poke_utils import get_pokemon_by_long_id
 
 
-class Incubate:
+class Incubate(object):
     def __init__(self, parent):
         self.parent = parent
-        self.log = logging.getLogger(__name__)
+        self.log = create_logger(__name__)
 
     def incubate_eggs(self):
         if not self.parent.config.egg_incubation_enabled:

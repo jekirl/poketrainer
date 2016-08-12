@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import copy
-import logging
 import os
 import pickle
 import sys
@@ -10,14 +9,18 @@ from collections import defaultdict
 import six
 from cachetools import TTLCache
 
+from helper.colorlogger import create_logger
 from helper.exceptions import TooManyEmptyResponses
 from helper.utilities import flat_map
 
 from .location import distance_in_meters, filtered_forts, get_route
 from .poke_utils import get_item_name
 
+if six.PY3:
+    from past.builtins import map
 
-class FortWalker:
+
+class FortWalker(object):
     def __init__(self, parent):
         self.parent = parent
         self.visited_forts = TTLCache(maxsize=120, ttl=self.parent.config.skip_visited_fort_duration)
@@ -35,7 +38,8 @@ class FortWalker:
         self.spinnable_cached_forts = []
         self.cache_is_sorted = self.parent.config.cache_is_sorted
         self.use_cache = self.parent.config.use_cache
-        self.log = logging.getLogger(__name__)
+
+        self.log = create_logger(__name__, self.parent.config.log_colors["fort_walker".upper()])
 
     """ will always only walk 1 step (i.e. waypoint), so we can accurately control the speed (via step_size) """
 
@@ -254,7 +258,7 @@ class FortWalker:
                     'reward': reward, 'location': {'lat': fort['latitude'], 'long': fort['longitude']}
                 })
             else:
-                self.log.info("Fort spun, but did not yield any rewards. Possible soft ban?")
+                self.log.warning("Fort spun, but did not yield any rewards. Possible soft ban?")
             self.visited_forts[fort['id']] = fort
         elif result == 4:
             self.log.debug("Fort spun but Your inventory is full : %s", res)
