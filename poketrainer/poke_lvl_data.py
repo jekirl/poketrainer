@@ -6,7 +6,7 @@ from os import sep as os_sep
 from helper.utilities import take_closest
 
 
-class PokemonLvlData:
+class PokemonLvlData(object):
     def __init__(self):
         self.total_cp_multiplier = 0.0
         self.stardust_to_this_lvl = 0

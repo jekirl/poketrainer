@@ -12,7 +12,7 @@ from .poke_utils import get_item_name
 from .pokemon import Pokemon
 
 
-class Inventory:
+class Inventory(object):
     def __init__(self, parent, inventory_items):
         self._parent = parent
         self.inventory_items = inventory_items
@@ -138,7 +138,7 @@ class Inventory:
         for inventory_item in self.inventory_items:
             item = inventory_item['inventory_item_data'].get('item', {})
             item_id = item.get('item_id', -1)
-            if item_id == Item_Enums.ITEM_LUCKY_EGG:
+            if item_id == Item_Enums.ITEM_LUCKY_EGG and 'count' in item:
                 return True
         return False
 
@@ -151,7 +151,7 @@ class Inventory:
         for inventory_item in self.inventory_items:
             item = inventory_item['inventory_item_data'].get('item', {})
             item_id = item.get('item_id', -1)
-            if item_id == Item_Enums.ITEM_RAZZ_BERRY:
+            if item_id == Item_Enums.ITEM_RAZZ_BERRY and 'count' in item:
                 return True
         return False
 

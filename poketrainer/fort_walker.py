@@ -20,7 +20,7 @@ if six.PY3:
     from past.builtins import map
 
 
-class FortWalker:
+class FortWalker(object):
     def __init__(self, parent):
         self.parent = parent
         self.visited_forts = TTLCache(maxsize=120, ttl=self.parent.config.skip_visited_fort_duration)
@@ -254,7 +254,7 @@ class FortWalker:
                 self.log.info("Fort spun, yielding: %s",
                               reward)
             else:
-                self.log.info("Fort spun, but did not yield any rewards. Possible soft ban?")
+                self.log.warning("Fort spun, but did not yield any rewards. Possible soft ban?")
             self.visited_forts[fort['id']] = fort
         elif result == 4:
             self.log.debug("Fort spun but Your inventory is full : %s", res)

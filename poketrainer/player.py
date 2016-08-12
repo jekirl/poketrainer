@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import json
 
 
-class Player:
+class Player(object):
     def __init__(self, player_data):
         self.player_data = player_data
         self.username = 0

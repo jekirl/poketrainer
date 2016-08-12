@@ -14,16 +14,18 @@ class ReleaseMethod(base.ReleaseMethod):
         self.throw_pokemon_ids = map(lambda x: getattr(Enums_pb2, x), config.get("THROW_POKEMON_NAMES", []))
         self.keep_cp_over = self.config.get('RELEASE_METHOD_CLASSIC', {}).get('KEEP_CP_OVER', 0)
         self.keep_iv_over = self.config.get('RELEASE_METHOD_CLASSIC', {}).get('KEEP_IV_OVER', 0)
+        self.prefer = self.config.get('RELEASE_METHOD_CLASSIC', {}).get('PREFER', 'CP')
         self.max_similar_pokemon = self.config.get('MAX_SIMILAR_POKEMON', 999)
         self.min_similar_pokemon = self.config.get('MIN_SIMILAR_POKEMON', 1)
+
+        self.sort_key = lambda x: (x.cp, x.iv) if self.prefer == 'CP' else lambda x: (x.iv, x.cp)
 
     def get_pokemon_to_release(self, pokemon_id, pokemons):
         pokemon_to_release = []
         pokemon_to_keep = []
 
         if len(pokemons) > self.min_similar_pokemon:
-            # sorting for CLASSIC method as default
-            sorted_pokemons = sorted(pokemons, key=lambda x: (x.cp, x.iv), reverse=True)
+            sorted_pokemons = sorted(pokemons, key=self.sort_key, reverse=True)
 
             kept_pokemon_of_type = self.min_similar_pokemon
             pokemon_to_keep = sorted_pokemons[0:self.min_similar_pokemon]

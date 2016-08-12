@@ -7,7 +7,7 @@ from helper.colorlogger import create_logger
 from .location import get_neighbors
 
 
-class MapObjects:
+class MapObjects(object):
     def __init__(self, parent):
         self.parent = parent
         self.log = create_logger(__name__)

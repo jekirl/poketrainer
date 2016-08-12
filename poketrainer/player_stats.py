@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from time import time
 
 
-class PlayerStats:
+class PlayerStats(object):
     def __init__(self, player_stats, pokemon_caught=0, start_time=time(), exp_start=None):
         self.player_stats = player_stats
         self.experience = 0
