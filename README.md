@@ -188,7 +188,7 @@ You can create an alias for this by adding `alias pokecli='docker start poketrai
 Poketrainer supports:
  * HTTP/HTTPS Proxies (IP Authentication or Basic Authentication)
  * SOCKS5 Proxies
- * PTC accounts only
+ * PTC accounts Only
 
 To start Poketrainer with a proxy assigned, you need the `-p`/`--proxy` flag when running `pokecli.py`. Use the `proxy_ip:proxy_port` format
 
