@@ -2,11 +2,17 @@
 
 import json
 import logging
+import sys
 
 import gevent
 
 from helper.colorlogger import create_logger
 from poketrainer.poketrainer import Poketrainer
+
+if sys.version_info[0] >= 3:
+    get_input = input
+else:
+    get_input = raw_input
 
 poketrainer = {}
 logger = create_logger(__name__, color='white')
@@ -55,7 +61,7 @@ def main():
     while True:
         try:
             poketrainer._heartbeat()
-            user_input = raw_input("\nWhat would you like to do next? (look, walk, run, catch, spin): ")  # or `input("Some...` in python 3
+            user_input = get_input("\nWhat would you like to do next? (look, walk, run, catch, spin): ")  # or `input("Some...` in python 3
             if(user_input == 'look'):
                 lookaround()
             elif(user_input == 'catch'):
