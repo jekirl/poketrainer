@@ -33,6 +33,8 @@ optional arguments:
   -e ENCRYPT_LIB, --encrypt-lib ENCRYPT_LIB
                         encrypt lib, libencrypt.so/encrypt.dll
   -d, --debug           Debug Mode
+  -p PROXY, --proxy PROXY
+                        Use Proxy, proxy_ip:port
 ```
 
 ### Web UI
