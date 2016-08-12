@@ -144,7 +144,7 @@ angular.module('Poketrainer.State.Status', [
         Navigation.primary.register("Users", "public.users", 30, 'md md-event-available', 'public.users');
     })
 
-    .controller('StatusController', function StatusController($scope, $stateParams, PokeSocket,
+    .controller('StatusController', function StatusController($scope, $stateParams, $mdToast, PokeSocket,
                                                               locationData, inventoryData, playerData, playerStatsData,
                                                               pokemonData, attacksData, SocketEvent) {
         // Debug only! Remove this after everything works
@@ -162,6 +162,17 @@ angular.module('Poketrainer.State.Status', [
         
         $scope.$on('inventory:updated', function(event, data) { 
             $scope.inventory = data;
+        });
+ 
+        $scope.$on('pokemon:caught', function(event, data) {
+            var pokemon = angular.fromJson(data);
+            $scope.pokemon.push(pokemon);
+            $mdToast.show(
+                $mdToast.simple()
+                    .textContent('Caught: ' + pokemon.name + ' (IV: ' + Math.floor(pokemon.iv) + ' | CP: ' + pokemon.cp + ')')
+                    .position('top right')
+                    .hideDelay(3000)
+            );
         });
  
         var positionUpdates = 0;

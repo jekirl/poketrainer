@@ -5,18 +5,6 @@ try {
   module = angular.module('poketrainer.Module.Templates', []);
 }
 module.run(['$templateCache', function($templateCache) {
-  $templateCache.put('states/inventory/inventory.tpl.html',
-    '<md-content class="md-padding"><div class="page-header"><h1>Inventory <small>({{ inventory.length }})</small></h1></div><md-progress-circular ng-if="isLoading" md-mode="indeterminate"></md-progress-circular><pre>{{inventory | json}}</pre></md-content>');
-}]);
-})();
-
-(function(module) {
-try {
-  module = angular.module('poketrainer.Module.Templates');
-} catch (e) {
-  module = angular.module('poketrainer.Module.Templates', []);
-}
-module.run(['$templateCache', function($templateCache) {
   $templateCache.put('states/abstracts/header.tpl.html',
     '<md-toolbar layout="row"><div class="md-toolbar-tools"><h2><span>PokéTrainer</span></h2><span flex=""></span><md-button ui-sref="public.users()" class="md-raised" aria-label="Bots">Bots Overview</md-button></div></md-toolbar>');
 }]);
@@ -31,6 +19,18 @@ try {
 module.run(['$templateCache', function($templateCache) {
   $templateCache.put('states/abstracts/navigation.tpl.html',
     '<md-sidenav ng-hide="state===\'public.users\'" md-is-locked-open="$mdMedia(\'gt-sm\')" class="md-whiteframe-4dp" md-component-id="left" flex=""><md-list><md-list-item ui-sref="public.status(params)"><md-icon>home</md-icon><p>STATUS</p></md-list-item><md-list-item ui-sref="public.pokemons(params)"><md-icon>home</md-icon><p>POKEMON</p></md-list-item><md-list-item ui-sref="public.inventory(params)"><md-icon>home</md-icon><p>INVENTORY</p></md-list-item></md-list></md-sidenav>');
+}]);
+})();
+
+(function(module) {
+try {
+  module = angular.module('poketrainer.Module.Templates');
+} catch (e) {
+  module = angular.module('poketrainer.Module.Templates', []);
+}
+module.run(['$templateCache', function($templateCache) {
+  $templateCache.put('states/inventory/inventory.tpl.html',
+    '<md-content class="md-padding"><div class="page-header"><h1>Inventory <small>({{ inventory.length }})</small></h1></div><md-progress-circular ng-if="isLoading" md-mode="indeterminate"></md-progress-circular><pre>{{inventory | json}}</pre></md-content>');
 }]);
 })();
 
