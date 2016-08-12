@@ -17,6 +17,7 @@ RUN mv /pgoencrypt/src/libencrypt.so /
 COPY docker_launch.sh /
 COPY pokecli.py /
 COPY web.py /
+COPY CLSniper.py /
 
 #folders
 COPY ./helper /helper

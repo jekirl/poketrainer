@@ -14,3 +14,5 @@ six==1.10.0
 -e git+git://github.com/0rpc/zerorpc-python.git@python3.4#egg=zerorpc
 xxhash
 colorlog
+pylru
+python-dateutil
