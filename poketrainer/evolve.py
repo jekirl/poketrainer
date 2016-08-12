@@ -5,7 +5,7 @@ from helper.colorlogger import create_logger
 from .pokemon import Pokemon
 
 
-class Evolve:
+class Evolve(object):
     def __init__(self, parent):
         self.parent = parent
 

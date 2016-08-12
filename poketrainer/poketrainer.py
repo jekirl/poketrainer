@@ -32,7 +32,7 @@ from .release import Release
 from .sniper import Sniper
 
 
-class Poketrainer:
+class Poketrainer(object):
     """ Public functions (without _**) are callable by the webservice! """
 
     def __init__(self, args):
@@ -57,7 +57,6 @@ class Poketrainer:
         self.config = None
         self._load_config()
 
-        print(__name__)
         self.log = create_logger(__name__, self.config.log_colors["poketrainer".upper()])
 
         self._open_socket()
@@ -247,14 +246,15 @@ class Poketrainer:
             if self.thread_lock(persist=True):
                 try:
                     self._heartbeat()
-
-                    self.poke_catcher.catch_all()
                     self.fort_walker.loop()
                     self.fort_walker.spin_nearest_fort()
+                    self.poke_catcher.catch_all()
+
                 finally:
                     # after we're done, release lock
                     self.persist_lock = False
                     self.thread_release()
+            # self.log.info("COMPLETED A _main_loop")
             self.sleep(1.0)
 
     def _heartbeat(self, res=False, login_response=False):

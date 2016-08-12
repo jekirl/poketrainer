@@ -7,7 +7,7 @@ from helper.colorlogger import create_logger
 from .release_methods.base import ReleaseMethodFactory
 
 
-class Release:
+class Release(object):
     def __init__(self, parent):
         self.parent = parent
 
@@ -23,7 +23,7 @@ class Release:
         return status
 
     def do_release_pokemon(self, pokemon):
-        self.log.info("Releasing pokemon: %s", pokemon)
+        self.log.debug("Releasing pokemon: %s", pokemon)
         self.parent.sleep(1.0 + self.parent.config.extra_wait)
         if self.do_release_pokemon_by_id(pokemon.id):
             self.log.info("Successfully Released Pokemon %s", pokemon)
