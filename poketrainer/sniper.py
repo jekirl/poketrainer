@@ -8,7 +8,7 @@ from .pokedex import pokedex
 from .pokemon import POKEMON_NAMES
 
 
-class Sniper:
+class Sniper(object):
     def __init__(self, parent):
         self.parent = parent
         self.log = create_logger(__name__)

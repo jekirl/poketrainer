@@ -7,7 +7,7 @@ from helper.colorlogger import create_logger
 from .release_methods.base import ReleaseMethodFactory
 
 
-class Release:
+class Release(object):
     def __init__(self, parent):
         self.parent = parent
 

@@ -12,7 +12,7 @@ from .poke_utils import get_item_name
 from .pokemon import Pokemon
 
 
-class Inventory:
+class Inventory(object):
     def __init__(self, parent, inventory_items):
         self._parent = parent
         self.inventory_items = inventory_items

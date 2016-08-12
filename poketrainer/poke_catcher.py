@@ -12,7 +12,7 @@ from .poke_utils import create_capture_probability, get_item_name
 from .pokemon import POKEMON_NAMES, Pokemon
 
 
-class PokeCatcher:
+class PokeCatcher(object):
     def __init__(self, parent):
         self.parent = parent
         self.encountered_pokemons = TTLCache(maxsize=120, ttl=self.parent.map_objects.get_api_rate_limit() * 2)
