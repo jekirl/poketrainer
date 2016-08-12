@@ -26,10 +26,10 @@ def snipe(pokemon, user, coords):
     try:
         new_url = base_url % dict(user=user, coords=coords)
         requests.get(new_url)
-
-
     except Exception as e:
         print("Couldn't do it... :( %s", e)
+
+
 def get_latest_rares():
     global blacklist
     response = None
