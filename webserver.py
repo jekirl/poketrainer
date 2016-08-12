@@ -41,7 +41,7 @@ class ReverseProxied(object):
         return self.app(environ, start_response)
 
 
-class RpcSocket:
+class RpcSocket(object):
     def __init__(self):
         self.log = logging.getLogger(__name__)
 
@@ -118,7 +118,7 @@ class BotUsers(object):
             for username in live_users:
                 if username == 'web':
                     continue
-                user = BotConnection(username, int(live_users[username]))
+                user = BotConnection(username)
                 self.users.append(user)
             f.close()
 
@@ -130,23 +130,31 @@ class BotUsers(object):
 
 
 class BotConnection(object):
-    def __init__(self, username, sock_port):
+    def __init__(self, username):
         self.username = username
         self.status = 'unknown'
-        self.sock_port = sock_port
+        self.sock_port = 0
         self._bot_rpc = None
 
     def get_api_rpc(self):
         if not self._bot_rpc:
+            desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+            with open(desc_file) as f:
+                sockets = f.read()
+                sockets = json.loads(sockets if len(sockets) > 0 else '{}')
+                if self.username not in sockets:
+                    logger.error(self.username + ' not found for pushing')
+                    return None
+                self.sock_port = int(sockets[self.username])
+                f.close()
             self._bot_rpc = zerorpc.Client()
             self._bot_rpc.connect("tcp://127.0.0.1:%i" % self.sock_port)
         return self._bot_rpc
 
     def test_connection(self, retry=False):
-        running = False
         c = self.get_api_rpc()
         try:
-            running = c.enable_web_pushing()
+            running = c('enable_web_pushing', timeout=1.5)
             logger.debug('Enabled pushing in bot %s', self.username)
         except Exception as e:
             if self._bot_rpc and not retry:
@@ -155,6 +163,7 @@ class BotConnection(object):
                 logger.info('Error connecting to bot %s, retrying', self.username)
                 return self.test_connection(retry=True)
             else:
+                running = False
                 logger.error('Error connecting to bot %s: %s', self.username, e)
         if running:
             self.status = 'online'
@@ -225,7 +234,7 @@ def connect():
     for user in bot_users.__iter__():
         logger.debug("Trying to enable web pushing in a background 'thread' for %s", user.username)
         socketio.start_background_task(user.test_connection)
-    logger.debug('Client connected %s', request.sid)
+    logger.debug('Client connected %s, gave: %s', request.sid, bot_users.to_list())
     emit('connect', {'success': True, 'users': bot_users.to_list()})
 
 
@@ -238,7 +247,11 @@ def disconnect():
 def get(message):
     username = message['username']
     types = message['types']
-    c = bot_users.get(username).get_api_rpc()
+    user = bot_users.get(username)
+    if not user:
+        logger.error("could not find bot '%s', will not get %s", username, types)
+        return
+    c = user.get_api_rpc()
     if 'location' in types:
         response = c.current_location()
         logger.debug('emitting location')
@@ -278,6 +291,54 @@ def on_leave(data):
     leave_room(room)
     logger.debug('%s has left room %s', request.sid, room)
     emit('leave', {'success': True, 'message': 'successfully left room ' + room})
+
+
+@socketio.on('transfer', namespace='/poketrainer')
+def transfer(data):
+    username = data['username']
+    p_id = data['p_id']
+    user = bot_users.get(username)
+    if not user:
+        logger.error("Could not find bot '%s', will not transfer %s", username, p_id)
+        emit('transfer', {'success': False, 'message': "Could not find bot '%s', will not transfer" % username})
+        return
+    c = user.get_api_rpc()
+    if c and c.release_pokemon_by_id(p_id) == 1:
+        emit('transfer', {'success': True, 'message': 'Released successfully'})
+    else:
+        emit('transfer', {'success': False, 'message': 'Transfer failed!'})
+
+
+@socketio.on('snipe', namespace='/poketrainer')
+def snipe(data):
+    username = data['username']
+    latlng = data['latlng']
+    user = bot_users.get(username)
+    if not user:
+        logger.error("Could not find bot '%s', will not snipe %s", username, latlng)
+        emit('snipe', {'success': False, 'message': "Could not find bot '%s', will not snipe %s" % (username, latlng)})
+        return
+    c = user.get_api_rpc()
+    try:
+        if len(latlng.split(',')) == 2:
+            l = latlng.split(',')
+            lat = float(l[0])
+            lng = float(l[1])
+        else:
+            l = latlng.split(' ')
+            lat = float(l[0])
+            lng = float(l[1])
+    except:
+        emit('snipe', {'success': False, 'message': 'Error parsing coordinates.'})
+        return
+
+    if c and c.snipe_pokemon(lat, lng):
+        msg = "Sniped!"
+        success = False
+    else:
+        msg = "Failed sniping!"
+        success = True
+    emit('snipe', {'success': success, 'message': msg})
 
 
 def init_web_config():

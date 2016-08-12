@@ -14,20 +14,19 @@ angular.module('Poketrainer.State.Users', [
                             return;
                         }
                         PokeSocket.removeListener(SocketEvent.UserList, userEventCb);
+                        for (var i = 0; i < message.users.length; i++) {
+                            // for testing, TODO: remove for live
+                            message.users[i].status = 'unknown';
+                        }
                         d.resolve(message.users);
                     };
 
-                    var userEventUpdate = function userEventUpdate(message) {
-                        console.log('got: ', message);
-                    };
-
-
                     PokeSocket.on(SocketEvent.UserList, userEventCb);
-                    PokeSocket.on(SocketEvent.UserStatus, userEventUpdate);
 
                     // Emit the event to our socket
                     // after listening for it.
-                    PokeSocket.emit(SocketEvent.UserList);
+                    // we don't need to since we connect anyway, any issues?
+                    //PokeSocket.emit(SocketEvent.UserList);
 
                     return d.promise;
                 }]
@@ -43,24 +42,19 @@ angular.module('Poketrainer.State.Users', [
     })
 
     .controller('UsersController', function UsersController($scope, Users, PokeSocket, SocketEvent) {
-        PokeSocket.emit(SocketEvent.Join, {room: 'global'});
+        // we don't need any data from the global scope here... yet?
+        //PokeSocket.emit(SocketEvent.Join, {room: 'global'});
         $scope.users = Users;
 
-        var userEventCb = function userEventCb(message) {
-            if(angular.isUndefined(message) || !message.success || !angular.isArray(message.users)){
-                return;
+        var userEventUpdate = function userEventUpdate(event, message) {
+            for (var i = 0; i < $scope.users.length; i++) {
+                if ($scope.users[i].username == message.username) {
+                    $scope.users[i].status = message.status;
+                }
             }
-
-            $scope.users = message.users;
-        };
-
-        var userEventUpdate = function userEventUpdate(message) {
-            // for some reason this event will not contain the actual emitted data?
-            console.log(message);
         };
 
         // Make sure to listen for new events
-        $scope.$on(SocketEvent._prefix + SocketEvent.UserList, userEventCb);
         $scope.$on(SocketEvent._prefix + SocketEvent.UserStatus, userEventUpdate);
     })
 ;

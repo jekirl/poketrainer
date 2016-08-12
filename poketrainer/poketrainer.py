@@ -218,7 +218,7 @@ class Poketrainer(object):
 
     def _do_push_to_web(self, event, action, data):
         if not self.can_push_to_web:
-            self.log.info('cant push')
+            self.log.debug('Web pushing is disabled')
             return
         if not self.web_rpc:
             desc_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), ".listeners")
@@ -226,7 +226,7 @@ class Poketrainer(object):
                 sockets = f.read()
                 sockets = json.loads(sockets if len(sockets) > 0 else '{}')
                 if 'web' not in sockets:
-                    self.log.info('web not found for pushing')
+                    self.log.debug('Web RPC socket not found for pushing')
                     self.can_push_to_web = False
                     return
                 sock_port = int(sockets['web'])
@@ -235,7 +235,7 @@ class Poketrainer(object):
             self.web_rpc.connect("tcp://127.0.0.1:%i" % sock_port)
         try:
             self.web_rpc.push(self.config.username, event, action, data)
-            self.log.info('pushed data to web')
+            self.log.debug('Pushed data to web, event: %s, action: %s', event, action)
         except Exception as e:
             self.log.error('Error trying to push to web, will now stop pushing')
             self.can_push_to_web = False
@@ -313,6 +313,11 @@ class Poketrainer(object):
 
         self.log.debug(
             'Response dictionary: \n\r{}'.format(json.dumps(res, indent=2, default=lambda obj: obj.decode('utf8'))))
+
+        status_code = res.get('status_code', -1)
+        if status_code == 3:
+            self.log.warn('Your account may be banned')
+            # exit(0)
 
         responses = res.get('responses', {})
         if 'GET_PLAYER' in responses:
@@ -416,6 +421,7 @@ class Poketrainer(object):
             self.log.info('get_map_objects_max_refresh_seconds: %s', str(get_map_objects_max_refresh_seconds))
             self.log.info('get_map_objects_min_distance_meters: %s', str(get_map_objects_min_distance_meters))
             self.log.info('encounter_range_meters: %s', str(encounter_range_meters))
+            exit(0)
             """
 
         self._heartbeat_number += 1
@@ -432,17 +438,10 @@ class Poketrainer(object):
 
     """ FOLLOWING ARE FUNCTIONS FOR THE WEB LISTENER """
 
-    def release_pokemon_by_id(self, p_id):
-        # acquire lock for this thread
-        if self.thread_lock(persist=True):
-            try:
-                return self.release.do_release_pokemon_by_id(p_id)
-            finally:
-                # after we're done, release lock
-                self.persist_lock = False
-                self.thread_release()
-        else:
-            return 'Only one Simultaneous request allowed'
+    def enable_web_pushing(self):
+        self.log.info('Enabled pushing to web, caus web told us to!')
+        self.can_push_to_web = True
+        return self.can_push_to_web
 
     def current_location(self):
         self.log.info("Web got position: %s", self.get_position())
@@ -460,14 +459,17 @@ class Poketrainer(object):
     def get_caught_pokemons(self):
         return self.inventory.get_caught_pokemon(as_dict=True)
 
-    def get_player_info(self):
-        return self.player.to_json()
-
-    def get_raw_inventory(self):
-        return json.dumps(self.inventory.get_raw_inventory_items())
-
-    def get_caught_pokemons_json(self):
-        return self.inventory.get_caught_pokemon_by_family(as_json=True)
+    def release_pokemon_by_id(self, p_id):
+        # acquire lock for this thread
+        if self.thread_lock(persist=True):
+            try:
+                return self.release.do_release_pokemon_by_id(p_id)
+            finally:
+                # after we're done, release lock
+                self.persist_lock = False
+                self.thread_release()
+        else:
+            return 'Only one Simultaneous request allowed'
 
     def snipe_pokemon(self, lat, lng):
         # acquire lock for this thread
@@ -482,10 +484,16 @@ class Poketrainer(object):
         else:
             return 'Only one Simultaneous request allowed'
 
-    def enable_web_pushing(self):
-        self.log.info('Enabled pushing to web, caus web told us to!')
-        self.can_push_to_web = True
-        return self.can_push_to_web
+    """ OLD WEB FUNCTIONS """
+
+    def get_player_info(self):
+        return self.player.to_json()
+
+    def get_raw_inventory(self):
+        return json.dumps(self.inventory.get_raw_inventory_items())
+
+    def get_caught_pokemons_json(self):
+        return self.inventory.get_caught_pokemon_by_family(as_json=True)
 
     def ping(self):
         self.log.info("Responding to ping")

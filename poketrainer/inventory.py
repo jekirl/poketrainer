@@ -21,16 +21,19 @@ class Inventory(object):
         self._log = create_logger(__name__, self._parent.config.log_colors["inventory".upper()])
 
         self.item_count = 0
-        self.ultra_balls = 0
-        self.great_balls = 0
+
         self.poke_balls = 0
+        self.great_balls = 0
+        self.ultra_balls = 0
         self.master_balls = 0
         self.potion = 0
-        self.hyper_potion = 0
         self.super_potion = 0
+        self.hyper_potion = 0
         self.max_potion = 0
-        self.lucky_eggs = 0
+        self.revive = 0
+        self.max_revive = 0
         self.razz_berries = 0
+        self.lucky_eggs = 0
         self.pokeball_percent = self._parent.config.ball_priorities[0] / 100.0
         self.greatball_percent = self._parent.config.ball_priorities[1] / 100.0
         self.ultraball_percent = self._parent.config.ball_priorities[2] / 100.0
@@ -52,26 +55,26 @@ class Inventory(object):
             item_id = item.get('item_id', -1)
             item_count = item.get('count', 0)
             self.item_count += item_count
-            if item_id == Item_Enums.ITEM_POTION:
-                self.potion = item_count
-            elif item_id == Item_Enums.ITEM_SUPER_POTION:
-                self.super_potion = item_count
-            elif item_id == Item_Enums.ITEM_MAX_POTION:
-                self.max_potion = item_count
-            elif item_id == Item_Enums.ITEM_HYPER_POTION:
-                self.hyper_potion = item_count
-            elif item_id == Item_Enums.ITEM_POKE_BALL:
+            if item_id == Item_Enums.ITEM_POKE_BALL:
                 self.poke_balls = item_count
             elif item_id == Item_Enums.ITEM_GREAT_BALL:
                 self.great_balls = item_count
-            elif item_id == Item_Enums.ITEM_MASTER_BALL:
-                self.master_balls = item_count
             elif item_id == Item_Enums.ITEM_ULTRA_BALL:
                 self.ultra_balls = item_count
-            elif item_id == Item_Enums.ITEM_LUCKY_EGG:
-                self.lucky_eggs = item_count
+            elif item_id == Item_Enums.ITEM_MASTER_BALL:
+                self.master_balls = item_count
+            elif item_id == Item_Enums.ITEM_POTION:
+                self.potion = item_count
+            elif item_id == Item_Enums.ITEM_SUPER_POTION:
+                self.super_potion = item_count
+            elif item_id == Item_Enums.ITEM_HYPER_POTION:
+                self.hyper_potion = item_count
+            elif item_id == Item_Enums.ITEM_MAX_POTION:
+                self.max_potion = item_count
             elif item_id == Item_Enums.ITEM_RAZZ_BERRY:
                 self.razz_berries = item_count
+            elif item_id == Item_Enums.ITEM_LUCKY_EGG:
+                self.lucky_eggs = item_count
             candy = inventory_item['inventory_item_data'].get('candy', {})
             self.pokemon_candy[candy.get('family_id', -1)] = candy.get('candy', -1)
             pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
@@ -84,6 +87,7 @@ class Inventory(object):
                 else:
                     self.incubators_available.append(incubator)
         self._parent.push_to_web('inventory', 'updated', self.to_dict())
+        # self._parent.push_to_web('caught_pokemon', 'updated', self.get_caught_pokemon(as_dict=True))
 
     def can_attempt_catch(self):
         return self.poke_balls + self.great_balls + self.ultra_balls + self.master_balls > 0
@@ -195,9 +199,7 @@ class Inventory(object):
     def get_caught_pokemon(self, as_json=False, as_dict=False):
         pokemon_list = sorted(map(lambda x: Pokemon(x['pokemon_data'], self._parent.player_stats.level,
                                                     self._parent.config.score_method,
-                                                    self._parent.config.score_settings,
-                                                    self.pokemon_candy[x['pokemon_data'].get('pokemon_id', -1)]
-                                                    ),
+                                                    self._parent.config.score_settings),
                                   filter(lambda x: 'pokemon_data' in x and not x['pokemon_data'].get("is_egg", False),
                                          map(lambda x: x.get('inventory_item_data', {}), self._inventory_items))),
                               key=lambda x: x.score, reverse=True)

@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import json
 
 from cachetools import TTLCache
+from time import time
 
 from helper.colorlogger import create_logger
 from helper.utilities import flat_map
@@ -113,9 +114,11 @@ class PokeCatcher(object):
         catch_attempt = self.attempt_catch(encounter_id, spawn_point_id, capture_probability)
         capture_status = catch_attempt.get('status', -1)
         if capture_status == 1:
+            pokemon.id = str(catch_attempt.get('captured_pokemon_id', 'NA'))
+            pokemon.creation_time_ms = time() * 1000
             self.log.debug("Caught Pokemon: : %s", catch_attempt)
             self.log.info("Caught Pokemon:  %s", pokemon)
-            self.parent.push_to_web('pokemon', 'caught', pokemon.to_json())
+            self.parent.push_to_web('pokemon', 'caught', pokemon.__dict__)
             self.parent.pokemon_caught += 1
             return True
         elif capture_status == 3:
