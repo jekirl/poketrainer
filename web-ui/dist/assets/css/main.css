@@ -6314,6 +6314,31 @@ button.close {
 .menu-toggle {
   padding-top: 14px !important;
 }
+.fa-spin-custom, .glyphicon-spin {
+    -webkit-animation: spin 1000ms infinite linear;
+    animation: spin 1000ms infinite linear;
+}
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+@keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+
 .angular-google-map-container {
   position: absolute;
   top: 0;
@@ -6322,11 +6347,30 @@ button.close {
   left: 0;
 }
 .angular-leaflet-map {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
+  position: relative;
+  height: 350px;
+}
+@media (min-width: 992px) {
+  .angular-leaflet-map {
+    position: absolute;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+  }
+}
+.poke-menu {
+  margin: 16px;
+  z-index: 1030;
+}
+@media (min-width: 992px) {
+  .poke-menu {
+    bottom: 0;
+    position: fixed;
+    left: 0;
+    right: 0;
+  }
 }
 .chart {
   position: relative;
@@ -6356,6 +6400,16 @@ button.close {
     width: 90%;
    max-width:1200px;
   }
+}
+
+.md-top.md-center,
+.md-bottom.md-center {
+  left: 50%;
+  transform: translate3d(-50%, 0, 0);
+  z-index: 1080 !important;
+}
+md-tooltip{
+  z-index: 1090 !important;
 }
 .m-t-5 { margin-top:5px; }
 .m-t-10 { margin-top:10px; }

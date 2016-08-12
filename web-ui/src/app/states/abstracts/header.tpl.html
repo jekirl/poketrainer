@@ -4,7 +4,7 @@
             <span>PokéTrainer</span>
         </h2>
         <span flex></span>
-        <md-button ui-sref="public.users()" class="md-raised" aria-label="Bots">
+        <md-button ng-hide="state==='public.users'" ui-sref="public.users()" class="md-raised" aria-label="Bots">
             Bots Overview
         </md-button>
     </div>

@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
-import logging
-
+from helper.colorlogger import create_logger
 from helper.utilities import flat_map
 
 from .location import distance_in_meters
@@ -9,10 +8,10 @@ from .pokedex import pokedex
 from .pokemon import POKEMON_NAMES
 
 
-class Sniper:
+class Sniper(object):
     def __init__(self, parent):
         self.parent = parent
-        self.log = logging.getLogger(__name__)
+        self.log = create_logger(__name__)
 
     # instead of a full heartbeat, just update position.
     # useful for sniping for example

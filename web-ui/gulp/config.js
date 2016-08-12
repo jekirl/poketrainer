@@ -60,13 +60,13 @@ module.exports = (function () {
 
         loadTasks: [
             "bower", "envcontext", "styles",
-            "scripts", "images", "icons", 
+            "scripts", "images", "icons", "fonts",
             "copy", "watch", "build", 
             "html2js", "index"
         ],
         buildTasks: [
             "envcontext", "styles", "scripts",
-            "images", "icons", "copy",
+            "images", "icons", "fonts", "copy",
             "html2js", "index-rebuild"
         ],
 
@@ -181,7 +181,8 @@ module.exports = (function () {
             scripts: [ assetsPath + "/js/*.js", '!' + assetsPath + "/js/-*.js" ],
             styles: [ assetsPath + "/less/main.less" ],
             images: [ assetsPath + "/images/**/*.{jpg,png,gif,svg}" ],
-            icons: [assetsPath + "/images/icons/*.svg" ]
+            icons: [ assetsPath + "/images/icons/*.svg" ],
+            fonts: [ bowerPath + "/bootstrap/dist/fonts/*" ]
         },
         {
         	name: "angular",

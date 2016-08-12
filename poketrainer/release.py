@@ -1,15 +1,17 @@
 from __future__ import absolute_import
 
-import logging
-
 from six import iteritems
+
+from helper.colorlogger import create_logger
+
 from .release_methods.base import ReleaseMethodFactory
 
 
-class Release:
+class Release(object):
     def __init__(self, parent):
         self.parent = parent
-        self.log = logging.getLogger(__name__)
+
+        self.log = create_logger(__name__, self.parent.config.log_colors["release".upper()])
 
         self.release_method_factory = ReleaseMethodFactory(self.parent.config.config_data)
 
@@ -21,19 +23,19 @@ class Release:
         return status
 
     def do_release_pokemon(self, pokemon):
-        self.log.info("Releasing pokemon: %s", pokemon)
+        self.log.debug("Releasing pokemon: %s", pokemon)
         self.parent.sleep(1.0 + self.parent.config.extra_wait)
         if self.do_release_pokemon_by_id(pokemon.id):
             self.log.info("Successfully Released Pokemon %s", pokemon)
-            self.parent.push_to_web('pokemon', 'released', pokemon.to_json())
+            self.parent.push_to_web('pokemon', 'released', pokemon.__dict__)
         else:
             self.log.info("Failed to release Pokemon %s", pokemon)
 
     def cleanup_pokemon(self):
         caught_pokemon = self.parent.inventory.get_caught_pokemon_by_family()
-        release_method = self.release_method_factory.getReleaseMethod()
+        release_method = self.release_method_factory.get_release_method()
         for pokemon_family_id, pokemon_list in iteritems(caught_pokemon):
-            pokemon_to_release, pokemon_to_keep = release_method.getPokemonToRelease(pokemon_family_id, pokemon_list)
+            pokemon_to_release, pokemon_to_keep = release_method.get_pokemon_to_release(pokemon_family_id, pokemon_list)
 
             if self.parent.config.pokemon_cleanup_testing_mode:
                 for pokemon in pokemon_to_release:

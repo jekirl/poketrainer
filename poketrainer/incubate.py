@@ -1,14 +1,17 @@
 from __future__ import absolute_import
 
-import logging
+from helper.colorlogger import create_logger
+
+from library.api.pgoapi.protos.POGOProtos.Inventory import \
+    Item_pb2 as Item_Enums
 
 from .poke_utils import get_pokemon_by_long_id
 
 
-class Incubate:
+class Incubate(object):
     def __init__(self, parent):
         self.parent = parent
-        self.log = logging.getLogger(__name__)
+        self.log = create_logger(__name__)
 
     def incubate_eggs(self):
         if not self.parent.config.egg_incubation_enabled:
@@ -30,9 +33,10 @@ class Incubate:
                 self.log.info('Incubating %skm egg, %skm done', incubator_egg_distance,
                               round(incubator_distance_done, 2))
         for incubator in self.parent.inventory.incubators_available:
-            if incubator['item_id'] == 901:  # unlimited use
+            if incubator['item_id'] == Item_Enums.ITEM_INCUBATOR_BASIC_UNLIMITED:
                 pass
-            elif self.parent.config.use_disposable_incubators and incubator['item_id'] == 902:  # limited use
+            elif (self.parent.config.use_disposable_incubators
+                  and incubator['item_id'] == Item_Enums.ITEM_INCUBATOR_BASIC):
                 pass
             else:
                 continue

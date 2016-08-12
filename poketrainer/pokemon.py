@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import json
+from collections import defaultdict
 from math import floor, sqrt
 from os import sep as os_sep
 from os import path
@@ -19,7 +20,7 @@ with open(_names_file_path) as jsonfile:
 class Pokemon(object):
     # Used for calculating the pokemon level
     # source http://pokemongo.gamepress.gg/cp-multiplier
-    CPM_calculation_increments = [
+    cpm_calculation_increments = [
         {
             'max_level': 1,
             'cpm_sqrt_increase_per_level': 0.008836,
@@ -44,15 +45,16 @@ class Pokemon(object):
     ]
 
     def __init__(self, pokemon_data, player_level=0,
-                 score_method="CP", score_settings=dict(),
-                 candy=0):
+                 score_method="CP", score_settings=None):
+        if not score_settings:
+            score_settings = dict()
         self.pokemon_data = pokemon_data
         self.creation_time_ms = pokemon_data.get('creation_time_ms', 0)
         self.stamina = pokemon_data.get('stamina', 0)
         self.favorite = pokemon_data.get('favorite', -1)
         self.is_favorite = self.favorite != -1
         self.pokemon_id = pokemon_data.get('pokemon_id', 0)
-        self.id = pokemon_data.get('id', 0)
+        self.id = str(pokemon_data.get('id', 'NA'))
         self.cp = pokemon_data.get('cp', 0)
         self.stamina_max = pokemon_data.get('stamina_max', 0)
         self.is_egg = pokemon_data.get('is_egg', False)
@@ -70,30 +72,30 @@ class Pokemon(object):
 
         # Used in Web.py
         if self.nickname is not "":
-            self.name = self.nickname
+            self.name = self.nickname.decode('utf-8')
         else:
             self.name = self.pokemon_type
-        self.candy = candy
         self.move_1 = pokemon_data.get('move_1', 0)
         self.move_2 = pokemon_data.get('move_2', 0)
-
-        # Max Evolve based on ur lvl vals and Power Up
-        self.candy_needed_to_max_evolve = 0
-        self.dust_needed_to_max_evolve = 0
-        self.max_evolve_cp = 0
-        self.power_up_result = 0
 
         self.iv_normalized = -1.0
         self.max_cp = -1.0
         self.max_cp_absolute = -1.0
 
         additional_data = GAME_MASTER.get(self.pokemon_id)
-        self.family_id = additional_data.FamilyId if additional_data else None
+        self.family_id = int(additional_data.FamilyId) if additional_data else -1
 
         # helps with rounding errors
         self.cpm_total = get_tcpm(self.cp_multiplier + self.additional_cp_multiplier)
         self.level_wild = self.get_level_by_cpm(self.cp_multiplier)
         self.level = self.get_level_by_cpm(self.cpm_total)
+
+        # Max Evolve based on ur lvl vals and Power Up
+        self.candy_needed_to_max_evolve = 0
+        self.dust_needed_to_max_evolve = 0
+        self.max_evolve_cp = 0
+        self.power_up_result = 0
+        self.set_max_cp(self.get_cpm_by_level(player_level + 1.5))
 
         # Thanks to http://pokemongo.gamepress.gg/pokemon-stats-advanced for the magical formulas
         attack = float(additional_data.BaseAttack) if additional_data else 0.0
@@ -102,6 +104,7 @@ class Pokemon(object):
 
         self.max_cp = self.calc_cp(self.get_cpm_by_level(player_level + 1.5), additional_data)
         self.max_cp_absolute = self.calc_cp(self.get_cpm_by_level(40), additional_data)
+
         # calculating these for level 40 to get more accurate values
         worst_iv_cp = (attack * sqrt(defense) * sqrt(stamina) * pow(self.get_cpm_by_level(40), 2)) / 10
         perfect_iv_cp = ((attack + 15) * sqrt(defense + 15) * sqrt(stamina + 15) * pow(self.get_cpm_by_level(40), 2)) / 10
@@ -119,6 +122,7 @@ class Pokemon(object):
         elif score_method == "FANCY":
             self.score = (self.iv_normalized / 100.0 * score_settings.get("WEIGHT_IV", 0.5)) + \
                          (self.level / (player_level + 1.5) * score_settings.get("WEIGHT_LVL", 0.5))
+
         self.try_keep = False
 
     def __str__(self):
@@ -153,17 +157,18 @@ class Pokemon(object):
         if not isinstance(pokemon_details, PokemonData) or not isinstance(tcpm, float):
             return 0
 
-        baseAttk = int(pokemon_details.BaseAttack)
-        baseDef = int(pokemon_details.BaseDefense)
-        baseStamina = int(pokemon_details.BaseStamina)
+        base_attk = int(pokemon_details.BaseAttack)
+        base_def = int(pokemon_details.BaseDefense)
+        base_stamina = int(pokemon_details.BaseStamina)
 
-        attk = (baseAttk + self.individual_attack) * tcpm
-        defense = (baseDef + self.individual_defense) * tcpm
-        stamina = (baseStamina + self.individual_stamina) * tcpm
+        attk = (base_attk + self.individual_attack) * tcpm
+        defense = (base_def + self.individual_defense) * tcpm
+        stamina = (base_stamina + self.individual_stamina) * tcpm
 
         return int(max(10, floor(sqrt(stamina) * attk * sqrt(defense) / 10)))
 
     def set_max_cp(self, max_tcpm):
+        max_tcpm = round(max_tcpm, 7)
         poke_game_data = GAME_MASTER.get(self.pokemon_id, PokemonData())
         if int(poke_game_data.PkMn) == 0 or max_tcpm not in TCPM_VALS or not all_in(['cp', 'cp_multiplier'], self.pokemon_data):
             return
@@ -193,13 +198,13 @@ class Pokemon(object):
             evolved_poke_data = GAME_MASTER.get(self.pokemon_id + i, PokemonData())
             self.max_evolve_cp = self.calc_cp(max_tcpm, evolved_poke_data)
 
-        pokeLvl = POKEMON_LVL_DATA[self.cpm_total].pokemon_lvl
-        self.power_up_result = self.calc_cp(TCPM_VALS[pokeLvl], poke_game_data) - self.cp
+        poke_lvl = POKEMON_LVL_DATA[self.cpm_total].pokemon_lvl
+        self.power_up_result = self.calc_cp(TCPM_VALS[poke_lvl], poke_game_data) - self.cp
 
     def get_level_by_cpm(self, cpm_total):
         prev_max_level = 0
         prev_max_level_cpm = 0
-        for cpm_increment in self.CPM_calculation_increments:
+        for cpm_increment in self.cpm_calculation_increments:
             max_level = cpm_increment['max_level']
             cpm_sqrt_increase_per_level = cpm_increment['cpm_sqrt_increase_per_level']
             if "max_level_cpm" in cpm_increment:
@@ -219,7 +224,7 @@ class Pokemon(object):
     def get_cpm_by_level(self, level):
         prev_max_level = 0
         prev_max_level_cpm = 0
-        for cpm_increment in self.CPM_calculation_increments:
+        for cpm_increment in self.cpm_calculation_increments:
             max_level = cpm_increment['max_level']
             cpm_sqrt_increase_per_level = cpm_increment['cpm_sqrt_increase_per_level']
             if level <= max_level:  # we are below the max level of current cpm iteration

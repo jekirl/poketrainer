@@ -6,6 +6,8 @@ angular.module('Poketrainer.Service.SocketEvent', [])
             UserStatus: 'user_status',
             Request: 'pull',
             Data: 'push',
-            Join: 'join'
+            Join: 'join',
+            Transfer: 'transfer',
+            Snipe: 'snipe'
         }
     });
