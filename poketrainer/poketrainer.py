@@ -254,7 +254,7 @@ class Poketrainer(object):
                     # after we're done, release lock
                     self.persist_lock = False
                     self.thread_release()
-            #self.log.info("COMPLETED A _main_loop")
+            # self.log.info("COMPLETED A _main_loop")
             self.sleep(1.0)
 
     def _heartbeat(self, res=False, login_response=False):
