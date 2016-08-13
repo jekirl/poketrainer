@@ -19,6 +19,8 @@ blacklist = ['rattata', 'pidgey']
 base_url = 'http://localhost:5000/%(user)s/snipe/%(coords)s'
 rare_url = 'http://www.pokesnipers.com/api/v1/pokemon.json'
 cache = pylru.lrucache(15)
+
+
 def snipe(pokemon, user, coords):
     print('Requesting %s for %s' % (pokemon, user))
     try:
@@ -26,6 +28,8 @@ def snipe(pokemon, user, coords):
         requests.get(new_url)
     except Exception as e:
         print("Couldn't do it... :( %s", e)
+
+
 def get_latest_rares():
     global blacklist
     response = None
@@ -62,6 +66,8 @@ def get_latest_rares():
                 p.start()
             for process in processes:
                 process.join()
+
+                
 while True:
     print('Checking for new pokemon')
     get_latest_rares()
