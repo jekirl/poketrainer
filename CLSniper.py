@@ -12,9 +12,9 @@ from dateutil import parser
 
 # EDIT ONLY THESE TWO THINGS
 users = [
-   'webpyusername1',
-   'webpyusername2',
-   'webpyusername3'
+    'webpyusername1',
+    'webpyusername2',
+    'webpyusername3'
 ]
 blacklist = ['rattata', 'pidgey']
 # -------------------------
@@ -68,6 +68,8 @@ def get_latest_rares():
                 p.start()
             for process in processes:
                 process.join()
+
+
 while True:
     print('Checking for new pokemon')
     get_latest_rares()

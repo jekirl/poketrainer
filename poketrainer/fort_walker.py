@@ -184,6 +184,7 @@ class FortWalker(object):
                 travel_link = ': %s%s,%s' % (self.base_travel_link, next_point[0], next_point[1])
             self.log.info("Walking %.1fm%s", distance_to_point, travel_link)
         self.parent.api.set_position(*next_point)
+        self.parent.push_to_web('position', 'update', next_point)
 
     def _walk_back_to_origin(self):
         orig_posf = self.parent.get_orig_position()
@@ -253,6 +254,9 @@ class FortWalker(object):
                     reward += ', ' + str(amount) + 'x ' + get_item_name(item_id)
                 self.log.info("Fort spun, yielding: %s",
                               reward)
+                self.parent.push_to_web('fort', 'spun', {
+                    'reward': reward, 'location': {'lat': fort['latitude'], 'long': fort['longitude']}
+                })
             else:
                 self.log.warning("Fort spun, but did not yield any rewards. Possible soft ban?")
             self.visited_forts[fort['id']] = fort

@@ -1,0 +1,40 @@
+{
+  "name": "poketrainer",
+  "version": "1.0.0",
+  "authors": [
+    "Lars Rasmussen"
+  ],
+  "description": "PokeTrainer Web UI",
+  "moduleType": [
+    "node"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "vendor",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "angularjs#1.5.8",
+    "jquery": "1.12.4",
+    "angular-ui-router": "^0.3.1",
+    "angular-resource": "^1.5.8",
+    "bootstrap": "3.3.7",
+    "angular-material": "^1.0.9",
+    "angular-chart.js": "^1.0.0",
+    "angular-simple-logger": "^0.1.7",
+    "angular-google-maps": "^2.3.3",
+    "lodash": "^4.14.1",
+    "jquery.easy-pie-chart": "^2.1.6",
+    "angular-datatables": "^0.5.4",
+    "angular-socket-io": "^0.7.0",
+    "socket.io-client": "^1.4.8",
+    "ui-leaflet": "^1.0.1"
+  },
+  "devDependencies": {},
+  "overrides": {}
+}

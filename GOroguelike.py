@@ -1,18 +1,13 @@
+#!/usr/bin/env python
 # Created from pokecli.py by @stolencatkarma
 
 import json
 import logging
-import sys
 
 import gevent
 
 from helper.colorlogger import create_logger
 from poketrainer.poketrainer import Poketrainer
-
-if sys.version_info[0] >= 3:
-    get_input = input
-else:
-    get_input = raw_input
 
 poketrainer = {}
 logger = create_logger(__name__, color='white')
@@ -25,11 +20,10 @@ def init_poketrainer():
         with open('config.json') as data_file:
             data = json.load(data_file)
         # print(data)
-    except Exception as e:
+    except Exception:
         logger.error("Could not parse config.json - please make sure it's setup correctly.")
-        raise e
+        raise
 
-    # count = 0
     for account in data['accounts']:
         logger.info('Found login info for ' + str(account['username']))
         arguments = {}
@@ -61,7 +55,7 @@ def main():
     while True:
         try:
             poketrainer._heartbeat()
-            user_input = get_input("\nWhat would you like to do next? (look, walk, run, catch, spin): ")  # or `input("Some...` in python 3
+            user_input = raw_input("\nWhat would you like to do next? (look, walk, run, catch, spin): ")  # or `input("Some...` in python 3
             if(user_input == 'look'):
                 lookaround()
             elif(user_input == 'catch'):

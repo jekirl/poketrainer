@@ -15,27 +15,31 @@ from .pokemon import Pokemon
 class Inventory(object):
     def __init__(self, parent, inventory_items):
         self._parent = parent
-        self.inventory_items = inventory_items
+        self._inventory_items = inventory_items
         self._last_egg_use_time = 0
 
         self._log = create_logger(__name__, self._parent.config.log_colors["inventory".upper()])
 
-        self.ultra_balls = 0
-        self.great_balls = 0
+        self.item_count = 0
+
         self.poke_balls = 0
+        self.great_balls = 0
+        self.ultra_balls = 0
         self.master_balls = 0
         self.potion = 0
-        self.hyper_potion = 0
         self.super_potion = 0
+        self.hyper_potion = 0
         self.max_potion = 0
-        self.lucky_eggs = 0
+        self.revive = 0
+        self.max_revive = 0
         self.razz_berries = 0
+        self.lucky_eggs = 0
         self.pokeball_percent = self._parent.config.ball_priorities[0] / 100.0
         self.greatball_percent = self._parent.config.ball_priorities[1] / 100.0
         self.ultraball_percent = self._parent.config.ball_priorities[2] / 100.0
         self.use_masterball = self._parent.config.ball_priorities[3]
 
-        self.pokemon_candy = defaultdict()
+        self.pokemon_candy = defaultdict(int)
         self.eggs_available = []
         self.incubators_available = []
         self.incubators_busy = []
@@ -45,30 +49,32 @@ class Inventory(object):
         self.eggs_available = []
         self.incubators_available = []
         self.incubators_busy = []
-        for inventory_item in self.inventory_items:
+        self.item_count = 0
+        for inventory_item in self._inventory_items:
             item = inventory_item['inventory_item_data'].get('item', {})
             item_id = item.get('item_id', -1)
             item_count = item.get('count', 0)
-            if item_id == Item_Enums.ITEM_POTION:
-                self.potion = item_count
-            elif item_id == Item_Enums.ITEM_SUPER_POTION:
-                self.super_potion = item_count
-            elif item_id == Item_Enums.ITEM_MAX_POTION:
-                self.max_potion = item_count
-            elif item_id == Item_Enums.ITEM_HYPER_POTION:
-                self.hyper_potion = item_count
-            elif item_id == Item_Enums.ITEM_POKE_BALL:
+            self.item_count += item_count
+            if item_id == Item_Enums.ITEM_POKE_BALL:
                 self.poke_balls = item_count
             elif item_id == Item_Enums.ITEM_GREAT_BALL:
                 self.great_balls = item_count
-            elif item_id == Item_Enums.ITEM_MASTER_BALL:
-                self.master_balls = item_count
             elif item_id == Item_Enums.ITEM_ULTRA_BALL:
                 self.ultra_balls = item_count
-            elif item_id == Item_Enums.ITEM_LUCKY_EGG:
-                self.lucky_eggs = item_count
+            elif item_id == Item_Enums.ITEM_MASTER_BALL:
+                self.master_balls = item_count
+            elif item_id == Item_Enums.ITEM_POTION:
+                self.potion = item_count
+            elif item_id == Item_Enums.ITEM_SUPER_POTION:
+                self.super_potion = item_count
+            elif item_id == Item_Enums.ITEM_HYPER_POTION:
+                self.hyper_potion = item_count
+            elif item_id == Item_Enums.ITEM_MAX_POTION:
+                self.max_potion = item_count
             elif item_id == Item_Enums.ITEM_RAZZ_BERRY:
                 self.razz_berries = item_count
+            elif item_id == Item_Enums.ITEM_LUCKY_EGG:
+                self.lucky_eggs = item_count
             candy = inventory_item['inventory_item_data'].get('candy', {})
             self.pokemon_candy[candy.get('family_id', -1)] = candy.get('candy', -1)
             pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
@@ -80,6 +86,8 @@ class Inventory(object):
                     self.incubators_busy.append(incubator)
                 else:
                     self.incubators_available.append(incubator)
+        self._parent.push_to_web('inventory', 'updated', self.to_dict())
+        # self._parent.push_to_web('caught_pokemon', 'updated', self.get_caught_pokemon(as_dict=True))
 
     def can_attempt_catch(self):
         return self.poke_balls + self.great_balls + self.ultra_balls + self.master_balls > 0
@@ -135,7 +143,7 @@ class Inventory(object):
             self.master_balls -= 1
 
     def has_lucky_egg(self):
-        for inventory_item in self.inventory_items:
+        for inventory_item in self._inventory_items:
             item = inventory_item['inventory_item_data'].get('item', {})
             item_id = item.get('item_id', -1)
             if item_id == Item_Enums.ITEM_LUCKY_EGG and 'count' in item:
@@ -148,7 +156,7 @@ class Inventory(object):
 
     def has_berry(self):
         # Only Razz berries are in the game at the moment
-        for inventory_item in self.inventory_items:
+        for inventory_item in self._inventory_items:
             item = inventory_item['inventory_item_data'].get('item', {})
             item_id = item.get('item_id', -1)
             if item_id == Item_Enums.ITEM_RAZZ_BERRY and 'count' in item:
@@ -161,7 +169,7 @@ class Inventory(object):
 
     def cleanup_inventory(self):
         item_count = 0
-        for inventory_item in self.inventory_items:
+        for inventory_item in self._inventory_items:
             if "item" in inventory_item['inventory_item_data']:
                 item = inventory_item['inventory_item_data']['item']
                 if (
@@ -188,21 +196,23 @@ class Inventory(object):
             self._log.info("Inventory has {0}/{1} items".format(item_count, self._parent.player.max_item_storage))
         return self.update_player_inventory()
 
-    def get_caught_pokemon(self, as_json=False):
+    def get_caught_pokemon(self, as_json=False, as_dict=False):
         pokemon_list = sorted(map(lambda x: Pokemon(x['pokemon_data'], self._parent.player_stats.level,
                                                     self._parent.config.score_method,
                                                     self._parent.config.score_settings),
                                   filter(lambda x: 'pokemon_data' in x and not x['pokemon_data'].get("is_egg", False),
-                                         map(lambda x: x.get('inventory_item_data', {}), self.inventory_items))),
+                                         map(lambda x: x.get('inventory_item_data', {}), self._inventory_items))),
                               key=lambda x: x.score, reverse=True)
         pokemon_list = filter(lambda x: not x.is_egg, pokemon_list)
         if as_json:
             return json.dumps(pokemon_list, default=lambda p: p.__dict__)  # reduce the data sent?
+        if as_dict:
+            return [pokemon.__dict__ for pokemon in pokemon_list]
         return pokemon_list
 
-    def get_caught_pokemon_by_family(self, as_json=False):
+    def get_caught_pokemon_by_family(self, as_json=False, as_dict=False):
         pokemon_list = defaultdict(list)
-        for pokemon in self.get_caught_pokemon():
+        for pokemon in self.get_caught_pokemon(as_dict=as_dict):
             pokemon_list[pokemon.pokemon_id].append(pokemon)
         if as_json:
             return json.dumps(pokemon_list, default=lambda p: p.__dict__)  # reduce the data sent?
@@ -212,10 +222,13 @@ class Inventory(object):
         if res is None:
             res = self._parent.api.get_inventory()
         if 'GET_INVENTORY' in res.get('responses', {}):
-            self.inventory_items = res.get('responses', {}) \
+            self._inventory_items = res.get('responses', {}) \
                 .get('GET_INVENTORY', {}).get('inventory_delta', {}).get('inventory_items', [])
             self.setup_inventory()
         return res
+
+    def get_raw_inventory_items(self):
+        return self._inventory_items
 
     def use_lucky_egg(self):
         if self._parent.config.use_lucky_egg and \
@@ -253,8 +266,11 @@ class Inventory(object):
     def __repr__(self):
         return self.__str__()
 
+    def to_dict(self):
+        return dict((att, val) for att, val in self.__dict__.iteritems() if not att.startswith('_'))
+
     def to_json(self):
         return json.dumps(
-            dict((att, val) for att, val in self.__dict__.iteritems() if not att.startswith('_')),
+            self.to_dict(),
             default=lambda o: o.__dict__
         )
