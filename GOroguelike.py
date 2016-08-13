@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-#!/usr/bin/env python
-#Created from pokecli.py by @stolencatkarma
+# Created from pokecli.py by @stolencatkarma
 
 import logging
 
@@ -12,18 +11,19 @@ from poketrainer.poketrainer import Poketrainer
 poketrainer = {}
 logger = create_logger(__name__, color='white')
 
+
 def init_poketrainer():
     global poketrainer
     logger.info('Parsing config.json')
     try:
         with open('config.json') as data_file:
             data = json.load(data_file)
-        #print(data)
+        # print(data)
     except Exception as e:
-        logger.error("Could not parse config.json - please make sure it's setup correctly.")
+        logger.error(e)
         raise
 
-    count = 0
+    # count = 0
     for account in data['accounts']:
         logger.info('Found login info for '+ str(account['username']))
         arguments = {}
@@ -35,8 +35,9 @@ def init_poketrainer():
         arguments['debug'] = False
         poketrainer = Poketrainer(arguments)
         # auto-start bot
-        #poketrainer.start()
+        # poketrainer.start()
         continue
+
 
 def main():
     # log settings
@@ -68,14 +69,17 @@ def main():
             logger.info('Exiting...')
             exit(0)
 
+
 def walk():
     logger.info('You walk along the path towards your next goal.')
     poketrainer.fort_walker.loop()
+
 
 def run():
     poketrainer.fort_walker.loop()
     poketrainer.fort_walker.loop()
     poketrainer.fort_walker.loop()
+
 
 def lookaround():
     global poketrainer
@@ -83,17 +87,18 @@ def lookaround():
     res = poketrainer.map_objects.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells'][0]
     forts = res['forts']
     spawn_points = res['spawn_points']
-    #logger.info("forts: %s", forts)
+    # logger.info("forts: %s", forts)
     if(forts is not None):
         for fort in forts:
             if('type' in fort):
                 logger.info('You see a Pokestop.')
             else:
                 logger.info('You see a Gym.')
-    #logger.info("catchable_pokemons: %s", catchable_pokemons)
+    # logger.info("catchable_pokemons: %s", catchable_pokemons)
     if(spawn_points is not None):
         for spawn_point in spawn_points:
             logger.debug('You see a spawn_points.')
+
 
 def catchpoke():
     global poketrainer
