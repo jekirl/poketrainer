@@ -18,12 +18,12 @@ def init_poketrainer():
     try:
         with open('config.json') as data_file:
             data = json.load(data_file)
-        #print(data)
+        # print(data)
     except Exception as e:
-        logger.error("Could not parse config.json - please make sure it's setup correctly.")
+        logger.error(e)
         raise
 
-    count = 0
+    # count = 0
     for account in data['accounts']:
         logger.info('Found login info for '+ str(account['username']))
         arguments = {}
@@ -37,6 +37,7 @@ def init_poketrainer():
         # auto-start bot
         # poketrainer.start()
         continue
+
 
 def main():
     # log settings
@@ -68,14 +69,17 @@ def main():
             logger.info('Exiting...')
             exit(0)
 
+
 def walk():
     logger.info('You walk along the path towards your next goal.')
     poketrainer.fort_walker.loop()
+
 
 def run():
     poketrainer.fort_walker.loop()
     poketrainer.fort_walker.loop()
     poketrainer.fort_walker.loop()
+
 
 def lookaround():
     global poketrainer
@@ -94,6 +98,7 @@ def lookaround():
     if(spawn_points is not None):
         for spawn_point in spawn_points:
             logger.debug('You see a spawn_points.')
+
 
 def catchpoke():
     global poketrainer
