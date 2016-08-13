@@ -41,6 +41,7 @@ class Poketrainer(object):
         self.socket = None
         self.cli_args = args
         self.force_debug = args['debug']
+        self._req_proxy = None
 
         # timers, counters and triggers
         self.pokemon_caught = 0
@@ -170,11 +171,21 @@ class Poketrainer(object):
                 position = prev_location
             self.api.set_position(*position)
 
+            # set proxy if one was provided
+            if self.cli_args['proxy']:
+                self.api.set_proxy(self.cli_args['proxy'])
+                self.log.info('Using proxy: %s', self.cli_args['proxy'])
+
+            # proxies only work with ptc accounts at the moment!
+            if self.cli_args['proxy'] and self.config.auth_service != 'ptc':
+                self.log.error("Currently proxy only works with ptc accounts.")
+                quit()
+
             # retry login every 30 seconds if any errors
             self.log.info('Starting Login process...')
             login = False
             while not login:
-                login = self.api.login(self.config.auth_service, self.config.username, self.config.get_password())
+                login = self.api.login(self.config.auth_service, self.config.username, self.config.get_password(), proxy=self.cli_args['proxy'])
                 if not login:
                     self.log.error('Login error, retrying Login in 30 seconds')
                     self.sleep(30)

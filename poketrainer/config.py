@@ -111,10 +111,10 @@ class Config(object):
             start_location = cli_args['location']
         else:
             start_location = self.location
-            self.cache_filename = './cache/cache ' + (hashlib.md5(start_location.encode())).hexdigest() + str(self.stay_within_proximity)
-            self.use_cache = config.get("BEHAVIOR", {}).get("USE_CACHED_FORTS", False)
-            self.cache_is_sorted = config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
-            self.enable_caching = config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
+        self.cache_filename = './cache/cache ' + (hashlib.md5(start_location.encode())).hexdigest() + str(self.stay_within_proximity)
+        self.use_cache = config.get("BEHAVIOR", {}).get("USE_CACHED_FORTS", False)
+        self.cache_is_sorted = config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
+        self.enable_caching = config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
 
     def _sanity_check_needy_item_farming(self):
         # Sanity checking, farm_items is Experimental, and we needn't do this if we're farming anyway
