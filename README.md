@@ -203,7 +203,6 @@ Examples:
 
         python pokecli.py -i 0 -p socks5://123.123.123.123:1234 
 
-    If you get an error, run `pip install pysocks` to add support to SOCKS5 proxies.
     
 ### What's working:
 What's working:
