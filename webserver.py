@@ -307,6 +307,22 @@ def transfer(data):
         emit('transfer', {'success': False, 'message': 'Transfer failed!'})
 
 
+@socketio.on('evolve', namespace='/poketrainer')
+def evolve(data):
+    username = data['username']
+    p_id = data['p_id']
+    user = bot_users.get(username)
+    if not user:
+        logger.error("Could not find bot '%s', will not evolve %s", username, p_id)
+        emit('evolve', {'success': False, 'message': "Could not find bot '%s', will not evolve" % username})
+        return
+    c = user.get_api_rpc()
+    if c and c.evolve_pokemon_by_id(p_id):
+        emit('evolve', {'success': True, 'message': 'Evolved successfully'})
+    else:
+        emit('evolve', {'success': False, 'message': 'Evolve failed!'})
+
+
 @socketio.on('snipe', namespace='/poketrainer')
 def snipe(data):
     username = data['username']

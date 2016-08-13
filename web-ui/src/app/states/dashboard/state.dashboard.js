@@ -147,9 +147,10 @@ angular.module('Poketrainer.State.Status', [
         PokeSocket.emit(SocketEvent.Join, {room: $stateParams.username});
         //console.log("Joined! ", SocketEvent.Join, $stateParams.username);
 
+        /** TRANSFER **/
         var transfer_p_id;
         var transferCb = function transferCb(message) {
-            //message.success;
+            $scope.evolve_disabled = false;
             $scope.transfer_disabled = false;
             if (message.success) {
                 for(var i=$scope.pokemon.length-1; i>=0; i--) {
@@ -164,17 +165,39 @@ angular.module('Poketrainer.State.Status', [
                 $mdToast.simple()
                     .textContent(message.message)
                     .position('top center')
-                    .hideDelay(1000)
+                    .hideDelay(3000)
             );
         };
         $scope.transfer_disabled = false;
         $scope.transfer = function(p_id) {
             transfer_p_id = p_id;
+            $scope.evolve_disabled = true;
             $scope.transfer_disabled = true;
             PokeSocket.on(SocketEvent.Transfer, transferCb);
             PokeSocket.emit(SocketEvent.Transfer, {username: $stateParams.username, p_id: p_id});
         };
 
+        /** EVOLVE **/
+        var evolveCb = function evolveCb(message) {
+            $scope.evolve_disabled = false;
+            $scope.transfer_disabled = false;
+            PokeSocket.removeListener(SocketEvent.Evolve, evolveCb);
+            $mdToast.show(
+                $mdToast.simple()
+                    .textContent(message.message)
+                    .position('top center')
+                    .hideDelay(3000)
+            );
+        };
+        $scope.evolve_disabled = false;
+        $scope.evolve = function(p_id) {
+            $scope.evolve_disabled = true;
+            $scope.transfer_disabled = true;
+            PokeSocket.on(SocketEvent.Evolve, evolveCb);
+            PokeSocket.emit(SocketEvent.Evolve, {username: $stateParams.username, p_id: p_id});
+        };
+
+        /** SNIPE **/
         var snipedCb = function snipedCb(message) {
             //message.success;
             $scope.snipe_disabled = false;
@@ -183,7 +206,7 @@ angular.module('Poketrainer.State.Status', [
                 $mdToast.simple()
                     .textContent(message.message)
                     .position('top center')
-                    .hideDelay(1000)
+                    .hideDelay(3000)
             );
         };
         $scope.snipe_coords = '';
@@ -240,6 +263,24 @@ angular.module('Poketrainer.State.Status', [
             $mdToast.show(
                 $mdToast.simple()
                     .textContent('Released: ' + pokemon.name + ' (IV: ' + Math.floor(pokemon.iv) + ' | CP: ' + pokemon.cp + ')')
+                    .position('top center')
+                    .hideDelay(3000)
+            );
+        });
+
+        $scope.$on('pokemon:evolved', function(event, data) {
+            var pokemon_old = data.old;
+            var pokemon_new = data.new;
+            for(var i=$scope.pokemon.length-1; i>=0; i--) {
+                if ($scope.pokemon[i].id == pokemon_old.id) {
+                    $scope.pokemon.splice(i,1);
+                }
+            }
+            $scope.pokemon.push(pokemon_new);
+            $mdToast.show(
+                $mdToast.simple()
+                    .textContent('Evolved: ' + pokemon_old.name + ' to ' + pokemon_new.name +
+                        ' (IV: ' + Math.floor(pokemon_new.iv) + ' | CP: ' + pokemon_new.cp + ')')
                     .position('top center')
                     .hideDelay(3000)
             );
@@ -317,10 +358,11 @@ angular.module('Poketrainer.State.Status', [
         };
         
         $scope.pokemonDataTableOptions = DTOptionsBuilder.newOptions()
-            .withOption('order', [[ 0, "desc" ]]);
-            /*.withOption('paging', true)
-            .withOption('scrollY', '75vh')
-            .withOption('scrollX', true);*/
+            .withOption('order', [[ 0, "desc" ]])
+            .withOption('stateSave', true);
+            /*.withOption('scrollY', '75vh')
+            .withOption('scrollX', true);
+            .withOption('paging', true)*/
 
         $scope.expLvlOptions = {
             animate:{

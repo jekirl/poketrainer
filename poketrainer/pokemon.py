@@ -90,6 +90,7 @@ class Pokemon(object):
         self.level = self.get_level_by_cpm(self.cpm_total)
 
         # Max Evolve based on ur lvl vals and Power Up
+        self.candy_needed_to_evolve = 0
         self.candy_needed_to_max_evolve = 0
         self.dust_needed_to_max_evolve = 0
         self.max_evolve_cp = 0
@@ -174,6 +175,7 @@ class Pokemon(object):
 
         candy_to_evolve = int(poke_game_data.CandyToEvolve)
 
+        self.candy_needed_to_evolve = candy_to_evolve
         self.candy_needed_to_max_evolve = POKEMON_LVL_DATA[max_tcpm].candy_to_this_lvl - POKEMON_LVL_DATA[self.cpm_total].candy_to_this_lvl + candy_to_evolve
         self.dust_needed_to_max_evolve = POKEMON_LVL_DATA[max_tcpm].stardust_to_this_lvl - POKEMON_LVL_DATA[self.cpm_total].stardust_to_this_lvl
 

@@ -8,6 +8,7 @@ angular.module('Poketrainer.Service.SocketEvent', [])
             Data: 'push',
             Join: 'join',
             Transfer: 'transfer',
+            Evolve: 'evolve',
             Snipe: 'snipe'
         }
     });

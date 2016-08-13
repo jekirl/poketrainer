@@ -208,7 +208,9 @@ class PokeCatcher(object):
                 .get('responses', {}).get('DISK_ENCOUNTER', {})
             result = resp.get('result', -1)
             if result == 1 and 'pokemon_data' in resp and 'capture_probability' in resp:
-                pokemon = Pokemon(resp.get('pokemon_data', {}))
+                pokemon = Pokemon(resp.get('pokemon_data', {}),
+                                  self.parent.player_stats.level,
+                                  self.parent.config.score_method, self.parent.config.score_settings)
                 capture_probability = create_capture_probability(resp.get('capture_probability', {}))
                 self.log.debug("Attempt Encounter: %s", json.dumps(resp, indent=4, sort_keys=True))
                 return self.do_catch_pokemon(encounter_id, fort_id, capture_probability, pokemon)

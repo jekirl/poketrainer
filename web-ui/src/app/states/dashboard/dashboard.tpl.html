@@ -93,8 +93,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-md-12">
-                            <table datatable="ng" dt-options="pokemonDataTableOptions" class="row-border hover">
+                        <div class="col-md-12 table-responsive">
+                            <table datatable="ng" dt-options="pokemonDataTableOptions" class="row-border hover table-striped">
                                 <thead>
                                     <th>Recent</th>
                                     <th>#</th>
@@ -114,10 +114,11 @@
                                     <th>Def IV</th>
                                     <th>Move 1</th>
                                     <th>Move 2</th>
+                                    <th>Evolve</th>
                                     <th>Transfer</th>
                                   </thead>
                                 <tbody>
-                                <tr ng-repeat="pkm in pokemon">
+                                <tr ng-repeat="pkm in pokemon" id="pkm_{{ pkm.id }}">
                                     <td data-order="{{ pkm.creation_time_ms }}">
                                         <md-tooltip md-direction="right">Caught:{{ pkm.creation_time_ms | date : 'medium' }}</md-tooltip>
                                         <img style="max-height: 50px;" ng-src="assets/images/pokemon/{{('000' + pkm.pokemon_id).substr(-3)}}.png">
@@ -129,7 +130,7 @@
                                     <td data-order="{{pkm.iv|number}}">IV: {{  pkm.iv | number:0 }}%</td>
                                     <td data-order="{{pkm.cp}}">CP: {{ pkm.cp | number}}</td>
                                     <td data-order="{{pkm.max_evolve_cp}}">CP: {{pkm.max_evolve_cp | number}}</td>
-                                    <td data-order="{{pkm.candy}}">Candy: {{inventory.pokemon_candy[pkm.family_id] | number}}</td>
+                                    <td data-order="{{inventory.pokemon_candy[pkm.family_id]}}">Candy: {{inventory.pokemon_candy[pkm.family_id] | number}}</td>
                                     <td data-order="{{pkm.candy_needed_to_max_evolve}}">Candy: {{pkm.candy_needed_to_max_evolve | number}}</td>
                                     <td data-order="{{pkm.dust_needed_to_max_evolve}}">Dust: {{pkm.dust_needed_to_max_evolve | number}}</td>
                                     <td data-order="{{pkm.power_up_result}}">CP: {{pkm.power_up_result | number}}</td>
@@ -139,6 +140,13 @@
                                     <td data-order="{{pkm.individual_defense}}">Def IV: {{pkm.individual_defense}}</td>
                                     <td>{{attacks[pkm.move_1]}}</td>
                                     <td>{{attacks[pkm.move_2]}}</td>
+                                    <td>
+                                        <button class="btn btn-sm" type="button"
+                                                ng-hide="pkm.candy_needed_to_evolve > inventory.pokemon_candy[pkm.family_id]"
+                                                ng-disabled="evolve_disabled" ng-click="evolve(pkm.id)">
+                                            Evolve
+                                        </button>
+                                    </td>
                                     <td>
                                         <button class="btn btn-sm" type="button" ng-disabled="transfer_disabled" ng-click="transfer(pkm.id)">
                                             Transfer

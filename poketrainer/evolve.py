@@ -28,27 +28,29 @@ class Evolve(object):
 
     def attempt_evolve_pokemon(self, pokemon):
         if self.is_pokemon_eligible_for_evolution(pokemon=pokemon):
-            self.log.info("Evolving pokemon: %s", pokemon)
-            self.parent.sleep(0.2 + self.parent.config.extra_wait)
-            evo_res = self.parent.api.evolve_pokemon(pokemon_id=int(pokemon.id)).get('responses', {}).get('EVOLVE_POKEMON', {})
-            status = evo_res.get('result', -1)
-            # self.sleep(3)
-            if status == 1:
-                evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}),
-                                          self.parent.player_stats.level, self.parent.config.score_method,
-                                          self.parent.config.score_settings)
-                # I don' think we need additional stats for evolved pokemon. Since we do not do anything with it.
-                # evolved_pokemon.pokemon_additional_data = self.game_master.get(pokemon.pokemon_id, PokemonData())
-                self.log.info("Evolved to %s", evolved_pokemon)
-                self.parent.push_to_web('pokemon', 'evolved', evolved_pokemon.to_json())
-                self.parent.inventory.update_player_inventory()
-                return True
-            else:
-                self.log.debug("Could not evolve Pokemon %s", evo_res)
-                self.log.info("Could not evolve pokemon %s | Status %s", pokemon, status)
-                self.parent.inventory.update_player_inventory()
-                return False
+            return self.do_evolve_pokemon(pokemon)
         else:
+            return False
+
+    def do_evolve_pokemon(self, pokemon):
+        self.log.info("Evolving pokemon: %s", pokemon)
+        self.parent.sleep(0.2 + self.parent.config.extra_wait)
+        evo_res = self.parent.api.evolve_pokemon(pokemon_id=int(pokemon.id)).get('responses', {}).get('EVOLVE_POKEMON', {})
+        status = evo_res.get('result', -1)
+        # self.sleep(3)
+        if status == 1:
+            evolved_pokemon = Pokemon(evo_res.get('evolved_pokemon_data', {}),
+                                      self.parent.player_stats.level, self.parent.config.score_method,
+                                      self.parent.config.score_settings)
+            self.log.info("Evolved to %s", evolved_pokemon)
+            self.parent.push_to_web('pokemon', 'evolved',
+                                    {'old': pokemon.__dict__, 'new': evolved_pokemon.__dict__})
+            self.parent.inventory.update_player_inventory()
+            return True
+        else:
+            self.log.debug("Could not evolve Pokemon %s", evo_res)
+            self.log.info("Could not evolve pokemon %s | Status %s", pokemon, status)
+            self.parent.inventory.update_player_inventory()
             return False
 
     def is_pokemon_eligible_for_evolution(self, pokemon):
