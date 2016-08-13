@@ -2,7 +2,7 @@ angular.module('Poketrainer.Service.SocketEvent', [])
     .factory('SocketEvent', function () {
         return {
             _prefix: "socket:",
-            UserList: 'connect',
+            UserList: 'users',
             UserStatus: 'user_status',
             Request: 'pull',
             Data: 'push',

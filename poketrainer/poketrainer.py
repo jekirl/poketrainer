@@ -322,6 +322,7 @@ class Poketrainer(object):
         responses = res.get('responses', {})
         if 'GET_PLAYER' in responses:
             self.player = Player(responses.get('GET_PLAYER', {}).get('player_data', {}))
+            self.push_to_web('player', 'updated', self.player.__dict__)
             self.log.info("Player Info: {0}, Pokemon Caught in this run: {1}".format(self.player, self.pokemon_caught))
 
         if 'GET_INVENTORY' in responses:
@@ -336,6 +337,7 @@ class Poketrainer(object):
                     )
                     if self.exp_start is None:
                         self.exp_start = self.player_stats.run_exp_start
+                    self.push_to_web('player_stats', 'updated', self.player_stats.__dict__)
                     self.log.info("Player Stats: {}".format(self.player_stats))
             if self.config.list_inventory_before_cleanup:
                 self.log.info("Player Inventory: %s", self.inventory)

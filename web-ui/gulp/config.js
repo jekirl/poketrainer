@@ -1,5 +1,5 @@
 ﻿var notifier = require('node-notifier');
-var argv = require('yargs').argv;
+var argv = require('yargs').alias('d', 'debug').argv;
 
 module.exports = (function () {
     var projectName = "poketrainer";
@@ -18,11 +18,12 @@ module.exports = (function () {
 		distPath + "/assets"
     ];
 
-    var debug = true;
-    var live = false;
-    if( typeof(argv.profile) !== "undefined"){
-        live = (argv.profile.toLowerCase() === "live" || argv.profile.toLowerCase() === "production");
-        debug = (argv.profile.toLowerCase() === "debug");
+    var debug = false;
+    var live = true;
+    if (argv.debug) {
+        console.log('debug mode');
+        debug = true;
+        live = false;
     }
     
     var baseUrl = '';

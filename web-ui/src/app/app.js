@@ -41,7 +41,6 @@ angular.module('poketrainer', [
 				return path.replace('?', '/?');
 			}
 
-			console.log(path);
 			return path + '/';
 		})
 		.otherwise('/');

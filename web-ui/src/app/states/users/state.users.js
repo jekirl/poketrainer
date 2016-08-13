@@ -14,10 +14,6 @@ angular.module('Poketrainer.State.Users', [
                             return;
                         }
                         PokeSocket.removeListener(SocketEvent.UserList, userEventCb);
-                        for (var i = 0; i < message.users.length; i++) {
-                            // for testing, TODO: remove for live
-                            message.users[i].status = 'unknown';
-                        }
                         d.resolve(message.users);
                     };
 
@@ -26,7 +22,8 @@ angular.module('Poketrainer.State.Users', [
                     // Emit the event to our socket
                     // after listening for it.
                     // we don't need to since we connect anyway, any issues?
-                    //PokeSocket.emit(SocketEvent.UserList);
+                    // we ened it to get back to the bots-overview?
+                    PokeSocket.emit(SocketEvent.UserList);
 
                     return d.promise;
                 }]
