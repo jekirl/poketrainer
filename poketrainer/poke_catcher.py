@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
 import json
+from time import time
 
 from cachetools import TTLCache
-from time import time
 
 from helper.colorlogger import create_logger
 from helper.utilities import flat_map

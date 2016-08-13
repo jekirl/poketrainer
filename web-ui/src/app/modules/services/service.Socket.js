@@ -1,7 +1,7 @@
 angular.module('Poketrainer.Service.Socket', ['btford.socket-io'])
     .factory('PokeSocket', function (socketFactory, $location) {
-        //var path = $location.url().replace(/\/+$/g, '') + '/socket.io';
-        var path = '/socket.io';
+        var path = window.location.pathname.replace(/\/+$/g, '') + '/socket.io';
+        //var path = '/socket.io';
 
         return socketFactory({
             ioSocket: io.connect(

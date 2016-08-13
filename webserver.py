@@ -1,4 +1,3 @@
-# DISCLAIMER: This is jank
 from __future__ import print_function
 
 import argparse
@@ -6,17 +5,14 @@ import csv
 import json
 import logging
 import os
-from collections import defaultdict
+import socket
 
 import gevent
-import socket
-import zerorpc
-from flask import Flask, flash, jsonify, redirect, render_template, url_for, request, send_from_directory
-from flask_socketio import SocketIO, join_room, leave_room, send, emit
+from flask import Flask, request, send_from_directory
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from six import PY2
 
-from poketrainer.poke_lvl_data import TCPM_VALS
-from poketrainer.pokemon import Pokemon
+import zerorpc
 
 logger = logging.getLogger(__name__)
 logging.getLogger("zerorpc").setLevel(logging.WARNING)
@@ -155,12 +151,12 @@ class BotConnection(object):
         c = self.get_api_rpc()
         try:
             running = c('enable_web_pushing', timeout=1.5)
-            logger.debug('Enabled pushing in bot %s', self.username)
+            logger.info('Enabled pushing in bot %s', self.username)
         except Exception as e:
             if self._bot_rpc and not retry:
                 self._bot_rpc.close()
                 self._bot_rpc = None
-                logger.info('Error connecting to bot %s, retrying', self.username)
+                logger.debug('Error connecting to bot %s, retrying', self.username)
                 return self.test_connection(retry=True)
             else:
                 running = False
@@ -188,10 +184,6 @@ def init_config():
         with open(config_file) as data:
             load.update(json.load(data))
 
-    # Read passed in Arguments
-    def required(x):
-        return x not in load['accounts'][0].keys()
-
     parser.add_argument("-i", "--config_index", help="Index of account in config.json", default=0, type=int)
     config = parser.parse_args()
     load = load['accounts'][config.__dict__['config_index']]
@@ -205,7 +197,6 @@ def init_config():
 app = Flask(__name__, static_folder='web-ui/dist', static_url_path='')
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
-app.debug = True
 socketio = SocketIO(app, async_mode="gevent")
 bot_users = BotUsers()
 
@@ -231,11 +222,17 @@ def static_proxy(filename):
 
 @socketio.on('connect', namespace='/poketrainer')
 def connect():
+    logger.debug('Client connected %s', request.sid)
+    emit('connect', {'success': True})
+
+
+@socketio.on('users', namespace='/poketrainer')
+def users():
     for user in bot_users.__iter__():
         logger.debug("Trying to enable web pushing in a background 'thread' for %s", user.username)
         socketio.start_background_task(user.test_connection)
-    logger.debug('Client connected %s, gave: %s', request.sid, bot_users.to_list())
-    emit('connect', {'success': True, 'users': bot_users.to_list()})
+    logger.debug('%s requested users, gave: %s', request.sid, bot_users.to_list())
+    emit('users', {'success': True, 'users': bot_users.to_list()})
 
 
 @socketio.on('disconnect', namespace='/poketrainer')
@@ -345,7 +342,7 @@ def init_web_config():
     load = {
         "hostname": "0.0.0.0",
         "port": 5000,
-        "debug": True
+        "debug": False
     }
     config_file = "web_config.json"
     # If config file exists, load variables from json
@@ -363,7 +360,8 @@ def main():
     if not web_config["debug"]:
         logging.getLogger(__name__).setLevel(logging.INFO)
 
-    rpc_socket_thread = RpcSocket()
+    # launch rpc socket
+    RpcSocket()
 
     # for some reason when we're using gevent, flask does not output a lot... we'll just notify here
     logger.info('Starting Webserver on %s:%s', str(web_config["hostname"]), str(web_config["port"]))

@@ -1,20 +1,20 @@
 from __future__ import absolute_import
 
-import logging
-import colorlog
 import json
+import logging
 import os
 import os.path
 import socket
-import zerorpc
 from time import time
 
+import colorlog
 import gevent
 from gevent.coros import BoundedSemaphore
 from six import PY2
 
-from helper.utilities import dict_merge
+import zerorpc
 from helper.colorlogger import create_logger
+from helper.utilities import dict_merge
 from library import api
 from pgoapi.exceptions import AuthException
 
@@ -25,7 +25,7 @@ from .incubate import Incubate
 from .inventory import Inventory
 from .location import get_location
 from .map_objects import MapObjects
-from .player import Player as Player
+from .player import Player
 from .player_stats import PlayerStats
 from .poke_catcher import PokeCatcher
 from .release import Release
@@ -41,6 +41,7 @@ class Poketrainer(object):
         self.socket = None
         self.cli_args = args
         self.force_debug = args['debug']
+        self._req_proxy = None
 
         # timers, counters and triggers
         self.pokemon_caught = 0
@@ -170,11 +171,21 @@ class Poketrainer(object):
                 position = prev_location
             self.api.set_position(*position)
 
+            # set proxy if one was provided
+            if self.cli_args['proxy']:
+                self.api.set_proxy(self.cli_args['proxy'])
+                self.log.info('Using proxy: %s', self.cli_args['proxy'])
+
+            # proxies only work with ptc accounts at the moment!
+            if self.cli_args['proxy'] and self.config.auth_service != 'ptc':
+                self.log.error("Currently proxy only works with ptc accounts.")
+                quit()
+
             # retry login every 30 seconds if any errors
             self.log.info('Starting Login process...')
             login = False
             while not login:
-                login = self.api.login(self.config.auth_service, self.config.username, self.config.get_password())
+                login = self.api.login(self.config.auth_service, self.config.username, self.config.get_password(), proxy=self.cli_args['proxy'])
                 if not login:
                     self.log.error('Login error, retrying Login in 30 seconds')
                     self.sleep(30)
@@ -322,6 +333,7 @@ class Poketrainer(object):
         responses = res.get('responses', {})
         if 'GET_PLAYER' in responses:
             self.player = Player(responses.get('GET_PLAYER', {}).get('player_data', {}))
+            self.push_to_web('player', 'updated', self.player.__dict__)
             self.log.info("Player Info: {0}, Pokemon Caught in this run: {1}".format(self.player, self.pokemon_caught))
 
         if 'GET_INVENTORY' in responses:
@@ -336,6 +348,7 @@ class Poketrainer(object):
                     )
                     if self.exp_start is None:
                         self.exp_start = self.player_stats.run_exp_start
+                    self.push_to_web('player_stats', 'updated', self.player_stats.__dict__)
                     self.log.info("Player Stats: {}".format(self.player_stats))
             if self.config.list_inventory_before_cleanup:
                 self.log.info("Player Inventory: %s", self.inventory)
