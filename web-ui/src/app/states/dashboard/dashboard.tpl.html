@@ -142,7 +142,7 @@
                                     <td>{{attacks[pkm.move_2]}}</td>
                                     <td>
                                         <button class="btn btn-sm" type="button"
-                                                ng-hide="pkm.candy_needed_to_evolve > inventory.pokemon_candy[pkm.family_id]"
+                                                ng-hide="pkm.candy_needed_to_evolve == 0 || pkm.candy_needed_to_evolve > inventory.pokemon_candy[pkm.family_id]"
                                                 ng-disabled="evolve_disabled" ng-click="evolve(pkm.id)">
                                             Evolve
                                         </button>
