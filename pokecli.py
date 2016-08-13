@@ -47,6 +47,7 @@ def init_arguments():
                         help="Location. Only applies if an account was selected through config_index parameter")
     parser.add_argument("-e", "--encrypt_lib", help="encrypt lib, libencrypt.so/encrypt.dll", default="libencrypt.so")
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
+    parser.add_argument("-p", "--proxy", help="Use Proxy, proxy_ip:port", default=None)
     arguments = parser.parse_args()
     return arguments.__dict__
 

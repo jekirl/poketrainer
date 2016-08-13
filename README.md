@@ -33,6 +33,8 @@ optional arguments:
   -e ENCRYPT_LIB, --encrypt-lib ENCRYPT_LIB
                         encrypt lib, libencrypt.so/encrypt.dll
   -d, --debug           Debug Mode
+  -p PROXY, --proxy PROXY
+                        Use Proxy, proxy_ip:port
 ```
 
 ### Web UI
@@ -182,6 +184,27 @@ The container is now running in the foregorund, and can be stopped by using `Ctr
 You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.  	
 
 
+### Proxy Support
+Poketrainer supports:
+ * HTTP/HTTPS Proxies (IP Authentication or Basic Authentication)
+ * SOCKS5 Proxies
+ * PTC accounts Only
+
+To start Poketrainer with a proxy assigned, you need the `-p`/`--proxy` flag when running `pokecli.py`. Use the `proxy_ip:proxy_port` format
+
+Examples:
+ * To start Poketrainer with a HTTP/HTTPS proxy:
+
+        python pokecli.py -i 0 -p 123.123.123.123:1234
+ * Basic Auth HTTP/HTTPS Proxy:
+
+        python pokecli.py -i 0 -p https://user:pass@123.123.123.123:1234
+ * SOCKS5 proxy:
+
+        python pokecli.py -i 0 -p socks5://123.123.123.123:1234 
+
+    If you get an error, run `pip install pysocks` to add support to SOCKS5 proxies.
+    
 ### What's working:
 What's working:
  * A lot of things. Check out the example config to see some of the features. Catching Lured pokemon, sniping, regular pokemon, multiple kinds of navigation (google maps, walking, driving, customized speed), a web ui, auto transfers, auto evolves, auto power ups, auto egg incubation, inventory managament, multiple account botting. And much more, README to be updated soon.
@@ -203,6 +226,7 @@ What's working:
 * [AHAAAAAAA](https://github.com/AHAAAAAAA/PokemonGo-Map) for parts of the s2sphere stuff
 * [beeedy](https://github.com/beeedy) for ability to transfer duplicate pokemon
 * [infinitewarp](https://github.com/infinitewarp) for introducing tox and cleaning up the code
+* [vmunich](https://github.com/vmunich) for implementing proxy support
 * And to anyone on the pokemongodev slack channel <3
 
 >>>>>>> super sketch but yolo
