@@ -16,7 +16,7 @@ class Release(object):
         self.release_method_factory = ReleaseMethodFactory(self.parent.config.config_data)
 
     def do_release_pokemon_by_id(self, p_id):
-        release_res = self.parent.api.release_pokemon(pokemon_id=long(p_id)).get('responses', {}).get('RELEASE_POKEMON', {})
+        release_res = self.parent.api.release_pokemon(pokemon_id=int(p_id)).get('responses', {}).get('RELEASE_POKEMON', {})
         status = release_res.get('result', -1)
         if not status:
             self.log.debug("Failed to release pokemon id %s, %s", p_id, release_res)

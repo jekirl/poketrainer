@@ -30,7 +30,7 @@ class Evolve(object):
         if self.is_pokemon_eligible_for_evolution(pokemon=pokemon):
             self.log.info("Evolving pokemon: %s", pokemon)
             self.parent.sleep(0.2 + self.parent.config.extra_wait)
-            evo_res = self.parent.api.evolve_pokemon(pokemon_id=long(pokemon.id)).get('responses', {}).get('EVOLVE_POKEMON', {})
+            evo_res = self.parent.api.evolve_pokemon(pokemon_id=int(pokemon.id)).get('responses', {}).get('EVOLVE_POKEMON', {})
             status = evo_res.get('result', -1)
             # self.sleep(3)
             if status == 1:
