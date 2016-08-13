@@ -1,0 +1,77 @@
+.angular-google-map-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+.angular-leaflet-map {
+  position: relative;
+  height: 350px;
+}
+@media (min-width: 768px) {
+  .angular-leaflet-map {
+    position: absolute;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+  }
+}
+.poke-menu {
+  margin: 16px;
+  z-index: 1030;
+}
+@media (max-width: 767px) {
+  .poke-menu div {
+    text-align: center !important;
+  }
+}
+@media (min-width: 768px) {
+  .poke-menu {
+    bottom: 0;
+    position: fixed;
+    left: 0;
+    right: 0;
+  }
+}
+.chart {
+  position: relative;
+  display: inline-block;
+  width: 110px;
+  height: 110px;
+  text-align: center;
+}
+.chart canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.percent {
+  display: inline-block;
+  line-height: 110px;
+  z-index: 2;
+}
+.percent:after {
+  content: '%';
+  margin-left: 0.1em;
+  font-size: .8em;
+}
+
+@media (min-width: 768px) {
+  .modal-xl {
+    width: 90%;
+   max-width:1200px;
+  }
+}
+
+.md-top.md-center,
+.md-bottom.md-center {
+  left: 50%;
+  transform: translate3d(-50%, 0, 0);
+  z-index: 1080 !important;
+}
+md-tooltip{
+  z-index: 1090 !important;
+}
