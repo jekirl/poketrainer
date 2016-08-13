@@ -67,7 +67,6 @@ def get_latest_rares():
             for process in processes:
                 process.join()
 
-                
 while True:
     print('Checking for new pokemon')
     get_latest_rares()
