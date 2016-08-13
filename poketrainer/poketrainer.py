@@ -5,11 +5,13 @@ import logging
 import os
 import os.path
 import socket
+from collections import defaultdict
 from time import time
 
 import colorlog
 import gevent
 from gevent.coros import BoundedSemaphore
+import six
 from six import PY2
 
 import zerorpc
@@ -28,6 +30,7 @@ from .map_objects import MapObjects
 from .player import Player
 from .player_stats import PlayerStats
 from .poke_catcher import PokeCatcher
+from .poke_utils import get_item_name
 from .release import Release
 from .sniper import Sniper
 
@@ -62,6 +65,13 @@ class Poketrainer(object):
 
         self._open_socket()
 
+        # config values that might be changed during runtime
+        self.step_size = self.config.step_size
+        self.should_catch_pokemon = self.config.should_catch_pokemon
+        self.can_push_to_web = False
+        self.web_rpc = None
+
+        # other objects
         self.player = Player({})
         self.player_stats = PlayerStats({})
         self.inventory = Inventory(self, [])
@@ -76,12 +86,6 @@ class Poketrainer(object):
         self._origPosF = (0, 0, 0)
         self.api = None
         self._load_api()
-
-        # config values that might be changed during runtime
-        self.step_size = self.config.step_size
-        self.should_catch_pokemon = self.config.should_catch_pokemon
-        self.can_push_to_web = False
-        self.web_rpc = None
 
         # threading / locking
         self.sem = BoundedSemaphore(1)  # gevent
@@ -185,7 +189,11 @@ class Poketrainer(object):
             self.log.info('Starting Login process...')
             login = False
             while not login:
-                login = self.api.login(self.config.auth_service, self.config.username, self.config.get_password(), proxy=self.cli_args['proxy'])
+                if self.cli_args['proxy']:
+                    login = self.api.login(self.config.auth_service, self.config.username, self.config.get_password(), proxy=self.cli_args['proxy'])
+                else:
+                    # preserve compatibility with system pgoapi
+                    login = self.api.login(self.config.auth_service, self.config.username, self.config.get_password())
                 if not login:
                     self.log.error('Login error, retrying Login in 30 seconds')
                     self.sleep(30)
@@ -342,6 +350,7 @@ class Poketrainer(object):
             self.inventory.update_player_inventory(res=res)
             for inventory_item in self.inventory.get_raw_inventory_items():
                 if "player_stats" in inventory_item['inventory_item_data']:
+                    old_level = self.player_stats.level
                     self.player_stats = PlayerStats(
                         inventory_item['inventory_item_data']['player_stats'],
                         self.pokemon_caught, self.start_time, self.exp_start
@@ -350,6 +359,23 @@ class Poketrainer(object):
                         self.exp_start = self.player_stats.run_exp_start
                     self.push_to_web('player_stats', 'updated', self.player_stats.__dict__)
                     self.log.info("Player Stats: {}".format(self.player_stats))
+                    if self.player_stats.level > old_level > 0:
+                        self.log.info('Collecting level up rewards for level %s', self.player_stats.level)
+                        self.sleep(2.0)
+                        resp = self.api.level_up_rewards(level=self.player_stats.level)\
+                            .get('responses', {}).get('LEVEL_UP_REWARDS', {})
+                        result = resp.get('result', -1)
+                        if result == 1:
+                            items_awarded = resp.get('items_awarded', [])
+                            items = defaultdict(int)
+                            for item in items_awarded:
+                                items[item['item_id']] += item['item_count']
+                            reward = ''
+                            for item_id, amount in six.iteritems(items):
+                                if reward != '':
+                                    reward += ', '
+                                reward += str(amount) + 'x ' + get_item_name(item_id)
+                            self.log.info('Collected level up rewards: %s', reward)
             if self.config.list_inventory_before_cleanup:
                 self.log.info("Player Inventory: %s", self.inventory)
             if not login_response:

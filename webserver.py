@@ -197,6 +197,7 @@ def init_config():
 app = Flask(__name__, static_folder='web-ui/dist', static_url_path='')
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
+app.debug = True
 socketio = SocketIO(app, async_mode="gevent")
 bot_users = BotUsers()
 

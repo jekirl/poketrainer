@@ -153,7 +153,7 @@ class PGoApi:
     """
     The login function is not needed anymore but still in the code for backward compatibility"
     """
-    def login(self, provider, username, password, proxy, lat=None, lng=None, alt=None, app_simulation=True):
+    def login(self, provider, username, password, proxy=None, lat=None, lng=None, alt=None, app_simulation=True):
 
         if lat is not None and lng is not None and alt is not None:
             self._position_lat = lat
