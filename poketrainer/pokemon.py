@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import json
-from collections import defaultdict
 from math import floor, sqrt
 from os import sep as os_sep
 from os import path

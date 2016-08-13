@@ -1,4 +1,3 @@
-# DISCLAIMER: This is jank
 from __future__ import print_function
 
 import argparse
@@ -6,17 +5,14 @@ import csv
 import json
 import logging
 import os
-from collections import defaultdict
+import socket
 
 import gevent
-import socket
-import zerorpc
-from flask import Flask, flash, jsonify, redirect, render_template, url_for, request, send_from_directory
-from flask_socketio import SocketIO, join_room, leave_room, send, emit
+from flask import Flask, request, send_from_directory
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from six import PY2
 
-from poketrainer.poke_lvl_data import TCPM_VALS
-from poketrainer.pokemon import Pokemon
+import zerorpc
 
 logger = logging.getLogger(__name__)
 logging.getLogger("zerorpc").setLevel(logging.WARNING)
@@ -231,7 +227,7 @@ def connect():
 
 
 @socketio.on('users', namespace='/poketrainer')
-def connect():
+def users():
     for user in bot_users.__iter__():
         logger.debug("Trying to enable web pushing in a background 'thread' for %s", user.username)
         socketio.start_background_task(user.test_connection)
@@ -364,7 +360,8 @@ def main():
     if not web_config["debug"]:
         logging.getLogger(__name__).setLevel(logging.INFO)
 
-    rpc_socket_thread = RpcSocket()
+    # launch rpc socket
+    RpcSocket()
 
     # for some reason when we're using gevent, flask does not output a lot... we'll just notify here
     logger.info('Starting Webserver on %s:%s', str(web_config["hostname"]), str(web_config["port"]))

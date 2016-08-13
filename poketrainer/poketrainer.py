@@ -1,20 +1,20 @@
 from __future__ import absolute_import
 
-import logging
-import colorlog
 import json
+import logging
 import os
 import os.path
 import socket
-import zerorpc
 from time import time
 
+import colorlog
 import gevent
 from gevent.coros import BoundedSemaphore
 from six import PY2
 
-from helper.utilities import dict_merge
+import zerorpc
 from helper.colorlogger import create_logger
+from helper.utilities import dict_merge
 from library import api
 from pgoapi.exceptions import AuthException
 
@@ -25,7 +25,7 @@ from .incubate import Incubate
 from .inventory import Inventory
 from .location import get_location
 from .map_objects import MapObjects
-from .player import Player as Player
+from .player import Player
 from .player_stats import PlayerStats
 from .poke_catcher import PokeCatcher
 from .release import Release
