@@ -30,7 +30,7 @@ from .map_objects import MapObjects
 from .player import Player
 from .player_stats import PlayerStats
 from .poke_catcher import PokeCatcher
-from .poke_utils import get_item_name
+from .poke_utils import get_item_name, get_pokemon_by_long_id
 from .release import Release
 from .sniper import Sniper
 
@@ -497,6 +497,19 @@ class Poketrainer(object):
 
     def get_caught_pokemons(self):
         return self.inventory.get_caught_pokemon(as_dict=True)
+
+    def evolve_pokemon_by_id(self, p_id):
+        # acquire lock for this thread
+        if self.thread_lock(persist=True):
+            try:
+                pokemon = get_pokemon_by_long_id(p_id, self.inventory.get_raw_inventory_items())
+                return self.evolve.do_evolve_pokemon(pokemon)
+            finally:
+                # after we're done, release lock
+                self.persist_lock = False
+                self.thread_release()
+        else:
+            return 'Only one Simultaneous request allowed'
 
     def release_pokemon_by_id(self, p_id):
         # acquire lock for this thread

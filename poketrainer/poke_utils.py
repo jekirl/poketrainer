@@ -30,7 +30,7 @@ def create_capture_probability(capture_probability):
 def get_pokemon_by_long_id(pokemon_id, res):
     for inventory_item in res:
         pokemon_data = inventory_item['inventory_item_data'].get('pokemon_data', {})
-        if not pokemon_data.get('is_egg', False) and pokemon_data.get('id', 'NA') == pokemon_id:
+        if not pokemon_data.get('is_egg', False) and str(pokemon_data.get('id', 'NA')) == str(pokemon_id):
             return Pokemon(pokemon_data)
     return None
 
