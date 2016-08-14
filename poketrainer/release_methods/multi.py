@@ -3,8 +3,9 @@ import logging
 
 from six import iteritems
 
-import base
 from library.api.pgoapi.protos.POGOProtos import Enums_pb2
+
+from . import base
 
 logger = logging.getLogger(__name__)
 
