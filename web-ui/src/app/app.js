@@ -53,10 +53,22 @@ angular.module('poketrainer', [
 
 	})
 
-	.run(function pokeTrainerRun ($state, $rootScope) {
-		$rootScope.$on('inventory:updated', function(data){
+	.run(function pokeTrainerRun ($state, $rootScope, $document) {
+		$rootScope.$on('inventory:updated', function(event, data){
 			//console.log("Inventory!! :D ")
-		})
+		});
+		$rootScope.$on('$stateChangeStart', function(){
+			$document.find('.screen-loading-overlay').removeClass('hidden');
+		});
+		$rootScope.$on('$stateChangeSuccess', function(){
+			$document.find('.screen-loading-overlay').addClass('hidden');
+		});
+		$rootScope.$on('$stateChangeError', function (event, toState, toParams, fromState, fromParams, error) {
+			if (error === "offline") {
+				$state.go("public.users");
+				$document.find('.screen-loading-overlay').removeClass('hidden');
+			}
+		});
 	})
 
 ;

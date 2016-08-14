@@ -7,6 +7,7 @@ angular.module('Poketrainer.Service.SocketEvent', [])
             Request: 'pull',
             Data: 'push',
             Join: 'join',
+            Leave: 'leave',
             Transfer: 'transfer',
             Evolve: 'evolve',
             Snipe: 'snipe'

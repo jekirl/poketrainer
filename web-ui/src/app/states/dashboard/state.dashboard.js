@@ -23,7 +23,11 @@ angular.module('Poketrainer.State.Status', [
                     var d = $q.defer();
 
                     var locationDataCb = function locationDataCb(message) {
-                        if(angular.isUndefined(message) || !message.success || message.type != 'location'){
+                        if(angular.isUndefined(message) || message.type != 'location') {
+                            return;
+                        }
+                        if (!message.success) {
+                            d.reject('offline');
                             return;
                         }
                         d.resolve(angular.fromJson(message.data));
@@ -41,7 +45,11 @@ angular.module('Poketrainer.State.Status', [
                     var d = $q.defer();
 
                     var inventoryDataCb = function inventoryDataCb(message) {
-                        if(angular.isUndefined(message) || !message.success || message.type != 'inventory'){
+                        if(angular.isUndefined(message) || message.type != 'inventory'){
+                            return;
+                        }
+                        if (!message.success) {
+                            d.reject('offline');
                             return;
                         }
                         d.resolve(angular.fromJson(message.data));
@@ -59,7 +67,11 @@ angular.module('Poketrainer.State.Status', [
                     var d = $q.defer();
 
                     var playerDataCb = function playerDataCb(message) {
-                        if(angular.isUndefined(message) || !message.success || message.type != 'player'){
+                        if(angular.isUndefined(message) || message.type != 'player'){
+                            return;
+                        }
+                        if (!message.success) {
+                            d.reject('offline');
                             return;
                         }
                         d.resolve(angular.fromJson(message.data));
@@ -77,7 +89,11 @@ angular.module('Poketrainer.State.Status', [
                     var d = $q.defer();
 
                     var playerStatsDataCb = function playerStatsDataCb(message) {
-                        if(angular.isUndefined(message) || !message.success || message.type != 'player_stats'){
+                        if(angular.isUndefined(message) || message.type != 'player_stats'){
+                            return;
+                        }
+                        if (!message.success) {
+                            d.reject('offline');
                             return;
                         }
                         d.resolve(angular.fromJson(message.data));
@@ -95,7 +111,11 @@ angular.module('Poketrainer.State.Status', [
                     var d = $q.defer();
 
                     var pokemonDataCb = function pokemonDataCb(message) {
-                        if(angular.isUndefined(message) || !message.success || message.type != 'pokemon'){
+                        if(angular.isUndefined(message) || message.type != 'pokemon'){
+                            return;
+                        }
+                        if (!message.success) {
+                            d.reject('offline');
                             return;
                         }
                         d.resolve(angular.fromJson(message.data));
@@ -113,7 +133,11 @@ angular.module('Poketrainer.State.Status', [
                     var d = $q.defer();
 
                     var attacksDataCb = function attacksDataCb(message) {
-                        if(angular.isUndefined(message) || !message.success || message.type != 'attacks'){
+                        if(angular.isUndefined(message) || message.type != 'attacks'){
+                            return;
+                        }
+                        if (!message.success) {
+                            d.reject('offline');
                             return;
                         }
                         d.resolve(angular.fromJson(message.data));
@@ -141,11 +165,20 @@ angular.module('Poketrainer.State.Status', [
     .controller('DashboardController', function DashboardController($scope, $stateParams, $mdToast, PokeSocket, leafletData,
                                                                     locationData, inventoryData, playerData, playerStatsData,
                                                                     pokemonData, attacksData, SocketEvent, DTOptionsBuilder) {
+        var userEventUpdate = function userEventUpdate(event, message) {
+            if ($stateParams.username == message.username) {
+                if (message.status == 'offline') {
+                    $state.go('public.users');
+                }
+            }
+        };
+        $scope.$on(SocketEvent._prefix + SocketEvent.UserStatus, userEventUpdate);
 
+        $scope.$on("$destroy", function(){
+            PokeSocket.emit(SocketEvent.Leave, {room: $stateParams.username});
+        });
         // Join specific user room
-        // TODO: we should leave the room when we change the page
         PokeSocket.emit(SocketEvent.Join, {room: $stateParams.username});
-        //console.log("Joined! ", SocketEvent.Join, $stateParams.username);
 
         /** TRANSFER **/
         var transfer_p_id;
