@@ -197,7 +197,7 @@ def init_config():
 app = Flask(__name__, static_folder='web-ui/dist', static_url_path='')
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 app.secret_key = ".t\x86\xcb3Lm\x0e\x8c:\x86\xe8FD\x13Z\x08\xe1\x04(\x01s\x9a\xae"
-app.debug = True
+app.debug = False
 socketio = SocketIO(app, async_mode="gevent")
 bot_users = BotUsers()
 
@@ -223,6 +223,9 @@ def static_proxy(filename):
 
 @socketio.on('connect', namespace='/poketrainer')
 def connect():
+    for user in bot_users.__iter__():
+        logger.debug("Trying to enable web pushing in a background 'thread' for %s", user.username)
+        socketio.start_background_task(user.test_connection)
     logger.debug('Client connected %s', request.sid)
     emit('connect', {'success': True})
 
@@ -247,32 +250,36 @@ def get(message):
     types = message['types']
     user = bot_users.get(username)
     if not user:
+        emit('pull', {'success': False, 'message': "Could not find bot '%s', will not get %s" % (username, types)})
         logger.error("could not find bot '%s', will not get %s", username, types)
         return
-    c = user.get_api_rpc()
-    if 'location' in types:
-        response = c.current_location()
-        logger.debug('emitting location')
-        emit('pull', {'success': True, 'type': 'location', 'data': response})
-    if 'player' in types:
-        response = c.get_player()
-        logger.debug('emitting player')
-        emit('pull', {'success': True, 'type': 'player', 'data': response})
-    if 'player_stats' in types:
-        response = c.get_player_stats()
-        logger.debug('emitting player_stats')
-        emit('pull', {'success': True, 'type': 'player_stats', 'data': response})
-    if 'inventory' in types:
-        response = c.get_inventory()
-        logger.debug('emitting inventory')
-        emit('pull', {'success': True, 'type': 'inventory', 'data': response})
-    if 'pokemon' in types:
-        response = c.get_caught_pokemons()
-        logger.debug('emitting pokemon')
-        emit('pull', {'success': True, 'type': 'pokemon', 'data': response})
-    if 'attacks' in types:
-        logger.debug('emitting attacks')
-        emit('pull', {'success': True, 'type': 'attacks', 'data': attacks})
+    try:
+        c = user.get_api_rpc()
+        if 'location' in types:
+            response = c.current_location()
+            logger.debug('emitting location')
+            emit('pull', {'success': True, 'type': 'location', 'data': response})
+        if 'player' in types:
+            response = c.get_player()
+            logger.debug('emitting player')
+            emit('pull', {'success': True, 'type': 'player', 'data': response})
+        if 'player_stats' in types:
+            response = c.get_player_stats()
+            logger.debug('emitting player_stats')
+            emit('pull', {'success': True, 'type': 'player_stats', 'data': response})
+        if 'inventory' in types:
+            response = c.get_inventory()
+            logger.debug('emitting inventory')
+            emit('pull', {'success': True, 'type': 'inventory', 'data': response})
+        if 'pokemon' in types:
+            response = c.get_caught_pokemons()
+            logger.debug('emitting pokemon')
+            emit('pull', {'success': True, 'type': 'pokemon', 'data': response})
+        if 'attacks' in types:
+            logger.debug('emitting attacks')
+            emit('pull', {'success': True, 'type': 'attacks', 'data': attacks})
+    except:
+        emit('pull', {'success': False, 'message': "Unknown Issue"})
 
 
 @socketio.on('join', namespace='/poketrainer')
@@ -370,12 +377,12 @@ def init_web_config():
 
 
 def main():
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s: [%(levelname)5s] %(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] s%(message)s')
 
     web_config = init_web_config()
 
-    if not web_config["debug"]:
-        logging.getLogger(__name__).setLevel(logging.INFO)
+    if web_config["debug"]:
+        logging.getLogger(__name__).setLevel(logging.DEBUG)
 
     # launch rpc socket
     RpcSocket()
