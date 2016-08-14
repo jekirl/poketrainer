@@ -1,8 +1,13 @@
 import logging
 
+import six
+
 from library.api.pgoapi.protos.POGOProtos import Enums_pb2
 
 from . import base
+
+if six.PY3:
+    from past.builtins import map
 
 logger = logging.getLogger(__name__)
 
