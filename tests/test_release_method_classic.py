@@ -1,7 +1,7 @@
 import random
 import unittest
 from copy import deepcopy
-from unittest import skip, skipIf
+from unittest import skipIf
 
 import six
 
@@ -184,8 +184,6 @@ class TestReleaseMethodClassic(unittest.TestCase):
         self.assertListEqual(to_keep, expected_keep)
         self.assertListEqual(to_release, expected_release)
 
-    # TODO FIXME Stop skipping this test! Fix whatever is wrong with sort_key.
-    @skip("something is wrong with the ternary statement that sets sort_key")
     def test_get_pokemon_to_release__keep_min_prefer_iv_also_keep_cp_over(self):
 
         pokemon_id = Pokedex.RATTATA
