@@ -1,9 +1,6 @@
 import random
 import unittest
 from copy import deepcopy
-from unittest import skipIf
-
-import six
 
 from poketrainer.pokedex import Pokedex
 from poketrainer.pokemon import Pokemon
@@ -51,8 +48,6 @@ class TestReleaseMethodClassic(unittest.TestCase):
         to_release, to_keep = releaser.get_pokemon_to_release(pokemon_id, pokemon_list)
         return to_release, to_keep
 
-    # TODO FIXME Stop skipping this test! Fix whatever is wrong with sort_key in py3.
-    @skipIf(six.PY3, 'not sure why python3 behaves differently here')
     def test_get_pokemon_to_release__throw_after_min(self):
 
         pokemon_id = Pokedex.PIDGEY
@@ -74,8 +69,6 @@ class TestReleaseMethodClassic(unittest.TestCase):
         self.assertListEqual(to_keep, expected_keep)
         self.assertListEqual(to_release, expected_release)
 
-    # TODO FIXME Stop skipping this test! Fix whatever is wrong with sort_key in py3.
-    @skipIf(six.PY3, 'not sure why python3 behaves differently here')
     def test_get_pokemon_to_release__keep_up_to_max(self):
 
         pokemon_id = Pokedex.EEVEE
