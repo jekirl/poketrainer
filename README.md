@@ -38,9 +38,12 @@ optional arguments:
 ```
 
 ### Web UI
- * Run python web.py to get a webservice to show you player information, this can be seen at:
-  * http://127.0.0.1:5000/YOUR_USERNAME_HERE
+ * You can start the new Web UI by running `python webserver.py`
+  * by default it's accessible through http://127.0.0.1:5000/
   * Only 1 needs to run regardless of how many bots you are running
+ * If you're having trouble with this Web UI, please open an issue
+ * You can also fall back to the old Web UI by running `python web.py`, it has most information available but will not update the information whithout reloading
+  * Note: You will need to access the old Web UI via http://127.0.0.1:5000/YOUR_USERNAME_HERE
 
 ----
 
