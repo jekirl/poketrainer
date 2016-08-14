@@ -1,6 +1,10 @@
+import logging
+
 from library.api.pgoapi.protos.POGOProtos import Enums_pb2
 
 from . import base
+
+logger = logging.getLogger(__name__)
 
 
 class ReleaseMethod(base.ReleaseMethod):
@@ -40,6 +44,9 @@ class ReleaseMethod(base.ReleaseMethod):
             return False
         # keep defined pokemon unless we are above MAX_SIMILAR_POKEMON
         if pokemon.pokemon_id in self.keep_pokemon_ids and kept_pokemon_of_type <= self.max_similar_pokemon:
+            return False
+        # never release pokemon currently deployed to gyms
+        if pokemon.is_deployed:
             return False
         # release defined throwaway pokemons
         if pokemon.pokemon_id in self.throw_pokemon_ids:

@@ -47,6 +47,9 @@ class ReleaseMethod(base.ReleaseMethod):
         # keep defined pokemon unless we are above MAX_SIMILAR_POKEMON
         if pokemon.pokemon_id in self.keep_pokemon_ids and kept_pokemon_of_type <= self.max_similar_pokemon:
             return False
+        # never release pokemon currently deployed to gyms
+        if pokemon.is_deployed:
+            return False
         # release defined throwaway pokemons
         if pokemon.pokemon_id in self.throw_pokemon_ids:
             return True
