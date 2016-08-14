@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 from helper.colorlogger import create_logger
-
 from library.api.pgoapi.protos.POGOProtos.Inventory import \
     Item_pb2 as Item_Enums
 
