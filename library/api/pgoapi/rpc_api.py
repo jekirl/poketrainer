@@ -180,7 +180,7 @@ class RpcApi:
         if player_position is not None:
             request.latitude, request.longitude, request.altitude = player_position
 
-        request.altitude = 8  # not as suspicious as 0
+        request.altitude = round(random.random() * 5 + 15, 2)  # not as suspicious as 0 or 8
 
         """ generate sub requests before signature generation """
         request = self._build_sub_requests(request, subrequests)
