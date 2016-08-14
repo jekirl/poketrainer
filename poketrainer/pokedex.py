@@ -258,6 +258,74 @@ class Pokedex(dict):
             self.MEWTWO: 0, self.MEW: 0
         }
 
+        self.stage = {
+            self.MISSINGNO: 0, self.BULBASAUR: 2, self.IVYSAUR: 0, self.VENUSAUR: 0,
+            self.CHARMANDER: 5, self.CHARMELEON: 0, self.CHARIZARD: 0, self.SQUIRTLE: 8,
+            self.WARTORTLE: 0, self.BLASTOISE: 0, self.CATERPIE: 11, self.METAPOD: 0,
+            self.BUTTERFREE: 0, self.WEEDLE: 14, self.KAKUNA: 0, self.BEEDRILL: 0, self.PIDGEY: 17,
+            self.PIDGEOTTO: 0, self.PIDGEOT: 0, self.RATTATA: 0, self.RATICATE: 0, self.SPEAROW: 0,
+            self.FEAROW: 0, self.EKANS: 0, self.ARBOK: 0, self.PIKACHU: 0, self.RAICHU: 0,
+            self.SANDSHREW: 0, self.SANDSLASH: 0, self.NIDORAN_FEMALE: 30, self.NIDORINA: 0,
+            self.NIDOQUEEN: 0, self.NIDORAN_MALE: 33, self.NIDORINO: 0, self.NIDOKING: 0,
+            self.CLEFAIRY: 0, self.CLEFABLE: 0, self.VULPIX: 0, self.NINETALES: 0, self.JIGGLYPUFF: 0,
+            self.WIGGLYTUFF: 0, self.ZUBAT: 0, self.GOLBAT: 0, self.ODDISH: 44, self.GLOOM: 0,
+            self.VILEPLUME: 0, self.PARAS: 0, self.PARASECT: 0, self.VENONAT: 0, self.VENOMOTH: 0,
+            self.DIGLETT: 0, self.DUGTRIO: 0, self.MEOWTH: 0, self.PERSIAN: 0, self.PSYDUCK: 0,
+            self.GOLDUCK: 0, self.MANKEY: 0, self.PRIMEAPE: 0, self.GROWLITHE: 0, self.ARCANINE: 0,
+            self.POLIWAG: 61, self.POLIWHIRL: 0, self.POLIWRATH: 0, self.ABRA: 64, self.KADABRA: 0,
+            self.ALAKAZAM: 0, self.MACHOP: 67, self.MACHOKE: 0, self.MACHAMP: 0, self.BELLSPROUT: 70,
+            self.WEEPINBELL: 0, self.VICTREEBEL: 0, self.TENTACOOL: 0, self.TENTACRUEL: 0,
+            self.GEODUDE: 75, self.GRAVELER: 0, self.GOLEM: 0, self.PONYTA: 0, self.RAPIDASH: 0,
+            self.SLOWPOKE: 0, self.SLOWBRO: 0, self.MAGNEMITE: 0, self.MAGNETON: 0, self.FARFETCHD: 0,
+            self.DODUO: 0, self.DODRIO: 0, self.SEEL: 0, self.DEWGONG: 0, self.GRIMER: 0, self.MUK: 0,
+            self.SHELLDER: 0, self.CLOYSTER: 0, self.GASTLY: 93, self.HAUNTER: 0, self.GENGAR: 0,
+            self.ONIX: 0, self.DROWZEE: 0, self.HYPNO: 0, self.KRABBY: 0, self.KINGLER: 0, self.VOLTORB: 0,
+            self.ELECTRODE: 0, self.EXEGGCUTE: 0, self.EXEGGUTOR: 0, self.CUBONE: 0, self.MAROWAK: 0,
+            self.HITMONLEE: 0, self.HITMONCHAN: 0, self.LICKITUNG: 0, self.KOFFING: 0, self.WEEZING: 0,
+            self.RHYHORN: 0, self.RHYDON: 0, self.CHANSEY: 0, self.TANGELA: 0, self.KANGASKHAN: 0,
+            self.HORSEA: 0, self.SEADRA: 0, self.GOLDEEN: 0, self.SEAKING: 0, self.STARYU: 0, self.STARMIE: 0,
+            self.MR_MIME: 0, self.SCYTHER: 0, self.JYNX: 0, self.ELECTABUZZ: 0, self.MAGMAR: 0, self.PINSIR: 0,
+            self.TAUROS: 0, self.MAGIKARP: 0, self.GYARADOS: 0, self.LAPRAS: 0, self.DITTO: 0, self.EEVEE: 0,
+            self.VAPOREON: 0, self.JOLTEON: 0, self.FLAREON: 0, self.PORYGON: 0, self.OMANYTE: 0, self.OMASTAR: 0,
+            self.KABUTO: 0, self.KABUTOPS: 0, self.AERODACTYL: 0, self.SNORLAX: 0, self.ARTICUNO: 0,
+            self.ZAPDOS: 0, self.MOLTRES: 0, self.DRATINI: 148, self.DRAGONAIR: 0, self.DRAGONITE: 0,
+            self.MEWTWO: 0, self.MEW: 0
+        }
+
+        self.family = {
+            self.MISSINGNO: 0, self.BULBASAUR: 1, self.IVYSAUR: 1, self.VENUSAUR: 0,
+            self.CHARMANDER: 4, self.CHARMELEON: 4, self.CHARIZARD: 0, self.SQUIRTLE: 7,
+            self.WARTORTLE: 7, self.BLASTOISE: 0, self.CATERPIE: 10, self.METAPOD: 10,
+            self.BUTTERFREE: 0, self.WEEDLE: 13, self.KAKUNA: 13, self.BEEDRILL: 0, self.PIDGEY: 16,
+            self.PIDGEOTTO: 16, self.PIDGEOT: 0, self.RATTATA: 19, self.RATICATE: 0, self.SPEAROW: 21,
+            self.FEAROW: 0, self.EKANS: 23, self.ARBOK: 0, self.PIKACHU: 25, self.RAICHU: 0,
+            self.SANDSHREW: 27, self.SANDSLASH: 0, self.NIDORAN_FEMALE: 29, self.NIDORINA: 29,
+            self.NIDOQUEEN: 0, self.NIDORAN_MALE: 32, self.NIDORINO: 32, self.NIDOKING: 0,
+            self.CLEFAIRY: 35, self.CLEFABLE: 0, self.VULPIX: 37, self.NINETALES: 0, self.JIGGLYPUFF: 39,
+            self.WIGGLYTUFF: 0, self.ZUBAT: 41, self.GOLBAT: 0, self.ODDISH: 43, self.GLOOM: 43,
+            self.VILEPLUME: 0, self.PARAS: 46, self.PARASECT: 0, self.VENONAT: 48, self.VENOMOTH: 0,
+            self.DIGLETT: 50, self.DUGTRIO: 0, self.MEOWTH: 52, self.PERSIAN: 0, self.PSYDUCK: 54,
+            self.GOLDUCK: 0, self.MANKEY: 56, self.PRIMEAPE: 0, self.GROWLITHE: 58, self.ARCANINE: 0,
+            self.POLIWAG: 60, self.POLIWHIRL: 60, self.POLIWRATH: 0, self.ABRA: 63, self.KADABRA: 63,
+            self.ALAKAZAM: 0, self.MACHOP: 66, self.MACHOKE: 66, self.MACHAMP: 0, self.BELLSPROUT: 69,
+            self.WEEPINBELL: 69, self.VICTREEBEL: 0, self.TENTACOOL: 72, self.TENTACRUEL: 0,
+            self.GEODUDE: 74, self.GRAVELER: 74, self.GOLEM: 0, self.PONYTA: 77, self.RAPIDASH: 0,
+            self.SLOWPOKE: 79, self.SLOWBRO: 0, self.MAGNEMITE: 81, self.MAGNETON: 0, self.FARFETCHD: 0,
+            self.DODUO: 84, self.DODRIO: 0, self.SEEL: 86, self.DEWGONG: 0, self.GRIMER: 88, self.MUK: 0,
+            self.SHELLDER: 90, self.CLOYSTER: 0, self.GASTLY: 92, self.HAUNTER: 92, self.GENGAR: 0,
+            self.ONIX: 0, self.DROWZEE: 96, self.HYPNO: 0, self.KRABBY: 98, self.KINGLER: 0, self.VOLTORB: 100,
+            self.ELECTRODE: 0, self.EXEGGCUTE: 102, self.EXEGGUTOR: 0, self.CUBONE: 104, self.MAROWAK: 0,
+            self.HITMONLEE: 0, self.HITMONCHAN: 0, self.LICKITUNG: 0, self.KOFFING: 109, self.WEEZING: 0,
+            self.RHYHORN: 111, self.RHYDON: 0, self.CHANSEY: 0, self.TANGELA: 0, self.KANGASKHAN: 0,
+            self.HORSEA: 116, self.SEADRA: 0, self.GOLDEEN: 118, self.SEAKING: 0, self.STARYU: 120, self.STARMIE: 0,
+            self.MR_MIME: 0, self.SCYTHER: 0, self.JYNX: 0, self.ELECTABUZZ: 0, self.MAGMAR: 0, self.PINSIR: 0,
+            self.TAUROS: 0, self.MAGIKARP: 129, self.GYARADOS: 0, self.LAPRAS: 0, self.DITTO: 0, self.EEVEE: 133,
+            self.VAPOREON: 0, self.JOLTEON: 0, self.FLAREON: 0, self.PORYGON: 0, self.OMANYTE: 138, self.OMASTAR: 0,
+            self.KABUTO: 140, self.KABUTOPS: 0, self.AERODACTYL: 0, self.SNORLAX: 0, self.ARTICUNO: 0,
+            self.ZAPDOS: 0, self.MOLTRES: 0, self.DRATINI: 147, self.DRAGONAIR: 147, self.DRAGONITE: 0,
+            self.MEWTWO: 0, self.MEW: 0
+        }
+
     def get_rarity_by_name(self, name):
         return self.RarityById(self[name])
 
