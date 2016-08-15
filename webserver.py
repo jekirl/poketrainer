@@ -117,6 +117,9 @@ class BotUsers(object):
                 self.users.append(user)
             f.close()
 
+    def reload(self):
+        return self.load()
+
     def __iter__(self):
         return self.users.__iter__()
 
@@ -222,6 +225,7 @@ def static_proxy(filename):
 
 @socketio.on('connect', namespace='/poketrainer')
 def connect():
+    bot_users.reload()
     for user in bot_users.__iter__():
         logger.debug("Trying to enable web pushing in a background 'thread' for %s", user.username)
         socketio.start_background_task(user.test_connection)
@@ -231,6 +235,7 @@ def connect():
 
 @socketio.on('users', namespace='/poketrainer')
 def users():
+    bot_users.reload()
     for user in bot_users.__iter__():
         logger.debug("Trying to enable web pushing in a background 'thread' for %s", user.username)
         socketio.start_background_task(user.test_connection)
