@@ -53,16 +53,9 @@ def init_arguments():
 
 
 def main():
-    # log settings
-    # log format
-
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] s%(message)s')
-    # log level for http request class
-    create_logger("requests", log_level=logging.WARNING)
-    # log level for pgoapi class
+    # set loggers / default log-levels for pgoapi
     create_logger("pgoapi", log_level=logging.WARNING)
-    # log level for internal pgoapi class
-    create_logger("rpc_api", log_level=logging.INFO)
+    create_logger("pgoapi.rpc_api", log_level=logging.INFO)
 
     args = init_arguments()
     if not args:

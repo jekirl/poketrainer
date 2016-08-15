@@ -4,7 +4,7 @@ from time import time
 
 
 class PlayerStats(object):
-    def __init__(self, player_stats, pokemon_caught=0, start_time=time(), exp_start=None):
+    def __init__(self, player_stats, pokemon_caught=0, forts_spun=0, start_time=time(), exp_start=None):
         self.player_stats = player_stats
         self.experience = 0
         self.next_level_xp = 0
@@ -13,6 +13,7 @@ class PlayerStats(object):
         self.km_walked = 0
         self.level = 0
         self.run_pokemon_caught = pokemon_caught
+        self.run_forts_spun = forts_spun
         self.run_start_time = start_time
         self.run_exp_start = exp_start
         self.run_duration_s = 0
