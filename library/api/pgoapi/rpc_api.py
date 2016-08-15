@@ -60,7 +60,7 @@ class RpcApi:
 
     def __init__(self, auth_provider, req_proxy):
 
-        self.log = logging.getLogger(__name__)
+        self.log = logging.getLogger('pgoapi.' + __name__)
 
         self._session = requests.session()
         self._session.headers.update({'User-Agent': 'Niantic App'})

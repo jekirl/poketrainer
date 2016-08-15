@@ -48,6 +48,7 @@ class Poketrainer(object):
 
         # timers, counters and triggers
         self.pokemon_caught = 0
+        self.forts_spun = 0
         self._error_counter = 0
         self._error_threshold = 10
         self.start_time = time()
@@ -139,18 +140,31 @@ class Poketrainer(object):
             defaults = load.get('defaults', {})
             config = load.get('accounts', [])[self.cli_args['config_index']]
 
-            if self.cli_args['debug'] or config.get('debug', False):
-                colorlog.getLogger("requests").setLevel(logging.DEBUG)
-                colorlog.getLogger("pgoapi").setLevel(logging.DEBUG)
-                colorlog.getLogger("poketrainer").setLevel(logging.DEBUG)
-                colorlog.getLogger("rpc_api").setLevel(logging.DEBUG)
+            # merge account section with defaults
+            config_class = Config(dict_merge(defaults, config), self.cli_args)
 
-            if config.get('auth_service', '') not in ['ptc', 'google']:
-                self.log.error("Invalid Auth service specified for account %s! ('ptc' or 'google')", config.get('username', 'NA'))
+            if config_class.add_file_logging:
+                if not os.path.exists('logs'):
+                    os.makedirs('logs')
+                log_file = 'logs' + os.sep + config_class.username + '.log'
+                log_file_handler = logging.FileHandler(log_file, config_class.file_logging_method)
+                log_file_handler.setLevel(logging.INFO)
+                log_formatter = logging.Formatter('%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+                log_file_handler.setFormatter(log_formatter)
+                logging.getLogger().addHandler(log_file_handler)
+
+            if self.cli_args['debug'] or config_class.debug:
+                # colorlog.getLogger("requests").setLevel(logging.DEBUG)
+                colorlog.getLogger("poketrainer").setLevel(logging.DEBUG)
+                colorlog.getLogger("pgoapi").setLevel(logging.DEBUG)
+                colorlog.getLogger("pgoapi.rpc_api").setLevel(logging.DEBUG)
+
+            if config_class.auth_service not in ['ptc', 'google']:
+                self.log.error("Invalid Auth service specified for account %s! ('ptc' or 'google')",
+                               config_class.username)
                 return False
 
-                # merge account section with defaults
-            self.config = Config(dict_merge(defaults, config), self.cli_args)
+            self.config = config_class
         return True
 
     def reload_config(self):
@@ -301,7 +315,8 @@ class Poketrainer(object):
                     self._heartbeat()
                     self.fort_walker.loop()
                     self.fort_walker.spin_nearest_fort()
-                    self.poke_catcher.catch_all()
+                    if self.should_catch_pokemon:
+                        self.poke_catcher.catch_all()
 
                 finally:
                     # after we're done, release lock
@@ -335,14 +350,16 @@ class Poketrainer(object):
 
         status_code = res.get('status_code', -1)
         if status_code == 3:
-            self.log.warn('Your account may be banned')
-            # exit(0)
+            self.log.warn('Your account may be banned, will now exit')
+            exit(0)
 
         responses = res.get('responses', {})
         if 'GET_PLAYER' in responses:
             self.player = Player(responses.get('GET_PLAYER', {}).get('player_data', {}))
             self.push_to_web('player', 'updated', self.player.__dict__)
-            self.log.info("Player Info: {0}, Pokemon Caught in this run: {1}".format(self.player, self.pokemon_caught))
+            self.log.info("Player Info: {0}, Pokemon Caught in this run: {1}, forts spun: {2}".format(
+                self.player, self.pokemon_caught, self.forts_spun
+            ))
 
         if 'GET_INVENTORY' in responses:
 
@@ -353,7 +370,7 @@ class Poketrainer(object):
                     old_level = self.player_stats.level
                     self.player_stats = PlayerStats(
                         inventory_item['inventory_item_data']['player_stats'],
-                        self.pokemon_caught, self.start_time, self.exp_start
+                        self.pokemon_caught, self.forts_spun, self.start_time, self.exp_start
                     )
                     if self.exp_start is None:
                         self.exp_start = self.player_stats.run_exp_start

@@ -24,6 +24,7 @@ cache/
 .installed.cfg
 *.egg
 /src
+/logs
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

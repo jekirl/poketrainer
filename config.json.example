@@ -198,6 +198,8 @@
         "SHOW_DISTANCE_TRAVELED": true,
         "SHOW_NEAREST_FORT_DISTANCE": true,
         "NOTIFY_NO_NEARBY_POKEMON": false,
+        "ADD_FILE_LOGGING": false,
+        "FILE_LOGGING_METHOD": "w",
         "COLORLOG": {
             "FORT_WALKER": "blue",
             "POKE_CATCHER": "green",

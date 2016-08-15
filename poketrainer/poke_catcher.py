@@ -116,8 +116,8 @@ class PokeCatcher(object):
         if capture_status == 1:
             pokemon.id = str(catch_attempt.get('captured_pokemon_id', 'NA'))
             pokemon.creation_time_ms = time() * 1000
-            self.log.debug("Caught Pokemon: : %s", catch_attempt)
-            self.log.info("Caught Pokemon:  %s", pokemon)
+            self.log.debug("Caught Pokemon: %s", catch_attempt)
+            self.log.info("Caught Pokemon: %s", pokemon)
             self.parent.push_to_web('pokemon', 'caught', pokemon.__dict__)
             self.parent.pokemon_caught += 1
             return True

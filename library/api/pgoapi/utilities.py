@@ -38,7 +38,7 @@ from google.protobuf.internal import encoder
 from geopy.geocoders import GoogleV3
 from s2sphere import LatLng, Angle, Cap, RegionCoverer, math
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('pgoapi.' + __name__)
 
 def f2i(float):
   return struct.unpack('<Q', struct.pack('<d', float))[0]

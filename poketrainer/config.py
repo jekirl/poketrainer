@@ -17,6 +17,8 @@ class Config(object):
         self.config_data = config
         self.__password = self.config_data.pop("password", 'NA')
 
+        self.debug = config.get('debug', False)
+
         self.location = config["location"]
         self.auth_service = config["auth_service"]
         self.username = config["username"]
@@ -98,6 +100,8 @@ class Config(object):
         self.show_distance_traveled = config.get("CONSOLE_OUTPUT", {}).get("SHOW_DISTANCE_TRAVELED", True)
         self.show_nearest_fort_distance = config.get("CONSOLE_OUTPUT", {}).get("SHOW_NEAREST_FORT_DISTANCE", True)
         self.notify_no_nearby_pokemon = config.get("CONSOLE_OUTPUT", {}).get("NOTIFY_NO_NEARBY_POKEMON", False)
+        self.add_file_logging = config.get("CONSOLE_OUTPUT", {}).get("ADD_FILE_LOGGING", False)
+        self.file_logging_method = config.get("CONSOLE_OUTPUT", {}).get("FILE_LOGGING_METHOD", "w")
 
         self.log_colors = config.get("CONSOLE_OUTPUT", {}).get("COLORLOG",
                                                                {"FORT_WALKER": "blue",
