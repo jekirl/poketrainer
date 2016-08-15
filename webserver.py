@@ -107,6 +107,7 @@ class BotUsers(object):
 
     def load(self):
         desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+        self.users = []
         with open(desc_file) as f:
             live_users = f.read()
             live_users = json.loads(live_users.encode() if len(live_users) > 0 else '{}')
@@ -381,7 +382,7 @@ def init_web_config():
 
 
 def main():
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] s%(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
 
     web_config = init_web_config()
 

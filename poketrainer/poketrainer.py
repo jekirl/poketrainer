@@ -61,6 +61,7 @@ class Poketrainer(object):
         # objects, order is important!
         self.config = None
         self._load_config()
+        self._add_file_logger()
 
         self.log = create_logger(__name__, self.config.log_colors["poketrainer".upper()])
 
@@ -96,6 +97,17 @@ class Poketrainer(object):
     def sleep(self, t):
         # eventlet.sleep(t * self.config.sleep_mult)
         gevent.sleep(t * self.config.sleep_mult)
+
+    def _add_file_logger(self):
+        if self.config.add_file_logging:
+            if not os.path.exists('logs'):
+                os.makedirs('logs')
+            log_file = 'logs' + os.sep + self.config.username + '.log'
+            log_file_handler = logging.FileHandler(log_file, self.config.file_logging_method)
+            log_file_handler.setLevel(logging.INFO)
+            log_formatter = logging.Formatter('%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+            log_file_handler.setFormatter(log_formatter)
+            logging.getLogger().addHandler(log_file_handler)
 
     def _open_socket(self):
         desc_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), ".listeners")
@@ -142,16 +154,6 @@ class Poketrainer(object):
 
             # merge account section with defaults
             config_class = Config(dict_merge(defaults, config), self.cli_args)
-
-            if config_class.add_file_logging:
-                if not os.path.exists('logs'):
-                    os.makedirs('logs')
-                log_file = 'logs' + os.sep + config_class.username + '.log'
-                log_file_handler = logging.FileHandler(log_file, config_class.file_logging_method)
-                log_file_handler.setLevel(logging.INFO)
-                log_formatter = logging.Formatter('%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
-                log_file_handler.setFormatter(log_formatter)
-                logging.getLogger().addHandler(log_file_handler)
 
             if self.cli_args['debug'] or config_class.debug:
                 colorlog.getLogger("poketrainer").setLevel(logging.DEBUG)
@@ -322,13 +324,10 @@ class Poketrainer(object):
                     # after we're done, release lock
                     self.persist_lock = False
                     self.thread_release()
-            if (0 < self.config.catch_pokemon_limit > self.pokemon_caught
-                    or 0 < self.config.fort_spin_limit > self.forts_spun):
-                self.log.info('catch_pokemon_limit of %s or fort_spin_limit of %s reached, now stopping',
-                              self.config.catch_pokemon_limit, self.config.fort_spin_limit)
-                self.stop()
-                return
-            # self.log.info("COMPLETED A _main_loop")
+            if (self.pokemon_caught > self.config.catch_pokemon_limit >= 0
+                    or self.forts_spun > self.config.fort_spin_limit >= 0):
+                return('catch_pokemon_limit of %s or fort_spin_limit of %s reached, now stopping'
+                       % (self.config.catch_pokemon_limit, self.config.fort_spin_limit))
             self.sleep(1.0)
 
     def _heartbeat(self, res=False, login_response=False):
