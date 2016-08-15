@@ -6,12 +6,13 @@ import json
 import logging
 import os
 import socket
-import zerorpc
 
 import gevent
 from flask import Flask, request, send_from_directory
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from six import PY2
+
+import zerorpc
 
 logger = logging.getLogger(__name__)
 logging.getLogger("zerorpc").setLevel(logging.WARNING)
