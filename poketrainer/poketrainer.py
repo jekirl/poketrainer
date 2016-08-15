@@ -5,20 +5,20 @@ import logging
 import os
 import os.path
 import socket
+import zerorpc
 from collections import defaultdict
 from time import time
 
 import colorlog
 import gevent
-from gevent.coros import BoundedSemaphore
 import six
+from gevent.coros import BoundedSemaphore
 from six import PY2
 
-import zerorpc
 from helper.colorlogger import create_logger
 from helper.utilities import dict_merge
 from library import api
-from pgoapi.exceptions import AuthException
+from library.api.pgoapi.exceptions import AuthException
 
 from .config import Config
 from .evolve import Evolve
@@ -154,7 +154,6 @@ class Poketrainer(object):
                 logging.getLogger().addHandler(log_file_handler)
 
             if self.cli_args['debug'] or config_class.debug:
-                # colorlog.getLogger("requests").setLevel(logging.DEBUG)
                 colorlog.getLogger("poketrainer").setLevel(logging.DEBUG)
                 colorlog.getLogger("pgoapi").setLevel(logging.DEBUG)
                 colorlog.getLogger("pgoapi.rpc_api").setLevel(logging.DEBUG)

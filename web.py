@@ -1,16 +1,15 @@
-# DISCLAIMER: This is jank
 from __future__ import print_function
 
 import argparse
 import csv
 import json
 import os
+import zerorpc
 from collections import defaultdict
 
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
 from werkzeug.exceptions import NotFound
 
-import zerorpc
 from poketrainer.poke_lvl_data import TCPM_VALS
 from poketrainer.pokemon import Pokemon
 

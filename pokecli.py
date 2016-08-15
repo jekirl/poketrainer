@@ -53,12 +53,7 @@ def init_arguments():
 
 
 def main():
-    # disable logging for root level, otherwise propagated logs would show twice
-    # we will later add a filehandler to the root level, if configured
-    logging.getLogger().addHandler(logging.NullHandler())
-
-    # set default log levels
-    create_logger("poketrainer", log_level=logging.INFO)
+    # set loggers / default log-levels for pgoapi
     create_logger("pgoapi", log_level=logging.WARNING)
     create_logger("pgoapi.rpc_api", log_level=logging.INFO)
 

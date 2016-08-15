@@ -2,6 +2,10 @@ import logging
 
 import colorlog
 
+# disable logging for root level, otherwise propagated logs would show twice
+# we will later add a filehandler to the root level, if configured
+colorlog.getLogger().addHandler(logging.NullHandler())
+
 
 def create_logger(name, color='reset', log_level=logging.INFO, log_colors={
         'DEBUG': 'white',
