@@ -1,7 +1,13 @@
 import logging
 
-import base
+import six
+
 from library.api.pgoapi.protos.POGOProtos import Enums_pb2
+
+from . import base
+
+if six.PY3:
+    from past.builtins import map
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +24,11 @@ class ReleaseMethod(base.ReleaseMethod):
         self.max_similar_pokemon = self.config.get('MAX_SIMILAR_POKEMON', 999)
         self.min_similar_pokemon = self.config.get('MIN_SIMILAR_POKEMON', 1)
 
-        self.sort_key = lambda x: (x.cp, x.iv) if self.prefer == 'CP' else lambda x: (x.iv, x.cp)
+        # yes, this *could* be a one-liner, but keep it separate for readability
+        if self.prefer == 'CP':
+            self.sort_key = lambda x: (x.cp, x.iv)
+        else:
+            self.sort_key = lambda x: (x.iv, x.cp)
 
     def get_pokemon_to_release(self, pokemon_id, pokemons):
         pokemon_to_release = []

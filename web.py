@@ -7,11 +7,15 @@ import os
 import zerorpc
 from collections import defaultdict
 
+import six
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
 from werkzeug.exceptions import NotFound
 
 from poketrainer.poke_lvl_data import TCPM_VALS
 from poketrainer.pokemon import Pokemon
+
+if six.PY3:
+    from past.builtins import filter
 
 
 class ReverseProxied(object):

@@ -70,10 +70,10 @@ class Pokemon(object):
         self.pokemon_type = POKEMON_NAMES.get(str(self.pokemon_id), "NA").encode('utf-8', 'ignore')
 
         # Used in Web.py
-        if self.nickname is not "":
+        if self.nickname and len(str(self.nickname)):
             self.name = self.nickname.decode('utf-8')
         else:
-            self.name = self.pokemon_type
+            self.name = self.pokemon_type.decode('utf-8')
         self.move_1 = pokemon_data.get('move_1', 0)
         self.move_2 = pokemon_data.get('move_2', 0)
 
