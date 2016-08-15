@@ -107,6 +107,7 @@ class BotUsers(object):
 
     def load(self):
         desc_file = os.path.dirname(os.path.realpath(__file__))+os.sep+".listeners"
+        self.users = []
         with open(desc_file) as f:
             live_users = f.read()
             live_users = json.loads(live_users.encode() if len(live_users) > 0 else '{}')
@@ -116,6 +117,9 @@ class BotUsers(object):
                 user = BotConnection(username)
                 self.users.append(user)
             f.close()
+
+    def reload(self):
+        return self.load()
 
     def __iter__(self):
         return self.users.__iter__()
@@ -222,6 +226,7 @@ def static_proxy(filename):
 
 @socketio.on('connect', namespace='/poketrainer')
 def connect():
+    bot_users.reload()
     for user in bot_users.__iter__():
         logger.debug("Trying to enable web pushing in a background 'thread' for %s", user.username)
         socketio.start_background_task(user.test_connection)
@@ -231,6 +236,7 @@ def connect():
 
 @socketio.on('users', namespace='/poketrainer')
 def users():
+    bot_users.reload()
     for user in bot_users.__iter__():
         logger.debug("Trying to enable web pushing in a background 'thread' for %s", user.username)
         socketio.start_background_task(user.test_connection)
@@ -376,7 +382,7 @@ def init_web_config():
 
 
 def main():
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] s%(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
 
     web_config = init_web_config()
 
