@@ -5,6 +5,7 @@ import logging
 import os
 import os.path
 import socket
+import zerorpc
 from collections import defaultdict
 from time import time
 
@@ -14,7 +15,6 @@ import six
 from gevent.coros import BoundedSemaphore
 from six import PY2
 
-import zerorpc
 from helper.colorlogger import create_logger
 from helper.utilities import dict_merge
 from library import api
