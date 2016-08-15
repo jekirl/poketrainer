@@ -293,10 +293,11 @@ class Poketrainer(object):
 
     def start(self):
         self.thread = gevent.spawn(self._main_loop)
-
         self.thread.link(self._callback)
 
     def stop(self):
+        self.forts_spun = 0
+        self.pokemon_caught = 0
         if self.thread:
             self.thread.kill()
 
@@ -321,6 +322,12 @@ class Poketrainer(object):
                     # after we're done, release lock
                     self.persist_lock = False
                     self.thread_release()
+            if (0 < self.config.catch_pokemon_limit > self.pokemon_caught
+                    or 0 < self.config.fort_spin_limit > self.forts_spun):
+                self.log.info('catch_pokemon_limit of %s or fort_spin_limit of %s reached, now stopping',
+                              self.config.catch_pokemon_limit, self.config.fort_spin_limit)
+                self.stop()
+                return
             # self.log.info("COMPLETED A _main_loop")
             self.sleep(1.0)
 

@@ -14,6 +14,10 @@ angular.module('Poketrainer.State.Users', [
                             return;
                         }
                         PokeSocket.removeListener(SocketEvent.UserList, userEventCb);
+                        // show all users to unknown state until we receive a proper state
+                        for (var i = 0; i < message.users.length; i++) {
+                            message.users[i].status = 'unknown';
+                        }
                         d.resolve(message.users);
                     };
 

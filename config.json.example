@@ -104,7 +104,9 @@
         "SLEEP_MULT" : 1.5,
         "ENABLE_CACHING" : false,
         "USE_CACHED_FORTS" : false,
-        "CACHED_FORTS_SORTED" : false
+        "CACHED_FORTS_SORTED" : false,
+        "CATCH_POKEMON_LIMIT" : -1,
+        "FORT_SPIN_LIMIT" : -1
       },
       "CAPTURE": {
         "CATCH_POKEMON": true,
@@ -207,7 +209,7 @@
             "EVOLVE": "cyan",
             "POKETRAINER": "yellow",
             "INVENTORY": "purple"
-            }            
+            }
         }
     
     
