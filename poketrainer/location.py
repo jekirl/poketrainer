@@ -108,7 +108,7 @@ def filtered_forts(starting_location, origin, forts, proximity, visited_forts={}
 
 
 def is_active_pokestop(fort, visited_forts, starting_location, proximity):
-    is_active_fort = fort.get('type', None) == 1 and ("enabled" in fort or 'lure_info' in fort) and fort.get(
+    is_active_fort = fort.get('type') == 1 and ("enabled" in fort or 'lure_info' in fort) and fort.get(
         'cooldown_complete_timestamp_ms', -1) < time() * 1000
     if proximity and proximity > 0:
         return is_active_fort and fort['id'] not in visited_forts and distance_in_meters(starting_location, (
