@@ -319,6 +319,9 @@ class PGoApi:
             curr_lng = self._posf[1]
 
             self.log.info("Sniping pokemon at %f, %f", lat, lng)
+            self.log.info("Waiting for API limit timer ...")
+            while time() - self._last_got_map_objects < self._map_objects_rate_limit:
+                self.gsleep(0.1)
 
             # move to snipe location
             self.set_position(lat, lng, 0.0)
@@ -328,7 +331,7 @@ class PGoApi:
             self.log.debug("Teleported to sniping location %f, %f", lat, lng)
 
             # find pokemons in dest
-            map_cells = self.nearby_map_objects()['responses']['GET_MAP_OBJECTS']['map_cells']
+            map_cells = self.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
             pokemons = PGoApi.flatmap(lambda c: c.get('catchable_pokemons', []), map_cells)
 
             # catch first pokemon:
