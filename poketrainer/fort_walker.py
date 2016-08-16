@@ -213,7 +213,7 @@ class FortWalker(object):
                 self.log.info("Nearest fort distance is {0:.2f} meters".format(nearest_fort_dis))
 
             # Fort is close enough to change our route and walk to
-            if not self.wander_steps and nearest_fort_dis < self.parent.config.wander_steps and nearest_fort_dis > 40:
+            if not self.wander_steps and 40 < nearest_fort_dis < self.parent.config.wander_steps:
                 # create route directly to fort, disabling google
                 route_data = get_route(
                     self.parent.get_position(), (destinations[0][0]['latitude'], destinations[0][0]['longitude']),
