@@ -100,7 +100,7 @@ class PokeCatcher(object):
             if "status" in r:
                 catch_status = r['status']
                 # fleed or error
-                if catch_status == 3 or catch_status == 0:
+                if catch_status in [3, 0]:
                     break
             ret = r
             # Sleep between catch attempts
