@@ -98,7 +98,9 @@ def distance_in_meters(p1, p2):
     return vincenty(p1, p2).meters
 
 
-def filtered_forts(starting_location, origin, forts, proximity, visited_forts={}, reverse=False):
+def filtered_forts(starting_location, origin, forts, proximity, visited_forts=None, reverse=False):
+    if visited_forts is None:
+        visited_forts = {}
     forts = filter(lambda f: is_active_pokestop(f[0], visited_forts=visited_forts, starting_location=starting_location,
                                                 proximity=proximity),
                    map(lambda x: (x, distance_in_meters(origin, (x['latitude'], x['longitude']))), forts))
