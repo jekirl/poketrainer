@@ -282,6 +282,7 @@ class Poketrainer(object):
             if not gt.exception:
                 result = gt.value
                 self.log.info('Thread finished with result: %s', result)
+                return
         except KeyboardInterrupt:
             return
 
