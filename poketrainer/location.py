@@ -41,12 +41,21 @@ def get_route(start, end, use_google=False, gmaps_api_key="", walk_to_all_forts=
             } for step in steps
         ]
         final_steps = []
-        for step in final_steps_google:
+        for step_google in final_steps_google:
             # make sure our steps are not bigger than step_size
-            if step['distance'] <= step_size:
-                final_steps.append(step)
+            if step_google['distance'] <= step_size:
+                final_steps.append(step_google)
             else:
-                step_increments = get_increments(start, destination, step_size)
+                if len(final_steps) < 1:
+                    prev_final_step = start
+                else:
+                    prev_final_step = final_steps[len(final_steps) - 1]
+                    prev_final_step = (prev_final_step['lat'], prev_final_step['long'], 0)
+                step_increments = get_increments(
+                    prev_final_step,
+                    (step_google['lat'], step_google['long']),
+                    step_size
+                )
                 previous_step = step_increments[0]
                 for step in step_increments[1:]:
                     final_steps.append({
