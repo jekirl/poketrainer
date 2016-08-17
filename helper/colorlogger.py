@@ -7,13 +7,15 @@ import colorlog
 colorlog.getLogger().addHandler(logging.NullHandler())
 
 
-def create_logger(name, color='reset', log_level=logging.INFO, log_colors={
-        'DEBUG': 'white',
-        'INFO': 'white',
-        'WARNING': 'red',
-        'ERROR': 'red',
-        'CRITICAL': 'red,bg_white',
-}):
+def create_logger(name, color='reset', log_level=logging.INFO, log_colors=None):
+    if log_colors is None:
+        log_colors = {
+            'DEBUG': 'white',
+            'INFO': 'white',
+            'WARNING': 'red',
+            'ERROR': 'red',
+            'CRITICAL': 'red,bg_white',
+        }
     handler = colorlog.StreamHandler()
     handler.setFormatter(colorlog.ColoredFormatter('%(log_color)s%(asctime)s %(' + color + ')s[%(module)10s] %(log_color)s[%(levelname)5s] %(' + color + ')s%(message)s',
                                                    log_colors=log_colors))

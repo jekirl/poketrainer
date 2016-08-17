@@ -55,7 +55,7 @@ class Evolve(object):
 
     def is_pokemon_eligible_for_evolution(self, pokemon):
         candy_have = self.parent.inventory.pokemon_candy.get(int(pokemon.family_id), -1)
-        candy_needed = self.parent.config.pokemon_evolution.get(pokemon.pokemon_id, None)
+        candy_needed = self.parent.config.pokemon_evolution.get(pokemon.pokemon_id)
         in_keep_list = pokemon.pokemon_id in self.parent.config.keep_pokemon_ids
         is_favorite = pokemon.is_favorite
         in_evolution_list = pokemon.pokemon_id in self.parent.config.pokemon_evolution
