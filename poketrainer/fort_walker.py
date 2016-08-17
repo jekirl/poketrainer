@@ -266,6 +266,7 @@ class FortWalker(object):
             self.log.debug("Fort spun but Your inventory is full : %s", res)
             self.log.info("Fort spun but Your inventory is full.")
             self.visited_forts[fort['id']] = fort
+            self.parent.forts_spun += 1
         elif result == 2:
             self.log.debug("Could not spin fort -  fort not in range %s", res)
             self.log.info("Could not spin fort http://maps.google.com/maps?q=%s,%s, Not in Range %s", fort['latitude'],
