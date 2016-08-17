@@ -94,8 +94,8 @@ class PokeCatcher(object):
             normalized_reticle_size = 1.950 - random() * 1.950 * (1.0 - self.parent.config.pokeball_min_accuracy)
             spin_modifier = 1.0 - random() * 1.0 * (1.0 - self.parent.config.pokeball_min_accuracy)
             normalized_hit_position = 1.0
-            self.log.info("hit: %s, spin: %s, reticle: %s, spin-modifier: %s", hit, spin,
-                          normalized_reticle_size, spin_modifier)
+            self.log.debug("hit: %s, spin: %s, reticle: %s, spin-modifier: %s", hit, spin,
+                           normalized_reticle_size, spin_modifier)
             if not spin:
                 normalized_hit_position = 0.0
                 r = self.parent.api.catch_pokemon(
