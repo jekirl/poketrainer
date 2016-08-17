@@ -155,6 +155,10 @@ class BotConnection(object):
         try:
             running = c('enable_web_pushing', timeout=1.5)
             logger.info('Enabled pushing in bot %s', self.username)
+            if running:
+                self.status = 'online'
+            else:
+                self.status = 'paused'
         except Exception as e:
             if self._bot_rpc and not retry:
                 self._bot_rpc.close()
@@ -162,12 +166,8 @@ class BotConnection(object):
                 logger.debug('Error connecting to bot %s, retrying', self.username)
                 return self.test_connection(retry=True)
             else:
-                running = False
+                self.status = 'offline'
                 logger.error('Error connecting to bot %s: %s', self.username, e)
-        if running:
-            self.status = 'online'
-        else:
-            self.status = 'offline'
         socketio.emit('user_status', {'username': self.username, 'status': self.status}, namespace='/poketrainer')
 
     def __str__(self):
@@ -303,6 +303,94 @@ def on_leave(data):
     emit('leave', {'success': True, 'message': 'successfully left room ' + room})
 
 
+@socketio.on('start', namespace='/poketrainer')
+def start_bot(data):
+    username = data['username']
+    user = bot_users.get(username)
+    if not user:
+        logger.error("Could not find bot '%s', will not start", username)
+        emit('start', {'success': False, 'message': "Could not find bot '%s', will not start" % username})
+        return
+    c = user.get_api_rpc()
+    try:
+        success = False
+        message = 'Start failed!'
+        if c and c('start_bot'):
+            success = True
+            message = 'Start successful'
+    except:
+        pass
+    socketio.start_background_task(user.test_connection)
+    emit('start', {'success': success, 'message': message})
+
+
+@socketio.on('stop', namespace='/poketrainer')
+def stop_bot(data):
+    username = data['username']
+    user = bot_users.get(username)
+    if not user:
+        logger.error("Could not find bot '%s', will not stop", username)
+        emit('stop', {'success': False, 'message': "Could not find bot '%s', will not stop" % username})
+        return
+    c = user.get_api_rpc()
+    logger.debug("Trying to stop %s", username)
+    try:
+        success = False
+        message = 'Stop failed!'
+        if c and c('stop_bot'):
+            success = True
+            message = 'Stop successful'
+            if not c:
+                message += ' rpc not found'
+    except:
+        pass
+    logger.debug(message + ", %s", username)
+    socketio.start_background_task(user.test_connection)
+    emit('stop', {'success': success, 'message': message})
+
+
+@socketio.on('reset_stats', namespace='/poketrainer')
+def reset_stats(data):
+    username = data['username']
+    user = bot_users.get(username)
+    if not user:
+        logger.error("Could not find bot '%s', will not reset stats", username)
+        emit('reset_stats', {'success': False, 'message': "Could not find bot '%s', will not reset stats" % username})
+        return
+    c = user.get_api_rpc()
+    try:
+        success = False
+        message = 'Reset Stats failed!'
+        if c and c('reset_stats'):
+            success = True
+            message = 'Reset Stats successful'
+    except:
+        pass
+    socketio.start_background_task(user.test_connection)
+    emit('reset_stats', {'success': success, 'message': message})
+
+
+@socketio.on('reload_api', namespace='/poketrainer')
+def reload_api(data):
+    username = data['username']
+    user = bot_users.get(username)
+    if not user:
+        logger.error("Could not find bot '%s', will not reload api", username)
+        emit('reload_api', {'success': False, 'message': "Could not find bot '%s', will not reload api" % username})
+        return
+    c = user.get_api_rpc()
+    try:
+        success = False
+        message = 'Reload API failed!'
+        if c and c('reload_api'):
+            success = True
+            message = 'Reload API successful'
+    except:
+        pass
+    socketio.start_background_task(user.test_connection)
+    emit('reload_api', {'success': success, 'message': message})
+
+
 @socketio.on('transfer', namespace='/poketrainer')
 def transfer(data):
     username = data['username']
@@ -313,10 +401,15 @@ def transfer(data):
         emit('transfer', {'success': False, 'message': "Could not find bot '%s', will not transfer" % username})
         return
     c = user.get_api_rpc()
-    if c and c.release_pokemon_by_id(p_id) == 1:
-        emit('transfer', {'success': True, 'message': 'Released successfully'})
-    else:
-        emit('transfer', {'success': False, 'message': 'Transfer failed!'})
+    try:
+        success = False
+        message = 'Transfer failed!'
+        if c and c('release_pokemon_by_id', p_id, timeout=60):
+            success = True
+            message = 'Released successfully'
+    except:
+        pass
+    emit('transfer', {'success': success, 'message': message})
 
 
 @socketio.on('evolve', namespace='/poketrainer')
@@ -329,10 +422,15 @@ def evolve(data):
         emit('evolve', {'success': False, 'message': "Could not find bot '%s', will not evolve" % username})
         return
     c = user.get_api_rpc()
-    if c and c.evolve_pokemon_by_id(p_id):
-        emit('evolve', {'success': True, 'message': 'Evolved successfully'})
-    else:
-        emit('evolve', {'success': False, 'message': 'Evolve failed!'})
+    try:
+        success = False
+        message = 'Evolve failed!'
+        if c and c('evolve_pokemon_by_id', p_id, timeout=60):
+            success = True
+            message = 'Evolved successfully'
+    except:
+        pass
+    emit('evolve', {'success': success, 'message': message})
 
 
 @socketio.on('snipe', namespace='/poketrainer')
@@ -358,13 +456,15 @@ def snipe(data):
         emit('snipe', {'success': False, 'message': 'Error parsing coordinates.'})
         return
 
-    if c and c.snipe_pokemon(lat, lng):
-        msg = "Sniped!"
+    try:
         success = False
-    else:
-        msg = "Failed sniping!"
-        success = True
-    emit('snipe', {'success': success, 'message': msg})
+        message = "Failed sniping!"
+        if c and c('snipe_pokemon', lat, lng, timeout=60):
+            success = True
+            message = 'Sniped successfully!'
+    except:
+        pass
+    emit('snipe', {'success': success, 'message': message})
 
 
 def init_web_config():

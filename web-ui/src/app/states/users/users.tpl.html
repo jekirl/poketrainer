@@ -2,15 +2,16 @@
     <h1>Bots</h1>
     <md-list>
         <md-list-item ng-repeat="user in users">
-            <md-button ng-show="user.status==='online'" ui-sref="public.dashboard({username: user.username})" class="md-raised">
-                <span class="glyphicon glyphicon-play" aria-hidden="true" style="color: green;"></span>
+            <md-button ng-show="user.status==='online' || user.status==='paused'" ui-sref="public.dashboard({username: user.username})" class="md-raised">
+                <span ng-hide="user.status==='paused'" class="glyphicon glyphicon-play" aria-hidden="true" style="color: green;"></span>
+                <span ng-hide="user.status==='online'" class="glyphicon glyphicon-pause" aria-hidden="true" style="color: orange;"></span>
                 {{ user.username }}
             </md-button>
             <md-button ng-show="user.status==='offline'" ng-disabled="true">
                 <span class="glyphicon glyphicon-stop" aria-hidden="true" style="color: red;"></span>
                 {{ user.username }}
             </md-button>
-            <md-button ng-hide="user.status==='online' || user.status==='offline'" ng-disabled="true">
+            <md-button ng-hide="user.status==='online' || user.status==='offline' || user.status==='paused'" ng-disabled="true">
                 <span class="glyphicon glyphicon-refresh glyphicon-spin" aria-hidden="true" style="color: grey;"></span>
                 {{ user.username }}
             </md-button>

@@ -156,11 +156,8 @@ class Inventory(object):
 
     def has_berry(self):
         # Only Razz berries are in the game at the moment
-        for inventory_item in self._inventory_items:
-            item = inventory_item['inventory_item_data'].get('item', {})
-            item_id = item.get('item_id', -1)
-            if item_id == Item_Enums.ITEM_RAZZ_BERRY and 'count' in item:
-                return True
+        if self.razz_berries > 0:
+            return True
         return False
 
     def take_berry(self):

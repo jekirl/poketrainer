@@ -8,6 +8,7 @@ angular.module('poketrainer', [
 	'Poketrainer.Service.Navigation',
 	'Poketrainer.Service.SocketEvent',
 	'Poketrainer.Service.Socket',
+	'Poketrainer.Service.UserList',
 
 	/** States/Routes **/
 	'Poketrainer.State.Abstracts',

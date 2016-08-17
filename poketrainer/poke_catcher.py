@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import json
+from random import random
 from time import time
 
 from cachetools import TTLCache
@@ -86,16 +87,36 @@ class PokeCatcher(object):
             pokeball = self.parent.inventory.take_next_ball(capture_probability)
             self.log.info("Attempting catch with {0} at {1:.2f}% chance. Try Number: {2}".format(get_item_name(
                 pokeball), item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
-            self.parent.sleep(0.5 + self.parent.config.extra_wait)
-            r = self.parent.api.catch_pokemon(
-                normalized_reticle_size=1.950,
-                pokeball=pokeball,
-                spin_modifier=0.850,
-                hit_pokemon=True,
-                normalized_hit_position=1,
-                encounter_id=encounter_id,
-                spawn_point_id=spawn_point_id,
-            ).get('responses', {}).get('CATCH_POKEMON', {})
+            self.parent.sleep(1.5 + self.parent.config.extra_wait)
+
+            hit = random() < self.parent.config.pokeball_hitrate
+            spin = random() < self.parent.config.pokeball_spinrate
+            normalized_reticle_size = 1.950 - random() * 1.950 * (1.0 - self.parent.config.pokeball_min_accuracy)
+            spin_modifier = 1.0 - random() * 1.0 * (1.0 - self.parent.config.pokeball_min_accuracy)
+            normalized_hit_position = 1.0
+            self.log.debug("hit: %s, spin: %s, reticle: %s, spin-modifier: %s", hit, spin,
+                           normalized_reticle_size, spin_modifier)
+            if not spin:
+                normalized_hit_position = 0.0
+                r = self.parent.api.catch_pokemon(
+                    normalized_reticle_size=normalized_reticle_size,
+                    pokeball=pokeball,
+                    hit_pokemon=hit,
+                    normalized_hit_position=normalized_hit_position,
+                    encounter_id=encounter_id,
+                    spawn_point_id=spawn_point_id,
+                ).get('responses', {}).get('CATCH_POKEMON', {})
+            else:
+                r = self.parent.api.catch_pokemon(
+                    normalized_reticle_size=normalized_reticle_size,
+                    pokeball=pokeball,
+                    spin_modifier=spin_modifier,
+                    hit_pokemon=hit,
+                    normalized_hit_position=normalized_hit_position,
+                    encounter_id=encounter_id,
+                    spawn_point_id=spawn_point_id,
+                ).get('responses', {}).get('CATCH_POKEMON', {})
+
             catch_attempts += 1
             if "status" in r:
                 catch_status = r['status']

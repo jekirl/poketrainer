@@ -162,9 +162,12 @@ angular.module('Poketrainer.State.Status', [
         Navigation.primary.register("Users", "public.users", 30, 'md md-event-available', 'public.users');
     })
 
-    .controller('DashboardController', function DashboardController($scope, $stateParams, $mdToast, PokeSocket, leafletData,
-                                                                    locationData, inventoryData, playerData, playerStatsData,
+    .controller('DashboardController', function DashboardController($rootScope, $scope, $stateParams, $mdToast, PokeSocket, leafletData,
+                                                                    UserList, locationData, inventoryData, playerData, playerStatsData,
                                                                     pokemonData, attacksData, SocketEvent, DTOptionsBuilder) {
+        UserList.setCurrent($stateParams.username);
+        $rootScope.$broadcast("currentUser_:changed");
+
         var userEventUpdate = function userEventUpdate(event, message) {
             if ($stateParams.username == message.username) {
                 if (message.status == 'offline') {
@@ -440,8 +443,6 @@ angular.module('Poketrainer.State.Status', [
             lineWidth:10,
             lineCap:'circle'
         };
-        
-        
 
     })
 ;

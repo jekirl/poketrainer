@@ -63,7 +63,7 @@ def main():
 
     poketrainer = Poketrainer(args)
     # auto-start bot
-    poketrainer.start()
+    poketrainer.start_bot()
     # because the bot spawns 'threads' so it can start / stop we're making an infinite lop here
     while True:
         try:

@@ -6,7 +6,7 @@ angular.module('Poketrainer.State.Users', [
         $stateProvider.state('public.users', {
             url: '/',
             resolve: {
-                Users: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveUsers($q, $stateParams, PokeSocket, SocketEvent){
+                Users: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', 'UserList', function resolveUsers($q, $stateParams, PokeSocket, SocketEvent, UserList){
                     var d = $q.defer();
 
                     var userEventCb = function userEventCb(message) {
@@ -14,19 +14,14 @@ angular.module('Poketrainer.State.Users', [
                             return;
                         }
                         PokeSocket.removeListener(SocketEvent.UserList, userEventCb);
-                        // show all users to unknown state until we receive a proper state
-                        for (var i = 0; i < message.users.length; i++) {
-                            message.users[i].status = 'unknown';
-                        }
-                        d.resolve(message.users);
+                        UserList.set(message.users);
+                        d.resolve();
                     };
 
                     PokeSocket.on(SocketEvent.UserList, userEventCb);
 
                     // Emit the event to our socket
                     // after listening for it.
-                    // we don't need to since we connect anyway, any issues?
-                    // we ened it to get back to the bots-overview?
                     PokeSocket.emit(SocketEvent.UserList);
 
                     return d.promise;
@@ -42,17 +37,14 @@ angular.module('Poketrainer.State.Users', [
         Navigation.primary.register("Users", "public.users", 30, 'md md-event-available', 'public.users');
     })
 
-    .controller('UsersController', function UsersController($scope, Users, PokeSocket, SocketEvent) {
+    .controller('UsersController', function UsersController($scope, UserList, PokeSocket, SocketEvent) {
         // we don't need any data from the global scope here... yet?
         //PokeSocket.emit(SocketEvent.Join, {room: 'global'});
-        $scope.users = Users;
+        $scope.users = UserList.get();
+        UserList.setCurrent('');
 
-        var userEventUpdate = function userEventUpdate(event, message) {
-            for (var i = 0; i < $scope.users.length; i++) {
-                if ($scope.users[i].username == message.username) {
-                    $scope.users[i].status = message.status;
-                }
-            }
+        var userEventUpdate = function userEventUpdate(event, user) {
+            $scope.users = UserList.update(user);
         };
 
         // Make sure to listen for new events
