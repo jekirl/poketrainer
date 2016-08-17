@@ -10,6 +10,10 @@ angular.module('Poketrainer.Service.SocketEvent', [])
             Leave: 'leave',
             Transfer: 'transfer',
             Evolve: 'evolve',
-            Snipe: 'snipe'
+            Snipe: 'snipe',
+            Start: 'start',
+            Stop: 'stop',
+            ResetStats: 'reset_stats',
+            ReloadAPI: 'reload_api'
         }
     });

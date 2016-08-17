@@ -57,6 +57,7 @@ class Poketrainer(object):
         self._heartbeat_frequency = 3  # 1 = always
         self._full_heartbeat_frequency = 15  # 10 = as before (every 10th heartbeat)
         self._farm_mode_triggered = False
+        self.running = False
 
         # objects, order is important!
         self.config = None
@@ -282,26 +283,43 @@ class Poketrainer(object):
             if not gt.exception:
                 result = gt.value
                 self.log.info('Thread finished with result: %s', result)
+                return
         except KeyboardInterrupt:
             return
 
-        self.log.exception('Error in main loop %s, restarting at location: %s',
-                           gt.exception, self.get_position())
-        # restart after sleep
-        self.sleep(30)
-        self.reload_config()
-        self.reload_api(self.get_position())
-        self.start()
+        if not self.running:
+            self.log.info('Bot stopped')
+        else:
+            self.log.exception('Error in main loop %s, restarting at location: %s',
+                               gt.exception, self.get_position())
+            # restart after sleep
+            self.sleep(30)
+            self.reload_config()
+            self.reload_api(self.get_position())
+            self.start_bot()
 
-    def start(self):
-        self.thread = gevent.spawn(self._main_loop)
-        self.thread.link(self._callback)
+    def start_bot(self):
+        if not self.running:
+            self.reload_config()
+            self.thread = gevent.spawn(self._main_loop)
+            self.thread.link(self._callback)
+            self.running = True
+        return self.running
 
-    def stop(self):
-        self.forts_spun = 0
-        self.pokemon_caught = 0
+    def stop_bot(self):
+        self.running = False
         if self.thread:
             self.thread.kill()
+        self.log.info('Bot stopped by Web')
+        return True
+
+    def reset_stats(self):
+        self.forts_spun = 0
+        self.pokemon_caught = 0
+        self.start_time = time()
+        self.exp_start = None
+        self._heartbeat_number = 1
+        return True
 
     def _main_loop(self):
         if self.config.enable_caching and self.config.experimental:
@@ -336,7 +354,7 @@ class Poketrainer(object):
             if (not self._heartbeat_number % self._heartbeat_frequency == 0 and
                     not self._heartbeat_number % self._full_heartbeat_frequency == 0):
                 self._heartbeat_number += 1
-                return
+                return False
 
             # making a standard call to update position, etc
             req = self.api.create_request()
@@ -486,7 +504,7 @@ class Poketrainer(object):
             """
 
         self._heartbeat_number += 1
-        return res
+        return True
 
     def set_position(self, *pos):
         return self.api.set_position(*pos)
@@ -502,7 +520,7 @@ class Poketrainer(object):
     def enable_web_pushing(self):
         self.log.info('Enabled pushing to web, caus web told us to!')
         self.can_push_to_web = True
-        return self.can_push_to_web
+        return self.running
 
     def current_location(self):
         self.log.info("Web got position: %s", self.get_position())

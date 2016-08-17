@@ -35,7 +35,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">
-                        Level XP:<br>
+                        Level {{ playerStats.level }}, XP:<br>
                         {{ (playerStats.experience - playerStats.prev_level_xp) | number }}/{{ (playerStats.next_level_xp - playerStats.prev_level_xp) | number }}
                     </h3>
                 </div>
@@ -94,7 +94,10 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-12 table-responsive">
-                            <table datatable="ng" dt-options="pokemonDataTableOptions" class="row-border hover table-striped">
+                            <table datatable="ng"
+                                   dt-options="pokemonDataTableOptions"
+                                   class="row-border hover table-striped"
+                                   id="pokemon_{{ player.username }}">
                                 <thead>
                                     <th>Recent</th>
                                     <th>#</th>
