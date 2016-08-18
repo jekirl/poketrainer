@@ -294,6 +294,7 @@ class Poketrainer(object):
                                gt.exception, self.get_position())
             # restart after sleep
             self.sleep(30)
+            self.running = False
             self.reload_config()
             self.reload_api(self.get_position())
             self.start_bot()
