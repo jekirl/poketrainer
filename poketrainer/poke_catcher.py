@@ -74,7 +74,7 @@ class PokeCatcher(object):
             if catch_attempts > self.parent.config.min_failed_attempts_before_using_berry \
                     and self.parent.inventory.has_berry():
                 self.log.info("Feeding da razz berry!")
-                self.parent.sleep(0.2 + self.parent.config.extra_wait)
+                self.parent.sleep(1.5 + self.parent.config.extra_wait)
                 r = self.parent.api.use_item_capture(item_id=self.parent.inventory.take_berry(),
                                                      encounter_id=encounter_id,
                                                      spawn_point_id=spawn_point_id) \
@@ -84,25 +84,30 @@ class PokeCatcher(object):
                 else:
                     self.log.info("Could not feed the Pokemon. (%s)", r)
 
-            pokeball = self.parent.inventory.take_next_ball(capture_probability)
-            self.log.info("Attempting catch with {0} at {1:.2f}% chance. Try Number: {2}".format(get_item_name(
-                pokeball), item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
-            self.parent.sleep(1.5 + self.parent.config.extra_wait)
-
             hit = random() < self.parent.config.pokeball_hitrate
             spin = random() < self.parent.config.pokeball_spinrate
             normalized_reticle_size = 1.950 - random() * 1.950 * (1.0 - self.parent.config.pokeball_min_accuracy)
             spin_modifier = 1.0 - random() * 1.0 * (1.0 - self.parent.config.pokeball_min_accuracy)
-            normalized_hit_position = 1.0
-            self.log.debug("hit: %s, spin: %s, reticle: %s, spin-modifier: %s", hit, spin,
-                           normalized_reticle_size, spin_modifier)
+            accuracy_info = "hit: %s, spin: %s" % (hit, spin)
+            if hit:
+                accuracy_info += ", reticle: %s" % normalized_reticle_size
+                if spin:
+                    accuracy_info += ", spin-modifier: %s" % spin_modifier
+
+            pokeball = self.parent.inventory.take_next_ball(capture_probability)
+            self.log.info("Attempting catch with {0} at {1:.2f}% chance. Try #: {2}, {3}"
+                          .format(get_item_name(pokeball),
+                                  item_capture_mult * capture_probability.get(pokeball, 0.0) * 100,
+                                  catch_attempts,
+                                  accuracy_info)
+                          )
+            self.parent.sleep(1.5 + self.parent.config.extra_wait)
             if not spin:
-                normalized_hit_position = 0.0
                 r = self.parent.api.catch_pokemon(
                     normalized_reticle_size=normalized_reticle_size,
                     pokeball=pokeball,
                     hit_pokemon=hit,
-                    normalized_hit_position=normalized_hit_position,
+                    normalized_hit_position=0.0,
                     encounter_id=encounter_id,
                     spawn_point_id=spawn_point_id,
                 ).get('responses', {}).get('CATCH_POKEMON', {})
@@ -112,7 +117,7 @@ class PokeCatcher(object):
                     pokeball=pokeball,
                     spin_modifier=spin_modifier,
                     hit_pokemon=hit,
-                    normalized_hit_position=normalized_hit_position,
+                    normalized_hit_position=1.0,
                     encounter_id=encounter_id,
                     spawn_point_id=spawn_point_id,
                 ).get('responses', {}).get('CATCH_POKEMON', {})
