@@ -356,7 +356,7 @@ angular.module('Poketrainer.State.Status', [
         var positionUpdates = 0;
         $scope.$on('position:update', function(event, data) {
             positionUpdates++;
-            if (positionUpdates % 5 == 0) {
+            if (positionUpdates % 1 == 0) {
                 $scope.markers.bot.lat = data[0];
                 $scope.markers.bot.lng = data[1];
                 var newLocation = {lat: data[0], lng: data[1]};

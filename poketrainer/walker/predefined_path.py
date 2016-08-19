@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import logging
 
-from poketrainer.location import get_route
+from poketrainer.location import get_location, get_route
 
 from . import base
 
@@ -12,7 +12,7 @@ class Walker(base.Walker):
         self.config = config
         self.parent = parent
 
-        self.route = {'steps': [], 'total_distance': 0}  # route should contain the complete path we're planning to go
+        self.route = []  # route should contain the complete path we're planning to go
         self.steps = []  # steps contain all steps to the next route target
 
     """ will always only walk 1 step (i.e. waypoint), so we can accurately control the speed (via step_size) """
@@ -25,19 +25,18 @@ class Walker(base.Walker):
                                        self.parent.total_distance_traveled, self.parent.total_trip_distance)
 
             # create general route first
-            if not self.route['steps']:
-                # get new route
-                if not self._get_route():
-                    return False
+            if not self.route:
+                self._get_route()
 
-            next_loc = self.route['steps'].pop(0)
+            next_loc = self.route.pop(0)
 
             # we have completed a previously set route
             if self.parent.total_distance_traveled > 0:
                 self.parent.module_log(logging.INFO, '===============================================')
-            # route contains only forts, so we actually get a sub-route here with individual steps
+
+            # create a sub-route with individual steps to next location
             route_data = get_route(
-                self.parent.get_position(), (next_loc['lat'], next_loc['long']),
+                self.parent.get_position(), next_loc,
                 self.config.use_google, self.config.gmaps_api_key,
                 step_size=self.parent.get_step_size()
             )
@@ -57,32 +56,11 @@ class Walker(base.Walker):
         return self.steps.pop(0)
 
     def walk_back_to_origin(self, origin):
-        self.route = {'steps': [
-            {
-                'lat': origin[0],
-                'long': origin[1]
-            }
-        ], 'total_distance': 0}
+        self._get_route()
         self.steps = []
 
-    """ replaces old spin_near_fort but returns only the forts to spin """
-
     def _get_route(self):
-
-        forts = self.parent.get_forts()
-
-        if not forts:
-            return False
-
-        posf = self.parent.get_position()
-        self.parent.base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (posf[0], posf[1])
-        self.parent.total_distance_traveled = 0
-
-        self.route = {'steps': [
-            {
-                'lat': float(fort_data[0]['latitude']),
-                'long': float(fort_data[0]['longitude'])
-            } for fort_data in forts
-            ], 'total_distance': 0}
-
+        self.route = []
+        for waypoint in self.config.predefined_path:
+            self.route.append(get_location(waypoint))
         return True

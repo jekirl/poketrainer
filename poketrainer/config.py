@@ -23,6 +23,7 @@ class Config(object):
         self.auth_service = config["auth_service"]
         self.username = config["username"]
         self.gmaps_api_key = config.get("GMAPS_API_KEY", "")
+        self.predefined_path = config.get("PREDEFINED_PATH", [])
 
         self.step_size = config.get("BEHAVIOR", {}).get("STEP_SIZE", 200)
         self.wander_steps = config.get("BEHAVIOR", {}).get("WANDER_STEPS", 0)

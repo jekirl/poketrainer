@@ -17,6 +17,15 @@ geolocator = GoogleV3()
 
 
 def get_location(search):
+    # skip geocode if possible (search = coordinates)
+    coordinates = search.split(',')
+    if len(coordinates) == 2:
+        try:
+            lon = float(coordinates[0].strip(' '))
+            lat = float(coordinates[1].strip(' '))
+            return (lon, lat, 0)
+        except Exception:
+            pass
     loc = geolocator.geocode(search)
     return (loc.latitude, loc.longitude, loc.altitude)
 
