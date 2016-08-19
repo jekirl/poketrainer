@@ -88,6 +88,9 @@ class PokeCatcher(object):
             spin = random() < self.parent.config.pokeball_spinrate
             normalized_reticle_size = 1.950 - random() * 1.950 * (1.0 - self.parent.config.pokeball_min_accuracy)
             spin_modifier = 1.0 - random() * 1.0 * (1.0 - self.parent.config.pokeball_min_accuracy)
+            normalized_hit_position = 1.0
+            if not hit:
+                normalized_hit_position = 0.0
             accuracy_info = "hit: %s, spin: %s" % (hit, spin)
             if hit:
                 accuracy_info += ", reticle: %s" % normalized_reticle_size
@@ -107,7 +110,7 @@ class PokeCatcher(object):
                     normalized_reticle_size=normalized_reticle_size,
                     pokeball=pokeball,
                     hit_pokemon=hit,
-                    normalized_hit_position=0.0,
+                    normalized_hit_position=normalized_hit_position,
                     encounter_id=encounter_id,
                     spawn_point_id=spawn_point_id,
                 ).get('responses', {}).get('CATCH_POKEMON', {})
@@ -117,7 +120,7 @@ class PokeCatcher(object):
                     pokeball=pokeball,
                     spin_modifier=spin_modifier,
                     hit_pokemon=hit,
-                    normalized_hit_position=1.0,
+                    normalized_hit_position=normalized_hit_position,
                     encounter_id=encounter_id,
                     spawn_point_id=spawn_point_id,
                 ).get('responses', {}).get('CATCH_POKEMON', {})

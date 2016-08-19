@@ -540,6 +540,9 @@ class Poketrainer(object):
     def get_caught_pokemons(self):
         return self.inventory.get_caught_pokemon(as_dict=True)
 
+    def get_forts(self):
+        return self.map_objects.get_forts_cached()
+
     def evolve_pokemon_by_id(self, p_id):
         # acquire lock for this thread
         if self.thread_lock(persist=True):

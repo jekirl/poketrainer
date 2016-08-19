@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from time import time
 
 from helper.colorlogger import create_logger
+from helper.utilities import flat_map
 
 from .location import get_neighbors
 
@@ -17,6 +18,7 @@ class MapObjects(object):
 
         # cache
         self._objects = {}
+        self._forts = []
 
     def get_api_rate_limit(self):
         return self._map_objects_rate_limit
@@ -40,3 +42,15 @@ class MapObjects(object):
                 cell_id=neighbors)
             self._last_got_map_objects = time()
         return self._objects
+
+    def get_forts(self):
+        res = self.nearby_map_objects()
+        self.log.debug("nearby_map_objects: %s", res)
+        map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
+        self._forts = flat_map(lambda c: c.get('forts', []), map_cells)
+        return self._forts
+
+    def get_forts_cached(self):
+        if not self._forts:
+            return self.get_forts()
+        return self._forts

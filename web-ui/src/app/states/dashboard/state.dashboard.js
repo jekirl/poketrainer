@@ -129,6 +129,28 @@ angular.module('Poketrainer.State.Status', [
 
                     return d.promise;
                 }],
+                fortsData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveFortsData($q, $stateParams, PokeSocket, SocketEvent){
+                    var d = $q.defer();
+
+                    var fortsDataCb = function fortsDataCb(message) {
+                        if(angular.isUndefined(message) || message.type != 'forts'){
+                            return;
+                        }
+                        if (!message.success) {
+                            d.reject('offline');
+                            return;
+                        }
+                        d.resolve(angular.fromJson(message.data));
+                    };
+
+                    PokeSocket.on(SocketEvent.Request, fortsDataCb);
+                    PokeSocket.emit(SocketEvent.Request, {
+                        username: $stateParams.username,
+                        types: ['forts']
+                    });
+
+                    return d.promise;
+                }],
                 attacksData: ['$q', '$stateParams', 'PokeSocket', 'SocketEvent', function resolveAttacksData($q, $stateParams, PokeSocket, SocketEvent){
                     var d = $q.defer();
 
@@ -164,7 +186,7 @@ angular.module('Poketrainer.State.Status', [
 
     .controller('DashboardController', function DashboardController($rootScope, $scope, $stateParams, $mdToast, PokeSocket, leafletData,
                                                                     UserList, locationData, inventoryData, playerData, playerStatsData,
-                                                                    pokemonData, attacksData, SocketEvent, DTOptionsBuilder) {
+                                                                    pokemonData, fortsData, attacksData, SocketEvent, DTOptionsBuilder) {
         UserList.setCurrent($stateParams.username);
         $rootScope.$broadcast("currentUser_:changed");
 
@@ -372,16 +394,33 @@ angular.module('Poketrainer.State.Status', [
                             zoom: 15
                         }
                      };
-        
-        $scope.markers = {
-            bot: {
-                lat: locationData[0],
-                lng: locationData[1],
-                message: $scope.player.username,
-                focus: true,
-                draggable: false
+
+        var markers = {};
+        for (var i = 0; i < fortsData.length; i++) {
+            var fort = fortsData[i];
+            if (fort.type == 1 && (fort.enabled || fort.lure_info)) {
+                markers['fort_' + i] = {
+                    lat: fort.latitude,
+                    lng: fort.longitude,
+                    message: fort.latitude + ', ' + fort.longitude,
+                    icon: {
+                        iconUrl: 'assets/images/fort.png',
+                        iconSize: [30, 32],
+                        iconAnchor: [16, 31]
+                    }
+                }
+            } else {
+                // GYM, we could display them aswell
             }
+        }
+        markers['bot'] = {
+            lat: locationData[0],
+            lng: locationData[1],
+            message: $scope.player.username,
+            focus: true,
+            draggable: false
         };
+        $scope.markers = markers;
         
         $scope.paths = {
             main: {

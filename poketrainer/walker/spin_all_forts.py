@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 
+import logging
 import six
 
 from poketrainer.location import get_route
@@ -14,7 +15,6 @@ class Walker(base.Walker):
     def __init__(self, config, parent):
         self.config = config
         self.parent = parent
-        self.log = parent.log
 
         self.route = {'steps': [], 'total_distance': 0}  # route should contain the complete path we're planning to go
         self.steps = []  # steps contain all steps to the next route target
@@ -28,7 +28,7 @@ class Walker(base.Walker):
             if not self.route['steps']:
                 # we have completed a previously set route
                 if self.parent.total_distance_traveled > 0:
-                    self.log.info('===============================================')
+                    self.parent.module_log(logging.INFO, '===============================================')
                 # get new route
                 if not self._get_route():
                     return False
@@ -38,17 +38,17 @@ class Walker(base.Walker):
                 self.parent.base_travel_link = "https://www.google.com/maps/dir/%s,%s/" % (posf[0], posf[1])
                 self.parent.total_distance_traveled = 0
                 self.parent.total_trip_distance = self.route['total_distance']
-                self.log.info('===============================================')
-                self.log.info("Total trip distance will be: {0:.2f} meters".
-                              format(self.parent.total_trip_distance))
+                self.parent.module_log(logging.INFO, '===============================================')
+                self.parent.module_log(logging.INFO, "Total trip distance will be: {0:.2f} meters".
+                                       format(self.parent.total_trip_distance))
 
             next_loc = self.route['steps'].pop(0)
             # if the route is not only forts, we can just set one step at a time
             self.steps = [next_loc]
 
         if self.config.show_distance_traveled and self.parent.total_distance_traveled > 0:
-            self.log.info('Traveled %.2f meters of %.2f of the trip',
-                          self.parent.total_distance_traveled, self.parent.total_trip_distance)
+            self.parent.module_log(logging.INFO, 'Traveled %.2f meters of %.2f of the trip',
+                                   self.parent.total_distance_traveled, self.parent.total_trip_distance)
         return self.steps.pop(0)
 
     def walk_back_to_origin(self, origin):

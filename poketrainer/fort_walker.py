@@ -11,7 +11,6 @@ from cachetools import TTLCache
 
 from helper.colorlogger import create_logger
 from helper.exceptions import TooManyEmptyResponses
-from helper.utilities import flat_map
 
 from .location import distance_in_meters, filtered_forts, get_route
 from .poke_utils import get_item_name
@@ -41,6 +40,11 @@ class FortWalker(object):
         self.walker_factory = WalkerFactory()
         self.walker = None
 
+    """ provide log function for children, so all logs are sent from this module """
+
+    def module_log(self, lvl, msg, *args, **kwargs):
+        self.log.log(lvl, msg, *args, **kwargs)
+
     """ will always only walk 1 step (i.e. waypoint), so we can accurately control the speed (via step_size) """
 
     def loop(self):
@@ -69,19 +73,6 @@ class FortWalker(object):
             self.walker = self.walker_factory.get_walker(self.parent.config, self)
         return self.walker
 
-    def get_all_forts(self):
-        res = self.parent.map_objects.nearby_map_objects()
-        self.log.debug("nearby_map_objects: %s", res)
-        map_cells = res.get('responses', {}).get('GET_MAP_OBJECTS', {}).get('map_cells', [])
-        forts = flat_map(lambda c: c.get('forts', []), map_cells)
-        if not forts:
-            self.log.debug("No fort to walk to! %s", res)
-            self.log.info('No more forts within proximity. Or server error')
-            self._error_counter += 1
-        else:
-            self._error_counter = 0
-        return forts
-
     def get_forts(self):
         forts = []
         if self.use_cache and self.parent.config.experimental and self.parent.config.enable_caching:
@@ -94,8 +85,15 @@ class FortWalker(object):
                 self.cache_is_sorted = False
 
         if not forts:
+            forts = self.parent.map_objects.get_forts()
+            if not forts:
+                self.log.debug("No fort to walk to! %s", forts)
+                self.log.info('No more forts within proximity. Or server error')
+                self._error_counter += 1
+            else:
+                self._error_counter = 0
             # filter forts and sort by distance
-            forts = filtered_forts(self.parent.get_orig_position(), self.parent.get_position(), self.get_all_forts(),
+            forts = filtered_forts(self.parent.get_orig_position(), self.parent.get_position(), forts,
                                    self.parent.config.stay_within_proximity, self.visited_forts)
             if not forts:
                 self.log.info('No more spinnable forts within proximity. Walking back to origin')
@@ -125,12 +123,9 @@ class FortWalker(object):
         self.get_walker().walk_back_to_origin(self.parent.get_orig_position())
 
     def spin_nearest_fort(self):
-        map_cells = self.parent.map_objects.nearby_map_objects().get('responses', {}).get('GET_MAP_OBJECTS', {})\
-            .get('map_cells', [])
-        forts = flat_map(lambda c: c.get('forts', []), map_cells)
+        forts = self.parent.map_objects.get_forts_cached()
         destinations = filtered_forts(self.parent.get_orig_position(), self.parent.get_position(), forts,
-                                      self.parent.config.stay_within_proximity,
-                                      self.visited_forts)
+                                      self.parent.config.stay_within_proximity, self.visited_forts)
         if destinations:
             nearest_fort = destinations[0][0]
             nearest_fort_dis = destinations[0][1]

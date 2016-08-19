@@ -18,7 +18,6 @@ class WalkerFactory(object):
             walker_name = 'default'
             if config.experimental and config.spin_all_forts:
                 walker_name = 'spin_all_forts'
-            parent.log.info('choosing walker: %s', walker_name)
             klass = getattr(importlib.import_module("poketrainer.walker." + walker_name.lower()), 'Walker')
             self._walker = klass(config, parent)
         return self._walker

@@ -280,6 +280,10 @@ def get(message):
             response = c.get_caught_pokemons()
             logger.debug('emitting pokemon')
             emit('pull', {'success': True, 'type': 'pokemon', 'data': response})
+        if 'forts' in types:
+            response = c.get_forts()
+            logger.debug('emitting forts')
+            emit('pull', {'success': True, 'type': 'forts', 'data': response})
         if 'attacks' in types:
             logger.debug('emitting attacks')
             emit('pull', {'success': True, 'type': 'attacks', 'data': attacks})
