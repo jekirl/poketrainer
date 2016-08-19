@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import logging
 
-from poketrainer.location import get_location, get_route
+from poketrainer.location import get_location, get_route, randomize_coordinates
 
 from . import base
 
@@ -62,5 +62,7 @@ class Walker(base.Walker):
     def _get_route(self):
         self.route = []
         for waypoint in self.config.predefined_path:
-            self.route.append(get_location(waypoint))
+            orig_location = get_location(waypoint)
+            location = randomize_coordinates(*orig_location, distance=10)
+            self.route.append(location)
         return True

@@ -8,6 +8,8 @@ import six
 from geopy.distance import VincentyDistance, vincenty
 from geopy.geocoders import GoogleV3
 from gmaps.directions import Directions
+import math
+from random import random
 
 if six.PY3:
     from past.builtins import map
@@ -28,6 +30,25 @@ def get_location(search):
             pass
     loc = geolocator.geocode(search)
     return (loc.latitude, loc.longitude, loc.altitude)
+
+
+# http://gis.stackexchange.com/questions/25877/how-to-generate-random-locations-nearby-my-location
+def randomize_coordinates(lat, lon, alt, distance=20):
+    """
+        randomize the coordinate
+    """
+    x0 = lon
+    y0 = lat
+    r = distance / 111300.0  # convert meters to degrees (at equator)
+    u = random()
+    v = random()
+    w = r * math.sqrt(u)
+    t = 2 * math.pi * v
+    x = w * math.cos(t)
+    y = w * math.sin(t)
+    # adjust for shrinking in east-west distances
+    x1 = x / math.cos(y0 * math.pi / 180)
+    return (y0 + y, x0 + x1, alt)
 
 
 # http://python-gmaps.readthedocs.io/en/latest/gmaps.html#module-gmaps.directions

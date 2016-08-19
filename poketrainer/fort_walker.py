@@ -123,7 +123,8 @@ class FortWalker(object):
         self.get_walker().walk_back_to_origin(self.parent.get_orig_position())
 
     def spin_nearest_fort(self):
-        forts = self.parent.map_objects.get_forts_cached()
+        # we cannot use the cached forts here, because of lures
+        forts = self.parent.map_objects.get_forts()
         destinations = filtered_forts(self.parent.get_orig_position(), self.parent.get_position(), forts,
                                       self.parent.config.stay_within_proximity, self.visited_forts)
         if destinations:
