@@ -74,7 +74,7 @@ class PokeCatcher(object):
             if catch_attempts > self.parent.config.min_failed_attempts_before_using_berry \
                     and self.parent.inventory.has_berry():
                 self.log.info("Feeding da razz berry!")
-                self.parent.sleep(1.5 + self.parent.config.extra_wait)
+                self.parent.sleep(1.0 + self.parent.config.extra_wait)
                 r = self.parent.api.use_item_capture(item_id=self.parent.inventory.take_berry(),
                                                      encounter_id=encounter_id,
                                                      spawn_point_id=spawn_point_id) \
@@ -104,7 +104,7 @@ class PokeCatcher(object):
                                   catch_attempts,
                                   accuracy_info)
                           )
-            self.parent.sleep(1.5 + self.parent.config.extra_wait)
+            self.parent.sleep(1.0 + self.parent.config.extra_wait)
             if not spin:
                 r = self.parent.api.catch_pokemon(
                     normalized_reticle_size=normalized_reticle_size,
@@ -181,7 +181,7 @@ class PokeCatcher(object):
             position = self.parent.api.get_position()
             pokemon = Pokemon(pokemon_data)
             self.log.info("Trying initiate catching Pokemon: %s", pokemon.pokemon_type)
-            self.parent.sleep(0.2 + self.parent.config.extra_wait)
+            self.parent.sleep(1.0 + self.parent.config.extra_wait)
             encounter = self.parent.api.encounter(encounter_id=encounter_id,
                                                   spawn_point_id=spawn_point_id,
                                                   player_latitude=position[0],
@@ -231,6 +231,7 @@ class PokeCatcher(object):
             self.log.debug("At Fort with lure %s".encode('utf-8', 'ignore'), lureinfo)
             self.log.info("At Fort with Lure AND Active Pokemon %s",
                           POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
+            self.parent.sleep(1.0 + self.parent.config.extra_wait)
             resp = self.parent.api.disk_encounter(encounter_id=encounter_id, fort_id=fort_id,
                                                   player_latitude=position[0],
                                                   player_longitude=position[1]) \
