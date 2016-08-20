@@ -189,8 +189,6 @@ The name option, poketrainer in the example, is arbirary. Multilple containers c
 
 The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`.
 
-If one wishes to use the CLsniper.py feature, you will need to modify the environment with your username during the docker run command. Add `-e WEBNAME=<yourusername>`. This will make the needed changes to the CLSniper.py script. Once this is done, one can invoke the script using `docker exec -ti <containername> python /CLSniper.py
-
 You can create an alias for this by adding `alias pokecli='docker start poketrainer && docker attach poketrainer'` to ~/.bashrc.  	
 
 
