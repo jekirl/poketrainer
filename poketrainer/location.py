@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import math
+from random import random
 from time import time
 
 import pyproj
@@ -8,8 +10,6 @@ import six
 from geopy.distance import VincentyDistance, vincenty
 from geopy.geocoders import GoogleV3
 from gmaps.directions import Directions
-import math
-from random import random
 
 if six.PY3:
     from past.builtins import map
