@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+import math
+from random import random
 from time import time
 
 import pyproj
@@ -17,8 +19,36 @@ geolocator = GoogleV3()
 
 
 def get_location(search):
+    # skip geocode if possible (search = coordinates)
+    coordinates = search.split(',')
+    if len(coordinates) == 2:
+        try:
+            lon = float(coordinates[0].strip(' '))
+            lat = float(coordinates[1].strip(' '))
+            return (lon, lat, 0)
+        except Exception:
+            pass
     loc = geolocator.geocode(search)
     return (loc.latitude, loc.longitude, loc.altitude)
+
+
+# http://gis.stackexchange.com/questions/25877/how-to-generate-random-locations-nearby-my-location
+def randomize_coordinates(lat, lon, alt, distance=20):
+    """
+        randomize the coordinate
+    """
+    x0 = lon
+    y0 = lat
+    r = distance / 111300.0  # convert meters to degrees (at equator)
+    u = random()
+    v = random()
+    w = r * math.sqrt(u)
+    t = 2 * math.pi * v
+    x = w * math.cos(t)
+    y = w * math.sin(t)
+    # adjust for shrinking in east-west distances
+    x1 = x / math.cos(y0 * math.pi / 180)
+    return (y0 + y, x0 + x1, alt)
 
 
 # http://python-gmaps.readthedocs.io/en/latest/gmaps.html#module-gmaps.directions

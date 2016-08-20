@@ -248,10 +248,10 @@ class Poketrainer(object):
             self.log.debug("%s is now releasing lock", id(gevent.getcurrent()))
             self.sem.release()
 
-    def push_to_web(self, event, action, data):
-        gevent.spawn(self._do_push_to_web, event, action, data)
+    def push_to_web(self, event, action, data, timeout=10):
+        gevent.spawn(self._do_push_to_web, event, action, data, timeout)
 
-    def _do_push_to_web(self, event, action, data):
+    def _do_push_to_web(self, event, action, data, timeout=10):
         if not self.can_push_to_web:
             self.log.debug('Web pushing is disabled')
             return
@@ -269,14 +269,15 @@ class Poketrainer(object):
             self.web_rpc = zerorpc.Client()
             self.web_rpc.connect("tcp://127.0.0.1:%i" % sock_port)
         try:
-            self.web_rpc.push(self.config.username, event, action, data)
+            self.web_rpc('push', self.config.username, event, action, data, timeout=timeout)
             self.log.debug('Pushed data to web, event: %s, action: %s', event, action)
         except Exception as e:
-            self.log.error('Error trying to push to web, will now stop pushing')
+            self.log.error('Error trying to push to web %s, will now stop pushing', e)
             self.can_push_to_web = False
-            self.web_rpc.close()
-            self.web_rpc = None
-            raise Exception(e)
+            if self.web_rpc:
+                self.web_rpc.close()
+                self.web_rpc = None
+            # raise Exception(e)
 
     def _callback(self, gt):
         try:
@@ -538,6 +539,9 @@ class Poketrainer(object):
 
     def get_caught_pokemons(self):
         return self.inventory.get_caught_pokemon(as_dict=True)
+
+    def get_forts(self):
+        return self.map_objects.get_forts_cached()
 
     def evolve_pokemon_by_id(self, p_id):
         # acquire lock for this thread

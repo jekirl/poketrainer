@@ -91,6 +91,7 @@
       "username": "someusername",
       "password": "password",
       "location": "University of Southern California, Los Angeles, CA",
+      "PREDEFINED_PATH": [],
       "BEHAVIOR": {
         "USE_GOOGLE": true,
         "STEP_SIZE": 100,

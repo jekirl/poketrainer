@@ -63,9 +63,14 @@ Below the accounts you can change options in the `default` section. If you need 
    * `SKIP_VISITED_FORT_DURATION` [Experimental] Avoid a fort for a given number of seconds
      * Setting this to 500 means avoid a fort for 500 seconds before returning, (Should be higher than 300 to have any effect). This will let the bot explore a bigger area.
    * `SPIN_ALL_FORTS` [Experimental] will try to route using google maps(must have key) to all visible forts, if `SKIP_VISITED_FORT_DURATION` is set high enough, you may roam around forever.
+   * `CATCH_POKEMON_LIMIT` The bot will stop after this many pokemons caught. Set it to something < 1000 to ensure you don't hit the daily limit.
+   * `FORT_SPIN_LIMIT` The bot will stop after this many forts spun. Set it to something < 2000 to ensure you don't hit the daily limit.
 * `CAPTURE`
    * `CATCH_POKEMON` Allows you to disabling catching pokemon if you just want to mine for the forts for pokeballs
    * `MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY` minimum number of failed capture attempts before trying to use a Razz Berry (default: 3)
+   * `POKEBALL_HITRATE` Value between 0.0 and 1.0, example: 0.8 = hit 80% of the pokeball throws, miss 20%
+   * `POKEBALL_SPINRATE` Value between 0.0 and 1.0, example: 0.4 = spin 40% of the pokeballs thrown
+   * `POKEBALL_MIN_ACCURACY` Value between 0.0 and 1.0, example: 1.0 = always hit when reticle is the smallest / spin with max efficiency (if spinning)
    * `USE_POKEBALL_IF_PERCENT` As long as using a pokeball would result in at least this percent of a chance to capture, use it (default: 50)
    * `USE_GREATBALL_IF_PERCENT` If using a pokeball wouldn't result in at least the above percent, use a greatball if the capture rate is above this percent (default: 50)
    * `USE_ULTRABALL_IF_PERCENT` If using a greatball wouldn't result in at least the above percent, use an ultraball if the capture rate is above this percent (default: 50)
@@ -109,6 +114,7 @@ Below the accounts you can change options in the `default` section. If you need 
    * `SCORE_METHOD`
      * A pokemon's score is an arbitrary and configurable parameter defines how to sort pokemon by best > worst to decide which one to keep first. Possible values are "CP", "IV", "CPxIV", or "CP+IV" or the special "FANCY" method.
      * The "FANCY" method uses the options a `WEIGHT_IV` and `WEIGHT_LVL` which give the ability to specifically set more weight on Lvl or IV. The formula is as follows: `(iv / 100.0 * SCORE_WEIGHT_IV) + level / (player_level+1.5) * SCORE_WEIGHT_LVL` where player_level+1.5 is the max level that pokemon can reach when fully powered up.
+* `PREDEFINED_PATH` Can be an array of locations / coordinates that will be walked. Will ignore `SPIN_ALL_FORTS` setting. Ideally your path will take the bot 15+ minutes to walk.
 * `NEEDY_ITEM_FARMING` [Experimental] will cease trying to catch pokemon and roam around to collect more pokeballs when inventory is low
    * `ENABLE` : `Boolean`, whether or not this feature is enabled
    * `POKEBALL_FARM_THRESHOLD` : `Integer`, when the observed pokeball count drops on or below this number, skip catching pokemon and begin collecting.
