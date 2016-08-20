@@ -17,10 +17,13 @@ class Config(object):
         self.config_data = config
         self.__password = self.config_data.pop("password", 'NA')
 
+        self.debug = config.get('debug', False)
+
         self.location = config["location"]
         self.auth_service = config["auth_service"]
         self.username = config["username"]
         self.gmaps_api_key = config.get("GMAPS_API_KEY", "")
+        self.predefined_path = config.get("PREDEFINED_PATH", [])
 
         self.step_size = config.get("BEHAVIOR", {}).get("STEP_SIZE", 200)
         self.wander_steps = config.get("BEHAVIOR", {}).get("WANDER_STEPS", 0)
@@ -32,9 +35,15 @@ class Config(object):
         self.spin_all_forts = config.get("BEHAVIOR", {}).get("SPIN_ALL_FORTS", False)
         self.stay_within_proximity = config.get("BEHAVIOR", {}).get("STAY_WITHIN_PROXIMITY",
                                                                     9999999)  # Stay within proximity
+        self.catch_pokemon_limit = config.get("BEHAVIOR", {}).get("CATCH_POKEMON_LIMIT", -1)
+        self.fort_spin_limit = config.get("BEHAVIOR", {}).get("FORT_SPIN_LIMIT", -1)
+
         self.should_catch_pokemon = config.get("CAPTURE", {}).get("CATCH_POKEMON", True)
         self.max_catch_attempts = config.get("CAPTURE", {}).get("MAX_CATCH_ATTEMPTS", 10)
         self.min_failed_attempts_before_using_berry = config.get("CAPTURE", {}).get("MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY", 3)
+        self.pokeball_hitrate = config.get("CAPTURE", {}).get("POKEBALL_HITRATE", 1.0)
+        self.pokeball_spinrate = config.get("CAPTURE", {}).get("POKEBALL_SPINRATE", 1.0)
+        self.pokeball_min_accuracy = config.get("CAPTURE", {}).get("POKEBALL_MIN_ACCURACY", 1.0)
         pokeball_percent = config.get("CAPTURE", {}).get("USE_POKEBALL_IF_PERCENT", 50)
         greatball_percent = config.get("CAPTURE", {}).get("USE_GREATBALL_IF_PERCENT", 50)
         ultraball_percent = config.get("CAPTURE", {}).get("USE_ULTRABALL_IF_PERCENT", 50)
@@ -98,6 +107,8 @@ class Config(object):
         self.show_distance_traveled = config.get("CONSOLE_OUTPUT", {}).get("SHOW_DISTANCE_TRAVELED", True)
         self.show_nearest_fort_distance = config.get("CONSOLE_OUTPUT", {}).get("SHOW_NEAREST_FORT_DISTANCE", True)
         self.notify_no_nearby_pokemon = config.get("CONSOLE_OUTPUT", {}).get("NOTIFY_NO_NEARBY_POKEMON", False)
+        self.add_file_logging = config.get("CONSOLE_OUTPUT", {}).get("ADD_FILE_LOGGING", False)
+        self.file_logging_method = config.get("CONSOLE_OUTPUT", {}).get("FILE_LOGGING_METHOD", "w")
 
         self.log_colors = config.get("CONSOLE_OUTPUT", {}).get("COLORLOG",
                                                                {"FORT_WALKER": "blue",
@@ -111,10 +122,10 @@ class Config(object):
             start_location = cli_args['location']
         else:
             start_location = self.location
-            self.cache_filename = './cache/cache ' + (hashlib.md5(start_location.encode())).hexdigest() + str(self.stay_within_proximity)
-            self.use_cache = config.get("BEHAVIOR", {}).get("USE_CACHED_FORTS", False)
-            self.cache_is_sorted = config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
-            self.enable_caching = config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
+        self.cache_filename = './cache/cache ' + (hashlib.md5(start_location.encode())).hexdigest() + str(self.stay_within_proximity)
+        self.use_cache = config.get("BEHAVIOR", {}).get("USE_CACHED_FORTS", False)
+        self.cache_is_sorted = config.get("BEHAVIOR", {}).get("CACHED_FORTS_SORTED", False)
+        self.enable_caching = config.get("BEHAVIOR", {}).get("ENABLE_CACHING", False)
 
     def _sanity_check_needy_item_farming(self):
         # Sanity checking, farm_items is Experimental, and we needn't do this if we're farming anyway

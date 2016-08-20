@@ -11,7 +11,6 @@ Unknown6-master
 env/
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -24,8 +23,8 @@ cache/
 *.egg-info/
 .installed.cfg
 *.egg
-web-ui/node_modules
-src
+/src
+/logs
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -87,6 +86,10 @@ ENV/
 
 # Spyder project settings
 .spyderproject
+
+# Node
+web-ui/vendor
+web-ui/node_modules
 
 # Rope project settings
 .ropeproject

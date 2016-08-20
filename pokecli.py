@@ -47,21 +47,15 @@ def init_arguments():
                         help="Location. Only applies if an account was selected through config_index parameter")
     parser.add_argument("-e", "--encrypt_lib", help="encrypt lib, libencrypt.so/encrypt.dll", default="libencrypt.so")
     parser.add_argument("-d", "--debug", help="Debug Mode", action='store_true', default=False)
+    parser.add_argument("-p", "--proxy", help="Use Proxy, proxy_ip:port", default=None)
     arguments = parser.parse_args()
     return arguments.__dict__
 
 
 def main():
-    # log settings
-    # log format
-
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(module)10s] [%(levelname)5s] s%(message)s')
-    # log level for http request class
-    create_logger("requests", log_level=logging.WARNING)
-    # log level for pgoapi class
+    # set loggers / default log-levels for pgoapi
     create_logger("pgoapi", log_level=logging.WARNING)
-    # log level for internal pgoapi class
-    create_logger("rpc_api", log_level=logging.INFO)
+    create_logger("pgoapi.rpc_api", log_level=logging.INFO)
 
     args = init_arguments()
     if not args:
@@ -69,7 +63,7 @@ def main():
 
     poketrainer = Poketrainer(args)
     # auto-start bot
-    poketrainer.start()
+    poketrainer.start_bot()
     # because the bot spawns 'threads' so it can start / stop we're making an infinite lop here
     while True:
         try:

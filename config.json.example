@@ -91,6 +91,7 @@
       "username": "someusername",
       "password": "password",
       "location": "University of Southern California, Los Angeles, CA",
+      "PREDEFINED_PATH": [],
       "BEHAVIOR": {
         "USE_GOOGLE": true,
         "STEP_SIZE": 100,
@@ -104,12 +105,17 @@
         "SLEEP_MULT" : 1.5,
         "ENABLE_CACHING" : false,
         "USE_CACHED_FORTS" : false,
-        "CACHED_FORTS_SORTED" : false
+        "CACHED_FORTS_SORTED" : false,
+        "CATCH_POKEMON_LIMIT" : -1,
+        "FORT_SPIN_LIMIT" : -1
       },
       "CAPTURE": {
         "CATCH_POKEMON": true,
         "MIN_FAILED_ATTEMPTS_BEFORE_USING_BERRY": 3,
         "MAX_CATCH_ATTEMPTS": 10,
+        "POKEBALL_HITRATE": 1.0,
+        "POKEBALL_SPINRATE": 1.0,
+        "POKEBALL_MIN_ACCURACY": 1.0,
         "USE_POKEBALL_IF_PERCENT": 70,
         "USE_GREATBALL_IF_PERCENT": 25,
         "USE_ULTRABALL_IF_PERCENT": 5,
@@ -198,6 +204,8 @@
         "SHOW_DISTANCE_TRAVELED": true,
         "SHOW_NEAREST_FORT_DISTANCE": true,
         "NOTIFY_NO_NEARBY_POKEMON": false,
+        "ADD_FILE_LOGGING": false,
+        "FILE_LOGGING_METHOD": "w",
         "COLORLOG": {
             "FORT_WALKER": "blue",
             "POKE_CATCHER": "green",
@@ -205,7 +213,7 @@
             "EVOLVE": "cyan",
             "POKETRAINER": "yellow",
             "INVENTORY": "purple"
-            }            
+            }
         }
     
     

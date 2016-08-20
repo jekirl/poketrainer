@@ -16,3 +16,4 @@ xxhash
 colorlog
 pylru
 python-dateutil
+pysocks

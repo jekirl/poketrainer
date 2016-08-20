@@ -1,4 +1,3 @@
-# DISCLAIMER: This is jank
 from __future__ import print_function
 
 import argparse
@@ -8,11 +7,15 @@ import os
 import zerorpc
 from collections import defaultdict
 
+import six
 from flask import Flask, flash, jsonify, redirect, render_template, url_for
 from werkzeug.exceptions import NotFound
 
 from poketrainer.poke_lvl_data import TCPM_VALS
 from poketrainer.pokemon import Pokemon
+
+if six.PY3:
+    from past.builtins import filter
 
 
 class ReverseProxied(object):
@@ -157,7 +160,7 @@ def status(username):
     latlng = c.current_location()
     latlng = "%f,%f" % (latlng[0], latlng[1])
 
-    items = json.loads(c.get_inventory())['inventory_items']
+    items = json.loads(c.get_raw_inventory())
     pokemons_data = []
     candy = defaultdict(int)
     for item in items:
@@ -191,7 +194,7 @@ def status(username):
 def pokemon(username):
     s = get_api_rpc(username)
     try:
-        pokemons = json.loads(s.get_caught_pokemons())
+        pokemons = json.loads(s.get_caught_pokemons_json())
     except ValueError:
         # FIXME Use logger instead of print statements!
         print("Not valid Json")
@@ -203,7 +206,7 @@ def pokemon(username):
 def inventory(username):
     s = get_api_rpc(username)
     try:
-        inventory = json.loads(s.get_inventory())
+        inventory = json.loads(s.get_raw_inventory())
     except ValueError:
         # FIXME Use logger instead of print statements!
         print("Not valid Json")

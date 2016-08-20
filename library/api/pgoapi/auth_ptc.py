@@ -49,18 +49,21 @@ class AuthPtc(Auth):
         Auth.__init__(self)
         
         self._auth_provider = 'ptc'
+        self._req_proxy = None
         
         self._session = requests.session()
         self._session.verify = True
 
-    def user_login(self, username, password):
+    def user_login(self, username, password, proxy=None):
         self.log.info('PTC User Login for: {}'.format(username))
 
         if not isinstance(username, six.string_types) or not isinstance(password, six.string_types):
             raise AuthException("Username/password not correctly specified")
         
         head = {'User-Agent': 'niantic'}
-        r = self._session.get(self.PTC_LOGIN_URL, headers=head)
+        self._req_proxy = {"http" : proxy, "https" : proxy}
+
+        r = self._session.get(self.PTC_LOGIN_URL, headers=head, proxies=self._req_proxy)
 
         try:
             jdata = json.loads(r.content.decode('utf-8'))
@@ -78,7 +81,7 @@ class AuthPtc(Auth):
             self.log.error('PTC User Login Error - Field missing in response.content: %s', e)
             return False
 
-        r1 = self._session.post(self.PTC_LOGIN_URL, data=data, headers=head)
+        r1 = self._session.post(self.PTC_LOGIN_URL, data=data, headers=head, proxies=self._req_proxy)
 
         ticket = None
         try:
@@ -99,7 +102,7 @@ class AuthPtc(Auth):
         self.log.info('PTC Refresh Token provided by user')
         self._refresh_token = refresh_token
 
-    def get_access_token(self, force_refresh = False):
+    def get_access_token(self, force_refresh=False):
         token_validity = self.check_access_token()
 
         if token_validity is True and force_refresh is False:
@@ -119,7 +122,7 @@ class AuthPtc(Auth):
                 'code': self._refresh_token,
             }
             
-            r2 = self._session.post(self.PTC_LOGIN_OAUTH, data=data1)
+            r2 = self._session.post(self.PTC_LOGIN_OAUTH, data=data1, proxies=self._req_proxy)
 
             qs = r2.content.decode('utf-8')
             token_data = parse_qs(qs)

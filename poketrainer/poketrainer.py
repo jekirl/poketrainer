@@ -1,22 +1,24 @@
 from __future__ import absolute_import
 
-import logging
-import colorlog
 import json
+import logging
 import os
 import os.path
 import socket
 import zerorpc
+from collections import defaultdict
 from time import time
 
+import colorlog
 import gevent
+import six
 from gevent.coros import BoundedSemaphore
 from six import PY2
 
-from helper.utilities import dict_merge
 from helper.colorlogger import create_logger
+from helper.utilities import dict_merge
 from library import api
-from pgoapi.exceptions import AuthException
+from library.api.pgoapi.exceptions import AuthException
 
 from .config import Config
 from .evolve import Evolve
@@ -25,9 +27,10 @@ from .incubate import Incubate
 from .inventory import Inventory
 from .location import get_location
 from .map_objects import MapObjects
-from .player import Player as Player
+from .player import Player
 from .player_stats import PlayerStats
 from .poke_catcher import PokeCatcher
+from .poke_utils import get_item_name, get_pokemon_by_long_id
 from .release import Release
 from .sniper import Sniper
 
@@ -41,9 +44,11 @@ class Poketrainer(object):
         self.socket = None
         self.cli_args = args
         self.force_debug = args['debug']
+        self._req_proxy = None
 
         # timers, counters and triggers
         self.pokemon_caught = 0
+        self.forts_spun = 0
         self._error_counter = 0
         self._error_threshold = 10
         self.start_time = time()
@@ -52,15 +57,24 @@ class Poketrainer(object):
         self._heartbeat_frequency = 3  # 1 = always
         self._full_heartbeat_frequency = 15  # 10 = as before (every 10th heartbeat)
         self._farm_mode_triggered = False
+        self.running = False
 
         # objects, order is important!
         self.config = None
         self._load_config()
+        self._add_file_logger()
 
         self.log = create_logger(__name__, self.config.log_colors["poketrainer".upper()])
 
         self._open_socket()
 
+        # config values that might be changed during runtime
+        self.step_size = self.config.step_size
+        self.should_catch_pokemon = self.config.should_catch_pokemon
+        self.can_push_to_web = False
+        self.web_rpc = None
+
+        # other objects
         self.player = Player({})
         self.player_stats = PlayerStats({})
         self.inventory = Inventory(self, [])
@@ -76,10 +90,6 @@ class Poketrainer(object):
         self.api = None
         self._load_api()
 
-        # config values that might be changed during runtime
-        self.step_size = self.config.step_size
-        self.should_catch_pokemon = self.config.should_catch_pokemon
-
         # threading / locking
         self.sem = BoundedSemaphore(1)  # gevent
         self.persist_lock = False
@@ -88,6 +98,17 @@ class Poketrainer(object):
     def sleep(self, t):
         # eventlet.sleep(t * self.config.sleep_mult)
         gevent.sleep(t * self.config.sleep_mult)
+
+    def _add_file_logger(self):
+        if self.config.add_file_logging:
+            if not os.path.exists('logs'):
+                os.makedirs('logs')
+            log_file = 'logs' + os.sep + self.config.username + '.log'
+            log_file_handler = logging.FileHandler(log_file, self.config.file_logging_method)
+            log_file_handler.setLevel(logging.INFO)
+            log_formatter = logging.Formatter('%(asctime)s [%(module)10s] [%(levelname)5s] %(message)s')
+            log_file_handler.setFormatter(log_formatter)
+            logging.getLogger().addHandler(log_file_handler)
 
     def _open_socket(self):
         desc_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), ".listeners")
@@ -104,9 +125,11 @@ class Poketrainer(object):
                     data = json.loads(data.encode() if len(data) > 0 else '{}')
                 else:
                     data = json.loads(data if len(data) > 0 else '{}')
+                f.close()
         data[self.config.username] = sock_port
         with open(desc_file, "w+") as f:
             f.write(json.dumps(data, indent=2))
+            f.close()
 
         s = zerorpc.Server(self)
         s.bind("tcp://127.0.0.1:%i" % sock_port)  # the free port should still be the same
@@ -130,18 +153,20 @@ class Poketrainer(object):
             defaults = load.get('defaults', {})
             config = load.get('accounts', [])[self.cli_args['config_index']]
 
-            if self.cli_args['debug'] or config.get('debug', False):
-                colorlog.getLogger("requests").setLevel(logging.DEBUG)
-                colorlog.getLogger("pgoapi").setLevel(logging.DEBUG)
-                colorlog.getLogger("poketrainer").setLevel(logging.DEBUG)
-                colorlog.getLogger("rpc_api").setLevel(logging.DEBUG)
+            # merge account section with defaults
+            config_class = Config(dict_merge(defaults, config), self.cli_args)
 
-            if config.get('auth_service', '') not in ['ptc', 'google']:
-                self.log.error("Invalid Auth service specified for account %s! ('ptc' or 'google')", config.get('username', 'NA'))
+            if self.cli_args['debug'] or config_class.debug:
+                colorlog.getLogger("poketrainer").setLevel(logging.DEBUG)
+                colorlog.getLogger("pgoapi").setLevel(logging.DEBUG)
+                colorlog.getLogger("pgoapi.rpc_api").setLevel(logging.DEBUG)
+
+            if config_class.auth_service not in ['ptc', 'google']:
+                self.log.error("Invalid Auth service specified for account %s! ('ptc' or 'google')",
+                               config_class.username)
                 return False
 
-                # merge account section with defaults
-            self.config = Config(dict_merge(defaults, config), self.cli_args)
+            self.config = config_class
         return True
 
     def reload_config(self):
@@ -166,11 +191,25 @@ class Poketrainer(object):
                 position = prev_location
             self.api.set_position(*position)
 
+            # set proxy if one was provided
+            if self.cli_args['proxy']:
+                self.api.set_proxy(self.cli_args['proxy'])
+                self.log.info('Using proxy: %s', self.cli_args['proxy'])
+
+            # proxies only work with ptc accounts at the moment!
+            if self.cli_args['proxy'] and self.config.auth_service != 'ptc':
+                self.log.error("Currently proxy only works with ptc accounts.")
+                quit()
+
             # retry login every 30 seconds if any errors
             self.log.info('Starting Login process...')
             login = False
             while not login:
-                login = self.api.login(self.config.auth_service, self.config.username, self.config.get_password())
+                if self.cli_args['proxy']:
+                    login = self.api.login(self.config.auth_service, self.config.username, self.config.get_password(), proxy=self.cli_args['proxy'])
+                else:
+                    # preserve compatibility with system pgoapi
+                    login = self.api.login(self.config.auth_service, self.config.username, self.config.get_password())
                 if not login:
                     self.log.error('Login error, retrying Login in 30 seconds')
                     self.sleep(30)
@@ -209,30 +248,80 @@ class Poketrainer(object):
             self.log.debug("%s is now releasing lock", id(gevent.getcurrent()))
             self.sem.release()
 
+    def push_to_web(self, event, action, data, timeout=10):
+        gevent.spawn(self._do_push_to_web, event, action, data, timeout)
+
+    def _do_push_to_web(self, event, action, data, timeout=10):
+        if not self.can_push_to_web:
+            self.log.debug('Web pushing is disabled')
+            return
+        if not self.web_rpc:
+            desc_file = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), ".listeners")
+            with open(desc_file) as f:
+                sockets = f.read()
+                sockets = json.loads(sockets if len(sockets) > 0 else '{}')
+                if 'web' not in sockets:
+                    self.log.debug('Web RPC socket not found for pushing')
+                    self.can_push_to_web = False
+                    return
+                sock_port = int(sockets['web'])
+                f.close()
+            self.web_rpc = zerorpc.Client()
+            self.web_rpc.connect("tcp://127.0.0.1:%i" % sock_port)
+        try:
+            self.web_rpc('push', self.config.username, event, action, data, timeout=timeout)
+            self.log.debug('Pushed data to web, event: %s, action: %s', event, action)
+        except Exception as e:
+            self.log.error('Error trying to push to web %s, will now stop pushing', e)
+            self.can_push_to_web = False
+            if self.web_rpc:
+                self.web_rpc.close()
+                self.web_rpc = None
+            # raise Exception(e)
+
     def _callback(self, gt):
         try:
             if not gt.exception:
                 result = gt.value
                 self.log.info('Thread finished with result: %s', result)
+                return
         except KeyboardInterrupt:
             return
 
-        self.log.exception('Error in main loop %s, restarting at location: %s',
-                           gt.exception, self.get_position())
-        # restart after sleep
-        self.sleep(30)
-        self.reload_config()
-        self.reload_api(self.get_position())
-        self.start()
+        if not self.running:
+            self.log.info('Bot stopped')
+        else:
+            self.log.exception('Error in main loop %s, restarting at location: %s',
+                               gt.exception, self.get_position())
+            # restart after sleep
+            self.sleep(30)
+            self.running = False
+            self.reload_config()
+            self.reload_api(self.get_position())
+            self.start_bot()
 
-    def start(self):
-        self.thread = gevent.spawn(self._main_loop)
+    def start_bot(self):
+        if not self.running:
+            self.reload_config()
+            self.thread = gevent.spawn(self._main_loop)
+            self.thread.link(self._callback)
+            self.running = True
+        return self.running
 
-        self.thread.link(self._callback)
-
-    def stop(self):
+    def stop_bot(self):
+        self.running = False
         if self.thread:
             self.thread.kill()
+        self.log.info('Bot stopped by Web')
+        return True
+
+    def reset_stats(self):
+        self.forts_spun = 0
+        self.pokemon_caught = 0
+        self.start_time = time()
+        self.exp_start = None
+        self._heartbeat_number = 1
+        return True
 
     def _main_loop(self):
         if self.config.enable_caching and self.config.experimental:
@@ -248,13 +337,17 @@ class Poketrainer(object):
                     self._heartbeat()
                     self.fort_walker.loop()
                     self.fort_walker.spin_nearest_fort()
-                    self.poke_catcher.catch_all()
+                    if self.should_catch_pokemon:
+                        self.poke_catcher.catch_all()
 
                 finally:
                     # after we're done, release lock
                     self.persist_lock = False
                     self.thread_release()
-            # self.log.info("COMPLETED A _main_loop")
+            if (self.pokemon_caught > self.config.catch_pokemon_limit >= 0
+                    or self.forts_spun > self.config.fort_spin_limit >= 0):
+                return('catch_pokemon_limit of %s or fort_spin_limit of %s reached, now stopping'
+                       % (self.config.catch_pokemon_limit, self.config.fort_spin_limit))
             self.sleep(1.0)
 
     def _heartbeat(self, res=False, login_response=False):
@@ -263,7 +356,7 @@ class Poketrainer(object):
             if (not self._heartbeat_number % self._heartbeat_frequency == 0 and
                     not self._heartbeat_number % self._full_heartbeat_frequency == 0):
                 self._heartbeat_number += 1
-                return
+                return False
 
             # making a standard call to update position, etc
             req = self.api.create_request()
@@ -280,24 +373,51 @@ class Poketrainer(object):
         self.log.debug(
             'Response dictionary: \n\r{}'.format(json.dumps(res, indent=2, default=lambda obj: obj.decode('utf8'))))
 
+        status_code = res.get('status_code', -1)
+        if status_code == 3:
+            self.log.warn('Your account may be banned, will now exit')
+            exit(0)
+
         responses = res.get('responses', {})
         if 'GET_PLAYER' in responses:
             self.player = Player(responses.get('GET_PLAYER', {}).get('player_data', {}))
-            self.log.info("Player Info: {0}, Pokemon Caught in this run: {1}".format(self.player, self.pokemon_caught))
+            self.push_to_web('player', 'updated', self.player.__dict__)
+            self.log.info("Player Info: {0}, Pokemon Caught in this run: {1}, forts spun: {2}".format(
+                self.player, self.pokemon_caught, self.forts_spun
+            ))
 
         if 'GET_INVENTORY' in responses:
 
             # update objects
             self.inventory.update_player_inventory(res=res)
-            for inventory_item in self.inventory.inventory_items:
+            for inventory_item in self.inventory.get_raw_inventory_items():
                 if "player_stats" in inventory_item['inventory_item_data']:
+                    old_level = self.player_stats.level
                     self.player_stats = PlayerStats(
                         inventory_item['inventory_item_data']['player_stats'],
-                        self.pokemon_caught, self.start_time, self.exp_start
+                        self.pokemon_caught, self.forts_spun, self.start_time, self.exp_start
                     )
                     if self.exp_start is None:
                         self.exp_start = self.player_stats.run_exp_start
+                    self.push_to_web('player_stats', 'updated', self.player_stats.__dict__)
                     self.log.info("Player Stats: {}".format(self.player_stats))
+                    if self.player_stats.level > old_level > 0:
+                        self.log.info('Collecting level up rewards for level %s', self.player_stats.level)
+                        self.sleep(2.0)
+                        resp = self.api.level_up_rewards(level=self.player_stats.level)\
+                            .get('responses', {}).get('LEVEL_UP_REWARDS', {})
+                        result = resp.get('result', -1)
+                        if result == 1:
+                            items_awarded = resp.get('items_awarded', [])
+                            items = defaultdict(int)
+                            for item in items_awarded:
+                                items[item['item_id']] += item['item_count']
+                            reward = ''
+                            for item_id, amount in six.iteritems(items):
+                                if reward != '':
+                                    reward += ', '
+                                reward += str(amount) + 'x ' + get_item_name(item_id)
+                            self.log.info('Collected level up rewards: %s', reward)
             if self.config.list_inventory_before_cleanup:
                 self.log.info("Player Inventory: %s", self.inventory)
             if not login_response:
@@ -382,10 +502,11 @@ class Poketrainer(object):
             self.log.info('get_map_objects_max_refresh_seconds: %s', str(get_map_objects_max_refresh_seconds))
             self.log.info('get_map_objects_min_distance_meters: %s', str(get_map_objects_min_distance_meters))
             self.log.info('encounter_range_meters: %s', str(encounter_range_meters))
+            exit(0)
             """
 
         self._heartbeat_number += 1
-        return res
+        return True
 
     def set_position(self, *pos):
         return self.api.set_position(*pos)
@@ -397,6 +518,43 @@ class Poketrainer(object):
         return self._origPosF
 
     """ FOLLOWING ARE FUNCTIONS FOR THE WEB LISTENER """
+
+    def enable_web_pushing(self):
+        self.log.info('Enabled pushing to web, caus web told us to!')
+        self.can_push_to_web = True
+        return self.running
+
+    def current_location(self):
+        self.log.info("Web got position: %s", self.get_position())
+        return self.get_position()
+
+    def get_player(self):
+        return self.player.__dict__
+
+    def get_player_stats(self):
+        return self.player_stats.__dict__
+
+    def get_inventory(self):
+        return self.inventory.to_dict()
+
+    def get_caught_pokemons(self):
+        return self.inventory.get_caught_pokemon(as_dict=True)
+
+    def get_forts(self):
+        return self.map_objects.get_forts_cached()
+
+    def evolve_pokemon_by_id(self, p_id):
+        # acquire lock for this thread
+        if self.thread_lock(persist=True):
+            try:
+                pokemon = get_pokemon_by_long_id(p_id, self.inventory.get_raw_inventory_items())
+                return self.evolve.do_evolve_pokemon(pokemon)
+            finally:
+                # after we're done, release lock
+                self.persist_lock = False
+                self.thread_release()
+        else:
+            return 'Only one Simultaneous request allowed'
 
     def release_pokemon_by_id(self, p_id):
         # acquire lock for this thread
@@ -410,19 +568,6 @@ class Poketrainer(object):
         else:
             return 'Only one Simultaneous request allowed'
 
-    def current_location(self):
-        self.log.info("Web got position: %s", self.get_position())
-        return self.get_position()
-
-    def get_caught_pokemons(self):
-        return self.inventory.get_caught_pokemon_by_family(as_json=True)
-
-    def get_inventory(self):
-        return self.inventory.to_json()
-
-    def get_player_info(self):
-        return self.player.to_json()
-
     def snipe_pokemon(self, lat, lng):
         # acquire lock for this thread
         if self.thread_lock(persist=True):
@@ -435,6 +580,17 @@ class Poketrainer(object):
                 self.thread_release()
         else:
             return 'Only one Simultaneous request allowed'
+
+    """ OLD WEB FUNCTIONS """
+
+    def get_player_info(self):
+        return self.player.to_json()
+
+    def get_raw_inventory(self):
+        return json.dumps(self.inventory.get_raw_inventory_items())
+
+    def get_caught_pokemons_json(self):
+        return self.inventory.get_caught_pokemon_by_family(as_json=True)
 
     def ping(self):
         self.log.info("Responding to ping")

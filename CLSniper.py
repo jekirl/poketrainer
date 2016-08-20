@@ -6,9 +6,8 @@ import time
 from datetime import datetime
 from multiprocessing import Process
 
-import requests
-
 import pylru
+import requests
 from dateutil import parser
 
 # EDIT ONLY THESE TWO THINGS
@@ -69,6 +68,8 @@ def get_latest_rares():
                 p.start()
             for process in processes:
                 process.join()
+
+
 while True:
     print('Checking for new pokemon')
     get_latest_rares()

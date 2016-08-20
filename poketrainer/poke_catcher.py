@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
 import json
+from random import random
+from time import time
 
 from cachetools import TTLCache
 
@@ -72,7 +74,7 @@ class PokeCatcher(object):
             if catch_attempts > self.parent.config.min_failed_attempts_before_using_berry \
                     and self.parent.inventory.has_berry():
                 self.log.info("Feeding da razz berry!")
-                self.parent.sleep(0.2 + self.parent.config.extra_wait)
+                self.parent.sleep(1.0 + self.parent.config.extra_wait)
                 r = self.parent.api.use_item_capture(item_id=self.parent.inventory.take_berry(),
                                                      encounter_id=encounter_id,
                                                      spawn_point_id=spawn_point_id) \
@@ -82,24 +84,52 @@ class PokeCatcher(object):
                 else:
                     self.log.info("Could not feed the Pokemon. (%s)", r)
 
+            hit = random() < self.parent.config.pokeball_hitrate
+            spin = random() < self.parent.config.pokeball_spinrate
+            normalized_reticle_size = 1.950 - random() * 1.950 * (1.0 - self.parent.config.pokeball_min_accuracy)
+            spin_modifier = 1.0 - random() * 1.0 * (1.0 - self.parent.config.pokeball_min_accuracy)
+            normalized_hit_position = 1.0
+            if not hit:
+                normalized_hit_position = 0.0
+            accuracy_info = "hit: %s, spin: %s" % (hit, spin)
+            if hit:
+                accuracy_info += ", reticle: %s" % normalized_reticle_size
+                if spin:
+                    accuracy_info += ", spin-modifier: %s" % spin_modifier
+
             pokeball = self.parent.inventory.take_next_ball(capture_probability)
-            self.log.info("Attempting catch with {0} at {1:.2f}% chance. Try Number: {2}".format(get_item_name(
-                pokeball), item_capture_mult * capture_probability.get(pokeball, 0.0) * 100, catch_attempts))
-            self.parent.sleep(0.5 + self.parent.config.extra_wait)
-            r = self.parent.api.catch_pokemon(
-                normalized_reticle_size=1.950,
-                pokeball=pokeball,
-                spin_modifier=0.850,
-                hit_pokemon=True,
-                normalized_hit_position=1,
-                encounter_id=encounter_id,
-                spawn_point_id=spawn_point_id,
-            ).get('responses', {}).get('CATCH_POKEMON', {})
+            self.log.info("Attempting catch with {0} at {1:.2f}% chance. Try #: {2}, {3}"
+                          .format(get_item_name(pokeball),
+                                  item_capture_mult * capture_probability.get(pokeball, 0.0) * 100,
+                                  catch_attempts,
+                                  accuracy_info)
+                          )
+            self.parent.sleep(1.0 + self.parent.config.extra_wait)
+            if not spin:
+                r = self.parent.api.catch_pokemon(
+                    normalized_reticle_size=normalized_reticle_size,
+                    pokeball=pokeball,
+                    hit_pokemon=hit,
+                    normalized_hit_position=normalized_hit_position,
+                    encounter_id=encounter_id,
+                    spawn_point_id=spawn_point_id,
+                ).get('responses', {}).get('CATCH_POKEMON', {})
+            else:
+                r = self.parent.api.catch_pokemon(
+                    normalized_reticle_size=normalized_reticle_size,
+                    pokeball=pokeball,
+                    spin_modifier=spin_modifier,
+                    hit_pokemon=hit,
+                    normalized_hit_position=normalized_hit_position,
+                    encounter_id=encounter_id,
+                    spawn_point_id=spawn_point_id,
+                ).get('responses', {}).get('CATCH_POKEMON', {})
+
             catch_attempts += 1
             if "status" in r:
                 catch_status = r['status']
                 # fleed or error
-                if catch_status == 3 or catch_status == 0:
+                if catch_status in [3, 0]:
                     break
             ret = r
             # Sleep between catch attempts
@@ -113,8 +143,11 @@ class PokeCatcher(object):
         catch_attempt = self.attempt_catch(encounter_id, spawn_point_id, capture_probability)
         capture_status = catch_attempt.get('status', -1)
         if capture_status == 1:
-            self.log.debug("Caught Pokemon: : %s", catch_attempt)
-            self.log.info("Caught Pokemon:  %s", pokemon)
+            pokemon.id = str(catch_attempt.get('captured_pokemon_id', 'NA'))
+            pokemon.creation_time_ms = time() * 1000
+            self.log.debug("Caught Pokemon: %s", catch_attempt)
+            self.log.info("Caught Pokemon: %s", pokemon)
+            self.parent.push_to_web('pokemon', 'caught', pokemon.__dict__)
             self.parent.pokemon_caught += 1
             return True
         elif capture_status == 3:
@@ -148,7 +181,7 @@ class PokeCatcher(object):
             position = self.parent.api.get_position()
             pokemon = Pokemon(pokemon_data)
             self.log.info("Trying initiate catching Pokemon: %s", pokemon.pokemon_type)
-            self.parent.sleep(0.2 + self.parent.config.extra_wait)
+            self.parent.sleep(1.0 + self.parent.config.extra_wait)
             encounter = self.parent.api.encounter(encounter_id=encounter_id,
                                                   spawn_point_id=spawn_point_id,
                                                   player_latitude=position[0],
@@ -198,13 +231,16 @@ class PokeCatcher(object):
             self.log.debug("At Fort with lure %s".encode('utf-8', 'ignore'), lureinfo)
             self.log.info("At Fort with Lure AND Active Pokemon %s",
                           POKEMON_NAMES.get(str(lureinfo.get('active_pokemon_id', 0)), "NA"))
+            self.parent.sleep(1.0 + self.parent.config.extra_wait)
             resp = self.parent.api.disk_encounter(encounter_id=encounter_id, fort_id=fort_id,
                                                   player_latitude=position[0],
                                                   player_longitude=position[1]) \
                 .get('responses', {}).get('DISK_ENCOUNTER', {})
             result = resp.get('result', -1)
             if result == 1 and 'pokemon_data' in resp and 'capture_probability' in resp:
-                pokemon = Pokemon(resp.get('pokemon_data', {}))
+                pokemon = Pokemon(resp.get('pokemon_data', {}),
+                                  self.parent.player_stats.level,
+                                  self.parent.config.score_method, self.parent.config.score_settings)
                 capture_probability = create_capture_probability(resp.get('capture_probability', {}))
                 self.log.debug("Attempt Encounter: %s", json.dumps(resp, indent=4, sort_keys=True))
                 return self.do_catch_pokemon(encounter_id, fort_id, capture_probability, pokemon)

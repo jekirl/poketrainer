@@ -51,7 +51,7 @@ class PGoApi:
 
         self._auth_provider = None
         if provider is not None and ((username is not None and password is not None) or (oauth2_refresh_token is not None)):
-            self.set_authentication(provider, oauth2_refresh_token, username, password)
+            self.set_authentication(provider, oauth2_refresh_token, username, password, proxy=self._req_proxy)
 
         self.set_api_endpoint("pgorelease.nianticlabs.com/plfe")
 
@@ -60,11 +60,17 @@ class PGoApi:
         self._position_alt = position_alt
 
         self._signature_lib = None
+        self._req_proxy = None
+
+    def set_proxy(self, proxy):
+        self.log.debug('Set Proxy - Proxy: %s', proxy)
+        self._req_proxy = {"http" : proxy, "https" : proxy}
+        self.log.info('Using Proxy: %s', self._req_proxy)
 
     def set_logger(self, logger=None):
         self.log = logger or logging.getLogger(__name__)
 
-    def set_authentication(self, provider=None, oauth2_refresh_token=None, username=None, password=None):
+    def set_authentication(self, provider=None, oauth2_refresh_token=None, username=None, password=None, proxy=None):
         if provider == 'ptc':
             self._auth_provider = AuthPtc()
         elif provider == 'google':
@@ -79,7 +85,7 @@ class PGoApi:
         if oauth2_refresh_token is not None:
             self._auth_provider.set_refresh_token(oauth2_refresh_token)
         elif username is not None and password is not None:
-            self._auth_provider.user_login(username, password)
+            self._auth_provider.user_login(username, password, proxy)
         else:
             raise AuthException("Invalid Credential Input - Please provide username/password or an oauth2 refresh token")
 
@@ -106,7 +112,7 @@ class PGoApi:
         return self._auth_provider
 
     def create_request(self):
-        request = PGoApiRequest(self, self._position_lat, self._position_lng, self._position_alt)
+        request = PGoApiRequest(self, self._position_lat, self._position_lng, self._position_alt, self._req_proxy)
         return request
 
     def activate_signature(self, lib_path):
@@ -147,7 +153,7 @@ class PGoApi:
     """
     The login function is not needed anymore but still in the code for backward compatibility"
     """
-    def login(self, provider, username, password, lat=None, lng=None, alt=None, app_simulation=True):
+    def login(self, provider, username, password, proxy=None, lat=None, lng=None, alt=None, app_simulation=True):
 
         if lat is not None and lng is not None and alt is not None:
             self._position_lat = lat
@@ -155,7 +161,7 @@ class PGoApi:
             self._position_alt = alt
 
         try:
-            self.set_authentication(provider, username=username, password=password)
+            self.set_authentication(provider, username=username, password=password, proxy=proxy)
         except AuthException as e:
             self.log.error('Login process failed: %s', e)
             return False
@@ -181,7 +187,7 @@ class PGoApi:
 
 
 class PGoApiRequest:
-    def __init__(self, parent, position_lat, position_lng, position_alt):
+    def __init__(self, parent, position_lat, position_lng, position_alt, proxy):
         self.log = logging.getLogger(__name__)
 
         self.__parent__ = parent
@@ -196,6 +202,8 @@ class PGoApiRequest:
 
         self._req_method_list = []
 
+        self._req_proxy = proxy
+
     def call(self):
         if not self._req_method_list:
             raise EmptySubrequestChainException()
@@ -207,7 +215,7 @@ class PGoApiRequest:
             self.log.info('Not logged in')
             return NotLoggedInException()
 
-        request = RpcApi(self._auth_provider)
+        request = RpcApi(self._auth_provider, self._req_proxy)
 
         lib_path = self.__parent__.get_signature_lib()
         if lib_path is not None:

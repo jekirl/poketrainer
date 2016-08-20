@@ -1,0 +1,25 @@
+<md-toolbar layout="row">
+    <div class="md-toolbar-tools">
+        <h2>
+            <span>PokéTrainer</span>
+        </h2>
+        <span flex></span>
+        <md-button ng-show="user.status==='paused'" ng-click="reload_api()" class="md-raised" aria-label="Reload">
+            Reload API
+        </md-button>
+        <md-button ng-show="user.status==='paused'" ng-click="reset_stats()" class="md-raised" aria-label="Reset">
+            Reset Stats
+        </md-button>
+        <md-button ng-show="user.status==='online'" ng-click="stop_bot()" class="md-raised" aria-label="Stop">
+            <span class="glyphicon glyphicon-pause" aria-hidden="true" style="color: orange;"></span>
+            Pause Bot
+        </md-button>
+        <md-button ng-show="user.status==='paused'" ng-click="start_bot()" class="md-raised" aria-label="Start">
+            <span class="glyphicon glyphicon-play" aria-hidden="true" style="color: green;"></span>
+            Continue Bot
+        </md-button>
+        <md-button ng-hide="state==='public.users'" ui-sref="public.users()" class="md-raised" aria-label="Bots">
+            Bots Overview
+        </md-button>
+    </div>
+</md-toolbar>
