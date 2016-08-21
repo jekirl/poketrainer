@@ -185,8 +185,7 @@ cd poketrainer/
 docker build -t pokecli .
 docker run -ti --name poketrainer -v /path/to/poketrainer/config.json:/config.json -p 5000:5000 pokecli -i 0
 ```
-The name option, poketrainer in the example, is arbirary. Multilple containers can be made using different names. -v maps the config file into the container. You can modify config.json and it will be reread when the container is started, no need to recreate the container or rebuild the image. -p maps the web interface to the external network, so you can check on the status of your training from a different machine. If you choose not to map the port, the ip address of the container can be found
-using `docker inspect poketrainer`.
+The name option, poketrainer in the example, is arbirary. Multilple containers can be made using different names. -v maps the config file into the container. You can modify config.json and it will be reread when the container is started, no need to recreate the container or rebuild the image. -p maps the web interface to the external network, so you can check on the status of your training from a different machine. If you choose not to map the port, the ip address of the container can be found using `docker inspect poketrainer`.
 
 The container is now running in the foregorund, and can be stopped by using `Ctrl+C`. The container can be detached using the sequence `Ctrl+p Ctrl+q`. To stop a container running in the background, run `docker stop poketrainer` and restart it using `docker start poketrainer`. This will start the docker container in the background, attach to it using 'docker attach poketrainer`.
 
