@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 from library.api.pgoapi.protos.POGOProtos.Inventory import \
     Item_pb2 as Enum_Items
+from library.api.pgoapi.protos.POGOProtos.Networking import \
+    Responses_pb2 as Enum_Responses
 from poketrainer.pokemon import Pokemon
 
 
@@ -11,6 +13,26 @@ def get_item_name(s_item_id):
         if item_id == s_item_id:
             return item.name.replace('ITEM_', '', 1)
     return 'Unknown'
+
+
+def get_response_text(request, field, value):
+    # convert snake_case to CamelCase and add '*Response'
+    # example: nickname_pokemon = NicknamePokemonResponse
+    request = request.lower().split('_')
+    request = "".join(x.title() for x in request) + 'Response'
+    # read descriptor
+    try:
+        response = Enum_Responses.DESCRIPTOR.\
+            message_types_by_name[request].\
+            fields_by_name[field].enum_type.\
+            values_by_number.items()
+        # search value
+        for (number, field) in response:
+            if number == value:
+                return field.name
+    except Exception as e:
+        return 'TXT not found: ' + str(e)
+    return 'TXT not found'
 
 
 def pokemon_iv_percentage(pokemon):

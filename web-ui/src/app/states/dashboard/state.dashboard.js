@@ -5,7 +5,8 @@ angular.module('Poketrainer.State.Status', [
     'easypiechart',
     'datatables',
     'ui-leaflet',
-    'nemLogging'
+    'nemLogging',
+	'xeditable'
 ])
 
     .config(function config($stateProvider, uiGmapGoogleMapApiProvider) {
@@ -184,11 +185,16 @@ angular.module('Poketrainer.State.Status', [
         Navigation.primary.register("Users", "public.users", 30, 'md md-event-available', 'public.users');
     })
 
-    .controller('DashboardController', function DashboardController($rootScope, $scope, $stateParams, $mdToast, PokeSocket, leafletData,
+    .controller('DashboardController', function DashboardController($rootScope, $scope, $stateParams, $mdToast, $q, PokeSocket, leafletData,
                                                                     UserList, locationData, inventoryData, playerData, playerStatsData,
-                                                                    pokemonData, fortsData, attacksData, SocketEvent, DTOptionsBuilder) {
+                                                                    pokemonData, fortsData, attacksData, SocketEvent, DTOptionsBuilder,
+                                                                    editableOptions, editableThemes) {
         UserList.setCurrent($stateParams.username);
         $rootScope.$broadcast("currentUser_:changed");
+
+        editableThemes.bs3.inputClass = 'input-sm';
+        editableThemes.bs3.buttonsClass = 'btn-sm';
+        editableOptions.theme = 'bs3';
 
         var userEventUpdate = function userEventUpdate(event, message) {
             if ($stateParams.username == message.username) {
@@ -214,11 +220,12 @@ angular.module('Poketrainer.State.Status', [
                 for(var i=$scope.pokemon.length-1; i>=0; i--) {
                     if ($scope.pokemon[i].id == transfer_p_id) {
                         $scope.pokemon.splice(i,1);
+                        break;
                     }
                 }
             }
             transfer_p_id = 0;
-            PokeSocket.removeListener(SocketEvent.Transfer, transferCb);
+            PokeSocket.removeListener('release_pokemon_by_id', transferCb);
             $mdToast.show(
                 $mdToast.simple()
                     .textContent(message.message)
@@ -231,15 +238,15 @@ angular.module('Poketrainer.State.Status', [
             transfer_p_id = p_id;
             $scope.evolve_disabled = true;
             $scope.transfer_disabled = true;
-            PokeSocket.on(SocketEvent.Transfer, transferCb);
-            PokeSocket.emit(SocketEvent.Transfer, {username: $stateParams.username, p_id: p_id});
+            PokeSocket.on('release_pokemon_by_id', transferCb);
+            PokeSocket.emit(SocketEvent.Action, {username: $stateParams.username, action: 'release_pokemon_by_id', params: (p_id)});
         };
 
         /** EVOLVE **/
         var evolveCb = function evolveCb(message) {
             $scope.evolve_disabled = false;
             $scope.transfer_disabled = false;
-            PokeSocket.removeListener(SocketEvent.Evolve, evolveCb);
+            PokeSocket.removeListener('evolve_pokemon_by_id', evolveCb);
             $mdToast.show(
                 $mdToast.simple()
                     .textContent(message.message)
@@ -251,15 +258,15 @@ angular.module('Poketrainer.State.Status', [
         $scope.evolve = function(p_id) {
             $scope.evolve_disabled = true;
             $scope.transfer_disabled = true;
-            PokeSocket.on(SocketEvent.Evolve, evolveCb);
-            PokeSocket.emit(SocketEvent.Evolve, {username: $stateParams.username, p_id: p_id});
+            PokeSocket.on('evolve_pokemon_by_id', evolveCb);
+            PokeSocket.emit(SocketEvent.Action, {username: $stateParams.username, action: 'evolve_pokemon_by_id', params: (p_id)});
         };
 
         /** SNIPE **/
         var snipedCb = function snipedCb(message) {
             //message.success;
             $scope.snipe_disabled = false;
-            PokeSocket.removeListener(SocketEvent.Snipe, snipedCb);
+            PokeSocket.removeListener('snipe_pokemon', snipedCb);
             $mdToast.show(
                 $mdToast.simple()
                     .textContent(message.message)
@@ -272,8 +279,107 @@ angular.module('Poketrainer.State.Status', [
         $scope.snipe_auto = false; // not implemented
         $scope.snipe = function(snipe_coords) {
             $scope.snipe_disabled = true;
-            PokeSocket.on(SocketEvent.Snipe, snipedCb);
-            PokeSocket.emit(SocketEvent.Snipe, {username: $stateParams.username, latlng: snipe_coords});
+            PokeSocket.on('snipe_pokemon', snipedCb);
+            PokeSocket.emit(SocketEvent.Action, {username: $stateParams.username, action: 'snipe_pokemon', latlng: snipe_coords});
+        };
+
+        /** Upgrade pokemon **/
+        var upgrade_pkm;
+        var upgradeCb = function upgradeCb(message) {
+            $scope.upgrade_disabled = false;
+            PokeSocket.removeListener('upgrade_pokemon_by_id', upgradeCb);
+            if (message.success) {
+                $scope.inventory.pokemon_candy[upgrade_pkm.family_id] -= upgrade_pkm.candy_needed_to_upgrade;
+                $scope.player.currencies[1].amount -= upgrade_pkm.dust_needed_to_upgrade;
+                for(var i=$scope.pokemon.length-1; i>=0; i--) {
+                    if ($scope.pokemon[i].id == message.upgraded_pokemon.id) {
+                        $scope.pokemon[i] = message.upgraded_pokemon;
+                        break;
+                    }
+                }
+            }
+            upgrade_pkm = {};
+            $mdToast.show(
+                $mdToast.simple()
+                    .textContent(message.message)
+                    .position('top center')
+                    .hideDelay(3000)
+            );
+        };
+        $scope.upgrade_disabled = false;
+        $scope.upgrade = function(pkm) {
+            upgrade_pkm = pkm;
+            $scope.upgrade_disabled = true;
+            PokeSocket.on('upgrade_pokemon_by_id', upgradeCb);
+            PokeSocket.emit(SocketEvent.Action, {username: $stateParams.username, action: 'upgrade_pokemon_by_id', params: [pkm.id]});
+        };
+
+        /** Nickname **/
+        $scope.nick_change_disabled = false;
+        $scope.nick_change = function(p_id, nickname) {
+            var d = $q.defer();
+
+            var nick_changeCb = function nick_changeCb(message) {
+                $scope.nick_change_disabled = false;
+                PokeSocket.removeListener('nickname_pokemon_by_id', nick_changeCb);
+                if (message.success) {
+                    d.resolve(true);
+                    // this is usually not needed, but in case the pokemon list is messed we do it anyway to be sure
+                    for(var i=$scope.pokemon.length-1; i>=0; i--) {
+                        if ($scope.pokemon[i].id == p_id) {
+                            $scope.pokemon[i].name = nickname;
+                            break;
+                        }
+                    }
+                } else {
+                    d.reject(false);
+                }
+                $mdToast.show(
+                    $mdToast.simple()
+                        .textContent(message.message)
+                        .position('top center')
+                        .hideDelay(3000)
+                );
+            };
+
+            $scope.nick_change_disabled = true;
+            PokeSocket.on('nickname_pokemon_by_id', nick_changeCb);
+            PokeSocket.emit(SocketEvent.Action, {username: $stateParams.username, action: 'nickname_pokemon_by_id', params: [p_id, nickname]});
+
+            return d.promise;
+        };
+
+
+        /** Favorite **/
+        var set_favorite_p_id;
+        var set_favorite_favorite;
+        var set_favoriteCb = function set_favoriteCb(message) {
+            $scope.set_favorite_disabled = false;
+            PokeSocket.removeListener('set_favorite_pokemon_by_id', set_favoriteCb);
+            if (message.success) {
+                for(var i=$scope.pokemon.length-1; i>=0; i--) {
+                    if ($scope.pokemon[i].id == set_favorite_p_id) {
+                        $scope.pokemon[i].is_favorite = set_favorite_favorite;
+                        break;
+                    }
+                }
+            }
+            set_favorite_p_id = 0;
+            set_favorite_favorite = false;
+            $mdToast.show(
+                $mdToast.simple()
+                    .textContent(message.message)
+                    .position('top center')
+                    .hideDelay(3000)
+            );
+        };
+        $scope.set_favorite_disabled = false;
+        $scope.set_favorite = function(p_id, favorite) {
+            set_favorite_p_id = p_id;
+            set_favorite_favorite = favorite;
+            $scope.set_favorite_disabled = true;
+            PokeSocket.on('set_favorite_pokemon_by_id', set_favoriteCb);
+            PokeSocket.emit(SocketEvent.Action, {username: $stateParams.username, action: 'set_favorite_pokemon_by_id', params: [p_id, favorite]});
         };
         
         $scope.$on('inventory:updated', function(event, data) { 

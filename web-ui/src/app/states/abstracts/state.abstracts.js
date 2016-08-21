@@ -25,19 +25,19 @@ angular.module('Poketrainer.State.Abstracts', [
         $scope.user = UserList.getCurrent();
 
         $scope.reload_api = function() {
-            PokeSocket.emit(SocketEvent.ReloadAPI, {username: $scope.user.username});
+            PokeSocket.emit(SocketEvent.Action, {username: $scope.user.username, action: 'reload_api'});
         };
 
         $scope.reset_stats = function() {
-            PokeSocket.emit(SocketEvent.ResetStats, {username: $scope.user.username});
+            PokeSocket.emit(SocketEvent.Action, {username: $scope.user.username, action: 'reset_stats'});
         };
 
         $scope.stop_bot = function() {
-            PokeSocket.emit(SocketEvent.Stop, {username: $scope.user.username});
+            PokeSocket.emit(SocketEvent.Action, {username: $scope.user.username, action: 'stop_bot'});
         };
 
         $scope.start_bot = function() {
-            PokeSocket.emit(SocketEvent.Start, {username: $scope.user.username});
+            PokeSocket.emit(SocketEvent.Action, {username: $scope.user.username, action: 'start_bot'});
         };
 
         // Make sure to listen for new events

@@ -89,7 +89,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Pokemon</h4>
+                    <h4 class="modal-title">Pokemon, Stardust: {{ player.currencies[1].amount | number }}</h4>
                 </div>
                 <div class="modal-body">
                     <div class="row">
@@ -101,6 +101,7 @@
                                 <thead>
                                     <th>Recent</th>
                                     <th>#</th>
+                                    <th></th>
                                     <th>Name</th>
                                     <th>Lvl</th>
                                     <th>Score</th>
@@ -117,6 +118,7 @@
                                     <th>Def IV</th>
                                     <th>Move 1</th>
                                     <th>Move 2</th>
+                                    <th>Power-UP</th>
                                     <th>Evolve</th>
                                     <th>Transfer</th>
                                   </thead>
@@ -127,7 +129,15 @@
                                         <img style="max-height: 50px;" ng-src="assets/images/pokemon/{{('000' + pkm.pokemon_id).substr(-3)}}.png">
                                     </td>
                                     <td data-order="{{pkm.pokemon_id}}">{{pkm.pokemon_id}}</td>
-                                    <td>{{pkm.name}}</td>
+                                    <td data-order="{{!(pkm.is_favorite)}}">
+                                        <button type="button" class="btn btn-link btn-xs" ng-disabled="set_favorite_disabled" ng-click="set_favorite(pkm.id, !(pkm.is_favorite))">
+                                            <span ng-hide="pkm.is_favorite" class="glyphicon glyphicon-star-empty" aria-hidden="true" style="color: slategrey;"></span>
+                                            <span ng-show="pkm.is_favorite" class="glyphicon glyphicon-star" aria-hidden="true" style="color: gold;"></span>
+                                        </button>
+                                    </td>
+                                    <td data-order="{{pkm.name}}">
+                                        <a href="#" editable-text="pkm.name" e-label="" onbeforesave="nick_change(pkm.id, $data)">{{pkm.name}}</a>
+                                    </td>
                                     <td data-order="{{pkm.level}}">{{pkm.level | number}}</td>
                                     <td data-order="{{pkm.score}}">{{pkm.score | number}}</td>
                                     <td data-order="{{pkm.iv|number}}">IV: {{  pkm.iv | number:0 }}%</td>
@@ -143,6 +153,22 @@
                                     <td data-order="{{pkm.individual_defense}}">Def IV: {{pkm.individual_defense}}</td>
                                     <td>{{attacks[pkm.move_1]}}</td>
                                     <td>{{attacks[pkm.move_2]}}</td>
+                                    <td>
+                                        <button class="btn btn-sm" type="button"
+                                                ng-hide="pkm.candy_needed_to_upgrade > inventory.pokemon_candy[pkm.family_id] ||
+                                                         pkm.dust_needed_to_upgrade > player.currencies[1].amount ||
+                                                         pkm.level >= playerStats.level + 1.5 ||
+                                                         pkm.level >= 40 ||
+                                                         pkm.candy_needed_to_upgrade <= 0 || pkm.dust_needed_to_upgrade <= 0"
+                                                ng-disabled="upgrade_disabled"
+                                                ng-click="upgrade(pkm)">
+                                            <md-tooltip md-direction="left">
+                                                Candy:{{ pkm.candy_needed_to_upgrade | number }},
+                                                Stardust:{{ pkm.dust_needed_to_upgrade | number }}
+                                            </md-tooltip>
+                                            Power-UP
+                                        </button>
+                                    </td>
                                     <td>
                                         <button class="btn btn-sm" type="button"
                                                 ng-hide="pkm.candy_needed_to_evolve == 0 || pkm.candy_needed_to_evolve > inventory.pokemon_candy[pkm.family_id]"
