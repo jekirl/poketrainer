@@ -30,7 +30,8 @@ from .map_objects import MapObjects
 from .player import Player
 from .player_stats import PlayerStats
 from .poke_catcher import PokeCatcher
-from .poke_utils import get_item_name, get_pokemon_by_long_id
+from .poke_utils import get_item_name, get_pokemon_by_long_id, get_response_text
+from .pokemon import Pokemon
 from .release import Release
 from .sniper import Sniper
 
@@ -520,8 +521,9 @@ class Poketrainer(object):
     """ FOLLOWING ARE FUNCTIONS FOR THE WEB LISTENER """
 
     def enable_web_pushing(self):
-        self.log.info('Enabled pushing to web, caus web told us to!')
-        self.can_push_to_web = True
+        if not self.can_push_to_web:
+            self.log.info('Enabled pushing to web, because web told us to!')
+            self.can_push_to_web = True
         return self.running
 
     def current_location(self):
@@ -561,6 +563,80 @@ class Poketrainer(object):
         if self.thread_lock(persist=True):
             try:
                 return self.release.do_release_pokemon_by_id(p_id)
+            finally:
+                # after we're done, release lock
+                self.persist_lock = False
+                self.thread_release()
+        else:
+            return 'Only one Simultaneous request allowed'
+
+    def nickname_pokemon_by_id(self, p_id, nickname):
+        # acquire lock for this thread
+        if self.thread_lock(persist=True):
+            try:
+                res = self.api.nickname_pokemon(
+                    pokemon_id=int(p_id),
+                    nickname=nickname
+                ).get('responses', {}).get('NICKNAME_POKEMON', {})
+                status = res.get('result', -1)
+                # self.sleep(3)
+                if status == 1:
+                    return {'success': True}
+                else:
+                    self.log.warn("Could not Nickname pokemon, Status %s",
+                                  get_response_text('NICKNAME_POKEMON', 'result', status))
+                    return {'success': False, 'message': "Could not Nickname pokemon, Status %s" %
+                                                         get_response_text('NICKNAME_POKEMON', 'result', status)}
+            finally:
+                # after we're done, release lock
+                self.persist_lock = False
+                self.thread_release()
+        else:
+            return 'Only one Simultaneous request allowed'
+
+    def upgrade_pokemon_by_id(self, p_id):
+        # acquire lock for this thread
+        if self.thread_lock(persist=True):
+            try:
+                res = self.api.upgrade_pokemon(
+                    pokemon_id=int(p_id)
+                ).get('responses', {}).get('UPGRADE_POKEMON', {})
+                status = res.get('result', -1)
+                # self.sleep(3)
+                if status == 1:
+                    upgraded_pokemon = Pokemon(res.get('upgraded_pokemon', {}),
+                                               self.player_stats.level, self.config.score_method,
+                                               self.config.score_settings)
+                    return {'success': True, 'upgraded_pokemon': upgraded_pokemon.__dict__}
+                else:
+                    self.log.warn("Could not upgrade pokemon, Status %s",
+                                  get_response_text('UPGRADE_POKEMON', 'result', status))
+                    return {'success': False, 'message': "Could not upgrade pokemon, Status %s" %
+                                                         get_response_text('UPGRADE_POKEMON', 'result', status)}
+            finally:
+                # after we're done, release lock
+                self.persist_lock = False
+                self.thread_release()
+        else:
+            return 'Only one Simultaneous request allowed'
+
+    def set_favorite_pokemon_by_id(self, p_id, is_favorite):
+        # acquire lock for this thread
+        if self.thread_lock(persist=True):
+            try:
+                res = self.api.set_favorite_pokemon(
+                    pokemon_id=int(p_id),
+                    is_favorite=is_favorite
+                ).get('responses', {}).get('SET_FAVORITE_POKEMON', {})
+                status = res.get('result', -1)
+                # self.sleep(3)
+                if status == 1:
+                    return {'success': True}
+                else:
+                    self.log.warn("Could not (un-)favorite pokemon, Status %s",
+                                  get_response_text('SET_FAVORITE_POKEMON', 'result', status))
+                    return {'success': False, 'message': "Could not (un-)favorite pokemon, Status %s" %
+                                                         get_response_text('SET_FAVORITE_POKEMON', 'result', status)}
             finally:
                 # after we're done, release lock
                 self.persist_lock = False

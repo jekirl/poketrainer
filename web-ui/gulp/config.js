@@ -169,6 +169,7 @@ module.exports = (function () {
                 bowerPath + '/angular-socket-io/socket.js',
                 bowerPath + '/leaflet/dist/leaflet.js',
                 bowerPath + '/ui-leaflet/dist/ui-leaflet.js',
+                bowerPath + '/angular-xeditable/dist/js/xeditable.js',
 
                 npmPath + '/chart.js/dist/Chart.js',
                 bowerPath + '/angular-chart.js/dist/angular-chart.js',
