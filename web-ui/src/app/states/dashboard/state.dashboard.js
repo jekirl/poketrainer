@@ -239,7 +239,7 @@ angular.module('Poketrainer.State.Status', [
             $scope.evolve_disabled = true;
             $scope.transfer_disabled = true;
             PokeSocket.on('release_pokemon_by_id', transferCb);
-            PokeSocket.emit(SocketEvent.Action, {username: $stateParams.username, action: 'release_pokemon_by_id', params: (p_id)});
+            PokeSocket.emit(SocketEvent.Action, {username: $stateParams.username, action: 'release_pokemon_by_id', params: [p_id]});
         };
 
         /** EVOLVE **/
@@ -259,7 +259,7 @@ angular.module('Poketrainer.State.Status', [
             $scope.evolve_disabled = true;
             $scope.transfer_disabled = true;
             PokeSocket.on('evolve_pokemon_by_id', evolveCb);
-            PokeSocket.emit(SocketEvent.Action, {username: $stateParams.username, action: 'evolve_pokemon_by_id', params: (p_id)});
+            PokeSocket.emit(SocketEvent.Action, {username: $stateParams.username, action: 'evolve_pokemon_by_id', params: [p_id]});
         };
 
         /** SNIPE **/
