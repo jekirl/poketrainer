@@ -129,7 +129,7 @@
                                         <img style="max-height: 50px;" ng-src="assets/images/pokemon/{{('000' + pkm.pokemon_id).substr(-3)}}.png">
                                     </td>
                                     <td data-order="{{pkm.pokemon_id}}">{{pkm.pokemon_id}}</td>
-                                    <td data-order="{{pkm.favorite * -1}}">
+                                    <td data-order="{{!(pkm.is_favorite)}}">
                                         <button type="button" class="btn btn-link btn-xs" ng-disabled="set_favorite_disabled" ng-click="set_favorite(pkm.id, !(pkm.is_favorite))">
                                             <span ng-hide="pkm.is_favorite" class="glyphicon glyphicon-star-empty" aria-hidden="true" style="color: slategrey;"></span>
                                             <span ng-show="pkm.is_favorite" class="glyphicon glyphicon-star" aria-hidden="true" style="color: gold;"></span>
