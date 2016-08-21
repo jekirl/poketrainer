@@ -52,6 +52,8 @@ class Pokemon(object):
         self.stamina = pokemon_data.get('stamina', 0)
         self.favorite = pokemon_data.get('favorite', -1)
         self.is_favorite = self.favorite != -1
+        self.deployed_fort_id = pokemon_data.get('deployed_fort_id', -1)
+        self.is_deployed = self.deployed_fort_id != -1
         self.pokemon_id = pokemon_data.get('pokemon_id', 0)
         self.id = str(pokemon_data.get('id', 'NA'))
         self.cp = pokemon_data.get('cp', 0)

@@ -17,6 +17,7 @@ RUN mv /pgoencrypt/src/libencrypt.so /
 COPY docker_launch.sh /
 COPY pokecli.py /
 COPY web.py /
+COPY GOroguelike.py /
 COPY CLSniper.py /
 
 #folders
@@ -25,6 +26,7 @@ COPY ./library /library
 COPY ./poketrainer /poketrainer
 COPY ./resources /resources
 COPY ./web /web
+COPY ./web-ui /web-ui
 VOLUME /data_dumps
 
 #launch script
