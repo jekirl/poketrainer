@@ -58,6 +58,7 @@ class Evolve(object):
         candy_needed = self.parent.config.pokemon_evolution.get(pokemon.pokemon_id)
         in_keep_list = pokemon.pokemon_id in self.parent.config.keep_pokemon_ids
         is_favorite = pokemon.is_favorite
+        is_deployed = pokemon.is_deployed
         in_evolution_list = pokemon.pokemon_id in self.parent.config.pokemon_evolution
 
         eligible_to_evolve = bool(
@@ -65,12 +66,13 @@ class Evolve(object):
             candy_have > candy_needed and
             not in_keep_list and
             not is_favorite and
+            not is_deployed and
             in_evolution_list
         )
 
         if self.parent.config.explain_evolution_before_cleanup:
             self.log.info(
-                "%s can evolve? %s! Need candy: %s. Have candy: %s. Favorite? %s. In keep list? %s. In evolution list? %s.",
-                pokemon.pokemon_type, eligible_to_evolve, candy_needed, candy_have, in_keep_list, is_favorite, in_evolution_list
+                "%s can evolve? %s! Need candy: %s. Have candy: %s. Favorite? %s. Deployed to gym? %s In keep list? %s. In evolution list? %s.",
+                pokemon.pokemon_type, eligible_to_evolve, candy_needed, candy_have, in_keep_list, is_favorite, is_deployed, in_evolution_list
             )
         return eligible_to_evolve
