@@ -340,7 +340,7 @@ def start_bot(data):
     try:
         if c:
             response = c(action, *params, timeout=60)
-            if isinstance(response, bool):
+            if isinstance(response, (int, bool)):
                 if response:
                     success = True
                     message = "'%s' successful!" % action
