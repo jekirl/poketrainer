@@ -9,9 +9,10 @@ from cachetools import TTLCache
 from helper.colorlogger import create_logger
 from helper.utilities import flat_map
 
+from .locale import POKEMON_NAMES
 from .location import distance_in_meters
 from .poke_utils import create_capture_probability, get_item_name
-from .pokemon import POKEMON_NAMES, Pokemon
+from .pokemon import Pokemon
 
 
 class PokeCatcher(object):

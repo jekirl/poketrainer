@@ -7,6 +7,8 @@ from library.api.pgoapi.protos.POGOProtos import Enums_pb2 as Enums
 from library.api.pgoapi.protos.POGOProtos.Inventory import \
     Item_pb2 as Item_Enums
 
+from .locale import change_locale
+
 
 class Config(object):
 
@@ -18,6 +20,8 @@ class Config(object):
         self.__password = self.config_data.pop("password", 'NA')
 
         self.debug = config.get('debug', False)
+
+        change_locale(self.config_data.get("LOCALE", ''))
 
         self.location = config["location"]
         self.auth_service = config["auth_service"]
