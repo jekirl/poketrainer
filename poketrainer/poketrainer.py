@@ -509,6 +509,13 @@ class Poketrainer(object):
         self._heartbeat_number += 1
         return True
 
+    def before_exit(self):
+        self.log.info("Player Info: {0}, Pokemon Caught in this run: {1}, forts spun: {2}".format(
+            self.player, self.pokemon_caught, self.forts_spun
+        ))
+        self.log.info("Player Stats: {}".format(self.player_stats))
+        self.log.info("Player Inventory: %s", self.inventory)
+
     def set_position(self, *pos):
         return self.api.set_position(*pos)
 

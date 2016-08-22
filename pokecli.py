@@ -69,6 +69,7 @@ def main():
         try:
             gevent.sleep(1.0)
         except KeyboardInterrupt:
+            poketrainer.before_exit()
             logger.info('Exiting...')
             exit(0)
 
