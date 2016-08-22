@@ -510,9 +510,9 @@ angular.module('Poketrainer.State.Status', [
                     lng: fort.longitude,
                     message: fort.latitude + ', ' + fort.longitude,
                     icon: {
-                        iconUrl: 'assets/images/fort.png',
-                        iconSize: [30, 32],
-                        iconAnchor: [16, 31]
+                        iconUrl: 'assets/images/pstop.png',
+                        iconSize: [31, 31],
+                        iconAnchor: [15, 29]
                     }
                 }
             } else {
