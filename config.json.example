@@ -91,6 +91,7 @@
       "username": "someusername",
       "password": "password",
       "location": "University of Southern California, Los Angeles, CA",
+      "LOCALE": "en",
       "PREDEFINED_PATH": [],
       "BEHAVIOR": {
         "USE_GOOGLE": true,
