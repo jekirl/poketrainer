@@ -53,6 +53,7 @@ class Config(object):
         ultraball_percent = config.get("CAPTURE", {}).get("USE_ULTRABALL_IF_PERCENT", 50)
         use_masterball = config.get("CAPTURE", {}).get("USE_MASTERBALL", False)
         self.ball_priorities = [pokeball_percent, greatball_percent, ultraball_percent, use_masterball]
+        self.never_catch_names = map(lambda x: getattr(Enums, x), config.get("CAPTURE", {}).get("NEVER_CATCH_NAMES", []))
 
         self.min_items = {}
         for k, v in config.get("MIN_ITEMS", {}).items():
