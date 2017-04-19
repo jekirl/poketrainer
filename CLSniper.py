@@ -6,8 +6,9 @@ import time
 from datetime import datetime
 from multiprocessing import Process
 
-import pylru
 import requests
+
+import pylru
 from dateutil import parser
 
 # EDIT ONLY THESE TWO THINGS
