@@ -2,14 +2,140 @@
 {% extends "layout.html" %}
 {% block title %}{{username}}'s Inventory{% endblock title %}
 {% block content %}
+<style>
+div {
+  white-space: nowrap;
+}
+span {
+  display: table-cell;
+  padding-right: 20px;
+  padding-left: 20px;
+}
+div.candy {}
+div.row {
+  width:60%;
+  display: table-row;
+}
+span.candy {
+  display: table-cell;
+}
+div.egg {
+  white-space: wrap;
+  display: block;
+}
+span.egg {
+  display: table-row;
+}
+span.detail {
+  display: table-cell;
+}
+div.stats {
+  display: block;
+}
+div.stats span {
+  display: block;
+  padding-left: 20px;
+}
+
+</style>
 <div class="container-">
   <pre>
-    {{inventory}}
+    <div class="pokeballs">
+      Pokeballs
+      <span>
+        Poke: {{ inventory.poke_balls }}
+      </span>
+      <span>
+        Great: {{ inventory.great_balls }}
+      </span>
+      <span>
+        Ultra: {{ inventory.ultra_balls }}
+      </span>
+      <span>
+        Master: {{ inventory.master_balls }}
+      </span>
+    </div>
+    <div class="berries">
+      Berries
+      <span>
+        Razz: {{ inventory.razz_berries }}
+      </span>
+    </div>
+    <div class="lucky_eggs">
+      Lucky Eggs: {{ inventory.lucky_eggs }}
+    </div>
+    <div class=""potions>
+      Potions
+      <span>
+        Potion: {{ inventory.potion }}
+      </span>
+      <span>
+        Super: {{ inventory.super_potion }}
+      </span>
+      <span>
+        Hyper: {{ inventory.hyper_potion }}
+      </span>
+      <span>
+        Max: {{ inventory.max_potion }}
+      </span>
+    </div>
+    <div class="candy">
+      Candy
+      {% for pokemon_number in inventory.pokemon_candy if inventory.pokemon_candy[pokemon_number] > 0 %}
+        {% if loop.index0 % 3 == 0 %}
+          <div class="row">
+        {% endif %}
+            <span class="candy">
+              Pokemon: <img style="max-height: 50px;" src={{ url_for( 'static', filename="pokemon/%03d.png" % pokemon_number|int) }}/>
+              Count: {{ inventory.pokemon_candy[pokemon_number] }}
+            </span>
+        {% if loop.index0 % 3 == 2 or loop.last %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div class="eggs">
+      Eggs
+      <div class="stats">
+        <span>
+          Total: {{ inventory.eggs|length }}
+        </span>
+        <span>
+          2km: {{ inventory.egg_counts[2.0] }}
+        </span>
+        <span>
+          5km: {{ inventory.egg_counts[5.0] }}
+        </span>
+        <span>
+          10km: {{ inventory.egg_counts[10.0] }}
+        </span>
+        <span>
+          Unused Incubators: {{ inventory.incubators_available|length }}
+        </span>
+        <span>
+          Unincubated Eggs: {{ inventory.eggs_available|length }}
+        </span>
+      </div>
+      <div class="each">
+        {% for egg in inventory.eggs %}
+        <span class="egg">
+          <span class="detail">
+            Egg: {{ egg.egg_km_walked_target }}
+          </span>
+          <span class="detail">
+            Incubating: {{ egg.incubating }}
+          </span>
+          <span class="detail">
+            Distance Remaining: {{ egg.distance }}
+          </span>
+        </span>
+        {% endfor %}
+      </div>
+    </div>
   </pre>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
   crossorigin="anonymous"></script>
 <script src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
-
 {% endblock content %}

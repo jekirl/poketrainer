@@ -206,13 +206,44 @@ def pokemon(username):
 def inventory(username):
     s = get_api_rpc(username)
     try:
-        inventory = json.loads(s.get_raw_inventory())
+        inventory = json.loads(s.get_inventory())
+        inventory["egg_counts"] = {
+            2.0: 0,
+            5.0: 0,
+            10.0: 0,
+        }
+        inventory["eggs"] = []
+        walked = 0
+        for item in inventory["inventory_items"]:
+            if "inventory_item_data" in item:
+                if "player_stats" in item["inventory_item_data"]:
+                    if "km_walked" in item["inventory_item_data"]["player_stats"]:
+                        walked = item["inventory_item_data"]["player_stats"]["km_walked"]
+                if "pokemon_data" in item["inventory_item_data"]:
+                    if "is_egg" in item["inventory_item_data"]["pokemon_data"]:
+                        egg = item["inventory_item_data"]["pokemon_data"]
+                        inventory["egg_counts"][egg["egg_km_walked_target"]] += 1
+                        egg["distance"] = egg["egg_km_walked_target"]
+                        egg["incubating"] = False
+                        inventory["eggs"].append(egg)
+                if "egg_incubators" in item["inventory_item_data"]:
+                    if "egg_incubator" in item["inventory_item_data"]["egg_incubators"]:
+                        inventory["incubators"] = item["inventory_item_data"]["egg_incubators"]["egg_incubator"]
+        for i, egg in enumerate(inventory["eggs"]):
+            if "egg_incubator_id" in egg:
+                for j, bator in enumerate(inventory["incubators"]):
+                    if egg["id"] == bator["pokemon_id"]:
+                        bator["distance"] = bator["target_km_walked"] - walked
+                        egg["distance"] = bator["target_km_walked"] - walked
+                        egg["incubating"] = True
+                        bator["egg"] = egg
+                        inventory["eggs"][i] = egg
+                        inventory["incubators"][j] = bator
     except ValueError:
         # FIXME Use logger instead of print statements!
         print("Not valid Json")
 
-    return render_template('inventory.html', inventory=json.dumps(inventory, indent=2), username=username)
-
+    return render_template('inventory.html', inventory=inventory, username=username)
 
 @app.route("/<username>/transfer/<p_id>")
 def transfer(username, p_id):
