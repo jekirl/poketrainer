@@ -17,8 +17,8 @@ def create_logger(name, color='reset', log_level=logging.INFO, log_colors=None):
             'CRITICAL': 'red,bg_white',
         }
     handler = colorlog.StreamHandler()
-    handler.setFormatter(colorlog.ColoredFormatter('%(log_color)s%(asctime)s %(' + color + ')s[%(module)10s] %(log_color)s[%(levelname)5s] %(' + color + ')s%(message)s',
-                                                   log_colors=log_colors))
+    handler.setFormatter(colorlog.ColoredFormatter('%(log_color)s%(asctime)s %(' + color + ')s[%(module)12s] %(log_color)s[%(levelname)5s] %(' + color + ')s%(message)s',
+                                                   log_colors=log_colors, datefmt="%H:%M:%S"))
     log = colorlog.getLogger(name)
     log.propagate = True
     log.addHandler(handler)
